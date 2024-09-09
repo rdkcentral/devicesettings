@@ -66,6 +66,7 @@
 #include "dsUtl.h"
 #include "edid-parser.hpp"
 
+
 namespace device 
 {
 
@@ -620,6 +621,18 @@ void HdmiInput::getEdid2AllmSupport (int iHdmiPort, bool *allmSupport) {
         throw Exception(ret);
     }
     printf ("%s:%d - EDID allm Support = %d\n", __PRETTY_FUNCTION__, __LINE__, *allmSupport);
+}
+
+void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion) {
+
+    dsError_t ret = dsGetHdmiVersion (static_cast<dsHdmiInPort_t>(iHdmiPort), capversion);
+
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+
+    printf ("%s:%d - HDMI Compatibility Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *capversion);
 }
 
 }
