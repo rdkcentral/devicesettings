@@ -128,6 +128,14 @@ void Manager::Initialize()
 	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
 }
 
+void Manager::load()
+{
+	printf("%d:%s load start\n", __LINE__, __FUNCTION__);
+	device::AudioOutputPortConfig::getInstance().load();
+	device::VideoOutputPortConfig::getInstance().load();
+	device::VideoDeviceConfig::getInstance().load();
+	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
+}
 
 /**
  * @fn void Manager::DeInitialize()
