@@ -399,7 +399,7 @@ dsError_t dsSetEnablePersist(intptr_t handle, const char* portName, bool enabled
 dsError_t dsSetAudioEncoding(intptr_t handle, dsAudioEncoding_t encoding)
 {
 	dsError_t ret = dsERR_NONE;
-	/* This is a empty operation in RNG150 */
+	/* This is a empty operation */
 	return ret;
 }
 
@@ -485,7 +485,7 @@ dsError_t dsSetAudioGain(intptr_t handle, float gain)
 dsError_t dsSetAudioDB(intptr_t handle, float db)
 {
 	dsError_t ret = dsERR_NONE;
-	/* This is a empty operation in RNG150 */
+	/* This is a empty operation */
 	return ret;
 }
 
@@ -544,7 +544,7 @@ dsError_t dsSetAudioDucking(intptr_t handle,dsAudioDuckingAction_t action, dsAud
 dsError_t dsEnableLoopThru(intptr_t handle, bool loopThru)
 {
 	dsError_t ret = dsERR_NONE;
-	/* This is a empty operation in RNG150 */
+	/* This is a empty operation */
 	return ret;
 }
 
