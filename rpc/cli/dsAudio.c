@@ -638,7 +638,7 @@ dsError_t dsIsAudioMS12Decode(intptr_t handle, bool *HasMS12Decode)
 
 dsError_t dsEnableMS12Config(intptr_t handle, dsMS12FEATURE_t feature,const bool enable)
 {
-	_dsMS12ConfigParam_t param;
+	dsMS12ConfigParam_t param;
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	param.handle = handle;
@@ -1615,7 +1615,7 @@ dsError_t dsGetSinkDeviceAtmosCapability(intptr_t handle, dsATMOSCapability_t *c
 
 dsError_t dsEnableLEConfig(intptr_t handle, const bool enable)
 {
-	_dsLEConfigParam_t param;
+	dsLEConfigParam_t param;
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	param.handle = handle;
