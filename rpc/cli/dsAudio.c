@@ -399,7 +399,7 @@ dsError_t dsSetEnablePersist(intptr_t handle, const char* portName, bool enabled
 dsError_t dsSetAudioEncoding(intptr_t handle, dsAudioEncoding_t encoding)
 {
 	dsError_t ret = dsERR_NONE;
-	/* This is a empty operation in RNG150 */
+	/* This is a empty operation */
 	return ret;
 }
 
@@ -485,7 +485,7 @@ dsError_t dsSetAudioGain(intptr_t handle, float gain)
 dsError_t dsSetAudioDB(intptr_t handle, float db)
 {
 	dsError_t ret = dsERR_NONE;
-	/* This is a empty operation in RNG150 */
+	/* This is a empty operation */
 	return ret;
 }
 
@@ -544,7 +544,7 @@ dsError_t dsSetAudioDucking(intptr_t handle,dsAudioDuckingAction_t action, dsAud
 dsError_t dsEnableLoopThru(intptr_t handle, bool loopThru)
 {
 	dsError_t ret = dsERR_NONE;
-	/* This is a empty operation in RNG150 */
+	/* This is a empty operation */
 	return ret;
 }
 
@@ -638,7 +638,7 @@ dsError_t dsIsAudioMS12Decode(intptr_t handle, bool *HasMS12Decode)
 
 dsError_t dsEnableMS12Config(intptr_t handle, dsMS12FEATURE_t feature,const bool enable)
 {
-	_dsMS12ConfigParam_t param;
+	dsMS12ConfigParam_t param;
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	param.handle = handle;
@@ -1615,7 +1615,7 @@ dsError_t dsGetSinkDeviceAtmosCapability(intptr_t handle, dsATMOSCapability_t *c
 
 dsError_t dsEnableLEConfig(intptr_t handle, const bool enable)
 {
-	_dsLEConfigParam_t param;
+	dsLEConfigParam_t param;
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	param.handle = handle;
