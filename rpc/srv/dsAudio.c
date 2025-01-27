@@ -3341,13 +3341,23 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
     dsAudioPortEnabledParam_t *param = (dsAudioPortEnabledParam_t *)arg;
 
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
-    if(param->enabled == 1 && _APortType == dsAUDIOPORT_TYPE_SPEAKER )
+    if( _APortType == dsAUDIOPORT_TYPE_SPEAKER )
     {
-       if(IARM_RESULT_SUCCESS != setAudioDuckingAudioLevel(param->handle)){
-           IARM_BUS_Unlock(lock);
-           return IARM_RESULT_INVALID_STATE;
-       }
-    }
+        bool muted = false;
+        dsError_t ret = dsIsAudioMute(param->handle, &muted);
+        if(ret != dsERR_NONE)
+        {
+            INT_INFO("%s : Failed to get the Mute status of Speaker", __FUNCTION__);
+        }
+        if(param->enabled == 1 && muted != true ) {
+            if(IARM_RESULT_SUCCESS != setAudioDuckingAudioLevel(param->handle)) {
+                IARM_BUS_Unlock(lock);
+                return IARM_RESULT_INVALID_STATE;
+            }
+        }
+        else {
+            INT_INFO("%s : Not setting the Audio Ducking level as Mute status of Speaker is %d",__FUNCTION__, muted);
+        }
     ret = dsEnableAudioPort(param->handle, param->enabled);
     if(ret == dsERR_NONE) {
           result = IARM_RESULT_SUCCESS;
