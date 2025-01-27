@@ -190,6 +190,21 @@ dsError_t  dsSetMS12AudioProfileSetttingsOverride(intptr_t handle,const char* pr
 dsError_t dsSetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBrightness,bool toPersist);
 
 /**
+ * @brief This function will get the brightness of the specified discrete LED on the front
+ * panel display.
+ * If persist flag is passed as TRUE it will return persisted or platform default brightness otherwise return actial brightness from HAL.
+ *
+ * @param[in] eIndicator FPD Indicator index (Power LED, Record LED, and so on).
+ * @param[out] eBrightness The brightness value for the specified indicator.
+ * @param[in] persist If set to TRUE, the brightness value from persistence otherwise actial value from HAL.
+ *
+ * @return Device Settings error code
+ * @retval dsERR_NONE Indicates dsSetFPBrightness API was successfully called using iarmbus call.
+ * @retval dsERR_GENERAL Indicates error due to general failure.
+ */
+dsError_t dsGetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t *eBrightness,bool persist);
+
+/**
  * @brief This function sets the color of the specified LED on the front panel in
  * multi-app mode using iarmbus call. The color of the LED shall be persisted if the
  * input parameter toPersist is set to TRUE.

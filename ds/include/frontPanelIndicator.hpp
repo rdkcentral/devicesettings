@@ -150,7 +150,7 @@ public:
     static const int kRFBypass; //!< Indicates id of RF bypass LED.
     static const int kMax;      //!< Indicates the maximum number of LEDS supported.
 
-    int getBrightness();
+    int getBrightness(const bool persist = false);
     void getBrightnessLevels(int &levels, int &min, int &max);
     int getColorMode();
 
