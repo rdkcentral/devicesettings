@@ -146,6 +146,9 @@ AudioOutputPort::AudioOutputPort(const int type, const int index, const int id) 
 		dsIsAudioMute			(_handle, &_muted);
         	dsGetAudioDelay                 (_handle, &_audioDelayMs);
         	dsGetAudioDelayOffset      (_handle, &_audioDelayOffsetMs);
+	} else {
+		printf("Failed to get Audio Port.... \n");
+		throw Exception(ret, "Failed to get audio port");
 	}
 }
 
