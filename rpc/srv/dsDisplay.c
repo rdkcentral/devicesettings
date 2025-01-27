@@ -69,6 +69,7 @@ IARM_Result_t _dsGetEDIDBytes(void *arg);
 IARM_Result_t _dsDisplayTerm(void *arg);
 void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *eventData);
 static void  filterEDIDResolution(intptr_t Shandle, dsDisplayEDID_t *edid);
+static void  dumpEDIDInformation( dsDisplayEDID_t *edid);
 static dsVideoPortType_t _GetDisplayPortType(intptr_t handle);
 extern void resetColorDepthOnHdmiReset(intptr_t handle);
 extern void _dsSyncHdmiStatus(const std::string& key, int value);
@@ -164,6 +165,7 @@ IARM_Result_t _dsGetEDID(void *arg)
     dsGetEDID(param->handle, &param->edid);
     
     filterEDIDResolution(param->handle, &param->edid);
+    dumpEDIDInformation( &param->edid);
 	
 	IARM_BUS_Unlock(lock);
 	
@@ -363,6 +365,24 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
 
     free(edidData);
 }
+
+static void dumpEDIDInformation( dsDisplayEDID_t *edid)
+{
+    INT_INFO("[DsMgr] Product Code: %x\r\n",edid->productCode);
+    INT_INFO("[DsMgr] Serial Number: %x\r\n",edid->serialNumber);
+    INT_INFO("[DsMgr] Manufacturer Year: %x\r\n",edid->manufactureYear);
+    INT_INFO("[DsMgr] Manufacturer week: %x\r\n",edid->manufactureWeek);
+    INT_INFO("[DsMgr] Monitor Name : %s\r\n",edid->monitorName);
+    INT_INFO("[DsMgr] Hdmi Device Type : %s\r\n",(edid->hdmiDeviceType)?"HDMI":"DVI");
+    INT_INFO("[DsMgr] Hdmi Device Is Repeater : %x\r\n",edid->isRepeater);
+    INT_INFO("[DsMgr] No of Resolutions: %x\r\n",edid->numOfSupportedResolution);
+    for (size_t j = 0; j < edid->numOfSupportedResolution; j++)
+    {
+        dsVideoPortResolution_t *edidResn = &(edid->suppResolutionList[j]);
+        INT_INFO("[DsMgr] Resolution Name: %s\r\n",edidResn->name);
+    }
+}
+
 
 static dsVideoPortType_t _GetDisplayPortType(intptr_t handle)
 {
