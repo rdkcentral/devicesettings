@@ -125,8 +125,6 @@ IARM_Result_t _dsEnableLEConfig(void *arg);
 IARM_Result_t _dsGetLEConfig(void *arg);
 IARM_Result_t _dsSetAudioDelay(void *arg);
 IARM_Result_t _dsGetAudioDelay(void *arg);
-IARM_Result_t _dsSetAudioDelayOffset(void *arg);
-IARM_Result_t _dsGetAudioDelayOffset(void *arg);
 IARM_Result_t _dsGetSinkDeviceAtmosCapability(void *arg);
 IARM_Result_t _dsSetAudioAtmosOutputMode(void *arg);
 IARM_Result_t _dsSetAudioMixerLevels (void *arg);
@@ -483,89 +481,6 @@ void AudioConfigInit()
             INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
         }
     }
-
-
-    typedef dsError_t (*dsSetAudioDelayOffset_t)(intptr_t handle, uint32_t audioDelayOffsetMs);
-    static dsSetAudioDelayOffset_t dsSetAudioDelayOffsetFunc = 0;
-    if (dsSetAudioDelayOffsetFunc == 0) {
-        dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-        if (dllib) {
-            dsSetAudioDelayOffsetFunc = (dsSetAudioDelayOffset_t) dlsym(dllib, "dsSetAudioDelayOffset");
-            if (dsSetAudioDelayOffsetFunc) {
-                INT_DEBUG("dsSetAudioDelayOffset_t(int, uint32_t) is defined and loaded\r\n");
-                std::string _AudioDelayOffset("0");
-                int m_audioDelayOffset = 0;
-//SPEAKER init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
-                    try {
-                        _AudioDelayOffset = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.DelayOffset");
-                    }
-                    catch(...) {
-                            try {
-                                INT_DEBUG("SPEAKER0.audio.DelayOffset not found in persistence store. Try system default\n");
-                                _AudioDelayOffset = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.audio.DelayOffset");
-                            }
-                            catch(...) {
-                                _AudioDelayOffset = "0";
-                            }
-                    }
-                    m_audioDelayOffset = atoi(_AudioDelayOffset.c_str());
-                    if (dsSetAudioDelayOffsetFunc(handle, m_audioDelayOffset) == dsERR_NONE) {
-                        INT_INFO("Port %s: Initialized audio delay offset : %d\n","SPEAKER0", m_audioDelayOffset);
-                    }
-                }
-//HDMI init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
-                    try {
-                        _AudioDelayOffset = device::HostPersistence::getInstance().getProperty("HDMI0.audio.DelayOffset");
-                    }
-                    catch(...) {
-                            try {
-                                INT_DEBUG("HDMI0.audio.DelayOffset not found in persistence store. Try system default\n");
-                                _AudioDelayOffset = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.audio.DelayOffset");
-                            }
-                            catch(...) {
-                                _AudioDelayOffset = "0";
-                            }
-                    }
-                    m_audioDelayOffset = atoi(_AudioDelayOffset.c_str());
-                    if (dsSetAudioDelayOffsetFunc(handle, m_audioDelayOffset) == dsERR_NONE) {
-                        INT_INFO("Port %s: Initialized audio delay offset : %d\n","HDMI0", m_audioDelayOffset);
-                    }
-                }
-//HDMI ARC init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI_ARC,0,&handle) == dsERR_NONE) {
-                    try {
-                        _AudioDelayOffset = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.audio.DelayOffset");
-                    }
-                    catch(...) {
-                            try {
-                                INT_DEBUG("HDMI_ARC0.audio.DelayOffset not found in persistence store. Try system default\n");
-                                _AudioDelayOffset = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.audio.DelayOffset");
-                            }
-                            catch(...) {
-                                _AudioDelayOffset = "0";
-                            }
-                    }
-                    m_audioDelayOffset = atoi(_AudioDelayOffset.c_str());
-                    if (dsSetAudioDelayOffsetFunc(handle, m_audioDelayOffset) == dsERR_NONE) {
-                        INT_INFO("Port %s: Initialized audio delay offset : %d\n","HDMI_ARC0", m_audioDelayOffset);
-                    }
-                }
-            }
-            else {
-                INT_INFO("dsSetAudioDelayOffset_t(int, uint32_t) is not defined\r\n");
-            }
-            dlclose(dllib);
-        }
-        else {
-            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
-        }
-    }
-
 
     typedef dsError_t (*dsSetPrimaryLanguage_t)(intptr_t handle, const char* pLang);;
     static dsSetPrimaryLanguage_t dsSetPrimaryLanguageFunc = 0;
@@ -2365,8 +2280,6 @@ IARM_Result_t _dsAudioPortInit(void *arg)
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetLEConfig,_dsGetLEConfig);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAudioDelay, _dsSetAudioDelay);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetAudioDelay, _dsGetAudioDelay);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAudioDelayOffset, _dsSetAudioDelayOffset);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetAudioDelayOffset, _dsGetAudioDelayOffset);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetSinkDeviceAtmosCapability, _dsGetSinkDeviceAtmosCapability);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAudioAtmosOutputMode, _dsSetAudioAtmosOutputMode);      
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAudioAtmosOutputMode, _dsSetAudioAtmosOutputMode);
@@ -3535,34 +3448,57 @@ IARM_Result_t _dsGetAudioFormat(void *arg)
 
 IARM_Result_t _dsGetEncoding(void *arg)
 {
+  IARM_BUS_Unlock(lock);
+
+#ifndef RDK_DSHAL_NAME
+    #warning   "RDK_DSHAL_NAME is not defined"
+    #define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
     _DEBUG_ENTER();
+    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
 
     IARM_BUS_Lock(lock);
-
-    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsError_t ret = dsERR_NONE;
-
-    dsAudioGetEncodingModeParam_t *param = (dsAudioGetEncodingModeParam_t *)arg;
-
-    if (param != NULL)
+    dsAudioSetStereoModeParam_t *s_param = (dsAudioSetStereoModeParam_t *)arg;
+    if (s_param != NULL && NULL != s_param->handle)
     {
-
-        dsAudioEncoding_t _encoding = dsAUDIO_ENC_NONE;
-        ret = dsGetAudioEncoding(param->handle, &_encoding);
-
+        dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
+        ret = dsGetStereoMode(s_param->handle, &stereoMode);
         if(ret == dsERR_NONE) {
             result = IARM_RESULT_SUCCESS;
         }
-        param->encoding = _encoding;
+        s_param->mode = stereoMode;
+   }
 
+   dsAudioEncoding_t _encoding = dsAUDIO_ENC_NONE;
+   if(result == IARM_RESULT_SUCCESS){
+       switch(s_param->mode){
+           case dsAUDIO_STEREO_STEREO:
+               _encoding = dsAUDIO_ENC_PCM;
+	       break;
+           case dsAUDIO_STEREO_DD:
+	       _encoding = dsAUDIO_ENC_AC3;
+	       break;
+           case dsAUDIO_STEREO_DDPLUS:
+	       _encoding = dsAUDIO_ENC_EAC3;
+	       break;
+           case dsAUDIO_STEREO_SURROUND:
+	   case dsAUDIO_STEREO_PASSTHRU:
+	       _encoding = dsAUDIO_ENC_DISPLAY;
+	       break;
+           case dsAUDIO_STEREO_UNKNOWN:
+	   default:
+	       _encoding = dsAUDIO_ENC_NONE;
+	       break;
+       }
+   }
+   dsAudioGetEncodingModeParam_t *param = (dsAudioGetEncodingModeParam_t *)arg;
+   param->encoding = _encoding;
+   INT_DEBUG("param->encoding = %d\r\n",_encoding);
+   IARM_BUS_Unlock(lock);
+   return result;
 
-     INT_DEBUG("param->encoding = %d\r\n",_encoding);
-    
-    }
-
-    IARM_BUS_Unlock(lock);
-
-    return result;
 }
 
 static dsAudioPortType_t _GetAudioPortType(intptr_t handle)
@@ -3804,78 +3740,6 @@ IARM_Result_t _dsGetAudioDelay(void *arg)
 
     IARM_BUS_Unlock(lock);
     return result;
-}
-
-IARM_Result_t _dsSetAudioDelayOffset(void *arg)
-{
-#ifndef RDK_DSHAL_NAME
-#warning   "RDK_DSHAL_NAME is not defined"
-#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
-#endif
-    _DEBUG_ENTER();
-    IARM_BUS_Lock(lock);
-
-    IARM_Result_t result = IARM_RESULT_SUCCESS;
-    typedef dsError_t (*dsSetAudioDelayOffset_t)(intptr_t handle, uint32_t audioDelayOffsetMs);
-    static dsSetAudioDelayOffset_t func = 0;
-    if (func == 0) {
-        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-        if (dllib) {
-            func = (dsSetAudioDelayOffset_t) dlsym(dllib, "dsSetAudioDelayOffset");
-            if (func) {
-                INT_DEBUG("dsSetAudioDelayOffset_t(int, uint32_t) is defined and loaded\r\n");
-            }
-            else {
-                INT_INFO("dsSetAudioDelayOffset_t(int, uint32_t) is not defined\r\n");
-            }
-            dlclose(dllib);
-        }
-        else {
-            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
-        }
-    }
-
-    dsAudioDelayOffsetParam_t *param = (dsAudioDelayOffsetParam_t *)arg;
-
-    if (func != 0 && param != NULL)
-    {
-        if (func(param->handle, param->audioDelayOffsetMs) != dsERR_NONE)
-        {
-            INT_INFO("%s: (SERVER) Unable to set audiodelay offset\n", __FUNCTION__);
-            result = IARM_RESULT_INVALID_STATE;
-        }
-#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
-        std::string _AudioDelayOffset = std::to_string(param->audioDelayOffsetMs);
-        dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
-        switch(_APortType) {
-            case dsAUDIOPORT_TYPE_SPDIF:
-                INT_DEBUG("%s: port: %s , persist audio delay offset ms: %d\n",__func__,"SPDIF0", param->audioDelayOffsetMs);
-                device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.DelayOffset",_AudioDelayOffset);
-                break;
-            case dsAUDIOPORT_TYPE_HDMI:
-                INT_DEBUG("%s: port: %s , persist audio delay offset ms: %d\n",__func__,"HDMI0", param->audioDelayOffsetMs);
-                device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.DelayOffset",_AudioDelayOffset);
-                break;
-            case dsAUDIOPORT_TYPE_SPEAKER:
-                INT_DEBUG("%s: port: %s , persist audio delay offset ms: %d\n",__func__,"SPEAKER0", param->audioDelayOffsetMs);
-                device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.DelayOffset",_AudioDelayOffset);
-                break;
-	    case dsAUDIOPORT_TYPE_HDMI_ARC:
-                INT_DEBUG("%s: port: %s , persist audio delay: %d\n",__func__,"HDMI_ARC0", param->audioDelayOffsetMs);
-                device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.audio.DelayOffset",_AudioDelayOffset);
-                break;	
-            default:
-                break;
-        }
-#endif
-    }
-    else {
-        result = IARM_RESULT_INVALID_STATE;
-    }
-
-    IARM_BUS_Unlock(lock);
-    return result;
-
 }
 
 IARM_Result_t _dsGetAudioDelayOffset(void *arg)

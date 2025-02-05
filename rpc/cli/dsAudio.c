@@ -680,28 +680,6 @@ dsError_t dsSetAudioDelay(intptr_t handle, const uint32_t audioDelayMs)
 
 }
 
-dsError_t dsSetAudioDelayOffset(intptr_t handle, const uint32_t audioDelayOffsetMs)
-{
-	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
-	dsAudioDelayOffsetParam_t param;
-	param.handle = handle;
-	param.audioDelayOffsetMs = audioDelayOffsetMs;
-
-	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-							(char *)IARM_BUS_DSMGR_API_dsSetAudioDelayOffset,
-							(void *)&param,
-							sizeof(param));
-
-	if (IARM_RESULT_SUCCESS != rpcRet)
-	{
-		return dsERR_GENERAL;
-	}
-
-	return dsERR_NONE;
-
-}
-
-
 dsError_t  dsSetDialogEnhancement(intptr_t handle, int level)
 {
         IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
@@ -1544,30 +1522,6 @@ dsError_t dsGetAudioDelay(intptr_t handle, uint32_t *audioDelayMs)
 	*audioDelayMs = param.audioDelayMs;
 	return dsERR_NONE;
 }
-
-dsError_t dsGetAudioDelayOffset(intptr_t handle, uint32_t *audioDelayOffsetMs)
-{
-	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
-	dsAudioDelayOffsetParam_t param;
-
-	param.handle = handle;
-	param.audioDelayOffsetMs = 0;
-
-	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-						(char *)IARM_BUS_DSMGR_API_dsGetAudioDelayOffset,
-						(void *)&param,
-						sizeof(param));
-
-	if (IARM_RESULT_SUCCESS != rpcRet)
-	{
-		printf("%s: AUDIODELAY CLIENT (GET) GENERAL ERROR\n", __FUNCTION__);
-		return dsERR_GENERAL;
-	}
-
-	*audioDelayOffsetMs = param.audioDelayOffsetMs;
-	return dsERR_NONE;
-}
-
 
 dsError_t dsSetAudioAtmosOutputMode(intptr_t handle, bool enable)
 {
