@@ -338,6 +338,7 @@ void VideoOutputPortConfig::load()
 	}
 	catch (...) {
 		cout << "VIdeo Outport Exception Thrown. ..."<<endl;
+        throw Exception("Failed to load video outport config");
 	}
 
 }

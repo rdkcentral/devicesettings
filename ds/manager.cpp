@@ -40,6 +40,7 @@
 #include "dsFPD.h"
 #include "dslogger.h"
 #include <mutex>
+#include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
 
@@ -71,6 +72,13 @@ Manager::~Manager() {
 	// TODO Auto-generated destructor stub
 }
 
+#define CHECK_RET_VAL(ret) {\
+	if (ret != dsERR_NONE) {\
+		cout << "**********Failed to Initialize device port*********" << endl;\
+		throw Exception(ret, "Error Initialising platform ports");\
+	}\
+	}
+
 /**
  * @addtogroup dssettingsmanagerapi
  * @{
@@ -100,30 +108,39 @@ void Manager::Initialize()
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
-	if (0 == IsInitialized) {	
-	
-		dsError_t err = dsERR_GENERAL;
-		unsigned int retryCount = 0;
-		// This retry logic will wait for the device manager initialization from the client side
-		// until the device manager service initialization is completed. The retry mechanism checks
-		// only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
-		// Once the service is ready, other port initializations can be called directly without any delay.
-		// That's why the retry logic is applied only for dsDisplayInit.
-		do {
-			err = dsDisplayInit();
-			printf ("Manager::Initialize: result :%d retryCount :%d\n", err, retryCount);
-			if (dsERR_NONE == err) break;
-			usleep(100000);
-		} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
-		dsAudioPortInit();
-		dsVideoPortInit();
-		dsVideoDeviceInit();
-		
-		AudioOutputPortConfig::getInstance().load();
-		VideoOutputPortConfig::getInstance().load();
-		VideoDeviceConfig::getInstance().load();
+	try {
+	    if (0 == IsInitialized) {	
+        
+	    	dsError_t err = dsERR_GENERAL;
+	    	unsigned int retryCount = 0;
+	    	// This retry logic will wait for the device manager initialization from the client side
+	    	// until the device manager service initialization is completed. The retry mechanism checks
+	    	// only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
+	    	// Once the service is ready, other port initializations can be called directly without any delay.
+	    	// That's why the retry logic is applied only for dsDisplayInit.
+	    	do {
+	    		err = dsDisplayInit();
+	    		printf ("Manager::Initialize: result :%d retryCount :%d\n", err, retryCount);
+	    		if (dsERR_NONE == err) break;
+	    		usleep(100000);
+	    	} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
+            CHECK_RET_VAL(err);
+	    	err = dsAudioPortInit();
+            CHECK_RET_VAL(err);
+	    	err = dsVideoPortInit();
+            CHECK_RET_VAL(err);
+	    	err = dsVideoDeviceInit();
+	    	CHECK_RET_VAL(err);
+	    	AudioOutputPortConfig::getInstance().load();
+	    	VideoOutputPortConfig::getInstance().load();
+	    	VideoDeviceConfig::getInstance().load();
+	    }
+        IsInitialized++;
+    }
+    catch(const Exception &e) {
+		cout << "Caught exception during Initialization" << e.what() << endl;
+		throw e;
 	}
-	IsInitialized++;
 	}
 	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
 }
