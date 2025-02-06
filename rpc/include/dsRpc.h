@@ -71,8 +71,6 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetLEConfig        "dsGetLEConfig"
 #define  IARM_BUS_DSMGR_API_dsSetAudioDelay            "dsSetAudioDelay"
 #define  IARM_BUS_DSMGR_API_dsGetAudioDelay            "dsGetAudioDelay"
-#define  IARM_BUS_DSMGR_API_dsSetAudioDelayOffset      "dsSetAudioDelayOffset"
-#define  IARM_BUS_DSMGR_API_dsGetAudioDelayOffset      "dsGetAudioDelayOffset"
 #define  IARM_BUS_DSMGR_API_dsGetSinkDeviceAtmosCapability "dsGetSinkDeviceAtmosCapability"
 #define  IARM_BUS_DSMGR_API_dsSetAudioAtmosOutputMode "dsSetAudioAtmosOutputMode"
 #define  IARM_BUS_DSMGR_API_dsSetAudioDucking    "dsSetAudioDucking"
