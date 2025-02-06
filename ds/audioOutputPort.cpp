@@ -145,7 +145,6 @@ AudioOutputPort::AudioOutputPort(const int type, const int index, const int id) 
 		dsIsAudioLoopThru		(_handle, &_loopThru);
 		dsIsAudioMute			(_handle, &_muted);
         	dsGetAudioDelay                 (_handle, &_audioDelayMs);
-        	dsGetAudioDelayOffset      (_handle, &_audioDelayOffsetMs);
 	} else {
 		printf("Failed to get Audio Port.... \n");
 		throw Exception(ret, "Failed to get audio port");
@@ -199,7 +198,6 @@ dsError_t AudioOutputPort::reInitializeAudioOutputPort()
            dsIsAudioLoopThru(_handle, &_loopThru);
            dsIsAudioMute(_handle, &_muted);
            dsGetAudioDelay(_handle, &_audioDelayMs);
-           dsGetAudioDelayOffset(_handle, &_audioDelayOffsetMs);
        }
  
  
@@ -460,24 +458,6 @@ bool AudioOutputPort::getAudioDelay(uint32_t& audioDelayMs) const
 {
         dsError_t ret = dsERR_NONE;
         ret = dsGetAudioDelay(_handle, &audioDelayMs);
-        if (ret != dsERR_NONE)
-        {
-                throw Exception(ret);
-        }
-
-        return true;
-}
-
-/**
- * @fn bool AudioOutputPort::getAudioDelayOffset(uint32_t& audioDelayOffsetMs) const
- * @brief This API is used to get the current audio delay offset in milliseconds for audio  output port.
- *
- * @return true if call succeded, false otherwise
- */
-bool AudioOutputPort::getAudioDelayOffset(uint32_t& audioDelayOffsetMs) const
-{
-        dsError_t ret = dsERR_NONE;
-        ret = dsGetAudioDelayOffset(_handle, &audioDelayOffsetMs);
         if (ret != dsERR_NONE)
         {
                 throw Exception(ret);
@@ -1459,38 +1439,6 @@ void AudioOutputPort::setAudioDelay(const uint32_t audioDelayMs)
 	if (ret == dsERR_NONE)
 	{
 		_audioDelayMs = audioDelayMs;
-	}
-	else
-	{
-		throw Exception(ret);
-	}
-}
-
-/**
- * @fn AudioOutputPort::setAudioDelayOffset(const uint32_t audioDelayOffsetMs)
- * @brief This API is used to set audio delay offset in milliseconds
- *
- * @param[in] audioDelayOffsetMs Number of milliseconds to offset(additional delay) of the audio delay(0 to +200)
- *
- * @return None
- */
-void AudioOutputPort::setAudioDelayOffset(const uint32_t audioDelayOffsetMs)
-{
-	dsError_t ret = dsERR_NONE;
-	uint32_t ms = audioDelayOffsetMs;
-
-	if (ms > audioDelayOffsetMsMax)
-	{
-		INT_ERROR("AudioOutputPort [%s], delay offset [%lu] ms, exceeds max [%lu]. Setting Max \n",
-			_name.c_str(), audioDelayOffsetMs, audioDelayOffsetMsMax);
-		ms = audioDelayOffsetMsMax;
-	}
-
-	ret = dsSetAudioDelayOffset(_handle, ms);
-
-	if (ret == dsERR_NONE)
-	{
-		_audioDelayOffsetMs = audioDelayOffsetMs;
 	}
 	else
 	{
