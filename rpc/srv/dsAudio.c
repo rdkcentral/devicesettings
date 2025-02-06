@@ -3358,6 +3358,7 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
         else {
             INT_INFO("%s : Not setting the Audio Ducking level as Mute status of Speaker is %d",__FUNCTION__, muted);
         }
+    }
     ret = dsEnableAudioPort(param->handle, param->enabled);
     if(ret == dsERR_NONE) {
           result = IARM_RESULT_SUCCESS;
