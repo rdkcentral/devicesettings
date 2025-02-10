@@ -370,8 +370,8 @@ static void dumpEDIDInformation( dsDisplayEDID_t *edid)
 {
     INT_INFO("[DsMgr] Product Code: %x\r\n",edid->productCode);
     INT_INFO("[DsMgr] Serial Number: %x\r\n",edid->serialNumber);
-    INT_INFO("[DsMgr] Manufacturer Year: %x\r\n",edid->manufactureYear);
-    INT_INFO("[DsMgr] Manufacturer week: %x\r\n",edid->manufactureWeek);
+    INT_INFO("[DsMgr] Manufacturer Year: %d\r\n",edid->manufactureYear);
+    INT_INFO("[DsMgr] Manufacturer week: %d\r\n",edid->manufactureWeek);
     INT_INFO("[DsMgr] Monitor Name : %s\r\n",edid->monitorName);
     INT_INFO("[DsMgr] Hdmi Device Type : %s\r\n",(edid->hdmiDeviceType)?"HDMI":"DVI");
     INT_INFO("[DsMgr] Hdmi Device Is Repeater : %x\r\n",edid->isRepeater);
