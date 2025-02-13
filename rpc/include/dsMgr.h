@@ -60,6 +60,7 @@ typedef enum _DSMgr_EventId_t {
 	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG,         /*!< COMPOSITE IN HPD change event */
 	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS,    /*!< COMPOSITE IN signal status change event */
 	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS,          /*!< COMPOSITE IN status change event */
+	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE, /*!< COMPOSITE IN video mode update event */
 	IARM_BUS_DSMGR_EVENT_TIME_FORMAT_CHANGE,           /*!< Clock Time Format Change Event*/
 	IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,           /*!< Audio Level Change Event*/
 	IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,            /*!< AUDIO OUT HPD change event */
@@ -160,6 +161,12 @@ typedef struct _DSMgr_EventData_t {
             dsCompositeInPort_t port;
             dsCompInSignalStatus_t status;
         }composite_in_sig_status; /*Composite in signal change detect*/
+
+	struct _COMPOSITE_IN_VIDEO_MODE_DATA{
+         /* Declare COMPOSITE In Video Mode*/
+            dsCompositeInPort_t port;
+            dsVideoPortResolution_t resolution;
+        }composite_in_video_mode; /*Composite in video mode update*/
 
         struct _FPD_TIME_FORMAT
         {

@@ -94,7 +94,7 @@ IARM_Result_t _dsCompositeInScaleVideo(void *arg);
 void _dsCompositeInConnectCB(dsCompositeInPort_t port, bool isPortConnected);
 void _dsCompositeInSignalChangeCB(dsCompositeInPort_t port, dsCompInSignalStatus_t sigStatus);
 void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus);
-
+void _dsCompositeInVideoModeUpdateCB(dsCompositeInPort_t port, dsVideoPortResolution_t videoResolution);
 
 #include <iostream>
 #include "hostPersistence.hpp"
@@ -207,12 +207,12 @@ IARM_Result_t _dsCompositeInInit(void *arg)
             }
 
             typedef dsError_t (*dsCompositeInRegisterStatusChangeCB_t)(dsCompositeInStatusChangeCB_t CBFunc);
-            static dsCompositeInRegisterStatusChangeCB_t statusChangeCBFunc = 0;
-            if (statusChangeCBFunc == 0) {
+            static dsCompositeInRegisterStatusChangeCB_t statusChangeCBFunc = NULL;
+            if (statusChangeCBFunc == NULL) {
                 void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
                 if (dllib) {
                     statusChangeCBFunc = (dsCompositeInRegisterStatusChangeCB_t) dlsym(dllib, "dsCompositeInRegisterStatusChangeCB");
-                    if(statusChangeCBFunc == 0) {
+                    if(statusChangeCBFunc == NULL) {
                         INT_INFO("dsCompositeInRegisterStatusChangeCB(dsCompositeInStatusChangeCB_t) is not defined\r\n");
                     }
                     dlclose(dllib);
@@ -226,7 +226,27 @@ IARM_Result_t _dsCompositeInInit(void *arg)
                  INT_DEBUG("%s - invoking dsCompositeInRegisterStatusChangeCB()\n", __PRETTY_FUNCTION__);
                  statusChangeCBFunc(_dsCompositeInStatusChangeCB);
             }
-        }
+        
+            typedef dsError_t (*dsCompositeInRegisterVideoModeUpdateCB_t)(dsCompositeInVideoModeUpdateCB_t CBFunc);
+            static dsCompositeInRegisterVideoModeUpdateCB_t videoModeUpdateCBFunc = NULL;
+            if (videoModeUpdateCBFunc == NULL) {
+                void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+                if (dllib) {
+                    videoModeUpdateCBFunc = (dsCompositeInRegisterVideoModeUpdateCB_t) dlsym(dllib, "dsCompositeInRegisterVideoModeUpdateCB");
+                    if(statusChangeCBFunc == NULL) {
+                        INT_INFO("dsCompositeInRegisterVideoModeUpdateCB(dsCompositeInRegisterVideoModeUpdateCB_t) is not defined\r\n");
+                    }
+                    dlclose(dllib);
+                }
+                else {
+                    INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+                }
+            }
+            if(videoModeUpdateCBFunc) {
+                 videoModeUpdateCBFunc(_dsCompositeInVideoModeUpdateCB);
+            }
+
+        }//end of (PROFILE_TV == profileType)
 
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsCompositeInTerm,                  _dsCompositeInTerm);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsCompositeInGetNumberOfInputs,     _dsCompositeInGetNumberOfInputs);
@@ -235,7 +255,7 @@ IARM_Result_t _dsCompositeInInit(void *arg)
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsCompositeInScaleVideo,            _dsCompositeInScaleVideo);
 
         m_isInitialized = 1;
-    }
+    }//end of (!m_isInitialized)
 
     IARM_BUS_Unlock(lock);
 
@@ -502,6 +522,20 @@ void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus)
                                 sizeof(hdmi_in_status_eventData));
 
     INT_DEBUG("%s <-- \n", __PRETTY_FUNCTION__);
+}
+
+void _dsCompositeInVideoModeUpdateCB(dsCompositeInPort_t port, dsVideoPortResolution_t videoResolution)
+{
+    IARM_Bus_DSMgr_EventData_t composite_in_videoMode_eventData;
+    INT_INFO("%s:%d - Composite In video mode info  update, Port: %d, Pixel Resolution: %d, Interlaced: %d, Frame Rate: %d \n", __PRETTY_FUNCTION__,__LINE__,port, videoResolution.pixelResolution, videoResolution.interlaced, videoResolution.frameRate);
+    composite_in_videoMode_eventData.data.composite_in_video_mode.port = port;
+    composite_in_videoMode_eventData.data.composite_in_video_mode.resolution.pixelResolution = videoResolution.pixelResolution;
+    composite_in_videoMode_eventData.data.composite_in_video_mode.resolution.interlaced = videoResolution.interlaced;
+    composite_in_videoMode_eventData.data.composite_in_video_mode.resolution.frameRate = videoResolution.frameRate;
+    IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,
+                                (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE,
+                                (void *)&composite_in_videoMode_eventData,
+                                sizeof(composite_in_videoMode_eventData));
 }
 
 /** @} */

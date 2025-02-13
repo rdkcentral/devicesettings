@@ -52,6 +52,8 @@
 #include <vector>
 
 #include "dsTypes.h"
+
+
 /**
  * @file hdmiIn.hpp
  * @brief Structures and classes for HDMI Input are defined here
@@ -95,6 +97,7 @@ public:
     void getAVLatency(int *audio_latency,int *video_latency);
     void setEdid2AllmSupport(int iHdmiPort,bool allm_suppport);
     void getEdid2AllmSupport(int iHdmiPort, bool *allm_support);
+    void getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion);
 private:
     HdmiInput ();           /* default constructor */
     virtual ~HdmiInput ();  /* destructor */
