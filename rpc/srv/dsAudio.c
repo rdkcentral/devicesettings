@@ -64,6 +64,11 @@ static float m_volumeLevel = 0;
 static int m_MuteStatus = false;
 static int m_isDuckingInProgress = false;
 
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t audioLevelMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t      audioLevelTimerCV = PTHREAD_COND_INITIALIZER;
