@@ -51,8 +51,7 @@
 
 #define direct_list_top(list) ((list))
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&fpLock)
-#define IARM_BUS_Unlock(lock) 
-#define pthread_mutex_unlock(&fpLock)
+#define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&fpLock)
 
 /* Below block allows the default brightness of a device (after a reset) to be set from 
  * device-specific recipes. If recipes say nothing, it should use max brightness supported. */
