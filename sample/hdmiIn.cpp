@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
          if(selectedPort < numInputs) {
              printf("Start HDMI port, press ENTER to stop\r\n");
              device::HdmiInput::getInstance().selectPort(selectedPort,true,dsVideoPlane_PRIMARY,false);
-             getc(stdin);
+             int ret = getc(stdin);
+             printf("Return: %d\r\n", ret);
              printf("Stop  HDMI port \r\n");
              device::HdmiInput::getInstance().selectPort(HDMI_IN_PORT_NONE,true,dsVideoPlane_PRIMARY,false);
          }

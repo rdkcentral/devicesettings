@@ -857,6 +857,7 @@ IARM_Result_t _dsGetResolution(void *arg)
                 }
         }
         strncpy(resolution->name, _Resolution.c_str(), sizeof(resolution->name));
+        resolution->name[sizeof(resolution->name)-1] = '\0';
      	INT_INFO("%s _VPortType:%d  resolution::%s \n",__FUNCTION__,_VPortType,resolution->name);
 	IARM_BUS_Unlock(lock);
 	
@@ -1731,7 +1732,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
 			}
 			
 			INT_INFO("Set Resolution on HDMI Port!!!!!!..\r\n");
-			_dsHDMIResolution = resolutionName;
+			_dsHDMIResolution = std::move(resolutionName);
 
 			if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsCompResolution)))
 			{

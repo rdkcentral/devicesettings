@@ -45,8 +45,6 @@ int main(int argc, char *argv[])
     IARM_Bus_Init("SampleDSClient");
     IARM_Bus_Connect();
 
-    device::Manager::Initialize();
-
     if (argc != 2)
     {
         printf("%s <Volume Level >", argv[0]);

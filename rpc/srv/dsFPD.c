@@ -186,7 +186,7 @@ IARM_Result_t dsFPDMgr_init()
 		_dsPowerBrightness = stringToNumber(value);
 		
 		value = device::HostPersistence::getInstance().getProperty("Text.brightness", numberToString(maxBrightness));
-		_dsTextBrightness = stringToNumber(value);
+		_dsTextBrightness = stringToNumber(std::move(value));
 
 #if(dsFPD_BRIGHTNESS_DEFAULT != dsFPD_BRIGHTNESS_MAX)
 		/* If we're applying a default brightness that's not MAX, check for currently persisted values. If any of them = MAX,

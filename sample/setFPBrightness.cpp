@@ -57,13 +57,13 @@ int main(int argc, char *argv[])
 		printf("Sample Application: set FrontPanel brightness\n");
         device::FrontPanelIndicator::getInstance(pIndicatorName).setBrightness(indicatorBrightness);
 		printf("Sample Application: set FrontPanel completed\n");
+        device::Manager::DeInitialize();
         
     }
     catch (...) {
     	printf("Exception Caught during [%s]\r\n", argv[0]);
     }
 
-    device::Manager::DeInitialize();
 
 
 	IARM_Bus_Disconnect();

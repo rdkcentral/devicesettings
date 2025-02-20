@@ -75,14 +75,13 @@ int main(int argc, char *argv[])
         int color = device::FrontPanelIndicator::getInstance(pIndicatorName).getColor();
         printf("Sample Application: Get color value is %d \n",color);
         printf("Sample Application: Get Color  completed\n");
+        device::Manager::DeInitialize();
             
     }
     catch (...)
     {
     	printf("Exception Caught during [%s]\r\n", argv[0]);
     }
-
-    device::Manager::DeInitialize();
     
     IARM_Bus_Disconnect();
     IARM_Bus_Term();

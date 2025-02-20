@@ -300,7 +300,7 @@ const VideoResolution & VideoOutputPort::getResolution()
 
 	/*Copy onto Temp - Safe*/
 	std::string temp( resolution.name,strlen(resolution.name));
-	_resolution = string(temp);
+	_resolution = string(std::move(temp));
 	
 	return VideoResolution::getInstance(_resolution,true);
 }
