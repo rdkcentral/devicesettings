@@ -237,6 +237,7 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetAllmStatus              "dsGetAllmStatus"
 #define IARM_BUS_DSMGR_API_dsGetSupportedGameFeaturesList              "dsGetSupportedGameFeaturesList"
 #define IARM_BUS_DSMGR_API_dsGetAVLatency   		"dsGetAVLatency"
+#define IARM_BUS_DSMGR_API_dsGetHdmiVersion            "dsGetHdmiVersion"
 
 /*
  * Declare RPC COMPOSITE INPUT API names
@@ -1030,6 +1031,14 @@ typedef struct _dsSetAudioMixerLevelsParam_t
     dsAudioInput_t aInput;
     int            volume;
 }dsSetAudioMixerLevelsParam_t;
+
+
+typedef struct _dsHdmiVersionParam_t
+{
+    dsError_t               result;
+    dsHdmiInPort_t          iHdmiPort;
+    dsHdmiMaxCapabilityVersion_t iCapVersion;
+}dsHdmiVersionParam_t;
 
 #ifdef __cplusplus
 }

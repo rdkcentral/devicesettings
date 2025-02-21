@@ -462,5 +462,25 @@ dsError_t dsGetEdid2AllmSupport (dsHdmiInPort_t iHdmiPort, bool *allm_support)
     printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
     return dsERR_GENERAL;
 }
+
+dsError_t dsGetHdmiVersion (dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_t  *capversion)
+{
+    _DEBUG_ENTER();
+    dsHdmiVersionParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsGetHdmiVersion,
+                            (void *)&param,
+                            sizeof(param));
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        *capversion = param.iCapVersion;
+        printf("[cli] %s: dsGetHdmiVersion eRet: %d \r\n", __FUNCTION__, param.result);
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
 /** @} */
 /** @} */

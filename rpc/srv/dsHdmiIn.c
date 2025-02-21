@@ -110,6 +110,7 @@ IARM_Result_t _dsGetSupportedGameFeaturesList (void *arg);
 IARM_Result_t _dsGetAVLatency (void *arg);
 IARM_Result_t _dsSetEdid2AllmSupport (void *arg);
 IARM_Result_t _dsGetEdid2AllmSupport (void *arg);
+IARM_Result_t _dsGetHdmiVersion (void *arg);
 
 static dsError_t setEdid2AllmSupport (dsHdmiInPort_t iHdmiPort, bool allmSupport);
 void _dsHdmiInConnectCB(dsHdmiInPort_t port, bool isPortConnected);
@@ -426,6 +427,36 @@ static dsError_t getAVLatency_hal (int *audio_latency, int *video_latency)
        return eRet;
 }
 
+static dsError_t getHdmiVersion (dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_t  *capversion) {
+    dsError_t eRet = dsERR_GENERAL;
+    typedef dsError_t (*dsGetHdmiVersion_t)(dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_t  *capversion);
+    static dsGetHdmiVersion_t dsGetHdmiVersionFunc = 0;
+    if (dsGetHdmiVersionFunc == 0) {
+       void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+       if (dllib) {
+            dsGetHdmiVersionFunc = (dsGetHdmiVersion_t) dlsym(dllib, "dsGetHdmiVersion");
+            if(dsGetHdmiVersionFunc == 0) {
+                INT_INFO("%s:%d dsGetHdmiVersion (int) is not defined %s\r\n", __FUNCTION__,__LINE__, dlerror());
+                eRet = dsERR_GENERAL;
+            }
+            else {
+                INT_INFO("%s:%d dsGetHdmiVersionFunc loaded\r\n", __FUNCTION__,__LINE__);
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("%s:%d dsGetHdmiVersion  Opening RDK_DSHAL_NAME [%s] failed %s\r\n",
+                   __FUNCTION__,__LINE__, RDK_DSHAL_NAME, dlerror());
+            eRet = dsERR_GENERAL;
+        }
+    }
+    if (0 != dsGetHdmiVersionFunc) {
+        eRet = dsGetHdmiVersionFunc (iHdmiPort, capversion);
+        INT_INFO("[srv] %s: dsGetHdmiVersionFunc eRet: %d \r\n", __FUNCTION__,eRet);
+    }
+    return eRet;
+}
+
 IARM_Result_t dsHdmiInMgr_init()
 {
     _dsHdmiInInit(NULL);
@@ -604,6 +635,7 @@ IARM_Result_t _dsHdmiInInit(void *arg)
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetAVLatency,  _dsGetAVLatency);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetEdid2AllmSupport,  _dsSetEdid2AllmSupport);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEdid2AllmSupport,  _dsGetEdid2AllmSupport);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetHdmiVersion,  _dsGetHdmiVersion);
 
         int itr = 0;
         bool isARCCapable = false;
@@ -1196,6 +1228,20 @@ IARM_Result_t _dsGetEdid2AllmSupport (void *arg)
     // irrespective of the edid version, the latest value is returned.
     param->allmSupport = m_edidallmsupport[param->iHdmiPort];
     INT_INFO("[srv] %s: dsGetEdid2AllmSupport : %d for port %d\r\n", __FUNCTION__, param->allmSupport,param->iHdmiPort);
+    IARM_BUS_Unlock(lock);
+    return IARM_RESULT_SUCCESS;
+}
+
+IARM_Result_t _dsGetHdmiVersion (void *arg)
+{
+    dsError_t eRet = dsERR_GENERAL;
+    dsHdmiVersionParam_t *param = (dsHdmiVersionParam_t *) arg;
+    dsHdmiMaxCapabilityVersion_t capVersion;
+    IARM_BUS_Lock(lock);
+    eRet = getHdmiVersion (param->iHdmiPort, &capVersion);
+    param->iCapVersion = capVersion;
+    param->result = eRet;
+    INT_INFO("[srv] %s: getHdmiVersion is %d, eRet: %d\r\n", __FUNCTION__,param->iCapVersion, param->result);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
