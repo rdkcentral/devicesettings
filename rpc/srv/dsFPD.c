@@ -400,7 +400,7 @@ IARM_Result_t _dsGetFPBrightness(void *arg)
     IARM_BUS_Lock(lock);
 
 	dsFPDBrightParam_t *param = (dsFPDBrightParam_t *)arg;
-    //dsGetFPBrightness(param->eIndicator, &param->eBrightness);
+    dsGetFPBrightness(param->eIndicator, &param->eBrightness);
 
 	/*
 		* Power LED Indicator Brightness is the Global LED brightness
