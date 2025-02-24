@@ -269,6 +269,7 @@ public:
         void ResetOutputToSDR();
         bool SetHdmiPreference(dsHdcpProtocolVersion_t hdcpProtocol);
         int GetHdmiPreference();
+        void setAllmEnabled(bool enable);
 
 	bool setScartParameter(const std::string parameter, const std::string value);
 	int getVideoEOTF() const;

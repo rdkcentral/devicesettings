@@ -910,6 +910,19 @@ int VideoOutputPort::GetHdmiPreference()
     return hdcpProtocol;
 }
 
+/**
+ * @fn void setAllmEnabled(bool enable); 
+ * @brief Enables/Disables ALLM mode for HDMI output video port.
+ */
+ void VideoOutputPort::setAllmEnabled(bool enable)
+ {
+     dsError_t ret = dsSetAllmEnabled(_handle,enable);
+     if (ret != dsERR_NONE) {
+         throw Exception(ret);
+     }
+ }
+ 
+
 }
 
 /** @} */ //End of Doxygen tag
