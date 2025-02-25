@@ -191,6 +191,7 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetCurrentOutputSettings "dsGetCurrentOutputSettings"
 #define IARM_BUS_DSMGR_API_dsSetBackgroundColor "dsSetBackgroundColor"
 #define IARM_BUS_DSMGR_API_dsSetForceHDRMode "dsSetForceHDRMode"
+#define IARM_BUS_DSMGR_API_dsSetAllmEnabled "dsSetAllmEnabled"
 /*
  * Declare RPC FP  API names 
  */
@@ -992,6 +993,14 @@ typedef struct _dsEdidVersionParam_t
     dsHdmiInPort_t          iHdmiPort;
     tv_hdmi_edid_version_t  iEdidVersion;
 }dsEdidVersionParam_t;
+
+typedef struct _dsSetAllmEnabledParam_t
+{
+    dsError_t result;
+    intptr_t  handle;
+    bool     enabled;
+}dsSetAllmEnabledParam_t;
+
 
 typedef struct _dsEdidAllmSupportParam_t
 {
