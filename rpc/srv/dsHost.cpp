@@ -262,14 +262,9 @@ IARM_Result_t _dsGetMS12ConfigType(void *arg)
    if (retValue == dsERR_NONE) {
        strncpy(param->configType, ms12ConfigType.c_str(), MS12_CONFIG_BUF_SIZE);
        param->configType[MS12_CONFIG_BUF_SIZE-1] = '\0';
-       if(rc!=EOK)
-       {
-            param->result = dsERR_GENERAL;
-            ERR_CHK(rc);
-       } else {
-            param->result = dsERR_NONE;
-	    ret = IARM_RESULT_SUCCESS;
-       }
+       
+        param->result = dsERR_NONE;
+        ret = IARM_RESULT_SUCCESS;
     }
     return ret; 
 }
