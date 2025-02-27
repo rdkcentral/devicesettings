@@ -248,7 +248,6 @@ IARM_Result_t _dsGetMS12ConfigType(void *arg)
    dsMS12ConfigTypeParam_t *param = (dsMS12ConfigTypeParam_t*) arg;
    dsError_t retValue = dsERR_NONE;
    string ms12ConfigType;
-   errno_t rc = -1;
 
    printf("Read default platform ms12 config type\n");
    try {
