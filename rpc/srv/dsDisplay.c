@@ -107,7 +107,7 @@ IARM_Result_t _dsDisplayInit(void *arg)
 		if (dsERR_NONE != eReturn) {
 		    eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_INTERNAL, 0, &handle);
 		}
-		dsRegisterDisplayEventCallback(NULL, _dsDisplayEventCallback);
+		dsRegisterDisplayEventCallback(handle, _dsDisplayEventCallback);
 		
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetDisplay,_dsGetDisplay);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetDisplayAspectRatio,_dsGetDisplayAspectRatio);
