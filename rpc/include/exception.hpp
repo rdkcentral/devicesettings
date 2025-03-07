@@ -44,7 +44,7 @@ class Exception : public std::exception {
 	std::string _msg;
 
 public:
-	Exception(const char *msg = "No Message for this exception") throw() : _msg(msg) {
+	Exception(const char *msg = "No Message for this exception") throw() : _msg(msg), _err(0){
 	}
 
 	Exception(int err, const char *msg = "No Message for this Exception") throw()

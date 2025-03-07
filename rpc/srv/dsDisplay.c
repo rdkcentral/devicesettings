@@ -208,7 +208,7 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
     dsDisplayGetEDIDBytesParam_t *param = (dsDisplayGetEDIDBytesParam_t *)arg;
 
     if (func != 0) {
-        unsigned char edid[512] = {0};
+        unsigned char edid[1024] = {0};
         int length = 0;
         dsError_t ret = func(param->handle, edid, &length);
         if (ret == dsERR_NONE && length <= 1024) {
@@ -322,6 +322,7 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
     dsDisplayEDID_t *edidData = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
     dsVideoPortType_t _VPortType = _GetDisplayPortType(handle);
     if (edid == NULL) {
+        free(edidData);
     	return; // Handle malloc failure
     }
     int numOfSupportedResolution = 0;
@@ -370,8 +371,8 @@ static void dumpEDIDInformation( dsDisplayEDID_t *edid)
 {
     INT_INFO("[DsMgr] Product Code: %x\r\n",edid->productCode);
     INT_INFO("[DsMgr] Serial Number: %x\r\n",edid->serialNumber);
-    INT_INFO("[DsMgr] Manufacturer Year: %x\r\n",edid->manufactureYear);
-    INT_INFO("[DsMgr] Manufacturer week: %x\r\n",edid->manufactureWeek);
+    INT_INFO("[DsMgr] Manufacturer Year: %d\r\n",edid->manufactureYear);
+    INT_INFO("[DsMgr] Manufacturer week: %d\r\n",edid->manufactureWeek);
     INT_INFO("[DsMgr] Monitor Name : %s\r\n",edid->monitorName);
     INT_INFO("[DsMgr] Hdmi Device Type : %s\r\n",(edid->hdmiDeviceType)?"HDMI":"DVI");
     INT_INFO("[DsMgr] Hdmi Device Is Repeater : %x\r\n",edid->isRepeater);
