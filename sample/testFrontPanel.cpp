@@ -50,17 +50,17 @@ int main(int argc, char *argv[])
 	IARM_Bus_Init("SampleDSClient");
 	IARM_Bus_Connect();
 
-    device::Manager::Initialize();
-    
-    if (argc != 2) {
-        printf("%s : <Text Message [3 Chars]>\n", argv[0]);
-        return 0;
-    }
-    char *Message = argv[1];
-
-	int bright = device::FrontPanelConfig::getInstance().getIndicator("Power").getBrightness();
     
     try {
+            device::Manager::Initialize();
+        
+            if (argc != 2) {
+                printf("%s : <Text Message [3 Chars]>\n", argv[0]);
+                return 0;
+            }
+            char *Message = argv[1];
+        
+            int bright = device::FrontPanelConfig::getInstance().getIndicator("Power").getBrightness();
 			printf("Power : brightness is %d\n",bright);
 			bright = device::FrontPanelConfig::getInstance().getIndicator("Message").getBrightness();
 			printf("Message : brightness is %d\n",bright);

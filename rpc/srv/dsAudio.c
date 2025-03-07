@@ -1856,10 +1856,11 @@ void AudioConfigInit()
 
            //SPEAKER init
                        handle = 0;
-                       dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
-                       if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
-                           INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
-                       }
+                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
+                                INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
+                            }
+                        }
            //HDMI init
                        handle = 0;
                        if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
@@ -2961,6 +2962,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
                 IARM_BUS_Unlock(lock);
+                dlclose(dllib);
                 return IARM_RESULT_INVALID_STATE;
             }
             dlclose(dllib);
@@ -3096,6 +3098,7 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
              }
              else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined \r\n");
+                dlclose(dllib);
                 return IARM_RESULT_INVALID_STATE;
              }
              dlclose(dllib);

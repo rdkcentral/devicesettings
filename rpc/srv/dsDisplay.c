@@ -212,7 +212,7 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
     dsDisplayGetEDIDBytesParam_t *param = (dsDisplayGetEDIDBytesParam_t *)arg;
 
     if (func != 0) {
-        unsigned char edid[512] = {0};
+        unsigned char edid[1024] = {0};
         int length = 0;
         dsError_t ret = func(param->handle, edid, &length);
         if (ret == dsERR_NONE && length <= 1024) {
@@ -326,6 +326,7 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
     dsDisplayEDID_t *edidData = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
     dsVideoPortType_t _VPortType = _GetDisplayPortType(handle);
     if (edid == NULL) {
+        free(edidData);
     	return; // Handle malloc failure
     }
     int numOfSupportedResolution = 0;

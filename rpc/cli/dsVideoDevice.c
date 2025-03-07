@@ -286,7 +286,7 @@ dsError_t dsSetDisplayframerate(intptr_t handle, char *framerate)
 {
         dsFramerateParam_t param = {0};
         param.handle = handle;
-	    strncpy(param.framerate, framerate, 20);
+	    strncpy(param.framerate, framerate, 19);
 
         IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                         (char *) IARM_BUS_DSMGR_API_dsSetDisplayframerate,

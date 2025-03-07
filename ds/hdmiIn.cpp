@@ -467,11 +467,6 @@ void HdmiInput::getEDIDBytesInfo (int iHdmiPort, std::vector<uint8_t> &edidArg) 
 
     const char* exceptionstr = "";
     ret = dsGetEDIDBytesInfo (static_cast<dsHdmiInPort_t>(iHdmiPort), edid, &length);
-    if (NULL == edid) {
-        printf("HdmiInput::getEDIDBytesInfo dsGetEDIDBytesInfo returned NULL \r\n");
-        exceptionstr = "EDID is NULL";
-        ret = dsERR_GENERAL;
-    }
 
     printf("HdmiInput::getEDIDBytesInfo has ret %d\r\n", ret);
     if (ret == dsERR_NONE) {
@@ -503,11 +498,6 @@ void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
     unsigned char spdinfo[sizeof(struct dsSpd_infoframe_st)] = {0};
     const char* exceptionstr = "";
     dsError_t ret = dsGetHDMISPDInfo (static_cast<dsHdmiInPort_t>(iHdmiPort), spdinfo);
-    if (NULL == spdinfo) {
-        printf("HdmiInput::dsGetHDMISPDInfo returned NULL \r\n");
-        exceptionstr = "SPDInfo is NULL";
-        ret = dsERR_GENERAL;
-    }
  
     printf("HdmiInput::getHDMISPDInfo has ret %d\r\n", ret);
     data.clear();
