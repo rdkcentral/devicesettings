@@ -160,8 +160,9 @@ void VideoConfigInit()
 
 IARM_Result_t dsVideoPortMgr_init()
 {
+INT_INFO("dsMgr_init  [%s]: entry \r\n", __FUNCTION__);
    IARM_BUS_Lock(lock);
-
+INT_INFO("dsMgr_init  [%s]: lock aquired\r\n", __FUNCTION__);
    std::string _Resolution(DEFAULT_RESOLUTION);
 
    if (PROFILE_TV == profileType)
@@ -219,13 +220,15 @@ IARM_Result_t dsVideoPortMgr_init()
                 INT_INFO("The Persistent RF resolution read is %s \r\n",_dsRFResolution.c_str());
                 _dsBBResolution = device::HostPersistence::getInstance().getProperty("Baseband0.resolution",_Resolution);
                 INT_INFO("The Persistent BB resolution read is %s \r\n",_dsBBResolution.c_str());
-					
+				INT_INFO("dsMgr_init  [%s]: calling platform init for dsVideoPortInit \r\n", __FUNCTION__);	
 		if (!m_isPlatInitialized) 
 		{
 			/*Initialize the Video Ports */
 			dsVideoPortInit();
+				INT_INFO("dsMgr_init  [%s]: calling platform init for VideoConfigInit\r\n", __FUNCTION__);	
 			VideoConfigInit();
 		}
+				INT_INFO("dsMgr_init  [%s]: calling platform done\r\n", __FUNCTION__);	
 		/*coverity[missing_lock]  CID-18497 using Coverity Annotation to ignore error*/
 		m_isPlatInitialized ++;
 	}
@@ -253,6 +256,7 @@ IARM_Result_t dsVideoPortMgr_init()
 	}
 	IARM_BUS_Unlock(lock);  //CID:136282 - Data race condition
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsVideoPortInit, _dsVideoPortInit);
+INT_INFO("dsMgr_init  [%s]: exit \r\n", __FUNCTION__);
     return IARM_RESULT_SUCCESS;
 }
 

@@ -114,16 +114,27 @@ IARM_Result_t dsMgr_init()
     INT_INFO("[%s]: profileType=%d\r\n", __FUNCTION__, profileType);
 
 	device::HostPersistence::getInstance().load();
+	INT_INFO("[%s]: Calling dsServer_Rdklogger_Init\r\n", __FUNCTION__);
 	dsServer_Rdklogger_Init();
+	INT_INFO("[%s]: Calling dsHostInit \r\n", __FUNCTION__);
 	dsHostInit();
+	INT_INFO("[%s]: Calling dsDisplayMgr_init\r\n", __FUNCTION__);
 	dsDisplayMgr_init();
+	INT_INFO("[%s]: Calling dsAudioMgr_init\r\n", __FUNCTION__);
 	dsAudioMgr_init();
+	INT_INFO("[%s]: Calling dsVideoPortMgr_init\r\n", __FUNCTION__);
 	dsVideoPortMgr_init();
+	INT_INFO("[%s]: Calling dsVideoDeviceMgr_init \r\n", __FUNCTION__);
 	dsVideoDeviceMgr_init();
+	INT_INFO("[%s]: Calling dsFPDMgr_init \r\n", __FUNCTION__);
 	dsFPDMgr_init();
+	INT_INFO("[%s]: Calling dsHostMgr_init \r\n", __FUNCTION__);
 	dsHostMgr_init();
+	INT_INFO("[%s]: Calling dsHdmiInMgr_init \r\n", __FUNCTION__);
 	dsHdmiInMgr_init();
+	INT_INFO("[%s]: Calling dsCompositeInMgr_init  \r\n", __FUNCTION__);
 	dsCompositeInMgr_init();
+	INT_INFO("[%s]: Calling  done \r\n", __FUNCTION__);
 	return ret;
 }
 
