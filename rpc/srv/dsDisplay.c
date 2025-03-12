@@ -78,16 +78,20 @@ static intptr_t _hdmiVideoPortHandle = 0;
 
 IARM_Result_t dsDisplayMgr_init()
 {
+        INT_INFO("dsMgr_init  [%s]: entry \r\n", __FUNCTION__);
 	IARM_BUS_Lock(lock);
+        INT_INFO("dsMgr_init  [%s]: lock aquired call dsDisplayInit\r\n", __FUNCTION__);
 	if (!m_isPlatInitialized) {
     	/* Nexus init, if any here */
     	dsDisplayInit();
     }
+        INT_INFO("dsMgr_init  [%s]: dsDisplayInit init done \r\n", __FUNCTION__);
 	/*coverity[missing_lock]  CID-19379 using Coverity Annotation to ignore error*/
 	m_isPlatInitialized++;
 
 	IARM_BUS_Unlock(lock);  //CID:136387 - Data race condition
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsDisplayInit, _dsDisplayInit);
+        INT_INFO("dsMgr_init  [%s]: exit\r\n", __FUNCTION__);
     return IARM_RESULT_SUCCESS;
 }
 
