@@ -1118,6 +1118,7 @@ dsError_t handleDsSetPreferredColorDepth(intptr_t handle,dsDisplayColorDepth_t c
     }
 
 
+	INT_INFO("dsMgr_init  [%s]: line: %d\r\n", __FUNCTION__,__LINE__);	
     if (func != 0) {
         ret = func(handle, colorDepth);
     }
@@ -1125,6 +1126,7 @@ dsError_t handleDsSetPreferredColorDepth(intptr_t handle,dsDisplayColorDepth_t c
         INT_INFO("%s:%d not able to load funtion func:%p\r\n",__FUNCTION__,__LINE__,  func);
         ret = dsERR_GENERAL;
     }
+	INT_INFO("dsMgr_init  [%s]: line: %d\r\n", __FUNCTION__,__LINE__);	
     return ret;
 }
 
@@ -1139,6 +1141,7 @@ IARM_Result_t setPreferredColorDepth(void *arg)
     {
         dsVideoPortType_t _VPortType = _GetVideoPortType(param->handle);
         bool isConnected = 0;
+	INT_INFO("dsMgr_init  [%s]: line: %d\r\n", __FUNCTION__,__LINE__);	
         dsIsDisplayConnected(param->handle,&isConnected);
         if(!isConnected)
         {
@@ -1167,12 +1170,15 @@ IARM_Result_t setPreferredColorDepth(void *arg)
             param->result = ret;
             return IARM_RESULT_SUCCESS;
         }
+	INT_INFO("dsMgr_init  [%s]: line: %d\r\n", __FUNCTION__,__LINE__);	
 
         //Getting the best supported color depth based on i/p color depth and edid support.
 	dsDisplayColorDepth_t colorDepthToSet = getBestSupportedColorDepth (param->handle, param->colorDepth);
+	INT_INFO("dsMgr_init  [%s]: line: %d\r\n", __FUNCTION__,__LINE__);	
 
         /*!< Set Platform color depth  */
         ret = handleDsSetPreferredColorDepth (param->handle, colorDepthToSet, param->toPersist);
+	INT_INFO("dsMgr_init  [%s]: line: %d\r\n", __FUNCTION__,__LINE__);	
         if (ret == dsERR_NONE)
         {
             /*!< Persist Resolution Settings */
@@ -1261,7 +1267,7 @@ void resetColorDepthOnHdmiReset(intptr_t handle)
 {
     //get color from persist location. then set the value
     dsDisplayColorDepth_t colorDepth = getPersistentColorDepth ();
-    INT_INFO("resetColorDepthOnHdmiReset: resetting colordepth:0x%x \r\n", colorDepth);
+    INT_INFO("dsMgr_init resetColorDepthOnHdmiReset: resetting colordepth:0x%x \r\n", colorDepth);
 
     dsPreferredColorDepthParam_t colorDepthParam;
     colorDepthParam.handle = handle;
@@ -1271,6 +1277,7 @@ void resetColorDepthOnHdmiReset(intptr_t handle)
 
     //call this function outside the lock
     IARM_Result_t ret = setPreferredColorDepth ((void*)(&colorDepthParam));
+	INT_INFO("dsMgr_init  [%s]: done calling setPreferredColorDepth\r\n", __FUNCTION__);	
 }
 
 IARM_Result_t _dsVideoPortTerm(void *arg)
