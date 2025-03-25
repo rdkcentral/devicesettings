@@ -423,6 +423,7 @@ IARM_Result_t _dsGetFPBrightness(void *arg)
 
 IARM_Result_t _dsSetFPBrightness(void *arg)
 {
+	printf("Brightness: _dsSetFPBrightness srv\n");
     _DEBUG_ENTER();
     IARM_Result_t ret = IARM_RESULT_SUCCESS;
     IARM_BUS_Lock(lock);
@@ -432,6 +433,7 @@ IARM_Result_t _dsSetFPBrightness(void *arg)
 	
 	if (param->eBrightness <= dsFPD_BRIGHTNESS_MAX)
     {
+		printf("Brightness: _dsSetFPBrightness within limit\n");
 		dsError_t dsStatus = dsSetFPBrightness(param->eIndicator, param->eBrightness);
                 if(dsStatus == dsERR_NONE)
                 {
@@ -442,7 +444,7 @@ IARM_Result_t _dsSetFPBrightness(void *arg)
 			{
 				case dsFPD_INDICATOR_POWER:
 				{	
-					 INT_INFO("_dsSetFPBrightness Power Brightness From  App is %d \r\n",param->eBrightness);
+					 INT_INFO("_dsSetFPBrightness srv Power Brightness From  App is %d \r\n",param->eBrightness);
 					
 					if(param->toPersist)
 					{	

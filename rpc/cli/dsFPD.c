@@ -188,7 +188,7 @@ dsError_t dsSetFPBlink (dsFPDIndicator_t eIndicator, unsigned int nBlinkDuration
 dsError_t dsGetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBrightness)
 {
     _DEBUG_ENTER();
-
+	printf("Brightness: dsGetFPBrightness cli\n");
 	dsFPDBrightParam_t param ;
 
     param.eIndicator = eIndicator;
@@ -201,17 +201,20 @@ dsError_t dsGetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBr
 							(void *)&param,
 							sizeof(param));
 
+	printf("Brightness: dsGetFPBrightness cli Iarm completed\n");
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
+		printf("Brightness: dsGetFPBrightness cli success\n");
 		*pBrightness = param.eBrightness;
 		return dsERR_NONE;
 	}
-
+	printf("Brightness: dsGetFPBrightness cli failure\n");
 	return dsERR_GENERAL ;
 }
 
 dsError_t dsGetFPDBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBrightness, bool persist)
 {
+	printf("Brightness: dsGetFPDBrightness cli\n");
     _DEBUG_ENTER();
         dsFPDBrightParam_t param ;
     param.eIndicator = eIndicator;
@@ -222,16 +225,21 @@ dsError_t dsGetFPDBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pB
                                                         (char *)IARM_BUS_DSMGR_API_dsGetFPBrightness,
                                                         (void *)&param,
                                                         sizeof(param));
+		printf("Brightness: dsGetFPDBrightness cli Iarm completed\n");												
+														
         if (IARM_RESULT_SUCCESS == rpcRet)
         {
+			printf("Brightness: dsGetFPDBrightness cli iarm success\n");
                 *pBrightness = param.eBrightness;
                 return dsERR_NONE;
         }
+		printf("Brightness: dsGetFPDBrightness cli failure\n");
         return dsERR_GENERAL ;
 }
 
 dsError_t dsSetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBrightness)
 {
+	printf("Brightness: dsSetFPBrightness cli\n");
     _DEBUG_ENTER();
     dsFPDBrightParam_t param ;
    
@@ -249,11 +257,14 @@ dsError_t dsSetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBri
 							(char *)IARM_BUS_DSMGR_API_dsSetFPBrightness,
 							(void *)&param,
 							sizeof(param));
+							printf("Brightness: dsSetFPBrightness cli iarm completed\n");
 
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
+		printf("Brightness: dsSetFPBrightness cli success\n");
 		return dsERR_NONE;
 	}
+	printf("Brightness: dsSetFPBrightness cli failure\n");
 	return dsERR_GENERAL ;
 }
 
@@ -261,6 +272,7 @@ dsError_t dsSetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBri
 
 dsError_t dsSetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBrightness,bool toPersist)
 {
+	printf("Brightness: dsSetFPDBrightness cli\n");
     _DEBUG_ENTER();
     dsFPDBrightParam_t param ;
    
@@ -274,16 +286,20 @@ dsError_t dsSetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBri
 	param.toPersist	= toPersist;
 
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+	
 
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
 							(char *)IARM_BUS_DSMGR_API_dsSetFPBrightness,
 							(void *)&param,
 							sizeof(param));
+							printf("Brightness: dsSetFPDBrightness cli iarm completed\n");
 
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
+		printf("Brightness: dsSetFPDBrightness cli success\n");
 		return dsERR_NONE;
 	}
+	printf("Brightness: dsSetFPDBrightness cli failure\n");
 	return dsERR_GENERAL ;
 }
 
