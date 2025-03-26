@@ -210,6 +210,25 @@ dsError_t dsGetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBr
 	return dsERR_GENERAL ;
 }
 
+dsError_t dsGetFPDBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBrightness, bool persist)
+{
+    _DEBUG_ENTER();
+        dsFPDBrightParam_t param ;
+    param.eIndicator = eIndicator;
+    param.eBrightness = 0;
+    param.toPersist = persist;
+        IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+        rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                                        (char *)IARM_BUS_DSMGR_API_dsGetFPBrightness,
+                                                        (void *)&param,
+                                                        sizeof(param));
+        if (IARM_RESULT_SUCCESS == rpcRet)
+        {
+                *pBrightness = param.eBrightness;
+                return dsERR_NONE;
+        }
+        return dsERR_GENERAL ;
+}
 
 dsError_t dsSetFPBrightness (dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBrightness)
 {

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
 		printf("Current configured profile: %s\n",aPort.getMS12AudioProfile().c_str());
 		printf("Configure new profile : %s\n",profileSet.c_str());
-		aPort.setMS12AudioProfile(profileSet);
+		aPort.setMS12AudioProfile(std::move(profileSet));
 		printf("(Check) Configured profile after set: %s\n",aPort.getMS12AudioProfile().c_str());
 
         device::Manager::DeInitialize();

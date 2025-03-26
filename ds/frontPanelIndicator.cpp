@@ -372,11 +372,11 @@ void FrontPanelIndicator::setState(const bool &enable)
  *
  * @return _brightness Brightness value of the specified LED indicators.
  */
-int FrontPanelIndicator::getBrightness() 
+int FrontPanelIndicator::getBrightness(const bool persist)  
 {
 	dsFPDBrightness_t brightness;
 
-	dsError_t ret = dsGetFPBrightness((dsFPDIndicator_t)_id,&brightness);
+	dsError_t ret = dsGetFPDBrightness((dsFPDIndicator_t)_id,&brightness, persist);
         if (ret != dsERR_NONE) {
             throw Exception(ret);
         }

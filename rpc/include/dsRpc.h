@@ -71,8 +71,6 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetLEConfig        "dsGetLEConfig"
 #define  IARM_BUS_DSMGR_API_dsSetAudioDelay            "dsSetAudioDelay"
 #define  IARM_BUS_DSMGR_API_dsGetAudioDelay            "dsGetAudioDelay"
-#define  IARM_BUS_DSMGR_API_dsSetAudioDelayOffset      "dsSetAudioDelayOffset"
-#define  IARM_BUS_DSMGR_API_dsGetAudioDelayOffset      "dsGetAudioDelayOffset"
 #define  IARM_BUS_DSMGR_API_dsGetSinkDeviceAtmosCapability "dsGetSinkDeviceAtmosCapability"
 #define  IARM_BUS_DSMGR_API_dsSetAudioAtmosOutputMode "dsSetAudioAtmosOutputMode"
 #define  IARM_BUS_DSMGR_API_dsSetAudioDucking    "dsSetAudioDucking"
@@ -193,6 +191,7 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetCurrentOutputSettings "dsGetCurrentOutputSettings"
 #define IARM_BUS_DSMGR_API_dsSetBackgroundColor "dsSetBackgroundColor"
 #define IARM_BUS_DSMGR_API_dsSetForceHDRMode "dsSetForceHDRMode"
+#define IARM_BUS_DSMGR_API_dsSetAllmEnabled "dsSetAllmEnabled"
 /*
  * Declare RPC FP  API names 
  */
@@ -239,6 +238,7 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetAllmStatus              "dsGetAllmStatus"
 #define IARM_BUS_DSMGR_API_dsGetSupportedGameFeaturesList              "dsGetSupportedGameFeaturesList"
 #define IARM_BUS_DSMGR_API_dsGetAVLatency   		"dsGetAVLatency"
+#define IARM_BUS_DSMGR_API_dsGetHdmiVersion            "dsGetHdmiVersion"
 
 /*
  * Declare RPC COMPOSITE INPUT API names
@@ -994,6 +994,14 @@ typedef struct _dsEdidVersionParam_t
     tv_hdmi_edid_version_t  iEdidVersion;
 }dsEdidVersionParam_t;
 
+typedef struct _dsSetAllmEnabledParam_t
+{
+    dsError_t result;
+    intptr_t  handle;
+    bool     enabled;
+}dsSetAllmEnabledParam_t;
+
+
 typedef struct _dsEdidAllmSupportParam_t
 {
     dsError_t               result;
@@ -1032,6 +1040,14 @@ typedef struct _dsSetAudioMixerLevelsParam_t
     dsAudioInput_t aInput;
     int            volume;
 }dsSetAudioMixerLevelsParam_t;
+
+
+typedef struct _dsHdmiVersionParam_t
+{
+    dsError_t               result;
+    dsHdmiInPort_t          iHdmiPort;
+    dsHdmiMaxCapabilityVersion_t iCapVersion;
+}dsHdmiVersionParam_t;
 
 #ifdef __cplusplus
 }

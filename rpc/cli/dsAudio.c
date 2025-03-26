@@ -331,7 +331,7 @@ dsError_t  dsEnableAudioPort(intptr_t handle, bool enabled, const char* portName
     param.handle = handle;
     param.enabled = enabled;
     memset(param.portName, '\0', sizeof(param.portName));
-    strncpy (param.portName, portName, sizeof(param.portName));
+    strncpy (param.portName, portName, sizeof(param.portName)-1);
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
@@ -356,7 +356,7 @@ dsError_t dsGetEnablePersist(intptr_t handle, const char* portName, bool *enable
     /*By default all port values are true*/
 	param.enabled = true;
     memset(param.portName, '\0', sizeof(param.portName));
-    strncpy (param.portName, portName, sizeof(param.portName));
+    strncpy (param.portName, portName, sizeof(param.portName)-1);
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                             (char *)IARM_BUS_DSMGR_API_dsGetEnablePersist,
                             (void *)&param,
@@ -380,7 +380,7 @@ dsError_t dsSetEnablePersist(intptr_t handle, const char* portName, bool enabled
     param.handle = handle;
     param.enabled = enabled;
     memset(param.portName, '\0', sizeof(param.portName));
-    strncpy (param.portName, portName,sizeof(param.portName));
+    strncpy (param.portName, portName,sizeof(param.portName)-1);
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
@@ -679,28 +679,6 @@ dsError_t dsSetAudioDelay(intptr_t handle, const uint32_t audioDelayMs)
 	return dsERR_NONE;
 
 }
-
-dsError_t dsSetAudioDelayOffset(intptr_t handle, const uint32_t audioDelayOffsetMs)
-{
-	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
-	dsAudioDelayOffsetParam_t param;
-	param.handle = handle;
-	param.audioDelayOffsetMs = audioDelayOffsetMs;
-
-	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-							(char *)IARM_BUS_DSMGR_API_dsSetAudioDelayOffset,
-							(void *)&param,
-							sizeof(param));
-
-	if (IARM_RESULT_SUCCESS != rpcRet)
-	{
-		return dsERR_GENERAL;
-	}
-
-	return dsERR_NONE;
-
-}
-
 
 dsError_t  dsSetDialogEnhancement(intptr_t handle, int level)
 {
@@ -1214,7 +1192,7 @@ dsError_t  dsSetMS12AudioProfile(intptr_t handle, const char* profile)
         param.handle = handle;
 
 	memset( param.profile, 0, sizeof(param.profile) );
-    strncpy (param.profile, profile ,sizeof(param.profile));
+    strncpy (param.profile, profile ,sizeof(param.profile)-1);
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                                                         (char *)IARM_BUS_DSMGR_API_dsSetMS12AudioProfile,
                                                         (void *)&param,
@@ -1332,7 +1310,7 @@ dsError_t  dsSetPrimaryLanguage(intptr_t handle, const char* pLang)
         }
 
         memset(param.primaryLanguage, '\0', sizeof(param.primaryLanguage));
-        strncpy (param.primaryLanguage, pLang,sizeof(param.primaryLanguage));
+        strncpy (param.primaryLanguage, pLang,sizeof(param.primaryLanguage)-1);
         rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                                                   (char *)IARM_BUS_DSMGR_API_dsSetPrimaryLanguage,
                                                   (void *)&param,
@@ -1384,7 +1362,7 @@ dsError_t  dsSetSecondaryLanguage(intptr_t handle, const char* sLang)
         }
 
         memset(param.secondaryLanguage, '\0', sizeof(param.secondaryLanguage));
-        strncpy (param.secondaryLanguage, sLang,sizeof(param.secondaryLanguage));
+        strncpy (param.secondaryLanguage, sLang,sizeof(param.secondaryLanguage)-1);
         rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                                                   (char *)IARM_BUS_DSMGR_API_dsSetSecondaryLanguage,
                                                   (void *)&param,
@@ -1432,15 +1410,15 @@ dsError_t  dsSetMS12AudioProfileSetttingsOverride(intptr_t handle,const char* pr
         param.handle = handle;
         
         memset( param.profileState, 0, sizeof(param.profileState) );
-        strncpy (param.profileState, profileState,sizeof(param.profileState) );
+        strncpy (param.profileState, profileState,sizeof(param.profileState)-1);
 
         memset( param.profileName, 0, sizeof(param.profileName) );
-        strncpy (param.profileName, profileName ,sizeof(param.profileName));
+        strncpy (param.profileName, profileName ,sizeof(param.profileName)-1);
         memset( param.profileSettingsName, 0, sizeof(param.profileSettingsName) );
-        strncpy (param.profileSettingsName, profileSettingsName ,sizeof(param.profileSettingsName));
+        strncpy (param.profileSettingsName, profileSettingsName ,sizeof(param.profileSettingsName)-1);
 
         memset( param.profileSettingValue, 0, sizeof(param.profileSettingValue) );
-        strncpy (param.profileSettingValue ,profileSettingValue ,sizeof(param.profileSettingValue));\
+        strncpy (param.profileSettingValue ,profileSettingValue ,sizeof(param.profileSettingValue)-1);
          
         rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                                                         (char *)IARM_BUS_DSMGR_API_dsSetMS12SetttingsOverride,
@@ -1544,30 +1522,6 @@ dsError_t dsGetAudioDelay(intptr_t handle, uint32_t *audioDelayMs)
 	*audioDelayMs = param.audioDelayMs;
 	return dsERR_NONE;
 }
-
-dsError_t dsGetAudioDelayOffset(intptr_t handle, uint32_t *audioDelayOffsetMs)
-{
-	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
-	dsAudioDelayOffsetParam_t param;
-
-	param.handle = handle;
-	param.audioDelayOffsetMs = 0;
-
-	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-						(char *)IARM_BUS_DSMGR_API_dsGetAudioDelayOffset,
-						(void *)&param,
-						sizeof(param));
-
-	if (IARM_RESULT_SUCCESS != rpcRet)
-	{
-		printf("%s: AUDIODELAY CLIENT (GET) GENERAL ERROR\n", __FUNCTION__);
-		return dsERR_GENERAL;
-	}
-
-	*audioDelayOffsetMs = param.audioDelayOffsetMs;
-	return dsERR_NONE;
-}
-
 
 dsError_t dsSetAudioAtmosOutputMode(intptr_t handle, bool enable)
 {

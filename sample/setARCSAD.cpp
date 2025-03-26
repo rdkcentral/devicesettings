@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         }
 		printf("Sample Application: set Short Audio Descriptor\r\n");
 		device::AudioOutputPort aPort = device::Host::getInstance().getAudioOutputPort("HDMI_ARC0");
-		aPort.setSAD(sad_list);
+		aPort.setSAD(std::move(sad_list));
 		printf("Sample Application: set called\r\n");
 
         device::Manager::DeInitialize();
