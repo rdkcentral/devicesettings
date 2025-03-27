@@ -222,6 +222,7 @@ FrontPanelIndicator::Blink::Blink(int interval, int iteration)
  */
 FrontPanelIndicator & FrontPanelIndicator::getInstance(int id)
 {
+	printf("FPI: get instance");
 	if (::isIndicatorValid(id)) {
 		return FrontPanelConfig::getInstance().getIndicator(id);
 	}
@@ -247,8 +248,10 @@ FrontPanelIndicator & FrontPanelIndicator::getInstance(int id)
  */
 FrontPanelIndicator & FrontPanelIndicator::getInstance(const std::string &name)
 {
+	printf("FPI: get instance string");
 	for (size_t i = 0; i < dsUTL_DIM(_indicatorNames); i++) {
 		if (name.compare(_indicatorNames[i]) == 0) {
+			printf("FPI: get instance string got");
 			return FrontPanelConfig::getInstance().getIndicator(i);
 		}
 	}
@@ -306,12 +309,14 @@ FrontPanelIndicator::~FrontPanelIndicator()
  */
 void FrontPanelIndicator::setBrightness(const int &brightness,bool toPersist)
 {
+	printf("FPI: setBrightness");
 	bool IsPersist = toPersist;
-
+	printf("FPI: set brightness perisist");
 	if (dsERR_NONE != dsSetFPDBrightness((dsFPDIndicator_t)_id, brightness,IsPersist) )
     {
     	throw IllegalArgumentException();
     } 
+	printf("FPI: setBrightness set brightness completed");
 	_brightness = brightness;
 }
 
