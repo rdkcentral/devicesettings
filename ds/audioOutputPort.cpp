@@ -376,6 +376,8 @@ bool AudioOutputPort::getStereoAuto()
 	int _localmode = 0;
 	dsGetStereoAuto	(_handle, &_localmode);
 	_stereoAuto = (_localmode);
+    INT_INFO("AudioOutputPort::getStereoAuto _stereoAuto:%d\n", _stereoAuto);
+    std::cout << "AudioOutputPort::getStereoAuto _stereoAuto: " << _stereoAuto << std::endl;
 	return _stereoAuto;
 }
 
@@ -1397,6 +1399,7 @@ void AudioOutputPort::setStereoMode(const int newMode, const bool toPersist)
 {
 	dsError_t ret = dsERR_GENERAL;
 
+    INT_INFO("AudioOutputPort [%s], setting stereo mode to [%d]\n", _name.c_str(), newMode);
 	if (AudioOutputPortType::getInstance(_type).isModeSupported(newMode)) 
 	{	
 		if ( (ret = dsSetStereoMode(_handle, (dsAudioStereoMode_t)newMode,toPersist)) == dsERR_NONE) {
@@ -1635,6 +1638,7 @@ void AudioOutputPort::enableMS12Config(const dsMS12FEATURE_t feature,const bool 
 void AudioOutputPort::setStereoAuto(const bool autoMode, const bool toPersist)
 {
 	dsError_t ret = dsERR_NONE;
+    INT_INFO("AudioOutputPort [%s], setting stereo auto mode to [%d]\n", _name.c_str(), autoMode);
 
 	if ( (ret = dsSetStereoAuto(_handle, autoMode ? 1 : 0, toPersist)) == dsERR_NONE) {
 		_stereoAuto = (autoMode);

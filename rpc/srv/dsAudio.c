@@ -215,7 +215,7 @@ void AudioConfigInit()
         if (dllib) {
             func = (dsEnableLEConfig_t) dlsym(dllib, "dsEnableLEConfig");
             if (func) {
-                INT_DEBUG("dsEnableLEConfig(int, bool) is defined and loaded\r\n");
+                INT_INFO("dsEnableLEConfig(int, bool) is defined and loaded\r\n");
                 std::string _LEEnable("FALSE");
                 try
                 {
@@ -226,7 +226,7 @@ void AudioConfigInit()
 #ifndef DS_LE_DEFAULT_DISABLED
                     _LEEnable = "TRUE";
 #endif
-                   INT_DEBUG("LE : Persisting default LE status: %s \r\n",_LEEnable.c_str());
+                   INT_INFO("LE : Persisting default LE status: %s \r\n",_LEEnable.c_str());
                    device::HostPersistence::getInstance().persistHostProperty("audio.LEEnable",_LEEnable);
                 }
                 if(_LEEnable == "TRUE")
@@ -262,7 +262,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetAudioGainFunc = (dsSetAudioGain_t) dlsym(dllib, "dsSetAudioGain");
             if (dsSetAudioGainFunc) {
-                INT_DEBUG("dsSetAudioGain_t(int, float ) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioGain_t(int, float ) is defined and loaded\r\n");
                 std::string _AudioGain("0");
                 float m_audioGain = 0;
 //SPEAKER init
@@ -273,7 +273,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("SPEAKER0.audio.Gain not found in persistence store. Try system default\n");
+                                INT_INFO("SPEAKER0.audio.Gain not found in persistence store. Try system default\n");
                                 _AudioGain = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.audio.Gain");
                             }
                             catch(...) {
@@ -293,7 +293,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("HDMI0.audio.Gain not found in persistence store. Try system default\n");
+                                INT_INFO("HDMI0.audio.Gain not found in persistence store. Try system default\n");
                                 _AudioGain = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.audio.Gain");
                             }
                             catch(...) {
@@ -322,7 +322,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetAudioLevelFunc = (dsSetAudioLevel_t) dlsym(dllib, "dsSetAudioLevel");
             if (dsSetAudioLevelFunc) {
-                INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
                 std::string _AudioLevel("0");
                 float m_audioLevel = 0;
 //SPEAKER init
@@ -333,7 +333,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("SPEAKER0.audio.Level not found in persistence store. Try system default\n");
+                                INT_INFO("SPEAKER0.audio.Level not found in persistence store. Try system default\n");
                                 _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.audio.Level");
                             }
                             catch(...) {
@@ -354,7 +354,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("HEADPHONE0.audio.Level not found in persistence store. Try system default\n");
+                                INT_INFO("HEADPHONE0.audio.Level not found in persistence store. Try system default\n");
                                 _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("HEADPHONE0.audio.Level");
                             }
                             catch(...) {
@@ -374,7 +374,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("HDMI0.audio.Level not found in persistence store. Try system default\n");
+                                INT_INFO("HDMI0.audio.Level not found in persistence store. Try system default\n");
                                 _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.audio.Level");
                             }
                             catch(...) {
@@ -406,7 +406,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetAudioDelayFunc = (dsSetAudioDelay_t) dlsym(dllib, "dsSetAudioDelay");
             if (dsSetAudioDelayFunc) {
-                INT_DEBUG("dsSetAudioDelay_t(int, uint32_t) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioDelay_t(int, uint32_t) is defined and loaded\r\n");
                 std::string _AudioDelay("0");
                 int m_audioDelay = 0;
 //SPEAKER init
@@ -417,7 +417,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("SPEAKER0.audio.Delay not found in persistence store. Try system default\n");
+                                INT_INFO("SPEAKER0.audio.Delay not found in persistence store. Try system default\n");
                                 _AudioDelay = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.audio.Delay");
                             }
                             catch(...) {
@@ -437,7 +437,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("HDMI0.audio.Delay not found in persistence store. Try system default\n");
+                                INT_INFO("HDMI0.audio.Delay not found in persistence store. Try system default\n");
                                 _AudioDelay = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.audio.Delay");
                             }
                             catch(...) {
@@ -457,7 +457,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("HDMI_ARC0.audio.Delay not found in persistence store. Try system default\n");
+                                INT_INFO("HDMI_ARC0.audio.Delay not found in persistence store. Try system default\n");
                                 _AudioDelay = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.audio.Delay");
                             }
                             catch(...) {
@@ -489,7 +489,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetPrimaryLanguageFunc = (dsSetPrimaryLanguage_t) dlsym(dllib, "dsSetPrimaryLanguage");
             if (dsSetPrimaryLanguageFunc) {
-                INT_DEBUG("dsSetPrimaryLanguage_t(int, char* ) is defined and loaded\r\n");
+                INT_INFO("dsSetPrimaryLanguage_t(int, char* ) is defined and loaded\r\n");
                 std::string _PrimaryLanguage("eng");
                 handle = 0;
                 try {
@@ -497,7 +497,7 @@ void AudioConfigInit()
                 }
                 catch(...) {
                         try {
-                            INT_DEBUG("audio.PrimaryLanguage not found in persistence store. Try system default\n");
+                            INT_INFO("audio.PrimaryLanguage not found in persistence store. Try system default\n");
                             _PrimaryLanguage = device::HostPersistence::getInstance().getDefaultProperty("audio.PrimaryLanguage");
                         }
                         catch(...) {
@@ -526,7 +526,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetSecondaryLanguageFunc = (dsSetSecondaryLanguage_t) dlsym(dllib, "dsSetSecondaryLanguage");
             if (dsSetSecondaryLanguageFunc) {
-                INT_DEBUG("dsSetSecondaryLanguage_t(int, char* ) is defined and loaded\r\n");
+                INT_INFO("dsSetSecondaryLanguage_t(int, char* ) is defined and loaded\r\n");
                 std::string _SecondaryLanguage("eng");
                 handle = 0;
                 try {
@@ -534,7 +534,7 @@ void AudioConfigInit()
                 }
                 catch(...) {
                         try {
-                            INT_DEBUG("audio.SecondaryLanguage not found in persistence store. Try system default\n");
+                            INT_INFO("audio.SecondaryLanguage not found in persistence store. Try system default\n");
                             _SecondaryLanguage = device::HostPersistence::getInstance().getDefaultProperty("audio.SecondaryLanguage");
                         }
                         catch(...) {
@@ -563,7 +563,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetFaderControlFunc = (dsSetFaderControl_t) dlsym(dllib, "dsSetFaderControl");
             if (dsSetFaderControlFunc) {
-                INT_DEBUG("dsSetFaderControl_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetFaderControl_t(int, int) is defined and loaded\r\n");
                 std::string _FaderControl("0");
                 int m_faderControl = 0;
 
@@ -573,7 +573,7 @@ void AudioConfigInit()
                 }
                 catch(...) {
                         try {
-                            INT_DEBUG("audio.FaderControl not found in persistence store. Try system default\n");
+                            INT_INFO("audio.FaderControl not found in persistence store. Try system default\n");
                             _FaderControl = device::HostPersistence::getInstance().getDefaultProperty("audio.FaderControl");
                         }
                         catch(...) {
@@ -604,7 +604,7 @@ void AudioConfigInit()
         if (dllib) {
             dsSetAssociatedAudioMixingFunc = (dsSetAssociatedAudioMixing_t) dlsym(dllib, "dsSetAssociatedAudioMixing");
             if (dsSetAssociatedAudioMixingFunc) {
-                INT_DEBUG("dsSetAssociatedAudioMixing_t (intptr_t handle, bool mixing ) is defined and loaded\r\n");
+                INT_INFO("dsSetAssociatedAudioMixing_t (intptr_t handle, bool mixing ) is defined and loaded\r\n");
                 std::string _AssociatedAudioMixing("Disabled");
                 bool m_AssociatedAudioMixing = false;
                 try {
@@ -612,7 +612,7 @@ void AudioConfigInit()
                 }
                 catch(...) {
                     try {
-                        INT_DEBUG("audio.AssociatedAudioMixing not found in persistence store. Try system default\n");
+                        INT_INFO("audio.AssociatedAudioMixing not found in persistence store. Try system default\n");
                         _AssociatedAudioMixing = device::HostPersistence::getInstance().getDefaultProperty("audio.AssociatedAudioMixing");
                     }
                     catch(...) {
@@ -660,7 +660,7 @@ void AudioConfigInit()
             if (dllib) {
                 dsSetMS12AudioProfileFunc = (dsSetMS12AudioProfile_t) dlsym(dllib, "dsSetMS12AudioProfile");
                 if (dsSetMS12AudioProfileFunc) {
-                    INT_DEBUG("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
+                    INT_INFO("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
                     handle = 0;
                     dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
 
@@ -669,7 +669,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("audio.MS12Profile not found in persistence store. Try system default\n");
+                                INT_INFO("audio.MS12Profile not found in persistence store. Try system default\n");
                                 _AProfile = device::HostPersistence::getInstance().getDefaultProperty("audio.MS12Profile");
                             }
                             catch(...) {
@@ -692,7 +692,7 @@ void AudioConfigInit()
                     handle = 0;
                     if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
                         if (dsSetMS12AudioProfileFunc(handle, _AProfile.c_str()) == dsERR_NONE) {
-                            INT_DEBUG("Port %s: Initialized MS12 Audio Profile  : %d\n","HDMI0", _AProfile.c_str());
+                            INT_INFO("Port %s: Initialized MS12 Audio Profile  : %d\n","HDMI0", _AProfile.c_str());
                         }
                     }
     #endif
@@ -729,7 +729,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetAudioCompressionFunc = (dsSetAudioCompression_t) dlsym(dllib, "dsSetAudioCompression");
                     if (dsSetAudioCompressionFunc) {
-                        INT_DEBUG("dsSetAudioCompression_t(int, int ) is defined and loaded\r\n");
+                        INT_INFO("dsSetAudioCompression_t(int, int ) is defined and loaded\r\n");
                         std::string _AudioCompression("0");
                         int m_audioCompression = 0;
                         try {
@@ -784,7 +784,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetDialogEnhancementFunc = (dsSetDialogEnhancement_t) dlsym(dllib, "dsSetDialogEnhancement");
                     if (dsSetDialogEnhancementFunc) {
-                        INT_DEBUG("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
+                        INT_INFO("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
                         std::string _EnhancerLevel("0");
                         int m_enhancerLevel = 0;
                         std::string _Property = _dsGetCurrentProfileProperty("EnhancerLevel");
@@ -839,7 +839,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetDolbyVolumeModeFunc = (dsSetDolbyVolumeMode_t) dlsym(dllib, "dsSetDolbyVolumeMode");
                     if (dsSetDolbyVolumeModeFunc) {
-                        INT_DEBUG("dsSetDolbyVolumeMode_t(int, bool) is defined and loaded\r\n");
+                        INT_INFO("dsSetDolbyVolumeMode_t(int, bool) is defined and loaded\r\n");
                         std::string _DolbyVolumeMode("FALSE");
                         bool m_dolbyVolumeMode = false;
                         try {
@@ -898,7 +898,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetIntelligentEqualizerModeFunc = (dsSetIntelligentEqualizerMode_t) dlsym(dllib, "dsSetIntelligentEqualizerMode");
                     if (dsSetIntelligentEqualizerModeFunc) {
-                        INT_DEBUG("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
+                        INT_INFO("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
                         std::string _IEQMode("0");
                         int m_IEQMode = 0;
                         handle = 0;
@@ -958,7 +958,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetVolumeLevellerFunc = (dsSetVolumeLeveller_t) dlsym(dllib, "dsSetVolumeLeveller");
                     if (dsSetVolumeLevellerFunc) {
-                        INT_DEBUG("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
+                        INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
                         std::string _volLevellerMode("0");
                         std::string _volLevellerLevel("0");
                         dsVolumeLeveller_t m_volumeLeveller;
@@ -1017,7 +1017,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetBassEnhancerFunc = (dsSetBassEnhancer_t) dlsym(dllib, "dsSetBassEnhancer");
                     if (dsSetBassEnhancerFunc) {
-                        INT_DEBUG("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
+                        INT_INFO("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
                         std::string _BassBoost("0");
                         int m_bassBoost = 0;
                         try {
@@ -1071,7 +1071,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsEnableSurroundDecoderFunc = (dsEnableSurroundDecoder_t) dlsym(dllib, "dsEnableSurroundDecoder");
                     if (dsEnableSurroundDecoderFunc) {
-                        INT_DEBUG("dsEnableSurroundDecoder_t(int, bool) is defined and loaded\r\n");
+                        INT_INFO("dsEnableSurroundDecoder_t(int, bool) is defined and loaded\r\n");
                         std::string _SurroundDecoder("FALSE");
                         bool m_surroundDecoder = false;
                         try {
@@ -1130,7 +1130,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetDRCModeFunc = (dsSetDRCMode_t) dlsym(dllib, "dsSetDRCMode");
                     if (dsSetDRCModeFunc) {
-                        INT_DEBUG("dsSetDRCMode_t(int, int) is defined and loaded\r\n");
+                        INT_INFO("dsSetDRCMode_t(int, int) is defined and loaded\r\n");
                         std::string _DRCMode("Line");
                         int m_DRCMode = 0;
                         try {
@@ -1189,7 +1189,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetSurroundVirtualizerFunc = (dsSetSurroundVirtualizer_t) dlsym(dllib, "dsSetSurroundVirtualizer");
                     if (dsSetSurroundVirtualizerFunc) {
-                        INT_DEBUG("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t virtualizer) is defined and loaded\r\n");
+                        INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t virtualizer) is defined and loaded\r\n");
                         std::string _SVMode("0");
                         std::string _SVBoost("0");
                         dsSurroundVirtualizer_t m_virtualizer;
@@ -1248,7 +1248,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetMISteeringFunc = (dsSetMISteering_t) dlsym(dllib, "dsSetMISteering");
                     if (dsSetMISteeringFunc) {
-                        INT_DEBUG("dsSetMISteering_t(int, bool) is defined and loaded\r\n");
+                        INT_INFO("dsSetMISteering_t(int, bool) is defined and loaded\r\n");
                         std::string _MISteering("Disabled");
                         bool m_MISteering = false;
                         try {
@@ -1309,7 +1309,7 @@ void AudioConfigInit()
                 if (dllib) {
                     dsSetGraphicEqualizerModeFunc = (dsSetGraphicEqualizerMode_t) dlsym(dllib, "dsSetGraphicEqualizerMode");
                     if (dsSetGraphicEqualizerModeFunc) {
-                        INT_DEBUG("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
+                        INT_INFO("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
                         std::string _GEQMode("0");
                         int m_GEQMode = 0;
                         handle = 0;
@@ -1357,7 +1357,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetAudioCompressionFunc = (dsSetAudioCompression_t) dlsym(dllib, "dsSetAudioCompression");
                    if (dsSetAudioCompressionFunc) {
-                       INT_DEBUG("dsSetAudioCompression_t(int, int ) is defined and loaded\r\n");
+                       INT_INFO("dsSetAudioCompression_t(int, int ) is defined and loaded\r\n");
                        std::string _AudioCompression("0");
                        int m_audioCompression = 0;
                        try {
@@ -1365,7 +1365,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.Compression not found in persistence store. Try system default\n");
+                               INT_INFO("audio.Compression not found in persistence store. Try system default\n");
                                _AudioCompression = device::HostPersistence::getInstance().getDefaultProperty("audio.Compression");
                            }
                            catch(...) {
@@ -1406,7 +1406,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetDialogEnhancementFunc = (dsSetDialogEnhancement_t) dlsym(dllib, "dsSetDialogEnhancement");
                    if (dsSetDialogEnhancementFunc) {
-                       INT_DEBUG("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
+                       INT_INFO("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
                        std::string _EnhancerLevel("0");
                        int m_enhancerLevel = 0;
                        try {
@@ -1414,7 +1414,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.EnhancerLevel not found in persistence store. Try system default\n");
+                               INT_INFO("audio.EnhancerLevel not found in persistence store. Try system default\n");
                                _EnhancerLevel = device::HostPersistence::getInstance().getDefaultProperty("audio.EnhancerLevel");
                            }
                            catch(...) {
@@ -1456,7 +1456,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetDolbyVolumeModeFunc = (dsSetDolbyVolumeMode_t) dlsym(dllib, "dsSetDolbyVolumeMode");
                    if (dsSetDolbyVolumeModeFunc) {
-                       INT_DEBUG("dsSetDolbyVolumeMode_t(int, bool) is defined and loaded\r\n");
+                       INT_INFO("dsSetDolbyVolumeMode_t(int, bool) is defined and loaded\r\n");
                        std::string _DolbyVolumeMode("FALSE");
                        bool m_dolbyVolumeMode = false;
                        try {
@@ -1465,7 +1465,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.DolbyVolumeMode not found in persistence store. Try system default\n");
+                               INT_INFO("audio.DolbyVolumeMode not found in persistence store. Try system default\n");
                                _DolbyVolumeMode = device::HostPersistence::getInstance().getDefaultProperty("audio.DolbyVolumeMode");
                            }
                            catch(...) {
@@ -1510,7 +1510,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetIntelligentEqualizerModeFunc = (dsSetIntelligentEqualizerMode_t) dlsym(dllib, "dsSetIntelligentEqualizerMode");
                    if (dsSetIntelligentEqualizerModeFunc) {
-                       INT_DEBUG("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
+                       INT_INFO("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
                        std::string _IEQMode("0");
                        int m_IEQMode = 0;
                        handle = 0;
@@ -1520,7 +1520,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.IntelligentEQ not found in persistence store. Try system default\n");
+                               INT_INFO("audio.IntelligentEQ not found in persistence store. Try system default\n");
                                _IEQMode = device::HostPersistence::getInstance().getDefaultProperty("audio.IntelligentEQ");
                            }
                            catch(...) {
@@ -1561,7 +1561,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetVolumeLevellerFunc = (dsSetVolumeLeveller_t) dlsym(dllib, "dsSetVolumeLeveller");
                    if (dsSetVolumeLevellerFunc) {
-                       INT_DEBUG("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
+                       INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
 		       std::string _volLevellerMode("0");
 		       std::string _volLevellerLevel("0");
                        dsVolumeLeveller_t m_volumeLeveller;
@@ -1572,7 +1572,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.VolumeLeveller not found in persistence store. Try system default\n");
+                               INT_INFO("audio.VolumeLeveller not found in persistence store. Try system default\n");
                                _volLevellerMode = device::HostPersistence::getInstance().getDefaultProperty("audio.VolumeLeveller.mode");
                                _volLevellerLevel = device::HostPersistence::getInstance().getDefaultProperty("audio.VolumeLeveller.level");
                            }
@@ -1585,7 +1585,7 @@ void AudioConfigInit()
 		       m_volumeLeveller.level = atoi(_volLevellerLevel.c_str());
            //SPEAKER init
                        handle = 0;
-                       INT_DEBUG("bDolbyVolumeOverrideCheck value:  %d\n", bDolbyVolumeOverrideCheck);
+                       INT_INFO("bDolbyVolumeOverrideCheck value:  %d\n", bDolbyVolumeOverrideCheck);
                        if(bDolbyVolumeOverrideCheck && dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
                            if (dsSetVolumeLevellerFunc(handle, m_volumeLeveller) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Volume Leveller : Mode: %d, Level: %d\n","SPEAKER0", m_volumeLeveller.mode, m_volumeLeveller.level);
@@ -1617,7 +1617,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetBassEnhancerFunc = (dsSetBassEnhancer_t) dlsym(dllib, "dsSetBassEnhancer");
                    if (dsSetBassEnhancerFunc) {
-                       INT_DEBUG("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
+                       INT_INFO("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
                        std::string _BassBoost("0");
                        int m_bassBoost = 0;
                        try {
@@ -1625,7 +1625,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.BassBoost not found in persistence store. Try system default\n");
+                               INT_INFO("audio.BassBoost not found in persistence store. Try system default\n");
                                std::string _Property = _dsGetCurrentProfileProperty("BassBoost");
                                _BassBoost = device::HostPersistence::getInstance().getDefaultProperty(_Property);
                            }
@@ -1667,7 +1667,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsEnableSurroundDecoderFunc = (dsEnableSurroundDecoder_t) dlsym(dllib, "dsEnableSurroundDecoder");
                    if (dsEnableSurroundDecoderFunc) {
-                       INT_DEBUG("dsEnableSurroundDecoder_t(int, bool) is defined and loaded\r\n");
+                       INT_INFO("dsEnableSurroundDecoder_t(int, bool) is defined and loaded\r\n");
                        std::string _SurroundDecoder("FALSE");
                        bool m_surroundDecoder = false;
                        try {
@@ -1675,7 +1675,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.SurroundDecoderEnabled not found in persistence store. Try system default\n");
+                               INT_INFO("audio.SurroundDecoderEnabled not found in persistence store. Try system default\n");
                                _SurroundDecoder = device::HostPersistence::getInstance().getDefaultProperty("audio.SurroundDecoderEnabled");
                            }
                            catch(...) {
@@ -1721,7 +1721,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetDRCModeFunc = (dsSetDRCMode_t) dlsym(dllib, "dsSetDRCMode");
                    if (dsSetDRCModeFunc) {
-                       INT_DEBUG("dsSetDRCMode_t(int, int) is defined and loaded\r\n");
+                       INT_INFO("dsSetDRCMode_t(int, int) is defined and loaded\r\n");
                        std::string _DRCMode("Line");
                        int m_DRCMode = 0;
                        try {
@@ -1729,7 +1729,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.DRCMode not found in persistence store. Try system default\n");
+                               INT_INFO("audio.DRCMode not found in persistence store. Try system default\n");
                                _DRCMode = device::HostPersistence::getInstance().getDefaultProperty("audio.DRCMode");
                            }
                            catch(...) {
@@ -1775,7 +1775,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetSurroundVirtualizerFunc = (dsSetSurroundVirtualizer_t) dlsym(dllib, "dsSetSurroundVirtualizer");
                    if (dsSetSurroundVirtualizerFunc) {
-                       INT_DEBUG("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
+                       INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
                         std::string _SVMode("0");
                         std::string _SVBoost("0");
                         dsSurroundVirtualizer_t m_virtualizer;		 
@@ -1788,7 +1788,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.SurroundVirtualizer.mode/audio.SurroundVirtualizer.boost not found in persistence store. Try system default\n");
+                               INT_INFO("audio.SurroundVirtualizer.mode/audio.SurroundVirtualizer.boost not found in persistence store. Try system default\n");
                                _SVMode = device::HostPersistence::getInstance().getProperty("audio.SurroundVirtualizer.mode");
                                _SVBoost = device::HostPersistence::getInstance().getProperty("audio.SurroundVirtualizer.boost"); 
                            }
@@ -1832,7 +1832,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetMISteeringFunc = (dsSetMISteering_t) dlsym(dllib, "dsSetMISteering");
                    if (dsSetMISteeringFunc) {
-                       INT_DEBUG("dsSetMISteering_t(int, bool) is defined and loaded\r\n");
+                       INT_INFO("dsSetMISteering_t(int, bool) is defined and loaded\r\n");
                        std::string _MISteering("Disabled");
                        bool m_MISteering = false;
                        try {
@@ -1840,7 +1840,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.MISteering not found in persistence store. Try system default\n");
+                               INT_INFO("audio.MISteering not found in persistence store. Try system default\n");
                                _MISteering = device::HostPersistence::getInstance().getDefaultProperty("audio.MISteering");
                            }
                            catch(...) {
@@ -1890,7 +1890,7 @@ void AudioConfigInit()
                if (dllib) {
                    dsSetGraphicEqualizerModeFunc = (dsSetGraphicEqualizerMode_t) dlsym(dllib, "dsSetGraphicEqualizerMode");
                    if (dsSetGraphicEqualizerModeFunc) {
-                       INT_DEBUG("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
+                       INT_INFO("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
                        std::string _GEQMode("0");
                        int m_GEQMode = 0;
                        handle = 0;
@@ -1900,7 +1900,7 @@ void AudioConfigInit()
                        }
                        catch(...) {
                            try {
-                               INT_DEBUG("audio.GraphicEQ not found in persistence store. Try system default\n");
+                               INT_INFO("audio.GraphicEQ not found in persistence store. Try system default\n");
                                _GEQMode = device::HostPersistence::getInstance().getDefaultProperty("audio.GraphicEQ");
                            }
                            catch(...) {
@@ -1944,7 +1944,7 @@ void AudioConfigInit()
        }
        catch(...) {
           try {
-                INT_DEBUG("HDMI0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                INT_INFO("HDMI0.AudioMode.AUTO not found in persistence store. Try system default\n");
                 _AudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.AudioMode.AUTO");
           }
           catch(...) {
@@ -1960,7 +1960,7 @@ void AudioConfigInit()
             if (dllib) {
                 func = (dsSetStereoAuto_t) dlsym(dllib, "dsSetStereoAuto");
                 if (func) {
-                    INT_DEBUG("dsSetStereoAuto_t(int, int *) is defined and loaded\r\n");
+                    INT_INFO("dsSetStereoAuto_t(int, int *) is defined and loaded\r\n");
                 }
                 else {
                     INT_INFO("dsSetStereoAuto_t(int, int *) is not defined\r\n");
@@ -1976,7 +1976,7 @@ void AudioConfigInit()
         {
             if (func(handle, 1) == dsERR_NONE)
             {
-                 INT_DEBUG("dsSetStereoAuto Port HDMI_0 Audio Mode is set to Auto \n");
+                 INT_INFO("dsSetStereoAuto Port HDMI_0 Audio Mode is set to Auto \n");
             }
         }
     }
@@ -1997,7 +1997,7 @@ void AudioConfigInit()
        }
        catch(...) {
           try {
-                INT_DEBUG("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                INT_INFO("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
                 _ARCAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.AudioMode.AUTO");
           }
           catch(...) {
@@ -2013,7 +2013,7 @@ void AudioConfigInit()
             if (dllib) {
                 func = (dsSetStereoAuto_t) dlsym(dllib, "dsSetStereoAuto");
                 if (func) {
-                    INT_DEBUG("dsSetStereoAuto_t(int, int *) is defined and loaded\r\n");
+                    INT_INFO("dsSetStereoAuto_t(int, int *) is defined and loaded\r\n");
                 }
                 else {
                     INT_INFO("dsSetStereoAuto_t(int, int *) is not defined\r\n");
@@ -2029,7 +2029,7 @@ void AudioConfigInit()
         {
             if (func(handle, 1) == dsERR_NONE)
             {
-                 INT_DEBUG("dsSetStereoAuto Port HDMI_0ARC Audio Mode is set to Auto \n");
+                 INT_INFO("dsSetStereoAuto Port HDMI_0ARC Audio Mode is set to Auto \n");
             }
         }
 
@@ -2062,7 +2062,7 @@ IARM_Result_t dsAudioMgr_init()
 		std::string _AudioModeSettings("STEREO");
 #endif     
 		_AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode",_AudioModeSettings);
-		INT_DEBUG("The HDMI Audio Mode Setting on startup  is %s \r\n",_AudioModeSettings.c_str());
+		INT_INFO("The HDMI Audio Mode Setting on startup  is %s \r\n",_AudioModeSettings.c_str());
 		if (_AudioModeSettings.compare("SURROUND") == 0)
 		{
 			_srv_HDMI_Audiomode = dsAUDIO_STEREO_SURROUND;
@@ -2124,7 +2124,7 @@ IARM_Result_t dsAudioMgr_init()
 	   }
 	   catch(...) {
                try {
-                   INT_DEBUG("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   INT_INFO("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _ARCAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.AudioMode.AUTO");
                }
                catch(...) {
@@ -2132,13 +2132,14 @@ IARM_Result_t dsAudioMgr_init()
                }
 
 	   }
+       INT_INFO("[%s][%d}The HDMI ARC Audio Auto Setting on startup  is %s \r\n", __FUNCTION__, __LINE__, _ARCAudioModeAuto.c_str());
 
            try {
                 _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode.AUTO");
            }
            catch(...) {
                try {
-                   INT_DEBUG("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   INT_INFO("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.AudioMode.AUTO");
                }
                catch(...) {
@@ -2160,13 +2161,14 @@ IARM_Result_t dsAudioMgr_init()
               _srv_AudioAuto = 0;
           }
         }
-        INT_DEBUG("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
-        INT_DEBUG("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
-        INT_DEBUG("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
+        INT_INFO("[%s][%d] The HDMI Audio Auto Setting on startup  is %d \r\n",__FUNCTION__,__LINE__,_srv_AudioAuto);
+        INT_INFO("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
+        INT_INFO("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
+        INT_INFO("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
 		/* Get the AudioModesettings for SPDIF from Persistence */
 		std::string _SPDIFModeSettings("STEREO");
 		_SPDIFModeSettings = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode",_SPDIFModeSettings);
-		INT_DEBUG("The SPDIF Audio Mode Setting on startup  is %s \r\n",_SPDIFModeSettings.c_str());
+		INT_INFO("The SPDIF Audio Mode Setting on startup  is %s \r\n",_SPDIFModeSettings.c_str());
 		if (_SPDIFModeSettings.compare("SURROUND") == 0)
 		{
 			_srv_SPDIF_Audiomode = dsAUDIO_STEREO_SURROUND;
@@ -2182,7 +2184,7 @@ IARM_Result_t dsAudioMgr_init()
                 /* Get the AudioModesettings for HDMI_ARC from Persistence */
                 std::string _ARCModeSettings("STEREO");
                 _ARCModeSettings = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode",_ARCModeSettings);
-                INT_DEBUG("The HDMI ARC Audio Mode Setting on startup  is %s \r\n",_ARCModeSettings.c_str());
+                INT_INFO("The HDMI ARC Audio Mode Setting on startup  is %s \r\n",_ARCModeSettings.c_str());
                 if (_ARCModeSettings.compare("SURROUND") == 0)
                 {
                         _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
@@ -2195,6 +2197,7 @@ IARM_Result_t dsAudioMgr_init()
                 {
                         _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
                 }
+                INT_INFO("[%s][%d] The HDMI ARC Audio Mode Setting on startup  is %d \r\n",__FUNCTION__,__LINE__,_srv_HDMI_ARC_Audiomode);
 	}
 	catch(...) 
 	{
@@ -2332,17 +2335,17 @@ IARM_Result_t _dsAudioPortInit(void *arg)
 
         dsError_t eRet = _dsAudioOutRegisterConnectCB (_dsAudioOutPortConnectCB);
         if (dsERR_NONE != eRet) {
-            INT_DEBUG("%s: _dsAudioOutRegisterConnectCB eRet:%04x", __FUNCTION__, eRet);
+            INT_INFO("%s: _dsAudioOutRegisterConnectCB eRet:%04x", __FUNCTION__, eRet);
         }
 
         eRet = _dsAudioFormatUpdateRegisterCB (_dsAudioFormatUpdateCB) ;
         if (dsERR_NONE != eRet) {
-            INT_DEBUG("%s: _dsAudioFormatUpdateRegisterCB eRet:%04x", __FUNCTION__, eRet);
+            INT_INFO("%s: _dsAudioFormatUpdateRegisterCB eRet:%04x", __FUNCTION__, eRet);
         }
 
 		eRet = _dsAudioAtmosCapsChangeRegisterCB (_dsAudioAtmosCapsChangeCB) ;
         if (dsERR_NONE != eRet) {
-            INT_DEBUG("%s: _dsAudioAtmosCapsChangeRegisterCB eRet:%04x", __FUNCTION__, eRet);
+            INT_INFO("%s: _dsAudioAtmosCapsChangeRegisterCB eRet:%04x", __FUNCTION__, eRet);
         }
 
 
@@ -2610,7 +2613,9 @@ IARM_Result_t _dsGetStereoAuto(void *arg)
     if (param != NULL)
     {
         param->autoMode = (_srv_AudioAuto ? 1 : 0);
+        INT_INFO("[%s][%d] The Audio Auto Mode Setting is %d \r\n",__FUNCTION__,__LINE__,param->autoMode);
     }
+    
 
     IARM_BUS_Unlock(lock);
 
@@ -2654,7 +2659,7 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
             if (dllib) {
                 func = (dsSetStereoAuto_t) dlsym(dllib, "dsSetStereoAuto");
                 if (func) {
-                    INT_DEBUG("dsSetStereoAuto_t(int, int *) is defined and loaded\r\n");
+                    INT_INFO("dsSetStereoAuto_t(int, int *) is defined and loaded\r\n");
                 }
                 else {
                     INT_INFO("dsSetStereoAuto_t(int, int *) is not defined\r\n");
@@ -2690,7 +2695,7 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
     bool portEnabled = false;
     dsAudioSetDuckingParam_t *param = (dsAudioSetDuckingParam_t *)arg;
     IARM_Bus_DSMgr_EventData_t eventData;
-    INT_DEBUG("%s action : %d type :%d val :%d m_volumeLevel:%f \n",__FUNCTION__,param->action,param->type,param->level,m_volumeLevel );
+    INT_INFO("%s action : %d type :%d val :%d m_volumeLevel:%f \n",__FUNCTION__,param->action,param->type,param->level,m_volumeLevel );
 
     dsError_t ret = dsIsAudioPortEnabled(param->handle, &portEnabled);
     if (ret != dsERR_NONE) {
@@ -2730,7 +2735,7 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
         return IARM_RESULT_SUCCESS;
     }
 
-    INT_DEBUG(":%s adjusted volume volume :%d m_volumeDuckingLevel :%d\n",__FUNCTION__,volume,m_volumeDuckingLevel );
+    INT_INFO(":%s adjusted volume volume :%d m_volumeDuckingLevel :%d\n",__FUNCTION__,volume,m_volumeDuckingLevel );
 
     // apply volume to hal layer
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
@@ -2740,7 +2745,7 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
         if (dllib) {
             dsSetAudioLevelFunc = (dsSetAudioLevel_t) dlsym(dllib, "dsSetAudioLevel");
             if (dsSetAudioLevelFunc) {
-                INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded \r\n");
+                INT_INFO("dsSetAudioLevel_t(int, float ) is defined and loaded \r\n");
 	    }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined \r\n");
@@ -2768,17 +2773,17 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
         else if (_APortType == dsAUDIOPORT_TYPE_HDMI) {
                 mode = _srv_HDMI_Audiomode;
         }
-        INT_DEBUG("The Port type is :%d  Audio Settings Mode is %d \r\n",_APortType, mode);
+        INT_INFO("The Port type is :%d  Audio Settings Mode is %d \r\n",_APortType, mode);
 
         if(mode == dsAUDIO_STEREO_PASSTHRU && volume != 100)
         {
             eventData.data.AudioLevelInfo.level = 0;
-            INT_DEBUG(" IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED PASSTHRU mode volume:%d \n",eventData.data.AudioLevelInfo.level);
+            INT_INFO(" IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED PASSTHRU mode volume:%d \n",eventData.data.AudioLevelInfo.level);
         }
         else
         {
             eventData.data.AudioLevelInfo.level = volume;
-            INT_DEBUG(" IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED  volume:%d \n ",eventData.data.AudioLevelInfo.level);
+            INT_INFO(" IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED  volume:%d \n ",eventData.data.AudioLevelInfo.level);
         }
         IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,(void *)&eventData, sizeof(eventData));
     }
@@ -2804,7 +2809,7 @@ IARM_Result_t _dsGetAudioGain(void *arg)
         if (dllib) {
             func = (dsGetAudioGain_t) dlsym(dllib, "dsGetAudioGain");
             if (func) {
-                INT_DEBUG("dsGetAudioGain_t(int, float *) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioGain_t(int, float *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioGain_t(int, float *) is not defined\r\n");
@@ -2848,7 +2853,7 @@ IARM_Result_t _dsGetAudioLevel(void *arg)
         if (dllib) {
             dsGetAudioLevelfunc = (dsGetAudioLevel_t) dlsym(dllib, "dsGetAudioLevel");
             if (dsGetAudioLevelfunc) {
-                INT_DEBUG("dsGetAudioLevel_t(int, float *) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioLevel_t(int, float *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioLevel_t(int, float *) is not defined\r\n");
@@ -2894,7 +2899,7 @@ IARM_Result_t _dsSetAudioGain(void *arg)
         if (dllib) {
             func = (dsSetAudioGain_t) dlsym(dllib, "dsSetAudioGain");
             if (func) {
-                INT_DEBUG("dsSetAudioGain_t(int, float ) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioGain_t(int, float ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetAudioGain_t(int, float ) is not defined\r\n");
@@ -2957,7 +2962,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         if (dllib) {
             dsSetAudioLevelFunc = (dsSetAudioLevel_t) dlsym(dllib, "dsSetAudioLevel");
             if (dsSetAudioLevelFunc) {
-                INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
@@ -2978,14 +2983,14 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         if(_APortType == dsAUDIOPORT_TYPE_SPEAKER)
         {
-            INT_DEBUG("_dsSetAudioLevel param->level :%f m_isDuckingInProgress :%d  \n",param->level,m_isDuckingInProgress);
+            INT_INFO("_dsSetAudioLevel param->level :%f m_isDuckingInProgress :%d  \n",param->level,m_isDuckingInProgress);
             float currlevel = 0;
             if (dsGetAudioLevelfunc == 0) {
                 void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
                 if (dllib) {
                     dsGetAudioLevelfunc = (dsGetAudioLevel_t) dlsym(dllib, "dsGetAudioLevel");
                     if (dsGetAudioLevelfunc) {
-                        INT_DEBUG("dsGetAudioLevel_t(int, float *) is defined and loaded\r\n");
+                        INT_INFO("dsGetAudioLevel_t(int, float *) is defined and loaded\r\n");
                     }
                     else {
                         INT_INFO("dsGetAudioLevel_t(int, float *) is not defined\r\n");
@@ -3094,7 +3099,7 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
          if (dllib) {
              dsSetAudioLevelFunc = (dsSetAudioLevel_t) dlsym(dllib, "dsSetAudioLevel");
              if (dsSetAudioLevelFunc) {
-                INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded \r\n");
+                INT_INFO("dsSetAudioLevel_t(int, float ) is defined and loaded \r\n");
              }
              else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined \r\n");
@@ -3138,19 +3143,19 @@ IARM_Result_t _dsSetAudioMute(void *arg)
             std::string _mute = param->mute ? "TRUE" : "FALSE";
             switch(_APortType) {
                 case dsAUDIOPORT_TYPE_SPDIF:
-                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"SPDIF0", param->mute ? "TRUE" : "FALSE");
+                    INT_INFO("%s: port: %s , persist audio mute: %s\n",__func__,"SPDIF0", param->mute ? "TRUE" : "FALSE");
                     device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.mute", _mute);
                     break;
                 case dsAUDIOPORT_TYPE_HDMI:
-                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"HDMI0", param->mute ? "TRUE" : "FALSE");
+                    INT_INFO("%s: port: %s , persist audio mute: %s\n",__func__,"HDMI0", param->mute ? "TRUE" : "FALSE");
                     device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.mute", _mute);
                     break;
                 case dsAUDIOPORT_TYPE_SPEAKER:
-                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"SPEAKER0", param->mute ? "TRUE" : "FALSE");
+                    INT_INFO("%s: port: %s , persist audio mute: %s\n",__func__,"SPEAKER0", param->mute ? "TRUE" : "FALSE");
                     device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.mute", _mute);
                     break;
                 case dsAUDIOPORT_TYPE_HEADPHONE:
-                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"HEADPHONE0", param->mute ? "TRUE" : "FALSE");
+                    INT_INFO("%s: port: %s , persist audio mute: %s\n",__func__,"HEADPHONE0", param->mute ? "TRUE" : "FALSE");
                     device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.mute", _mute);
                     break;
                 default:
@@ -3210,7 +3215,7 @@ IARM_Result_t _dsIsAudioMute(void *arg)
         if ("TRUE" == _mute) {
             param->mute = true;
         }
-        INT_DEBUG("%s: persist value:%s for :%s\n", __FUNCTION__, _mute.c_str(), isMuteKey.c_str());
+        INT_INFO("%s: persist value:%s for :%s\n", __FUNCTION__, _mute.c_str(), isMuteKey.c_str());
 #endif //DS_AUDIO_SETTINGS_PERSISTENCE end
 
         result = IARM_RESULT_SUCCESS;
@@ -3238,7 +3243,7 @@ IARM_Result_t _dsIsAudioPortEnabled(void *arg)
         param->enabled = enabled;
         result = IARM_RESULT_SUCCESS;
     }
-    INT_DEBUG("%s : returned ret: %04x enabled: %s\n", __FUNCTION__, ret, param->enabled? "TRUE":"FALSE");
+    INT_INFO("%s : returned ret: %04x enabled: %s\n", __FUNCTION__, ret, param->enabled? "TRUE":"FALSE");
 
     IARM_BUS_Unlock(lock);
 
@@ -3290,11 +3295,11 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
     ret = dsIsAudioPortEnabled (param->handle, &bAudioPortEnableVerify);
     if(dsERR_NONE == ret) {
         if (bAudioPortEnableVerify != param->enabled) {
-            INT_DEBUG("%s : %s Audio port status verification failed. param->enabled: %d bAudioPortEnableVerify:%d\n", 
+            INT_INFO("%s : %s Audio port status verification failed. param->enabled: %d bAudioPortEnableVerify:%d\n", 
                     __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled, bAudioPortEnableVerify);
         }
         else {
-            INT_DEBUG("%s : %s Audio port status verification passed. status %d\n", __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled); 
+            INT_INFO("%s : %s Audio port status verification passed. status %d\n", __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled); 
         }
     }
     else {
@@ -3329,7 +3334,7 @@ IARM_Result_t _dsGetEnablePersist(void *arg)
     }
     catch(...) {
         try {
-            INT_DEBUG("Init: %s : %s port enable settings not found in persistence store. Try system default\n",__FUNCTION__, isEnabledAudioPortKey.c_str());
+            INT_INFO("Init: %s : %s port enable settings not found in persistence store. Try system default\n",__FUNCTION__, isEnabledAudioPortKey.c_str());
             _AudioPortEnable = device::HostPersistence::getInstance().getDefaultProperty(isEnabledAudioPortKey);
         }
         catch(...) {
@@ -3338,11 +3343,11 @@ IARM_Result_t _dsGetEnablePersist(void *arg)
         }
     }
     if ("FALSE" == _AudioPortEnable) { 
-       INT_DEBUG("%s: persist dsEnableAudioPort value: _AudioPortEnable:%s:\n", __FUNCTION__, _AudioPortEnable.c_str());  
+       INT_INFO("%s: persist dsEnableAudioPort value: _AudioPortEnable:%s:\n", __FUNCTION__, _AudioPortEnable.c_str());  
         enabled = false;
     }
     else {
-        INT_DEBUG("%s: persist dsEnableAudioPort value: _AudioPortEnable:%s:\n", __FUNCTION__, _AudioPortEnable.c_str());  
+        INT_INFO("%s: persist dsEnableAudioPort value: _AudioPortEnable:%s:\n", __FUNCTION__, _AudioPortEnable.c_str());  
         enabled = true;
     }
 
@@ -3374,7 +3379,7 @@ IARM_Result_t _dsSetEnablePersist(void *arg)
     isEnabledAudioPortKey.append (param->portName);
     isEnabledAudioPortKey.append (".isEnabled");
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
-    INT_DEBUG("%s: persist dsEnableAudioPort value: %s for the port %s\n", __FUNCTION__, param->enabled? "TRUE":"FALSE", isEnabledAudioPortKey.c_str());
+    INT_INFO("%s: persist dsEnableAudioPort value: %s for the port %s\n", __FUNCTION__, param->enabled? "TRUE":"FALSE", isEnabledAudioPortKey.c_str());
     device::HostPersistence::getInstance().persistHostProperty(isEnabledAudioPortKey.c_str(), param->enabled? ("TRUE"):("FALSE"));
 #endif //DS_AUDIO_SETTINGS_PERSISTENCE end
  
@@ -3419,7 +3424,7 @@ IARM_Result_t _dsGetAudioFormat(void *arg)
         if (dllib) {
             func = (dsGetAudioFormat_t) dlsym(dllib, "dsGetAudioFormat");
             if (func) {
-                INT_DEBUG("dsGetAudioFormat_t(int, dsAudioFormat_t *) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioFormat_t(int, dsAudioFormat_t *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioFormat_t(int, dsAudioFormat_t *) is not defined\r\n");
@@ -3499,7 +3504,7 @@ IARM_Result_t _dsGetEncoding(void *arg)
    }
    dsAudioGetEncodingModeParam_t *param = (dsAudioGetEncodingModeParam_t *)arg;
    param->encoding = _encoding;
-   INT_DEBUG("param->encoding = %d\r\n",_encoding);
+   INT_INFO("param->encoding = %d\r\n",_encoding);
    IARM_BUS_Unlock(lock);
    return result;
 
@@ -3547,7 +3552,7 @@ IARM_Result_t _dsIsAudioMSDecode(void *arg)
         if (dllib) {
             func = (dsIsAudioMSDecode_t) dlsym(dllib, "dsIsAudioMSDecode");
             if (func) {
-                INT_DEBUG("dsIsAudioMSDecode(int, bool*) is defined and loaded\r\n");
+                INT_INFO("dsIsAudioMSDecode(int, bool*) is defined and loaded\r\n");
             }   
             else {
                 INT_INFO("dsIsAudioMSDecode(int, bool*) is not defined\r\n");
@@ -3597,7 +3602,7 @@ IARM_Result_t _dsIsAudioMS12Decode(void *arg)
         if (dllib) {
             func = (dsIsAudioMS12Decode_t) dlsym(dllib, "dsIsAudioMS12Decode");
             if (func) {
-                INT_DEBUG("dsIsAudioMS12Decode(int, bool*) is defined and loaded\r\n");
+                INT_INFO("dsIsAudioMS12Decode(int, bool*) is defined and loaded\r\n");
             }   
             else {
                 INT_INFO("dsIsAudioMS12Decode(int, bool*) is not defined\r\n");
@@ -3643,7 +3648,7 @@ IARM_Result_t _dsSetAudioDelay(void *arg)
         if (dllib) {
             func = (dsSetAudioDelay_t) dlsym(dllib, "dsSetAudioDelay");
             if (func) {
-                INT_DEBUG("dsSetAudioDelay_t(int, uint32_t) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioDelay_t(int, uint32_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetAudioDelay_t(int, uint32_t) is not defined\r\n");
@@ -3670,23 +3675,23 @@ IARM_Result_t _dsSetAudioDelay(void *arg)
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         switch(_APortType) {
             case dsAUDIOPORT_TYPE_SPDIF:
-                INT_DEBUG("%s: port: %s , persist audio delay: %d\n",__func__,"SPDIF0", param->audioDelayMs);
+                INT_INFO("%s: port: %s , persist audio delay: %d\n",__func__,"SPDIF0", param->audioDelayMs);
                 device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.Delay",_AudioDelay);
                 break;
             case dsAUDIOPORT_TYPE_HDMI:
-                INT_DEBUG("%s: port: %s , persist audio delay: %d\n",__func__,"HDMI0", param->audioDelayMs);
+                INT_INFO("%s: port: %s , persist audio delay: %d\n",__func__,"HDMI0", param->audioDelayMs);
                 device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.Delay",_AudioDelay);
                 break;
             case dsAUDIOPORT_TYPE_SPEAKER:
-                INT_DEBUG("%s: port: %s , persist audio delay: %d\n",__func__,"SPEAKER0", param->audioDelayMs);
+                INT_INFO("%s: port: %s , persist audio delay: %d\n",__func__,"SPEAKER0", param->audioDelayMs);
                 device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.Delay",_AudioDelay);
                 break;
             case dsAUDIOPORT_TYPE_HDMI_ARC:
-                INT_DEBUG("%s: port: %s , persist audio delay: %d\n",__func__,"HDMI_ARC0", param->audioDelayMs);
+                INT_INFO("%s: port: %s , persist audio delay: %d\n",__func__,"HDMI_ARC0", param->audioDelayMs);
                 device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.audio.Delay",_AudioDelay);
                 break;
             default:
-                INT_DEBUG("%s: port: UNKNOWN , persist audio delay: %d : NOT SET\n",__func__, param->audioDelayMs);
+                INT_INFO("%s: port: UNKNOWN , persist audio delay: %d : NOT SET\n",__func__, param->audioDelayMs);
                 break;
         }
 #endif
@@ -3717,7 +3722,7 @@ IARM_Result_t _dsGetAudioDelay(void *arg)
         if (dllib) {
             func = (dsGetAudioDelay_t) dlsym(dllib, "dsGetAudioDelay");
             if (func) {
-                INT_DEBUG("dsGetAudioDelay_t(int, uint32_t*) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioDelay_t(int, uint32_t*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioDelay_t(int, uint32_t*) is not defined\r\n");
@@ -3763,7 +3768,7 @@ IARM_Result_t _dsGetAudioDelayOffset(void *arg)
         if (dllib) {
             func = (dsGetAudioDelayOffset_t) dlsym(dllib, "dsGetAudioDelayOffset");
             if (func) {
-                INT_DEBUG("dsGetAudioDelayOffset_t(int, uint32_t*) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioDelayOffset_t(int, uint32_t*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioDelayOffset_t(int, uint32_t*) is not defined\r\n");
@@ -3809,7 +3814,7 @@ IARM_Result_t _dsSetAudioAtmosOutputMode(void *arg)
         if (dllib) {
             func = (dsSetAudioAtmosOutputMode_t) dlsym(dllib, "dsSetAudioAtmosOutputMode");
             if (func) {
-                INT_DEBUG("dsSetAudioAtmosOutputMode_t (intptr_t handle, bool enable ) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioAtmosOutputMode_t (intptr_t handle, bool enable ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetAudioAtmosOutputMode_t (intptr_t handle, bool enable) is not defined\r\n");
@@ -3851,7 +3856,7 @@ IARM_Result_t _dsGetSinkDeviceAtmosCapability(void *arg)
         if (dllib) {
             func = (dsGetSinkDeviceAtmosCapability_t) dlsym(dllib, "dsGetSinkDeviceAtmosCapability");
             if (func) {
-                INT_DEBUG("dsGetSinkDeviceAtmosCapability_t (intptr_t handle, dsATMOSCapability_t *capability ) is defined and loaded\r\n");
+                INT_INFO("dsGetSinkDeviceAtmosCapability_t (intptr_t handle, dsATMOSCapability_t *capability ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetSinkDeviceAtmosCapability_t (intptr_t handle, dsATMOSCapability_t *capability ) is not defined\r\n");
@@ -3898,7 +3903,7 @@ IARM_Result_t _dsSetAudioCompression(void *arg)
         if (dllib) {
             func = (dsSetAudioCompression_t) dlsym(dllib, "dsSetAudioCompression");
             if (func) {
-                INT_DEBUG("dsSetAudioCompression_t(int, int ) is defined and loaded\r\n");
+                INT_INFO("dsSetAudioCompression_t(int, int ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetAudioCompression_t(int, int) is not defined\r\n");
@@ -3918,7 +3923,7 @@ IARM_Result_t _dsSetAudioCompression(void *arg)
         {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
             std::string _Compression = std::to_string(param->compression);
-            INT_DEBUG("%s: persist audio compression: %d\n",__func__, param->compression);
+            INT_INFO("%s: persist audio compression: %d\n",__func__, param->compression);
             device::HostPersistence::getInstance().persistHostProperty("audio.Compression",_Compression);
 #endif
             result = IARM_RESULT_SUCCESS;
@@ -3946,7 +3951,7 @@ IARM_Result_t _dsGetAudioCompression(void *arg)
         if (dllib) {
             func = (dsGetAudioCompression_t) dlsym(dllib, "dsGetAudioCompression");
             if (func) {
-                INT_DEBUG("dsGetAudioCompression_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioCompression_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioCompression_t(int, int *) is not defined\r\n");
@@ -4002,7 +4007,7 @@ static IARM_Result_t _setDialogEnhancement(intptr_t handle, int enhancerLevel)
         if (dllib) {
             func = (dsSetDialogEnhancement_t) dlsym(dllib, "dsSetDialogEnhancement");
             if (func) {
-                INT_DEBUG("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetDialogEnhancement_t(int, int ) is not defined\r\n");
@@ -4021,7 +4026,7 @@ static IARM_Result_t _setDialogEnhancement(intptr_t handle, int enhancerLevel)
         {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
             std::string _EnhancerLevel = std::to_string(enhancerLevel);
-            INT_DEBUG("%s: persist enhancer level: %d\n",__func__, enhancerLevel);
+            INT_INFO("%s: persist enhancer level: %d\n",__func__, enhancerLevel);
             device::HostPersistence::getInstance().persistHostProperty(_Property ,_EnhancerLevel);
 #endif
             result = IARM_RESULT_SUCCESS;
@@ -4048,7 +4053,7 @@ IARM_Result_t _dsGetDialogEnhancement(void *arg)
         if (dllib) {
             func = (dsGetDialogEnhancement_t) dlsym(dllib, "dsGetDialogEnhancement");
             if (func) {
-                INT_DEBUG("dsGetDialogEnhancement_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetDialogEnhancement_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetDialogEnhancement_t(int, int *) is not defined\r\n");
@@ -4095,7 +4100,7 @@ IARM_Result_t _dsSetDolbyVolumeMode(void *arg)
         if (dllib) {
             func = (dsSetDolbyVolumeMode_t) dlsym(dllib, "dsSetDolbyVolumeMode");
             if (func) {
-                INT_DEBUG("dsSetDolbyVolumeMode_t(int, bool) is defined and loaded\r\n");
+                INT_INFO("dsSetDolbyVolumeMode_t(int, bool) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetDolbyVolumeMode_t(int, bool) is not defined\r\n");
@@ -4114,7 +4119,7 @@ IARM_Result_t _dsSetDolbyVolumeMode(void *arg)
         if (func(param->handle, param->enable) == dsERR_NONE)
         {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
-            INT_DEBUG("%s: persist dolby volume mode: %s\n",__func__, param->enable ? "TRUE":"FALSE");
+            INT_INFO("%s: persist dolby volume mode: %s\n",__func__, param->enable ? "TRUE":"FALSE");
             device::HostPersistence::getInstance().persistHostProperty("audio.DolbyVolumeMode",param->enable ? "TRUE":"FALSE");
 #endif
             result = IARM_RESULT_SUCCESS;
@@ -4142,7 +4147,7 @@ IARM_Result_t _dsGetDolbyVolumeMode(void *arg)
         if (dllib) {
             func = (dsGetDolbyVolumeMode_t) dlsym(dllib, "dsGetDolbyVolumeMode");
             if (func) {
-                INT_DEBUG("dsGetDolbyVolumeMode_t(int, bool *) is defined and loaded\r\n");
+                INT_INFO("dsGetDolbyVolumeMode_t(int, bool *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetDolbyVolumeMode_t(int, bool *) is not defined\r\n");
@@ -4188,7 +4193,7 @@ IARM_Result_t _dsSetIntelligentEqualizerMode(void *arg)
         if (dllib) {
             func = (dsSetIntelligentEqualizerMode_t) dlsym(dllib, "dsSetIntelligentEqualizerMode");
             if (func) {
-                INT_DEBUG("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetIntelligentEqualizerMode_t(int, int) is not defined\r\n");
@@ -4237,7 +4242,7 @@ IARM_Result_t _dsGetIntelligentEqualizerMode(void *arg)
         if (dllib) {
             func = (dsGetIntelligentEqualizerMode_t) dlsym(dllib, "dsGetIntelligentEqualizerMode");
             if (func) {
-                INT_DEBUG("dsGetIntelligentEqualizerMode_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetIntelligentEqualizerMode_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetIntelligentEqualizerMode_t(int, int *) is not defined\r\n");
@@ -4284,7 +4289,7 @@ IARM_Result_t _dsGetVolumeLeveller(void *arg)
         if (dllib) {
             func = (dsGetVolumeLeveller_t) dlsym(dllib, "dsGetVolumeLeveller");
             if (func) {
-                INT_DEBUG("dsGetVolumeLeveller_t(int, dsVolumeLeveller_t *) is defined and loaded\r\n");
+                INT_INFO("dsGetVolumeLeveller_t(int, dsVolumeLeveller_t *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetVolumeLeveller_t(int, dsVolumeLeveller_t *) is not defined\r\n");
@@ -4346,7 +4351,7 @@ static IARM_Result_t _setVolumeLeveller(intptr_t handle, int volLevellerMode, in
         if (dllib) {
             func = (dsSetVolumeLeveller_t) dlsym(dllib, "dsSetVolumeLeveller");
             if (func) {
-                INT_DEBUG("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
+                INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is not defined\r\n");
@@ -4372,12 +4377,12 @@ static IARM_Result_t _setVolumeLeveller(intptr_t handle, int volLevellerMode, in
             std::string _PropertyMode = _dsGetCurrentProfileProperty("VolumeLeveller.mode");
             std::string _Propertylevel = _dsGetCurrentProfileProperty("VolumeLeveller.level");
             std::string _mode = std::to_string(param.volLeveller.mode);
-            INT_DEBUG("%s: persist volume leveller mode: %d\n",__func__, param.volLeveller.mode);
+            INT_INFO("%s: persist volume leveller mode: %d\n",__func__, param.volLeveller.mode);
             device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,_mode);
 
 	    if((param.volLeveller.mode == 0) || (param.volLeveller.mode == 1)) {
                 std::string _level = std::to_string(param.volLeveller.level);
-                INT_DEBUG("%s: persist volume leveller value: %d\n",__func__, param.volLeveller.level);
+                INT_INFO("%s: persist volume leveller value: %d\n",__func__, param.volLeveller.level);
                 device::HostPersistence::getInstance().persistHostProperty(_Propertylevel,_level);
 	    }
 #endif
@@ -4406,7 +4411,7 @@ IARM_Result_t _dsGetBassEnhancer(void *arg)
         if (dllib) {
             func = (dsGetBassEnhancer_t) dlsym(dllib, "dsGetBassEnhancer");
             if (func) {
-                INT_DEBUG("dsGetBassEnhancer_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetBassEnhancer_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetBassEnhancer_t(int, int *) is not defined\r\n");
@@ -4462,7 +4467,7 @@ static IARM_Result_t _setBassEnhancer(intptr_t handle ,int boost)
         if (dllib) {
             func = (dsSetBassEnhancer_t) dlsym(dllib, "dsSetBassEnhancer");
             if (func) {
-                INT_DEBUG("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetBassEnhancer_t(int, int) is not defined\r\n");
@@ -4480,7 +4485,7 @@ static IARM_Result_t _setBassEnhancer(intptr_t handle ,int boost)
         {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
             std::string _BassBoost = std::to_string(boost);
-            INT_DEBUG("%s: persist boost value: %d\n",__func__, boost);
+            INT_INFO("%s: persist boost value: %d\n",__func__, boost);
             device::HostPersistence::getInstance().persistHostProperty("audio.BassBoost", _BassBoost);
 #endif
             result = IARM_RESULT_SUCCESS;
@@ -4508,7 +4513,7 @@ IARM_Result_t _dsIsSurroundDecoderEnabled(void *arg)
         if (dllib) {
             func = (dsIsSurroundDecoderEnabled_t) dlsym(dllib, "dsIsSurroundDecoderEnabled");
             if (func) {
-                INT_DEBUG("dsIsSurroundDecoderEnabled_t(int, bool *) is defined and loaded\r\n");
+                INT_INFO("dsIsSurroundDecoderEnabled_t(int, bool *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsIsSurroundDecoderEnabled_t(int, bool *) is not defined\r\n");
@@ -4555,7 +4560,7 @@ IARM_Result_t _dsEnableSurroundDecoder(void *arg)
         if (dllib) {
             func = (dsEnableSurroundDecoder_t) dlsym(dllib, "dsEnableSurroundDecoder");
             if (func) {
-                INT_DEBUG("dsEnableSurroundDecoder_t(int, bool) is defined and loaded\r\n");
+                INT_INFO("dsEnableSurroundDecoder_t(int, bool) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsEnableSurroundDecoder_t(int, bool) is not defined\r\n");
@@ -4603,7 +4608,7 @@ IARM_Result_t _dsGetDRCMode(void *arg)
         if (dllib) {
             func = (dsGetDRCMode_t) dlsym(dllib, "dsGetDRCMode");
             if (func) {
-                INT_DEBUG("dsGetDRCMode_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetDRCMode_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetDRCMode_t(int, int *) is not defined\r\n");
@@ -4650,7 +4655,7 @@ IARM_Result_t _dsSetDRCMode(void *arg)
         if (dllib) {
             func = (dsSetDRCMode_t) dlsym(dllib, "dsSetDRCMode");
             if (func) {
-                INT_DEBUG("dsSetDRCMode_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetDRCMode_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetDRCMode_t(int, int) is not defined\r\n");
@@ -4697,7 +4702,7 @@ IARM_Result_t _dsGetSurroundVirtualizer(void *arg)
         if (dllib) {
             func = (dsGetSurroundVirtualizer_t) dlsym(dllib, "dsGetSurroundVirtualizer");
             if (func) {
-                INT_DEBUG("dsGetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t *) is defined and loaded\r\n");
+                INT_INFO("dsGetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t *) is not defined\r\n");
@@ -4759,7 +4764,7 @@ static IARM_Result_t _setSurroundVirtualizer(intptr_t handle , int virtualizerMo
         if (dllib) {
             func = (dsSetSurroundVirtualizer_t) dlsym(dllib, "dsSetSurroundVirtualizer");
             if (func) {
-                INT_DEBUG("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
+                INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is not defined\r\n");
@@ -4819,7 +4824,7 @@ IARM_Result_t _dsGetMISteering(void *arg)
         if (dllib) {
             func = (dsGetMISteering_t) dlsym(dllib, "dsGetMISteering");
             if (func) {
-                INT_DEBUG("dsGetMISteering_t(int, bool *) is defined and loaded\r\n");
+                INT_INFO("dsGetMISteering_t(int, bool *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetMISteering_t(int, bool *) is not defined\r\n");
@@ -4865,7 +4870,7 @@ IARM_Result_t _dsSetMISteering(void *arg)
         if (dllib) {
             func = (dsSetMISteering_t) dlsym(dllib, "dsSetMISteering");
             if (func) {
-                INT_DEBUG("dsSetMISteering_t(int, bool) is defined and loaded\r\n");
+                INT_INFO("dsSetMISteering_t(int, bool) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetMISteering_t(int, bool) is not defined\r\n");
@@ -4913,7 +4918,7 @@ IARM_Result_t _dsSetGraphicEqualizerMode(void *arg)
         if (dllib) {
             func = (dsSetGraphicEqualizerMode_t) dlsym(dllib, "dsSetGraphicEqualizerMode");
             if (func) {
-                INT_DEBUG("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetGraphicEqualizerMode_t(int, int) is not defined\r\n");
@@ -4962,7 +4967,7 @@ IARM_Result_t _dsGetGraphicEqualizerMode(void *arg)
         if (dllib) {
             func = (dsGetGraphicEqualizerMode_t) dlsym(dllib, "dsGetGraphicEqualizerMode");
             if (func) {
-                INT_DEBUG("dsGetGraphicEqualizerMode_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetGraphicEqualizerMode_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetGraphicEqualizerMode_t(int, int *) is not defined\r\n");
@@ -5009,7 +5014,7 @@ IARM_Result_t _dsGetMS12AudioProfileList(void *arg)
         if (dllib) {
             func = (dsGetMS12AudioProfileList_t) dlsym(dllib, "dsGetMS12AudioProfileList");
             if (func) {
-                INT_DEBUG("dsGetMS12AudioProfileList_t(int, dsMS12AudioProfileList_t*) is defined and loaded\r\n");
+                INT_INFO("dsGetMS12AudioProfileList_t(int, dsMS12AudioProfileList_t*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetMS12AudioProfileList_t(int, dsMS12AudioProfileList_t*) is not defined\r\n");
@@ -5059,7 +5064,7 @@ IARM_Result_t _dsGetMS12AudioProfile(void *arg)
         if (dllib) {
             func = (dsGetMS12AudioProfile_t) dlsym(dllib, "dsGetMS12AudioProfile");
             if (func) {
-                INT_DEBUG("dsGetMS12AudioProfile_t(int, char* ) is defined and loaded\r\n");
+                INT_INFO("dsGetMS12AudioProfile_t(int, char* ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetMS12AudioProfile_t(int, char*) is not defined\r\n");
@@ -5104,7 +5109,7 @@ IARM_Result_t _dsSetMS12AudioProfile(void *arg)
         if (dllib) {
             func = (dsSetMS12AudioProfile_t) dlsym(dllib, "dsSetMS12AudioProfile");
             if (func) {
-                INT_DEBUG("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
+                INT_INFO("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetMS12AudioProfile_t(int, const char*) is not defined\r\n");
@@ -5156,7 +5161,7 @@ IARM_Result_t _dsSetAssociatedAudioMixing(void *arg)
         if (dllib) {
             func = (dsSetAssociatedAudioMixing_t) dlsym(dllib, "dsSetAssociatedAudioMixing");
             if (func) {
-                INT_DEBUG("dsSetAssociatedAudioMixing_t(int, bool) is defined and loaded\r\n");
+                INT_INFO("dsSetAssociatedAudioMixing_t(int, bool) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetMS12AudioProfile_t(int, bool) is not defined\r\n");
@@ -5212,7 +5217,7 @@ IARM_Result_t _dsGetAssociatedAudioMixing(void *arg)
         if (dllib) {
             func = (dsGetAssociatedAudioMixing_t) dlsym(dllib, "dsGetAssociatedAudioMixing");
             if (func) {
-                INT_DEBUG("dsGetAssociatedAudioMixing_t(int, bool *) is defined and loaded\r\n");
+                INT_INFO("dsGetAssociatedAudioMixing_t(int, bool *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAssociatedAudioMixing_t(int, bool *) is not defined\r\n");
@@ -5258,7 +5263,7 @@ IARM_Result_t _dsSetFaderControl(void *arg)
         if (dllib) {
             func = (dsSetFaderControl_t) dlsym(dllib, "dsSetFaderControl");
             if (func) {
-                INT_DEBUG("dsSetFaderControl_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetFaderControl_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetFaderControl_t(int, int) is not defined\r\n");
@@ -5318,7 +5323,7 @@ IARM_Result_t _dsGetFaderControl(void *arg)
         if (dllib) {
             func = (dsGetFaderControl_t) dlsym(dllib, "dsGetFaderControl");
             if (func) {
-                INT_DEBUG("dsGetFaderControl_t(int, int *) is defined and loaded\r\n");
+                INT_INFO("dsGetFaderControl_t(int, int *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetFaderControl_t(int, int *) is not defined\r\n");
@@ -5364,7 +5369,7 @@ IARM_Result_t _dsSetPrimaryLanguage(void *arg)
         if (dllib) {
             func = (dsSetPrimaryLanguage_t) dlsym(dllib, "dsSetPrimaryLanguage");
             if (func) {
-                INT_DEBUG("dsSetPrimaryLanguage_t(int, const char*) is defined and loaded\r\n");
+                INT_INFO("dsSetPrimaryLanguage_t(int, const char*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetPrimaryLanguage_t(int, const char*) is not defined\r\n");
@@ -5422,7 +5427,7 @@ IARM_Result_t _dsGetPrimaryLanguage(void *arg)
         if (dllib) {
             func = (dsGetPrimaryLanguage_t) dlsym(dllib, "dsGetPrimaryLanguage");
             if (func) {
-                INT_DEBUG("dsGetPrimaryLanguage_t(int, char* ) is defined and loaded\r\n");
+                INT_INFO("dsGetPrimaryLanguage_t(int, char* ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetPrimaryLanguage_t(int, char*) is not defined\r\n");
@@ -5468,7 +5473,7 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
         if (dllib) {
             func = (dsSetSecondaryLanguage_t) dlsym(dllib, "dsSetSecondaryLanguage");
             if (func) {
-                INT_DEBUG("dsSetSecondaryLanguage_t(int, const char*) is defined and loaded\r\n");
+                INT_INFO("dsSetSecondaryLanguage_t(int, const char*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetSecondaryLanguage_t(int, const char*) is not defined\r\n");
@@ -5526,7 +5531,7 @@ IARM_Result_t _dsGetSecondaryLanguage(void *arg)
         if (dllib) {
             func = (dsGetSecondaryLanguage_t) dlsym(dllib, "dsGetSecondaryLanguage");
             if (func) {
-                INT_DEBUG("dsGetSecondaryLanguage_t(int, char* ) is defined and loaded\r\n");
+                INT_INFO("dsGetSecondaryLanguage_t(int, char* ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetSecondaryLanguage_t(int, char*) is not defined\r\n");
@@ -5577,7 +5582,7 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
     }
     catch(...) {
          try {
-             INT_DEBUG("audio.MS12Profile not found in persistence store. Try system default\n");
+             INT_INFO("audio.MS12Profile not found in persistence store. Try system default\n");
             _AProfile = device::HostPersistence::getInstance().getDefaultProperty("audio.MS12Profile");
         }
         catch(...) {
@@ -5722,7 +5727,7 @@ IARM_Result_t _dsGetSupportedARCTypes(void *arg)
         if (dllib) {
             func = (dsGetSupportedARCTypes_t) dlsym(dllib, "dsGetSupportedARCTypes");
             if (func) {
-                INT_DEBUG("dsGetSupportedARCTypes_t(int, int*) is defined and loaded\r\n");
+                INT_INFO("dsGetSupportedARCTypes_t(int, int*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetSupportedARCTypes_t(int, int*) is not defined\r\n");
@@ -5769,7 +5774,7 @@ IARM_Result_t _dsAudioSetSAD(void *arg)
         if (dllib) {
             func = (dsAudioSetSAD_t) dlsym(dllib, "dsAudioSetSAD");
             if (func) {
-                INT_DEBUG("dsAudioSetSAD_t(int, dsAudioSADList_t) is defined and loaded\r\n");
+                INT_INFO("dsAudioSetSAD_t(int, dsAudioSADList_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsAudioSetSAD_t(int, dsAudioSADList_t) is not defined\r\n");
@@ -5819,7 +5824,7 @@ IARM_Result_t _dsAudioEnableARC(void *arg)
         if (dllib) {
             func = (dsAudioEnableARC_t) dlsym(dllib, "dsAudioEnableARC");
             if (func) {
-                INT_DEBUG("dsAudioEnableARC_t(int, dsAudioARCStatus_t) is defined and loaded\r\n");
+                INT_INFO("dsAudioEnableARC_t(int, dsAudioARCStatus_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsAudioEnableARC_t(int, dsAudioARCStatus_t) is not defined\r\n");
@@ -5886,7 +5891,7 @@ IARM_Result_t _dsEnableLEConfig(void *arg)
         if (dllib) {
             func = (dsEnableLEConfig_t) dlsym(dllib, "dsEnableLEConfig");
             if (func) {
-                INT_DEBUG("dsEnableLEConfig(int, bool) is defined and loaded\r\n");
+                INT_INFO("dsEnableLEConfig(int, bool) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsEnableLEConfig(int, bool) is not defined\r\n");
@@ -5900,7 +5905,7 @@ IARM_Result_t _dsEnableLEConfig(void *arg)
 
     _dsLEConfigParam_t *param = (_dsLEConfigParam_t *)arg;
     if (func != NULL) {
-        INT_DEBUG("LE: %s  enable status:%d \r\n",__FUNCTION__,param->enable);
+        INT_INFO("LE: %s  enable status:%d \r\n",__FUNCTION__,param->enable);
 
         if(param->enable != m_LEEnabled)
         {
@@ -5947,7 +5952,7 @@ IARM_Result_t _dsGetLEConfig(void *arg)
         if (dllib) {
             func = (dsGetLEConfig_t) dlsym(dllib, "dsGetLEConfig");
             if (func) {
-                INT_DEBUG("dsGetLEConfig(int , bool *) is defined and loaded\r\n");
+                INT_INFO("dsGetLEConfig(int , bool *) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetLEConfig(int , bool *) is not defined\r\n");
@@ -6039,7 +6044,7 @@ IARM_Result_t _dsGetAudioCapabilities(void *arg)
         if (dllib) {
             func = (dsGetAudioCapabilitiesFunc_t)dlsym(dllib, "dsGetAudioCapabilities");
             if (func) {
-                INT_DEBUG("dsGetAudioCapabilities() is defined and loaded\r\n");
+                INT_INFO("dsGetAudioCapabilities() is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetAudioCapabilities() is not defined\r\n");
@@ -6076,7 +6081,7 @@ IARM_Result_t _dsGetMS12Capabilities(void *arg)
         if (dllib) {
             func = (dsGetMS12CapabilitiesFunc_t)dlsym(dllib, "dsGetMS12Capabilities");
             if (func) {
-                INT_DEBUG("dsGetMS12Capabilities() is defined and loaded\r\n");
+                INT_INFO("dsGetMS12Capabilities() is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetMS12Capabilities() is not defined\r\n");
@@ -6118,12 +6123,12 @@ void _dsAudioOutPortConnectCB(dsAudioPortType_t portType, unsigned int uiPortNo,
 
 static dsError_t _dsAudioOutRegisterConnectCB (dsAudioOutPortConnectCB_t cbFun) {
     dsError_t eRet = dsERR_GENERAL; 
-    INT_DEBUG("%s: %d - Inside \n", __FUNCTION__, __LINE__);
+    INT_INFO("%s: %d - Inside \n", __FUNCTION__, __LINE__);
 
     typedef dsError_t (*dsAudioOutRegisterConnectCB_t)(dsAudioOutPortConnectCB_t cbFunArg);
     static dsAudioOutRegisterConnectCB_t dsAudioOutRegisterConnectCBFun = 0;
     if (dsAudioOutRegisterConnectCBFun == 0) {
-        INT_DEBUG("%s: %d - dlerror: %s\n", __FUNCTION__, __LINE__, dlerror());
+        INT_INFO("%s: %d - dlerror: %s\n", __FUNCTION__, __LINE__, dlerror());
         void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
         if (dllib) {
             dsAudioOutRegisterConnectCBFun = (dsAudioOutRegisterConnectCB_t) dlsym(dllib, "dsAudioOutRegisterConnectCB");
@@ -6132,7 +6137,7 @@ static dsError_t _dsAudioOutRegisterConnectCB (dsAudioOutPortConnectCB_t cbFun) 
                 eRet = dsERR_GENERAL;
             }
             else {
-                INT_DEBUG("%s: dsAudioOutRegisterConnectCB is loaded\r\n", __FUNCTION__);
+                INT_INFO("%s: dsAudioOutRegisterConnectCB is loaded\r\n", __FUNCTION__);
             }
             dlclose(dllib);
         }
@@ -6163,12 +6168,12 @@ IARM_Result_t _dsAudioOutIsConnected (void *arg) {
     bool isConnected = true;
     param->isCon = true;
 
-    INT_DEBUG("%s: %d - Inside \n", __FUNCTION__, __LINE__);
+    INT_INFO("%s: %d - Inside \n", __FUNCTION__, __LINE__);
 
     typedef dsError_t (*dsAudioOutIsConnected_t)(intptr_t handleArg, bool* pisConArg);
     static dsAudioOutIsConnected_t dsAudioOutIsConFunc = 0;
     if (dsAudioOutIsConFunc == 0) {
-        INT_DEBUG("%s: %d -  dlerror:%s\n", __FUNCTION__, __LINE__, dlerror());
+        INT_INFO("%s: %d -  dlerror:%s\n", __FUNCTION__, __LINE__, dlerror());
         void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
         if (dllib) {
             dsAudioOutIsConFunc = (dsAudioOutIsConnected_t) dlsym(dllib, "dsAudioOutIsConnected");
@@ -6177,7 +6182,7 @@ IARM_Result_t _dsAudioOutIsConnected (void *arg) {
                 eRet = dsERR_GENERAL;
             }
             else {
-                INT_DEBUG("%s: dsAudioOutIsConnected is loaded\r\n", __FUNCTION__);
+                INT_INFO("%s: dsAudioOutIsConnected is loaded\r\n", __FUNCTION__);
             }
             dlclose(dllib);
         }
@@ -6221,12 +6226,12 @@ void _dsAudioFormatUpdateCB(dsAudioFormat_t audioFormat)
 
 static dsError_t _dsAudioFormatUpdateRegisterCB (dsAudioFormatUpdateCB_t cbFun) {
     dsError_t eRet = dsERR_GENERAL;
-    INT_DEBUG("%s: %d - Inside \n", __FUNCTION__, __LINE__);
+    INT_INFO("%s: %d - Inside \n", __FUNCTION__, __LINE__);
 
     typedef dsError_t (*dsAudioFormatUpdateRegisterCB_t)(dsAudioFormatUpdateCB_t cbFunArg);
     static dsAudioFormatUpdateRegisterCB_t dsAudioFormatUpdateRegisterCBFun = 0;
     if (dsAudioFormatUpdateRegisterCBFun == 0) {
-        INT_DEBUG("%s: %d - dlerror: %s\n", __FUNCTION__, __LINE__, dlerror());
+        INT_INFO("%s: %d - dlerror: %s\n", __FUNCTION__, __LINE__, dlerror());
         void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
         if (dllib) {
             dsAudioFormatUpdateRegisterCBFun = (dsAudioFormatUpdateRegisterCB_t) dlsym(dllib, "dsAudioFormatUpdateRegisterCB");
@@ -6235,7 +6240,7 @@ static dsError_t _dsAudioFormatUpdateRegisterCB (dsAudioFormatUpdateCB_t cbFun) 
                 eRet = dsERR_GENERAL;
             }
             else {
-                INT_DEBUG("%s: dsAudioFormatUpdateRegisterCB is loaded\r\n", __FUNCTION__);
+                INT_INFO("%s: dsAudioFormatUpdateRegisterCB is loaded\r\n", __FUNCTION__);
             }
             dlclose(dllib);
         }
@@ -6271,7 +6276,7 @@ void _dsAudioAtmosCapsChangeCB(dsATMOSCapability_t atmosCaps, bool status)
 
 static dsError_t _dsAudioAtmosCapsChangeRegisterCB (dsAtmosCapsChangeCB_t cbFun) {
     dsError_t eRet = dsERR_GENERAL;
-    INT_DEBUG("%s: %d - Inside \n", __FUNCTION__, __LINE__);
+    INT_INFO("%s: %d - Inside \n", __FUNCTION__, __LINE__);
 
 	typedef dsError_t (*dsAudioAtmosCapsChangeRegisterCB_t) (dsAtmosCapsChangeCB_t cbFunc);
     static dsAudioAtmosCapsChangeRegisterCB_t dsAudioAtmosCapsChangeRegisterCBFunc = 0;
@@ -6284,7 +6289,7 @@ static dsError_t _dsAudioAtmosCapsChangeRegisterCB (dsAtmosCapsChangeCB_t cbFun)
                 eRet = dsERR_GENERAL;
             }
             else {
-                INT_DEBUG("%s: dsAudioAtmosCapsChangeRegisterCB is loaded\r\n", __FUNCTION__);
+                INT_INFO("%s: dsAudioAtmosCapsChangeRegisterCB is loaded\r\n", __FUNCTION__);
             }
             dlclose(dllib);
         }
@@ -6328,7 +6333,7 @@ static IARM_Result_t _resetBassEnhancer(intptr_t handle)
         if (dllib) {
             func = (dsSetBassEnhancer_t) dlsym(dllib, "dsSetBassEnhancer");
             if (func) {
-                INT_DEBUG("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetBassEnhancer_t(int, int) is not defined\r\n");
@@ -6386,7 +6391,7 @@ static IARM_Result_t _resetVolumeLeveller(intptr_t handle)
         if (dllib) {
             func = (dsSetVolumeLeveller_t) dlsym(dllib, "dsSetVolumeLeveller");
             if (func) {
-                INT_DEBUG("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
+                INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is not defined\r\n");
@@ -6448,7 +6453,7 @@ static IARM_Result_t _resetSurroundVirtualizer(intptr_t handle)
         if (dllib) {
             func = (dsSetSurroundVirtualizer_t) dlsym(dllib, "dsSetSurroundVirtualizer");
             if (func) {
-                INT_DEBUG("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
+                INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is not defined\r\n");
@@ -6509,7 +6514,7 @@ static IARM_Result_t  _resetDialogEnhancerLevel(intptr_t handle)
      if (dllib) {
         func = (dsSetDialogEnhancement_t) dlsym(dllib, "dsSetDialogEnhancement");
         if (func) {
-           INT_DEBUG("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
+           INT_INFO("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
         }
         else {
            INT_INFO("dsSetDialogEnhancement_t(int, int ) is not defined\r\n");
@@ -6562,7 +6567,7 @@ std::string _dsGetCurrentProfileProperty(std::string property)
       }
       catch(...) {
          try {
-             INT_DEBUG("audio.MS12Profile not found in persistence store. Try system default\n");
+             INT_INFO("audio.MS12Profile not found in persistence store. Try system default\n");
             _AProfile = device::HostPersistence::getInstance().getDefaultProperty("audio.MS12Profile");
         }
         catch(...) {
@@ -6597,7 +6602,7 @@ void _dsMS12ProfileSettingOverride(intptr_t handle)
        if (dllib) {
           dsSetDialogEnhancementfunc = (dsSetDialogEnhancement_t) dlsym(dllib, "dsSetDialogEnhancement");
           if (dsSetDialogEnhancementfunc) {
-             INT_DEBUG("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
+             INT_INFO("dsSetDialogEnhancement_t(int, int) is defined and loaded\r\n");
           }
           else {
              INT_INFO("dsSetDialogEnhancement_t(int, int ) is not defined\r\n");
@@ -6618,7 +6623,7 @@ void _dsMS12ProfileSettingOverride(intptr_t handle)
        }
        catch(...) {
             try {
-                INT_DEBUG("audio.EnhancerLevel not found in persistence store. Try system default\n");
+                INT_INFO("audio.EnhancerLevel not found in persistence store. Try system default\n");
                 _EnhancerLevel = device::HostPersistence::getInstance().getDefaultProperty(_Property);
             }
             catch(...) {
@@ -6639,7 +6644,7 @@ void _dsMS12ProfileSettingOverride(intptr_t handle)
         if (dllib) {
             dsSetBassEnhancerFunc = (dsSetBassEnhancer_t) dlsym(dllib, "dsSetBassEnhancer");
             if (dsSetBassEnhancerFunc) {
-                INT_DEBUG("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
+                INT_INFO("dsSetBassEnhancer_t(int, int) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetBassEnhancer_t(int, int) is not defined\r\n");
@@ -6660,7 +6665,7 @@ void _dsMS12ProfileSettingOverride(intptr_t handle)
         }
         catch(...) {
             try {
-                INT_DEBUG("audio.EnhancerLevel not found in persistence store. Try system default\n");
+                INT_INFO("audio.EnhancerLevel not found in persistence store. Try system default\n");
                 _BassBoost = device::HostPersistence::getInstance().getDefaultProperty(_Property);
             }
             catch(...) {
@@ -6682,7 +6687,7 @@ void _dsMS12ProfileSettingOverride(intptr_t handle)
         if (dllib) {
             dsSetVolumeLevellerfunc = (dsSetVolumeLeveller_t) dlsym(dllib, "dsSetVolumeLeveller");
             if (dsSetVolumeLevellerfunc) {
-                INT_DEBUG("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
+                INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetVolumeLeveller_t(int, dsVolumeLeveller_t) is not defined\r\n");
@@ -6733,7 +6738,7 @@ void _dsMS12ProfileSettingOverride(intptr_t handle)
         if (dllib) {
         dsSetSurroundVirtualizerfunc = (dsSetSurroundVirtualizer_t) dlsym(dllib, "dsSetSurroundVirtualizer");
             if (dsSetSurroundVirtualizerfunc) {
-                INT_DEBUG("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
+                INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsSetSurroundVirtualizer_t(int, dsSurroundVirtualizer_t) is not defined\r\n");
@@ -6789,7 +6794,7 @@ bool _dsMs12ProfileSupported(intptr_t handle,std::string profile)
         if (dllib) {
             func = (dsGetMS12AudioProfileList_t) dlsym(dllib, "dsGetMS12AudioProfileList");
             if (func) {
-                INT_DEBUG("dsGetMS12AudioProfileList_t(int, dsMS12AudioProfileList_t*) is defined and loaded\r\n");
+                INT_INFO("dsGetMS12AudioProfileList_t(int, dsMS12AudioProfileList_t*) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetMS12AudioProfileList_t(int, dsMS12AudioProfileList_t*) is not defined\r\n");
@@ -6836,7 +6841,7 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
             _HDMIARCPortId = "-1";
     }
     param->portId = atoi(_HDMIARCPortId.c_str());
-    INT_DEBUG("The HDMI ARC Port Id is %d \r\n",param->portId);
+    INT_INFO("The HDMI ARC Port Id is %d \r\n",param->portId);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
@@ -6845,7 +6850,7 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
 	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = 0.0, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
-	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
+	INT_INFO("%s Audio level persistence update timer thread running...\n",__func__);
 	    while(1){
               // wait for 3 sec, then update the latest audio level from cache variable
 
@@ -6901,7 +6906,7 @@ static dsError_t setAudioMixerLevels (intptr_t handle, dsAudioInput_t aInput, in
                 INT_INFO("%s:%d dsSetAudioMixerLevels (intptr_t,dsAudioInput_t,int) is not defined %s\r\n", __FUNCTION__, __LINE__, dlerror());
             }
             else {
-                INT_DEBUG("%s:%d dsSetAudioMixerLevels loaded\r\n", __FUNCTION__, __LINE__);
+                INT_INFO("%s:%d dsSetAudioMixerLevels loaded\r\n", __FUNCTION__, __LINE__);
             }
             dlclose(dllib);
         }
