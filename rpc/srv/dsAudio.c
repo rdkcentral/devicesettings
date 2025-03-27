@@ -2132,6 +2132,7 @@ IARM_Result_t dsAudioMgr_init()
                }
 
 	   }
+       INT_INFO("[%s][%d}The HDMI ARC Audio Auto Setting on startup  is %s \r\n", __FUNCTION__, __LINE__, _ARCAudioModeAuto.c_str());
 
            try {
                 _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode.AUTO");
@@ -2160,6 +2161,7 @@ IARM_Result_t dsAudioMgr_init()
               _srv_AudioAuto = 0;
           }
         }
+        INT_INFO("[%s][%d] The HDMI Audio Auto Setting on startup  is %d \r\n",__FUNCTION__,__LINE__,_srv_AudioAuto);
         INT_INFO("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
         INT_INFO("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
         INT_INFO("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
@@ -2611,7 +2613,9 @@ IARM_Result_t _dsGetStereoAuto(void *arg)
     if (param != NULL)
     {
         param->autoMode = (_srv_AudioAuto ? 1 : 0);
+        INT_INFO("[%s][%d] The Audio Auto Mode Setting is %d \r\n",__FUNCTION__,__LINE__,param->autoMode);
     }
+    
 
     IARM_BUS_Unlock(lock);
 
