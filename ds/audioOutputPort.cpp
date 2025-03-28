@@ -377,6 +377,7 @@ bool AudioOutputPort::getStereoAuto()
 	dsGetStereoAuto	(_handle, &_localmode);
 	_stereoAuto = (_localmode);
     INT_INFO("AudioOutputPort::getStereoAuto _stereoAuto:%d\n", _stereoAuto);
+    std::cout << "AudioOutputPort::getStereoAuto _stereoAuto: " << _stereoAuto << std::endl;
 	return _stereoAuto;
 }
 
