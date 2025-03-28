@@ -273,7 +273,13 @@ IARM_Result_t _dsVideoPortInit(void *arg)
 		dsIsDisplayConnected(dsGetDefaultPortHandle(),&isConnected);
 		_dsSyncHdmiStatus(DS_HDMI_TAG_HOTPLUP, (isConnected?dsDISPLAY_EVENT_CONNECTED:dsDISPLAY_EVENT_DISCONNECTED));
 		#ifdef HAS_HDCP_CALLBACK
-			dsRegisterHdcpStatusCallback(NULL,_dsHdcpCallback);
+	           intptr_t handle = NULL;
+                   dsError_t eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_HDMI,0,&handle);
+                   if (dsERR_NONE != eReturn) {
+                        eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_INTERNAL,0,&handle);
+                   }
+                   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",handle);
+		   dsRegisterHdcpStatusCallback(handle,_dsHdcpCallback);
 		#endif
 		
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetVideoPort,_dsGetVideoPort);
