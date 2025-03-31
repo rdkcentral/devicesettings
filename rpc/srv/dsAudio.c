@@ -2107,8 +2107,13 @@ IARM_Result_t dsAudioMgr_init()
                 }
             #endif
 
+            bool hostDataHDMI = false;
+            bool hostDataArc = false;
+            bool hostDataSPDIF = false;
+
             try {
-		_AudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode.AUTO",_AudioModeAuto);
+            _AudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode.AUTO",_AudioModeAuto);
+            hostDataHDMI = true;
 	    }
 	    catch(...) {
 #ifdef IGNORE_EDID_LOGIC
@@ -2119,12 +2124,14 @@ IARM_Result_t dsAudioMgr_init()
 	    }
            std::string _ARCAudioModeAuto("FALSE");
 	   std::string _SPDIFAudioModeAuto("FALSE");
+
 	   try {
-		_ARCAudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode.AUTO");
+		    _ARCAudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode.AUTO");
+            hostDataArc = true;
 	   }
 	   catch(...) {
                try {
-                   INT_DEBUG("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   INT_INFO("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _ARCAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.AudioMode.AUTO");
                }
                catch(...) {
@@ -2135,31 +2142,91 @@ IARM_Result_t dsAudioMgr_init()
 
            try {
                 _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode.AUTO");
+                hostDataSPDIF = true;
            }
            catch(...) {
                try {
-                   INT_DEBUG("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   INT_INFO("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.AudioMode.AUTO");
                }
                catch(...) {
                    _SPDIFAudioModeAuto = "FALSE";
                }
            }
-           if ((_AudioModeAuto.compare("TRUE") == 0) || (_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
-	    {
-	        _srv_AudioAuto = 1;
-	    }
-        else
-        {
-          if(_srv_HDMI_Audiomode == dsAUDIO_STEREO_SURROUND)
-          {
-              _srv_AudioAuto = 1;
-          }
-          else
-          {
-              _srv_AudioAuto = 0;
-          }
-        }
+           if(!hostDataArc && !hostDataHDMI && !hostDataSPDIF)
+           {
+            if ((_AudioModeAuto.compare("TRUE") == 0) || (_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
+	         {
+	             _srv_AudioAuto = 1;
+	         }
+             else
+             {
+               if(_srv_HDMI_Audiomode == dsAUDIO_STEREO_SURROUND)
+               {
+                   _srv_AudioAuto = 1;
+               }
+               else
+               {
+                   _srv_AudioAuto = 0;
+               }
+             }
+           }
+           else if(hostDataArc && !hostDataHDMI && !hostDataSPDIF)
+           {
+                _srv_AudioAuto = (_ARCAudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
+           }
+           else if(!hostDataArc && hostDataHDMI && !hostDataSPDIF)
+           {
+                _srv_AudioAuto = (_AudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
+           }
+           else if(!hostDataArc && !hostDataHDMI && hostDataSPDIF)
+           {
+                _srv_AudioAuto = (_SPDIFAudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
+           }
+           else if(hostDataArc && hostDataHDMI && !hostDataSPDIF)
+           {
+                if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_AudioModeAuto.compare("TRUE") == 0))
+                {
+                    _srv_AudioAuto = 1;
+                }
+                else
+                {
+                    _srv_AudioAuto = 0;
+                }
+           }
+              else if(hostDataArc && !hostDataHDMI && hostDataSPDIF)
+              {
+                 if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
+                 {
+                      _srv_AudioAuto = 1;
+                 }
+                 else
+                 {
+                      _srv_AudioAuto = 0;
+                 }
+              }
+              else if(!hostDataArc && hostDataHDMI && hostDataSPDIF)
+              {
+                 if((_AudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
+                 {
+                      _srv_AudioAuto = 1;
+                 }
+                 else
+                 {
+                      _srv_AudioAuto = 0;
+                 }
+              }
+              else if(hostDataArc && hostDataHDMI && hostDataSPDIF)
+              {
+                 if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_AudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
+                 {
+                      _srv_AudioAuto = 1;
+                 }
+                 else
+                 {
+                      _srv_AudioAuto = 0;
+                 }
+              }
         INT_DEBUG("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
         INT_DEBUG("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
         INT_DEBUG("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
