@@ -2107,13 +2107,13 @@ IARM_Result_t dsAudioMgr_init()
                 }
             #endif
 
-            bool hostDataHDMI = false;
-            bool hostDataArc = false;
-            bool hostDataSPDIF = false;
+            bool isHDMIAutoPersisted = false;
+            bool isARCAutoPersisted = false;
+            bool isSPDIFAutoPersisted = false;
 
             try {
             _AudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode.AUTO",_AudioModeAuto);
-            hostDataHDMI = true;
+            isHDMIAutoPersisted = true;
 	    }
 	    catch(...) {
 #ifdef IGNORE_EDID_LOGIC
@@ -2127,11 +2127,11 @@ IARM_Result_t dsAudioMgr_init()
 
 	   try {
 		    _ARCAudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode.AUTO");
-            hostDataArc = true;
+            isARCAutoPersisted = true;
 	   }
 	   catch(...) {
                try {
-                   INT_INFO("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                    INT_DEBUG("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _ARCAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.AudioMode.AUTO");
                }
                catch(...) {
@@ -2142,18 +2142,18 @@ IARM_Result_t dsAudioMgr_init()
 
            try {
                 _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode.AUTO");
-                hostDataSPDIF = true;
+                isSPDIFAutoPersisted = true;
            }
            catch(...) {
                try {
-                   INT_INFO("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                    INT_DEBUG("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.AudioMode.AUTO");
                }
                catch(...) {
                    _SPDIFAudioModeAuto = "FALSE";
                }
            }
-           if(!hostDataArc && !hostDataHDMI && !hostDataSPDIF)
+           if(!isARCAutoPersisted && !isHDMIAutoPersisted && !isSPDIFAutoPersisted)
            {
             if ((_AudioModeAuto.compare("TRUE") == 0) || (_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
 	         {
@@ -2171,19 +2171,19 @@ IARM_Result_t dsAudioMgr_init()
                }
              }
            }
-           else if(hostDataArc && !hostDataHDMI && !hostDataSPDIF)
+           else if(isARCAutoPersisted && !isHDMIAutoPersisted && !isSPDIFAutoPersisted)
            {
                 _srv_AudioAuto = (_ARCAudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
            }
-           else if(!hostDataArc && hostDataHDMI && !hostDataSPDIF)
+           else if(!isARCAutoPersisted && isHDMIAutoPersisted && !isSPDIFAutoPersisted)
            {
                 _srv_AudioAuto = (_AudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
            }
-           else if(!hostDataArc && !hostDataHDMI && hostDataSPDIF)
+           else if(!isARCAutoPersisted && !isHDMIAutoPersisted && isSPDIFAutoPersisted)
            {
                 _srv_AudioAuto = (_SPDIFAudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
            }
-           else if(hostDataArc && hostDataHDMI && !hostDataSPDIF)
+           else if(isARCAutoPersisted && isHDMIAutoPersisted && !isSPDIFAutoPersisted)
            {
                 if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_AudioModeAuto.compare("TRUE") == 0))
                 {
@@ -2194,7 +2194,7 @@ IARM_Result_t dsAudioMgr_init()
                     _srv_AudioAuto = 0;
                 }
            }
-              else if(hostDataArc && !hostDataHDMI && hostDataSPDIF)
+              else if(isARCAutoPersisted && !isHDMIAutoPersisted && isSPDIFAutoPersisted)
               {
                  if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
                  {
@@ -2205,7 +2205,7 @@ IARM_Result_t dsAudioMgr_init()
                       _srv_AudioAuto = 0;
                  }
               }
-              else if(!hostDataArc && hostDataHDMI && hostDataSPDIF)
+              else if(!isARCAutoPersisted && isHDMIAutoPersisted && isSPDIFAutoPersisted)
               {
                  if((_AudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
                  {
@@ -2216,7 +2216,7 @@ IARM_Result_t dsAudioMgr_init()
                       _srv_AudioAuto = 0;
                  }
               }
-              else if(hostDataArc && hostDataHDMI && hostDataSPDIF)
+              else if(isARCAutoPersisted && isHDMIAutoPersisted && isSPDIFAutoPersisted)
               {
                  if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_AudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
                  {
