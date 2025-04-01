@@ -2131,7 +2131,7 @@ IARM_Result_t dsAudioMgr_init()
 	   }
 	   catch(...) {
                try {
-                    INT_DEBUG("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   INT_DEBUG("HDMI_ARC0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _ARCAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.AudioMode.AUTO");
                }
                catch(...) {
@@ -2146,7 +2146,7 @@ IARM_Result_t dsAudioMgr_init()
            }
            catch(...) {
                try {
-                    INT_DEBUG("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   INT_DEBUG("SPDIF0.AudioMode.AUTO not found in persistence store. Try system default\n");
                    _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.AudioMode.AUTO");
                }
                catch(...) {
