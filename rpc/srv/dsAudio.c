@@ -71,12 +71,16 @@ int _srv_AudioHDMIAuto = 0;
 int _srv_AudioSPDIFAuto = 0;
 int _srv_AudioHDMIARCAuto = 0;
 #ifdef IGNORE_EDID_LOGIC
-int _srv_AudioAuto  = 1;
+int _srv_AudioHDMIAuto = 1;
+int _srv_AudioSPDIFAuto = 1;
+int _srv_AudioHDMIARCAuto = 1;
 dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_SURROUND;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_SURROUND;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
 #else
-int _srv_AudioAuto  = 0;
+int _srv_AudioHDMIAuto = 0;
+int _srv_AudioSPDIFAuto = 0;
+int _srv_AudioHDMIARCAuto = 0;
 dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
@@ -2163,7 +2167,7 @@ IARM_Result_t dsAudioMgr_init()
            }
            if(_ARCAudioModeAuto.compare("TRUE") == 0)
            {
-                _srv_AudioARCAuto = 1;
+                _srv_AudioHDMIARCAuto = 1;
            }
            if(_SPDIFAudioModeAuto.compare("TRUE") == 0)
            {
@@ -2417,7 +2421,6 @@ IARM_Result_t _dsGetStereoMode(void *arg)
     else if (param != NULL && NULL != param->handle)
     {
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
-        INT_INFO("%s..%d-%d \r\n",__func__,param->type,param->index);
         /* In Auto Mode, get the effective mode */
         if (_APortType == dsAUDIOPORT_TYPE_SPDIF && _srv_AudioSPDIFAuto) {
             dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
@@ -2435,7 +2438,7 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             }
             param->mode = stereoMode;
         }
-        else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC && _srv_AudioARCAuto) {
+        else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC && _srv_AudioHDMIARCAuto) {
             dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
             ret = dsGetStereoMode(param->handle, &stereoMode);
             if(ret == dsERR_NONE) {
@@ -2642,7 +2645,7 @@ IARM_Result_t _dsGetStereoAuto(void *arg)
             param->autoMode = _srv_AudioHDMIAuto ? 1 : 0;
         }
         else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC) {
-            param->autoMode = _srv_AudioARCAuto ? 1 : 0;
+            param->autoMode = _srv_AudioHDMIARCAuto ? 1 : 0;
         }
         else if (_APortType == dsAUDIOPORT_TYPE_SPDIF) {
             param->autoMode = _srv_AudioSPDIFAuto ? 1 : 0;
@@ -2673,7 +2676,7 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
 
 	    case dsAUDIOPORT_TYPE_HDMI_ARC:
 	        device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
-            _srv_AudioARCAuto = param->autoMode;
+            _srv_AudioHDMIARCAuto = param->autoMode;
 		break;
 
 	    case dsAUDIOPORT_TYPE_SPDIF:
