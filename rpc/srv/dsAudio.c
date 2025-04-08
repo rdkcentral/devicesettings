@@ -67,9 +67,6 @@ static int m_isDuckingInProgress = false;
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t audioLevelMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t      audioLevelTimerCV = PTHREAD_COND_INITIALIZER;
-int _srv_AudioHDMIAuto = 0;
-int _srv_AudioSPDIFAuto = 0;
-int _srv_AudioHDMIARCAuto = 0;
 #ifdef IGNORE_EDID_LOGIC
 int _srv_AudioHDMIAuto = 1;
 int _srv_AudioSPDIFAuto = 1;
