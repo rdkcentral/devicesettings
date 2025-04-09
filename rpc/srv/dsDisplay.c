@@ -109,7 +109,7 @@ IARM_Result_t _dsDisplayInit(void *arg)
             eReturn = dsGetDisplay(dsVIDEOPORT_TYPE_INTERNAL, 0, &handle);
             if (dsERR_NONE != eReturn) {
                 INT_ERROR("dsGetDisplay for dsVIDEOPORT_TYPE_INTERNAL also failed.\r\n");
-                return IARM_RESULT_FAILURE;
+                return IARM_RESULT_INVALID_PARAM;
             }
         }
         dsRegisterDisplayEventCallback(handle, _dsDisplayEventCallback);
