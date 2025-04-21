@@ -101,10 +101,19 @@ IARM_Result_t _dsDisplayInit(void *arg)
     IARM_BUS_Lock(lock);
 
     if (!m_isInitialized) {
+        /* Register appropriate dsRegisterDisplayEventCallback here*/
+        intptr_t handle = NULL;
+        dsError_t eReturn = dsGetDisplay(dsVIDEOPORT_TYPE_HDMI, 0, &handle);
+        if (dsERR_NONE != eReturn) {
+            INT_INFO("dsGetDisplay for dsVIDEOPORT_TYPE_HDMI failed; trying dsVIDEOPORT_TYPE_INTERNAL.\r\n");
+            eReturn = dsGetDisplay(dsVIDEOPORT_TYPE_INTERNAL, 0, &handle);
+            if (dsERR_NONE != eReturn) {
+                INT_ERROR("dsGetDisplay for dsVIDEOPORT_TYPE_INTERNAL also failed.\r\n");
+                return IARM_RESULT_INVALID_PARAM;
+            }
+        }
+        dsRegisterDisplayEventCallback(handle, _dsDisplayEventCallback);
 
-		/* Register appropriate dsRegisterDisplayEventCallback here*/	
-        dsRegisterDisplayEventCallback(NULL,_dsDisplayEventCallback);
-		
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetDisplay,_dsGetDisplay);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetDisplayAspectRatio,_dsGetDisplayAspectRatio);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEDID,_dsGetEDID);
