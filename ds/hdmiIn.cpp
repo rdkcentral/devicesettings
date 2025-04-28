@@ -547,6 +547,37 @@ void HdmiInput::getEdidVersion (int iHdmiPort, int *iEdidVersion) {
     printf ("%s:%d - EDID Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *iEdidVersion);
 }
 
+void HdmiInput::setVRRSupport(int iHdmiPort, bool vrrSupport)
+{
+    printf ("HdmiInput::setVRRSupport \r\n");
+    dsError_t ret = dsHdmiInSetVRRSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrSupport);
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+    printf ("%s:%d - Set VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, vrrSupport);
+}
+
+void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
+    printf ("HdmiInput::getVRRSupport \r\n");
+    dsError_t ret = dsHdmiInGetVRRSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrSupport);
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+    printf ("%s:%d - EDID VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, *vrrSupport);
+}
+
+void HdmiInput::getVRRStatus (int iHdmiPort, dsVRRType_t *vrrStatus) {
+    printf ("HdmiInput::getVRRStatus \r\n");
+    dsError_t ret = dsHdmiInGetVRRStatus (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrStatus);
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+    printf ("%s:%d - VRR Status = %d\n", __FUNCTION__, __LINE__, *vrrStatus);
+}
+
 void HdmiInput::getHdmiALLMStatus (int iHdmiPort, bool *allmStatus) {
     printf ("HdmiInput::getHdmiALLMStatus \r\n");
     dsError_t ret = dsGetAllmStatus (static_cast<dsHdmiInPort_t>(iHdmiPort), allmStatus);
