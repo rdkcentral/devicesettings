@@ -88,7 +88,7 @@ static pthread_mutex_t fpLock = PTHREAD_MUTEX_INITIALIZER;
 static tv_hdmi_edid_version_t m_edidversion[dsHDMI_IN_PORT_MAX];
 static bool m_edidallmsupport[dsHDMI_IN_PORT_MAX];
 static bool m_vrrsupport[dsHDMI_IN_PORT_MAX];
-static bool m_vrrsupportCaps[dsHDMI_IN_PORT_MAX];
+static bool m_hdmiPortVrrCaps[dsHDMI_IN_PORT_MAX];
 IARM_Result_t dsHdmiInMgr_init();
 IARM_Result_t dsHdmiInMgr_term();
 IARM_Result_t _dsHdmiInInit(void *arg);
@@ -670,9 +670,6 @@ IARM_Result_t _dsHdmiInInit(void *arg)
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetVRRStatus,  _dsGetVRRStatus);
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetHdmiVersion,  _dsGetHdmiVersion);
 
-       m_vrrsupport[dsHDMI_IN_PORT_2] = true;
-       m_vrrsupport[dsHDMI_IN_PORT_3] = true;
-
         int itr = 0;
         bool isARCCapable = false;
         for (itr = 0; itr < dsHDMI_IN_PORT_MAX; itr++) {
@@ -830,8 +827,8 @@ IARM_Result_t _dsHdmiInInit(void *arg)
         }
 
         for (itr = 0; itr < dsHDMI_IN_PORT_MAX; itr++) {
-            if (getVRRSupport(static_cast<dsHdmiInPort_t>(itr), &m_vrrsupportCaps[itr]) >= 0) {
-                INT_INFO("Port HDMI%d: VRR capability : %d\n", itr, m_vrrsupportCaps[itr]);
+            if (getVRRSupport(static_cast<dsHdmiInPort_t>(itr), &m_hdmiPortVrrCaps[itr]) >= 0) {
+                INT_INFO("Port HDMI%d: VRR capability : %d\n", itr, m_hdmiPortVrrCaps[itr]);
             }
         }
 
@@ -1372,7 +1369,7 @@ void updateVRRBitValuesInPersistence(dsHdmiInPort_t iHdmiPort, bool vrrSupport)
 
 static dsError_t setVRRSupport (dsHdmiInPort_t iHdmiPort, bool vrrSupport) {
     dsError_t eRet = dsERR_GENERAL;
-    if (!m_vrrsupportCaps[iHdmiPort]) {
+    if (!m_hdmiPortVrrCaps[iHdmiPort]) {
             return dsERR_OPERATION_NOT_SUPPORTED;
     }
     typedef dsError_t (*dsHdmiInSetVRRSupport_t)(dsHdmiInPort_t iHdmiPort, bool vrrSupport);
