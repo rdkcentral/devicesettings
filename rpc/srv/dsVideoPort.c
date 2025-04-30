@@ -278,7 +278,7 @@ IARM_Result_t _dsVideoPortInit(void *arg)
                    if (dsERR_NONE != eReturn) {
                         eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_INTERNAL,0,&handle);
                    }
-                   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",handle);
+                   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%d \n",handle);
 		   dsRegisterHdcpStatusCallback(handle,_dsHdcpCallback);
 		#endif
 		
