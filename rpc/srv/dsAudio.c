@@ -2162,13 +2162,25 @@ IARM_Result_t dsAudioMgr_init()
            {
                 _srv_AudioHDMIAuto = 1;
            }
+           else if(_AudioModeAuto.compare("FALSE") == 0)
+           {
+                _srv_AudioHDMIAuto = 0;
+           }
            if(_ARCAudioModeAuto.compare("TRUE") == 0)
            {
                 _srv_AudioHDMIARCAuto = 1;
            }
+           else if(_ARCAudioModeAuto.compare("FALSE") == 0)
+           {
+              _srv_AudioHDMIARCAuto = 0;
+           }
            if(_SPDIFAudioModeAuto.compare("TRUE") == 0)
            {
                 _srv_AudioSPDIFAuto = 1;
+           }
+           else if(_SPDIFAudioModeAuto.compare("FALSE") == 0)
+           {
+                _srv_AudioSPDIFAuto = 0;
            }
 
         INT_DEBUG("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
