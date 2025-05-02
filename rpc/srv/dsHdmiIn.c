@@ -745,7 +745,7 @@ IARM_Result_t _dsHdmiInInit(void *arg)
             else
                 m_vrrsupport[dsHDMI_IN_PORT_1] =  false;
 
-            INT_INFO("Port %s: _VRRSupport: %s , m_edidallmsupport: %d\n", "HDMI1", _VRRSupport.c_str(), m_vrrsupport[1]);
+            INT_INFO("Port %s: _VRRSupport: %s , m_vrrsupport: %d\n", "HDMI1", _VRRSupport.c_str(), m_vrrsupport[1]);
         }
         catch(...) {
             INT_INFO("Port %s: Exception in Getting the HDMI1 EDID VRR support from persistence storage..... \r\n", "HDMI1");
