@@ -57,6 +57,7 @@ typedef enum _DSMgr_EventId_t {
 	IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS,          /*!< HDMI IN status change event */
 	IARM_BUS_DSMGR_EVENT_HDMI_IN_VIDEO_MODE_UPDATE,          /*!< HDMI IN video mode update event */
 	IARM_BUS_DSMGR_EVENT_HDMI_IN_ALLM_STATUS,          /*!< HDMI IN ALLM mode update event */
+	IARM_BUS_DSMGR_EVENT_HDMI_IN_VRR_STATUS,          /*!< HDMI IN VRR mode update event */
 	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG,         /*!< COMPOSITE IN HPD change event */
 	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS,    /*!< COMPOSITE IN signal status change event */
 	IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS,          /*!< COMPOSITE IN status change event */
@@ -229,6 +230,12 @@ typedef struct _DSMgr_EventData_t {
             dsHdmiInPort_t port;
             bool allm_mode;
         }hdmi_in_allm_mode; /*HDMI in ALLM Mode change*/
+
+	struct _HDMI_IN_VRR_MODE_DATA{
+         /* Declare HDMI In VRR Mode*/
+            dsHdmiInPort_t port;
+            dsVRRType_t vrr_type;
+        }hdmi_in_vrr_mode; /*HDMI in VRR Mode change*/
 
 	struct _HDMI_IN_CONTENT_TYPE_DATA{
          /* Declare HDMI In ALLM Mode*/
