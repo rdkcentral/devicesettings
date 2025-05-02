@@ -477,7 +477,6 @@ dsError_t dsHdmiInSetVRRSupport (dsHdmiInPort_t iHdmiPort, bool vrr_support)
                             (void *)&param,
                             sizeof(param));
 
-    printf("[cli]: dsSetVRRSupport port :%d, vrrsupport :%d\n",param.iHdmiPort,param.vrrSupport);
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
         printf ("[cli] %s: dsSetVRRSupport eRet: %d \r\n", __FUNCTION__, param.result);
