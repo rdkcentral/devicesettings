@@ -550,7 +550,6 @@ void HdmiInput::getEdidVersion (int iHdmiPort, int *iEdidVersion) {
 
 void HdmiInput::setVRRSupport(int iHdmiPort, bool vrrSupport)
 {
-    printf ("HdmiInput::setVRRSupport \r\n");
     dsError_t ret = dsHdmiInSetVRRSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrSupport);
     if (ret != dsERR_NONE)
     {
@@ -560,7 +559,6 @@ void HdmiInput::setVRRSupport(int iHdmiPort, bool vrrSupport)
 }
 
 void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
-    printf ("HdmiInput::getVRRSupport \r\n");
     dsError_t ret = dsHdmiInGetVRRSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrSupport);
     if (ret != dsERR_NONE)
     {
@@ -570,7 +568,6 @@ void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
 }
 
 void HdmiInput::getVRRStatus (int iHdmiPort, dsVRRType_t *vrrStatus) {
-    printf ("HdmiInput::getVRRStatus \r\n");
     dsError_t ret = dsHdmiInGetVRRStatus (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrStatus);
     if (ret != dsERR_NONE)
     {
