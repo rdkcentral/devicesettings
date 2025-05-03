@@ -67,6 +67,7 @@
 #include "edid-parser.hpp"
 #include "dsInternal.h"
 
+
 namespace device 
 {
 
