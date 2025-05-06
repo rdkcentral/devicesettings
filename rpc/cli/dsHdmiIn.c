@@ -54,6 +54,7 @@
 #include "libIARM.h"
 #include "libIBus.h"
 #include "safec_lib.h" 
+#include "dsInternal.h"
 
 
 dsError_t dsHdmiInInit (void)

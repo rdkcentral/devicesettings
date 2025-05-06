@@ -65,6 +65,7 @@
 #include "dsHdmiIn.h"
 #include "dsUtl.h"
 #include "edid-parser.hpp"
+#include "dsInternal.h"
 
 
 namespace device 
