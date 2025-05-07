@@ -87,6 +87,8 @@ static int m_isPlatInitialized=0;
 static pthread_mutex_t fpLock = PTHREAD_MUTEX_INITIALIZER;
 static tv_hdmi_edid_version_t m_edidversion[dsHDMI_IN_PORT_MAX];
 static bool m_edidallmsupport[dsHDMI_IN_PORT_MAX];
+static bool m_vrrsupport[dsHDMI_IN_PORT_MAX];
+static bool m_hdmiPortVrrCaps[dsHDMI_IN_PORT_MAX];
 IARM_Result_t dsHdmiInMgr_init();
 IARM_Result_t dsHdmiInMgr_term();
 IARM_Result_t _dsHdmiInInit(void *arg);
@@ -110,14 +112,20 @@ IARM_Result_t _dsGetSupportedGameFeaturesList (void *arg);
 IARM_Result_t _dsGetAVLatency (void *arg);
 IARM_Result_t _dsSetEdid2AllmSupport (void *arg);
 IARM_Result_t _dsGetEdid2AllmSupport (void *arg);
+IARM_Result_t _dsSetVRRSupport (void *arg);
+IARM_Result_t _dsGetVRRSupport (void *arg);
+IARM_Result_t _dsGetVRRStatus (void *arg);
 IARM_Result_t _dsGetHdmiVersion (void *arg);
 
 static dsError_t setEdid2AllmSupport (dsHdmiInPort_t iHdmiPort, bool allmSupport);
+static dsError_t setVRRSupport (dsHdmiInPort_t iHdmiPort, bool vrrSupport);
+static dsError_t getVRRSupport (dsHdmiInPort_t iHdmiPort, bool *vrrSupport);
 void _dsHdmiInConnectCB(dsHdmiInPort_t port, bool isPortConnected);
 void _dsHdmiInSignalChangeCB(dsHdmiInPort_t port, dsHdmiInSignalStatus_t sigStatus);
 void _dsHdmiInStatusChangeCB(dsHdmiInStatus_t inputStatus);
 void _dsHdmiInVideoModeUpdateCB(dsHdmiInPort_t port, dsVideoPortResolution_t videoResolution);
 void _dsHdmiInAllmChangeCB(dsHdmiInPort_t port, bool allm_mode);
+void _dsHdmiInVRRChangeCB(dsHdmiInPort_t port, dsVRRType_t vrr_type);
 void _dsHdmiInAviContentTypeChangeCB(dsHdmiInPort_t port, dsAviContentType_t content_type);
 void _dsHdmiInAVLatencyChangeCB(int audio_latency, int video_latency);
 
@@ -284,12 +292,13 @@ static dsError_t setEdidVersion (dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_
                     INT_DEBUG("Port %s: Persist EDID Version: %d\n", "HDMI2", iEdidVersion);
                     break;
             }
-    		// Whenever there is a change in edid version to 2.0, ensure the edid allm support is updated with latest value
+	    // Whenever there is a change in edid version to 2.0, ensure the edid allm support and edid vrr support is updated with latest value
 	if(iEdidVersion == HDMI_EDID_VER_20)
     	{
-        	INT_INFO("As the version is changed to 2.0, we are updating the allm bit in edid\n");
+		INT_INFO("As the version is changed to 2.0, we are updating the allm bit and the vrr bit in edid\n");
 		setEdid2AllmSupport(iHdmiPort,m_edidallmsupport[iHdmiPort]);
-    	}
+                setVRRSupport(iHdmiPort,m_vrrsupport[iHdmiPort]);
+        }
         }
         INT_INFO("[srv] %s: dsSetEdidVersionFunc eRet: %d \r\n", __FUNCTION__, eRet);
     }
@@ -577,6 +586,25 @@ IARM_Result_t _dsHdmiInInit(void *arg)
             if(allmChangeCBFunc) {
                 allmChangeCBFunc(_dsHdmiInAllmChangeCB);
             }
+	    typedef dsError_t (*dsHdmiInRegisterVRRChangeCB_t)(dsHdmiInVRRChangeCB_t CBFunc);
+            static dsHdmiInRegisterVRRChangeCB_t vrrChangeCBFunc = 0;
+            if (vrrChangeCBFunc == 0) {
+                void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+                if (dllib) {
+                    vrrChangeCBFunc = (dsHdmiInRegisterVRRChangeCB_t) dlsym(dllib, "dsHdmiInRegisterVRRChangeCB");
+                    if(vrrChangeCBFunc == 0) {
+                        INT_INFO("dsHdmiInRegisterVRRChangeCB(dsHdmiInVRRChangeCB_t) is not defined\r\n");
+                    }
+                    dlclose(dllib);
+                }
+                else {
+                    INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+                }
+            }
+
+            if(vrrChangeCBFunc) {
+                vrrChangeCBFunc(_dsHdmiInVRRChangeCB);
+            }
             typedef dsError_t (*dsHdmiInRegisterAviContentTypeChangeCB_t)(dsHdmiInAviContentTypeChangeCB_t CBFunc);
             static dsHdmiInRegisterAviContentTypeChangeCB_t contentTypeChangeCBFunc = 0;
             if (contentTypeChangeCBFunc == 0) {
@@ -635,6 +663,9 @@ IARM_Result_t _dsHdmiInInit(void *arg)
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetAVLatency,  _dsGetAVLatency);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetEdid2AllmSupport,  _dsSetEdid2AllmSupport);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEdid2AllmSupport,  _dsGetEdid2AllmSupport);
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetVRRSupport,  _dsSetVRRSupport);
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetVRRSupport,  _dsGetVRRSupport);
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetVRRStatus,               _dsGetVRRStatus);
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetHdmiVersion,  _dsGetHdmiVersion);
 
         int itr = 0;
@@ -688,6 +719,62 @@ IARM_Result_t _dsHdmiInInit(void *arg)
             INT_INFO("Port %s: Exception in Getting the HDMI2 EDID allm support from persistence storage..... \r\n", "HDMI2");
             m_edidallmsupport[dsHDMI_IN_PORT_2] = true;
         }
+       // Getting the edidvrrEnable value from persistence upon bootup
+        std::string _VRRSupport("TRUE");
+        try {
+            _VRRSupport = device::HostPersistence::getInstance().getProperty("HDMI0.vrrEnable");
+            if(_VRRSupport == "TRUE")
+                m_vrrsupport[dsHDMI_IN_PORT_0] =  true;
+            else
+                m_vrrsupport[dsHDMI_IN_PORT_0] =  false;
+
+            INT_INFO("Port %s: _VRRSupport: %s , m_vrrsupport: %d\n", "HDMI0", _VRRSupport.c_str(), m_vrrsupport[0]);
+        }
+        catch(...) {
+            INT_INFO("Port %s: Exception in Getting the HDMI0 EDID VRR support from persistence storage..... \r\n", "HDMI0");
+            m_vrrsupport[dsHDMI_IN_PORT_0] = false;
+        }
+
+        try {
+            _VRRSupport = device::HostPersistence::getInstance().getProperty("HDMI1.vrrEnable");
+            if(_VRRSupport == "TRUE")
+                m_vrrsupport[dsHDMI_IN_PORT_1] =  true;
+            else
+                m_vrrsupport[dsHDMI_IN_PORT_1] =  false;
+
+            INT_INFO("Port %s: _VRRSupport: %s , m_edidallmsupport: %d\n", "HDMI1", _VRRSupport.c_str(), m_vrrsupport[1]);
+        }
+        catch(...) {
+            INT_INFO("Port %s: Exception in Getting the HDMI1 EDID VRR support from persistence storage..... \r\n", "HDMI1");
+            m_vrrsupport[dsHDMI_IN_PORT_1] = false;
+        }
+
+        try {
+            _VRRSupport = device::HostPersistence::getInstance().getProperty("HDMI2.vrrEnable");
+            if(_VRRSupport == "TRUE")
+                m_vrrsupport[dsHDMI_IN_PORT_2] =  true;
+            else
+                m_vrrsupport[dsHDMI_IN_PORT_2] =  false;
+
+            INT_INFO("Port %s: _vrrSupport: %s , m_vrrsupport: %d\n", "HDMI2", _VRRSupport.c_str(), m_vrrsupport[2]);
+        }
+        catch(...) {
+            INT_INFO("Port %s: Exception in Getting the HDMI2 EDID VRR support from persistence storage..... \r\n", "HDMI2");
+            m_vrrsupport[dsHDMI_IN_PORT_2] = true;
+        }
+        try {
+            _VRRSupport = device::HostPersistence::getInstance().getProperty("HDMI3.vrrEnable");
+            if(_VRRSupport == "TRUE")
+                m_vrrsupport[dsHDMI_IN_PORT_3] =  true;
+            else
+                m_vrrsupport[dsHDMI_IN_PORT_3] =  false;
+
+            INT_INFO("Port %s: _vrrSupport: %s , m_vrrsupport: %d\n", "HDMI3", _VRRSupport.c_str(), m_vrrsupport[3]);
+        }
+        catch(...) {
+            INT_INFO("Port %s: Exception in Getting the HDMI3 EDID VRR support from persistence storage..... \r\n", "HDMI3");
+            m_vrrsupport[dsHDMI_IN_PORT_3] = true;
+        }
        	
 	std::string _EdidVersion("1");
         try {
@@ -736,6 +823,11 @@ IARM_Result_t _dsHdmiInInit(void *arg)
             }
         }
 	
+        for (itr = 0; itr < dsHDMI_IN_PORT_MAX; itr++) {
+            if (getVRRSupport(static_cast<dsHdmiInPort_t>(itr), &m_hdmiPortVrrCaps[itr]) >= 0) {
+                INT_INFO("Port HDMI%d: VRR capability : %d\n", itr, m_hdmiPortVrrCaps[itr]);
+            }
+        }
         for (itr = 0; itr < dsHDMI_IN_PORT_MAX; itr++) {
             if (setEdidVersion (static_cast<dsHdmiInPort_t>(itr), m_edidversion[itr]) >= 0) {
                 INT_INFO("Port HDMI%d: Initialized EDID Version : %d\n", itr, m_edidversion[itr]);
@@ -990,6 +1082,22 @@ void _dsHdmiInAllmChangeCB(dsHdmiInPort_t port, bool allm_mode)
                                 sizeof(hdmi_in_allmMode_eventData));
 
 }
+
+void _dsHdmiInVRRChangeCB(dsHdmiInPort_t port, dsVRRType_t vrr_type)
+{
+    IARM_Bus_DSMgr_EventData_t hdmi_in_vrrMode_eventData;
+
+    INT_INFO("%s:%d - HDMI In VRR Mode update!!!!!! Port: %d, VRR TYPE: %d\r\n", __FUNCTION__,__LINE__,port, vrr_type);
+    hdmi_in_vrrMode_eventData.data.hdmi_in_vrr_mode.port = port;
+    hdmi_in_vrrMode_eventData.data.hdmi_in_vrr_mode.vrr_type = vrr_type;
+
+    IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,
+                                (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_VRR_STATUS,
+                                (void *)&hdmi_in_vrrMode_eventData,
+                                sizeof(hdmi_in_vrrMode_eventData));
+
+}
+
 void _dsHdmiInAviContentTypeChangeCB(dsHdmiInPort_t port, dsAviContentType_t avi_content_type)
 {
     IARM_Bus_DSMgr_EventData_t hdmi_in_contentType_eventData;
@@ -1034,7 +1142,7 @@ IARM_Result_t _dsGetEDIDBytesInfo (void *arg)
         rc = memcpy_s(param->edid,sizeof(param->edid), edidArg, param->length);
         if(rc!=EOK)
         {
-        	ERR_CHK(rc);
+		ERR_CHK(rc);
         }
     }
     IARM_BUS_Unlock(lock);
@@ -1228,6 +1336,180 @@ IARM_Result_t _dsGetEdid2AllmSupport (void *arg)
     // irrespective of the edid version, the latest value is returned.
     param->allmSupport = m_edidallmsupport[param->iHdmiPort];
     INT_INFO("[srv] %s: dsGetEdid2AllmSupport : %d for port %d\r\n", __FUNCTION__, param->allmSupport,param->iHdmiPort);
+    IARM_BUS_Unlock(lock);
+    return IARM_RESULT_SUCCESS;
+}
+
+void updateVRRBitValuesInPersistence(dsHdmiInPort_t iHdmiPort, bool vrrSupport)
+{
+      INT_INFO("[srv]: Updating values of vrr bit in persistence\n");
+      switch(iHdmiPort){
+                case dsHDMI_IN_PORT_0:
+                    device::HostPersistence::getInstance().persistHostProperty("HDMI0.vrrEnable", vrrSupport ? "TRUE" : "FALSE");
+                    INT_INFO("Port %s: Persist EDID VRR Bit: %d\n", "HDMI0", vrrSupport);
+                    break;
+                case dsHDMI_IN_PORT_1:
+                    device::HostPersistence::getInstance().persistHostProperty("HDMI1.vrrEnable", vrrSupport ? "TRUE" : "FALSE");
+                    INT_INFO("Port %s: Persist EDID VRR Bit: %d\n", "HDMI1", vrrSupport);
+                    break;
+                case dsHDMI_IN_PORT_2:
+                    device::HostPersistence::getInstance().persistHostProperty("HDMI2.vrrEnable", vrrSupport ? "TRUE" : "FALSE");
+                    INT_INFO("Port %s: Persist EDID VRR Bit: %d\n", "HDMI2", vrrSupport);
+                    break;
+                case dsHDMI_IN_PORT_3:
+                    device::HostPersistence::getInstance().persistHostProperty("HDMI3.vrrEnable", vrrSupport ? "TRUE" : "FALSE");
+                    INT_INFO("Port %s: Persist EDID VRR Bit: %d\n", "HDMI3", vrrSupport);
+                    break;
+      }
+}
+
+static dsError_t setVRRSupport (dsHdmiInPort_t iHdmiPort, bool vrrSupport) {
+    dsError_t eRet = dsERR_GENERAL;
+    if (!m_hdmiPortVrrCaps[iHdmiPort]) {
+	    return dsERR_OPERATION_NOT_SUPPORTED;
+    }
+    typedef dsError_t (*dsHdmiInSetVRRSupport_t)(dsHdmiInPort_t iHdmiPort, bool vrrSupport);
+    static dsHdmiInSetVRRSupport_t dsHdmiInSetVRRSupportFunc = 0;
+
+    if (dsHdmiInSetVRRSupportFunc == 0) {
+       void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+       if (dllib) {
+            dsHdmiInSetVRRSupportFunc = (dsHdmiInSetVRRSupport_t) dlsym(dllib, "dsHdmiInSetVRRSupport");
+            if(dsHdmiInSetVRRSupportFunc == 0) {
+                INT_INFO("%s:%d dsHdmiInSetVRRSupport (int,bool) is not defined %s\r\n", __FUNCTION__, __LINE__, dlerror());
+            }
+            else {
+                INT_DEBUG("%s:%d dsHdmiInSetVRRSupport loaded\r\n", __FUNCTION__, __LINE__);
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("%s:%d dsHdmiInSetVRRSupport  Opening RDK_DSHAL_NAME [%s] failed %s\r\n",
+                   __FUNCTION__, __LINE__, RDK_DSHAL_NAME, dlerror());
+        }
+    }
+    INT_INFO("setVRRSupport to ds-hal:  EDID VRR Bit: %d\n", vrrSupport);
+    if (0 != dsHdmiInSetVRRSupportFunc) {
+        eRet = dsHdmiInSetVRRSupportFunc (iHdmiPort, vrrSupport);
+        INT_INFO("[srv] %s: dsHdmiInSetVRRSupportFunc eRet: %d \r\n", __FUNCTION__, eRet);
+    }
+    else {
+        INT_INFO("%s:  dsHdmiInSetVRRSupportFunc = %p\n", __FUNCTION__, dsHdmiInSetVRRSupportFunc);
+    }
+    return eRet;
+}
+
+IARM_Result_t _dsSetVRRSupport (void *arg)
+{
+    _DEBUG_ENTER();
+
+    dsVRRSupportParam_t *param = (dsVRRSupportParam_t *) arg;
+    param->result = dsERR_NONE;
+    INT_INFO("[srv] :  In _dsSetVRRSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
+    IARM_BUS_Lock(lock);
+    if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the VRR bit in edid
+    {
+        param->result = setVRRSupport (param->iHdmiPort, param->vrrSupport);
+    }
+    INT_INFO("[srv] %s: dsSetVRRSupport Port: %d vrrSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->vrrSupport, param->result);
+    if(param->result == dsERR_NONE)
+    {
+        updateVRRBitValuesInPersistence(param->iHdmiPort,param->vrrSupport);
+        m_vrrsupport[param->iHdmiPort] = param->vrrSupport;
+    }
+    IARM_BUS_Unlock(lock);
+    return IARM_RESULT_SUCCESS;
+}
+
+static dsError_t getVRRSupport (dsHdmiInPort_t iHdmiPort, bool *vrrSupport) {
+    dsError_t eRet = dsERR_GENERAL;
+    typedef dsError_t (*dsHdmiInGetVRRSupport_t)(dsHdmiInPort_t iHdmiPort, bool *vrrSupport);
+    static dsHdmiInGetVRRSupport_t dsHdmiInGetVRRSupportFunc = 0;
+
+    if (dsHdmiInGetVRRSupportFunc == 0) {
+       void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+       if (dllib) {
+            dsHdmiInGetVRRSupportFunc = (dsHdmiInGetVRRSupport_t) dlsym(dllib, "dsHdmiInGetVRRSupport");
+            if(dsHdmiInGetVRRSupportFunc == 0) {
+                INT_INFO("%s:%d dsHdmiInGetVRRSupport (int,bool) is not defined %s\r\n", __FUNCTION__, __LINE__, dlerror());
+            }
+            else {
+                INT_DEBUG("%s:%d dsHdmiInGetVRRSupport loaded\r\n", __FUNCTION__, __LINE__);
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("%s:%d dsHdmiInGetVRRSupport  Opening RDK_DSHAL_NAME [%s] failed %s\r\n",
+                   __FUNCTION__, __LINE__, RDK_DSHAL_NAME, dlerror());
+        }
+    }
+    if (0 != dsHdmiInGetVRRSupportFunc) {
+        eRet = dsHdmiInGetVRRSupportFunc (iHdmiPort, vrrSupport);
+        INT_INFO("[srv] %s: dsHdmiInGetVRRSupportFunc eRet: %d \r\n", __FUNCTION__, eRet);
+    }
+    else {
+        INT_INFO("%s:  dsHdmiInGetVRRSupportFunc = %p\n", __FUNCTION__, dsHdmiInGetVRRSupportFunc);
+    }
+    return eRet;
+}
+
+IARM_Result_t _dsGetVRRSupport (void *arg)
+{
+    _DEBUG_ENTER();
+    bool vrrSupport = false;
+    dsVRRSupportParam_t *param = (dsVRRSupportParam_t *) arg;
+    IARM_BUS_Lock(lock);
+    param->result =  dsERR_NONE;
+    // getVRRSupport will return the latest vrr bit value of the specified port(which is written to persistence)
+    // irrespective of the edid version, the latest value is returned.
+    param->vrrSupport = m_vrrsupport[param->iHdmiPort];
+    INT_INFO("[srv] %s: dsGetVRRSupport : %d for port %d\r\n", __FUNCTION__, param->vrrSupport,param->iHdmiPort);
+    IARM_BUS_Unlock(lock);
+    return IARM_RESULT_SUCCESS;
+}
+
+
+static dsError_t getVRRStatus (dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus) {
+    dsError_t eRet = dsERR_GENERAL;
+    typedef dsError_t (*dsHdmiInGetVRRStatus_t)(dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus);
+    static dsHdmiInGetVRRStatus_t dsHdmiInGetVRRStatusFunc = 0;
+    if (dsHdmiInGetVRRStatusFunc == 0) {
+       void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+       if (dllib) {
+            dsHdmiInGetVRRStatusFunc = (dsHdmiInGetVRRStatus_t) dlsym(dllib, "dsHdmiInGetVRRStatus");
+            if(dsHdmiInGetVRRStatusFunc == 0) {
+                INT_INFO("%s:%d dsHdmiInGetVRRStatus (int) is not defined %s\r\n", __FUNCTION__, __LINE__, dlerror());
+            }
+            else {
+                INT_DEBUG("%s:%d dsHdmiInGetVRRStatusFunc loaded\r\n", __FUNCTION__, __LINE__);
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("%s:%d dsHdmiInGetVRRStatus  Opening RDK_DSHAL_NAME [%s] failed %s\r\n",
+                   __FUNCTION__, __LINE__, RDK_DSHAL_NAME, dlerror());
+        }
+    }
+    if (0 != dsHdmiInGetVRRStatusFunc) {
+        eRet = dsHdmiInGetVRRStatusFunc (iHdmiPort, vrrStatus);
+        INT_INFO("[srv] %s: dsHdmiInGetVRRStatusFunc eRet: %d \r\n", __FUNCTION__, eRet);
+    }
+    else {
+        INT_INFO("%s:  dsHdmiInGetVRRStatusFunc = %p\n", __FUNCTION__, dsHdmiInGetVRRStatusFunc);
+    }
+    return eRet;
+}
+
+IARM_Result_t _dsGetVRRStatus (void *arg)
+{
+    dsVRRType_t vrrStatus = dsVRR_NONE;
+    _DEBUG_ENTER();
+
+    dsVRRStatusParam_t *param = (dsVRRStatusParam_t *) arg;
+    IARM_BUS_Lock(lock);
+    param->result = getVRRStatus (param->iHdmiPort, &vrrStatus);
+    param->vrrStatus = vrrStatus;
+    INT_INFO("[srv] %s: dsGetVRRStatus vrrStatus: %d\r\n", __FUNCTION__, param->vrrStatus);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
