@@ -236,6 +236,9 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsSetEdid2AllmSupport            "dsSetEdid2AllmSupport"
 #define IARM_BUS_DSMGR_API_dsGetEdid2AllmSupport            "dsGetEdid2AllmSupport"
 #define IARM_BUS_DSMGR_API_dsGetAllmStatus              "dsGetAllmStatus"
+#define IARM_BUS_DSMGR_API_dsSetVRRSupport              "dsSetVRRSupport"
+#define IARM_BUS_DSMGR_API_dsGetVRRSupport              "dsGetVRRSupport"
+#define IARM_BUS_DSMGR_API_dsGetVRRStatus               "dsGetVRRStatus"
 #define IARM_BUS_DSMGR_API_dsGetSupportedGameFeaturesList              "dsGetSupportedGameFeaturesList"
 #define IARM_BUS_DSMGR_API_dsGetAVLatency   		"dsGetAVLatency"
 #define IARM_BUS_DSMGR_API_dsGetHdmiVersion            "dsGetHdmiVersion"
@@ -1008,6 +1011,20 @@ typedef struct _dsEdidAllmSupportParam_t
     dsHdmiInPort_t          iHdmiPort;
     bool                    allmSupport;
 }dsEdidAllmSupportParam_t;
+
+typedef struct _dsVRRSupportParam_t
+{
+    dsError_t               result;
+    dsHdmiInPort_t          iHdmiPort;
+    bool                    vrrSupport;
+}dsVRRSupportParam_t;
+
+typedef struct _dsVRRStatusParam_t
+{
+    dsError_t               result;
+    dsHdmiInPort_t          iHdmiPort;
+    dsVRRType_t             vrrStatus;
+}dsVRRStatusParam_t;
 
 typedef struct _dsGetHDMIARCPortIdParam_t {
         dsError_t result;

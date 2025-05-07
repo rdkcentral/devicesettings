@@ -464,6 +464,68 @@ dsError_t dsGetEdid2AllmSupport (dsHdmiInPort_t iHdmiPort, bool *allm_support)
     return dsERR_GENERAL;
 }
 
+dsError_t dsHdmiInSetVRRSupport (dsHdmiInPort_t iHdmiPort, bool vrr_support)
+{
+    _DEBUG_ENTER();
+
+    dsVRRSupportParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    param.vrrSupport = vrr_support;
+    rpcRet = IARM_Bus_Call (IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsSetVRRSupport,
+                            (void *)&param,
+                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
+
+dsError_t dsHdmiInGetVRRSupport (dsHdmiInPort_t iHdmiPort, bool *vrr_support)
+{
+    _DEBUG_ENTER();
+
+    dsVRRSupportParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    rpcRet = IARM_Bus_Call (IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsGetVRRSupport,
+                            (void *)&param,
+                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        *vrr_support =  param.vrrSupport;
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
+
+dsError_t dsHdmiInGetVRRStatus (dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus)
+{
+    _DEBUG_ENTER();
+    dsVRRStatusParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    rpcRet = IARM_Bus_Call (IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsGetVRRStatus,
+                            (void *)&param,
+                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        *vrrStatus =  param.vrrStatus;
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
+
 dsError_t dsGetHdmiVersion (dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_t  *capversion)
 {
     _DEBUG_ENTER();
