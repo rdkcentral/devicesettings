@@ -68,12 +68,16 @@ static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t audioLevelMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t      audioLevelTimerCV = PTHREAD_COND_INITIALIZER;
 #ifdef IGNORE_EDID_LOGIC
-int _srv_AudioAuto  = 1;
+int _srv_AudioHDMIAuto = 1;
+int _srv_AudioSPDIFAuto = 1;
+int _srv_AudioHDMIARCAuto = 1;
 dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_SURROUND;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_SURROUND;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
 #else
-int _srv_AudioAuto  = 0;
+int _srv_AudioHDMIAuto = 0;
+int _srv_AudioSPDIFAuto = 0;
+int _srv_AudioHDMIARCAuto = 0;
 dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
@@ -2153,80 +2157,32 @@ IARM_Result_t dsAudioMgr_init()
                    _SPDIFAudioModeAuto = "FALSE";
                }
            }
-           if(!isARCAutoPersisted && !isHDMIAutoPersisted && !isSPDIFAutoPersisted)
+
+           if(_AudioModeAuto.compare("TRUE") == 0)
            {
-            if ((_AudioModeAuto.compare("TRUE") == 0) || (_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
-	         {
-	             _srv_AudioAuto = 1;
-	         }
-             else
-             {
-               if(_srv_HDMI_Audiomode == dsAUDIO_STEREO_SURROUND)
-               {
-                   _srv_AudioAuto = 1;
-               }
-               else
-               {
-                   _srv_AudioAuto = 0;
-               }
-             }
+                _srv_AudioHDMIAuto = 1;
            }
-           else if(isARCAutoPersisted && !isHDMIAutoPersisted && !isSPDIFAutoPersisted)
+           else if(_AudioModeAuto.compare("FALSE") == 0)
            {
-                _srv_AudioAuto = (_ARCAudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
+                _srv_AudioHDMIAuto = 0;
            }
-           else if(!isARCAutoPersisted && isHDMIAutoPersisted && !isSPDIFAutoPersisted)
+           if(_ARCAudioModeAuto.compare("TRUE") == 0)
            {
-                _srv_AudioAuto = (_AudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
+                _srv_AudioHDMIARCAuto = 1;
            }
-           else if(!isARCAutoPersisted && !isHDMIAutoPersisted && isSPDIFAutoPersisted)
+           else if(_ARCAudioModeAuto.compare("FALSE") == 0)
            {
-                _srv_AudioAuto = (_SPDIFAudioModeAuto.compare("TRUE") == 0) ? 1 : 0;
+              _srv_AudioHDMIARCAuto = 0;
            }
-           else if(isARCAutoPersisted && isHDMIAutoPersisted && !isSPDIFAutoPersisted)
+           if(_SPDIFAudioModeAuto.compare("TRUE") == 0)
            {
-                if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_AudioModeAuto.compare("TRUE") == 0))
-                {
-                    _srv_AudioAuto = 1;
-                }
-                else
-                {
-                    _srv_AudioAuto = 0;
-                }
+                _srv_AudioSPDIFAuto = 1;
            }
-              else if(isARCAutoPersisted && !isHDMIAutoPersisted && isSPDIFAutoPersisted)
-              {
-                 if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
-                 {
-                      _srv_AudioAuto = 1;
-                 }
-                 else
-                 {
-                      _srv_AudioAuto = 0;
-                 }
-              }
-              else if(!isARCAutoPersisted && isHDMIAutoPersisted && isSPDIFAutoPersisted)
-              {
-                 if((_AudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
-                 {
-                      _srv_AudioAuto = 1;
-                 }
-                 else
-                 {
-                      _srv_AudioAuto = 0;
-                 }
-              }
-              else if(isARCAutoPersisted && isHDMIAutoPersisted && isSPDIFAutoPersisted)
-              {
-                 if((_ARCAudioModeAuto.compare("TRUE") == 0) || (_AudioModeAuto.compare("TRUE") == 0) || (_SPDIFAudioModeAuto.compare("TRUE") == 0))
-                 {
-                      _srv_AudioAuto = 1;
-                 }
-                 else
-                 {
-                      _srv_AudioAuto = 0;
-                 }
-              }
+           else if(_SPDIFAudioModeAuto.compare("FALSE") == 0)
+           {
+                _srv_AudioSPDIFAuto = 0;
+           }
+
         INT_DEBUG("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
         INT_DEBUG("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
         INT_DEBUG("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
@@ -2473,8 +2429,25 @@ IARM_Result_t _dsGetStereoMode(void *arg)
     }
     else if (param != NULL && NULL != param->handle)
     {
+        dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         /* In Auto Mode, get the effective mode */
-        if (_srv_AudioAuto) {
+        if (_APortType == dsAUDIOPORT_TYPE_SPDIF && _srv_AudioSPDIFAuto) {
+            dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
+            ret = dsGetStereoMode(param->handle, &stereoMode);
+            if(ret == dsERR_NONE) {
+                result = IARM_RESULT_SUCCESS;
+            }
+            param->mode = stereoMode;
+        }
+        else if (_APortType == dsAUDIOPORT_TYPE_HDMI && _srv_AudioHDMIAuto) {
+            dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
+            ret = dsGetStereoMode(param->handle, &stereoMode);
+            if(ret == dsERR_NONE) {
+                result = IARM_RESULT_SUCCESS;
+            }
+            param->mode = stereoMode;
+        }
+        else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC && _srv_AudioHDMIARCAuto) {
             dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
             ret = dsGetStereoMode(param->handle, &stereoMode);
             if(ret == dsERR_NONE) {
@@ -2483,7 +2456,6 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             param->mode = stereoMode;
         }
         else {
-            dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
             if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
             {
                 param->mode = _srv_SPDIF_Audiomode;
@@ -2674,9 +2646,19 @@ IARM_Result_t _dsGetStereoAuto(void *arg)
 
     dsAudioSetStereoAutoParam_t *param = (dsAudioSetStereoAutoParam_t *)arg;
 
+    dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
+
     if (param != NULL)
     {
-        param->autoMode = (_srv_AudioAuto ? 1 : 0);
+        if (_APortType == dsAUDIOPORT_TYPE_HDMI) {
+            param->autoMode = _srv_AudioHDMIAuto ? 1 : 0;
+        }
+        else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC) {
+            param->autoMode = _srv_AudioHDMIARCAuto ? 1 : 0;
+        }
+        else if (_APortType == dsAUDIOPORT_TYPE_SPDIF) {
+            param->autoMode = _srv_AudioSPDIFAuto ? 1 : 0;
+        }
     }
 
     IARM_BUS_Unlock(lock);
@@ -2698,14 +2680,17 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
 	switch(_APortType) {
 	    case dsAUDIOPORT_TYPE_HDMI:
 	        device::HostPersistence::getInstance().persistHostProperty("HDMI0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+            _srv_AudioHDMIAuto = param->autoMode;
 		break;
 
 	    case dsAUDIOPORT_TYPE_HDMI_ARC:
 	        device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+            _srv_AudioHDMIARCAuto = param->autoMode;
 		break;
 
 	    case dsAUDIOPORT_TYPE_SPDIF:
 		device::HostPersistence::getInstance().persistHostProperty("SPDIF0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+            _srv_AudioSPDIFAuto = param->autoMode;
 		break;
 
 	    default:
@@ -2741,8 +2726,6 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
             }
         }
     }
-
-    _srv_AudioAuto = param->autoMode ? 1 : 0;
 
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
