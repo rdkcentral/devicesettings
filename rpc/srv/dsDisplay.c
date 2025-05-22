@@ -55,6 +55,8 @@
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
+static bool isEdidCached = false;
+static bool isEdidBytesCached = false;
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
 #define NULL_HANDLE 0
@@ -165,16 +167,32 @@ IARM_Result_t _dsGetDisplayAspectRatio(void *arg)
 IARM_Result_t _dsGetEDID(void *arg)
 {
     _DEBUG_ENTER();
-
-    IARM_BUS_Lock(lock);
-    
-	dsDisplayGetEDIDParam_t *param = (dsDisplayGetEDIDParam_t *)arg;
+    errno_t rc = -1;
+    static dsDisplayEDID_t *edidInfo = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
+    dsDisplayGetEDIDParam_t *param = (dsDisplayGetEDIDParam_t *)arg;
     dsVideoPortType_t _VPortType;
+    if(isEdidCached && param)
+    {
+	    rc = memcpy_s(&param->edid,sizeof(param->edid),edidInfo,sizeof(dsDisplayEDID_t));
+	    if(rc!=EOK)
+		     {
+			     ERR_CHK(rc);
+	             }
+	    return IARM_RESULT_SUCCESS;
+    }
+    IARM_BUS_Lock(lock);
+    memset(edidInfo,0,sizeof(*edidInfo));
 
     dsGetEDID(param->handle, &param->edid);
     
     filterEDIDResolution(param->handle, &param->edid);
     dumpEDIDInformation( &param->edid);
+    rc = memcpy_s(edidInfo,sizeof(dsDisplayEDID_t),&param->edid,sizeof(param->edid));
+     if(rc!=EOK)
+     {
+	     ERR_CHK(rc);
+     }
+     isEdidCached = true;
 	
 	IARM_BUS_Unlock(lock);
 	
@@ -190,6 +208,22 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
 #endif
     errno_t rc = -1;
     _DEBUG_ENTER();
+    static unsigned char edid[1024] = {0};
+    static int length = 0;
+   dsDisplayGetEDIDBytesParam_t *param = (dsDisplayGetEDIDBytesParam_t *)arg;
+    if(isEdidBytesCached && param)
+	     {
+		     rc = memcpy_s(param->bytes,sizeof(param->bytes),edid,length);
+		     if(rc!=EOK)
+			      {
+				      ERR_CHK(rc);
+			      }
+		     param->length = length;
+		     param->result = dsERR_NONE; 
+		     return IARM_RESULT_SUCCESS; 
+
+              }
+
 
     IARM_BUS_Lock(lock);
 
@@ -227,6 +261,7 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
                     ERR_CHK(rc);
             }
      	    param->length = length;
+	    isEdidBytesCached = true;
         }
         param->result = ret;
     }
@@ -281,6 +316,9 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
 			INT_INFO("Disconnecting HDMI from display !!!!!!!! ..\r\n");
 			_eventData.data.hdmi_hpd.event =  dsDISPLAY_EVENT_DISCONNECTED ;
             _eventId = IARM_BUS_DSMGR_EVENT_HDMI_HOTPLUG;
+	    isEdidCached = false;
+	    isEdidBytesCached = false;
+	      INT_INFO("isEdidCached & isEdidBytesCached set to false !!!!!!..\r\n");
 			_dsSyncHdmiStatus(DS_HDMI_TAG_HOTPLUP, dsDISPLAY_EVENT_DISCONNECTED);
             break;
 
@@ -378,19 +416,17 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
 
 static void dumpEDIDInformation( dsDisplayEDID_t *edid)
 {
-    INT_INFO("[DsMgr] Product Code: %x\r\n",edid->productCode);
-    INT_INFO("[DsMgr] Serial Number: %x\r\n",edid->serialNumber);
-    INT_INFO("[DsMgr] Manufacturer Year: %d\r\n",edid->manufactureYear);
-    INT_INFO("[DsMgr] Manufacturer week: %d\r\n",edid->manufactureWeek);
-    INT_INFO("[DsMgr] Monitor Name : %s\r\n",edid->monitorName);
-    INT_INFO("[DsMgr] Hdmi Device Type : %s\r\n",(edid->hdmiDeviceType)?"HDMI":"DVI");
-    INT_INFO("[DsMgr] Hdmi Device Is Repeater : %x\r\n",edid->isRepeater);
-    INT_INFO("[DsMgr] No of Resolutions: %x\r\n",edid->numOfSupportedResolution);
-    for (size_t j = 0; j < edid->numOfSupportedResolution; j++)
+     printf("[DsMgr]dumpEDIDInformation: Product:%x SN:%x Year:%d Week:%d Monitor:%s Type:%s Repeater:%x\n",
+		 		    edid->productCode,edid->serialNumber,edid->manufactureYear,edid->manufactureWeek,edid->monitorName,
+						    edid->hdmiDeviceType?"HDMI":"DVI",edid->isRepeater);
+     printf("Supported resolutions: ");
+     for (size_t j = 0; j < edid->numOfSupportedResolution; j++)
     {
         dsVideoPortResolution_t *edidResn = &(edid->suppResolutionList[j]);
-        INT_INFO("[DsMgr] Resolution Name: %s\r\n",edidResn->name);
+	 printf("%s,",edidResn->name);
+        
     }
+     printf("\n");
 }
 
 
