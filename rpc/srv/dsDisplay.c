@@ -248,7 +248,7 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
         }   
     }   
 
-    dsDisplayGetEDIDBytesParam_t *param = (dsDisplayGetEDIDBytesParam_t *)arg;
+   
 
     if (func != 0) {
         unsigned char edid[1024] = {0};
