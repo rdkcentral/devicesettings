@@ -251,8 +251,6 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
    
 
     if (func != 0) {
-        unsigned char edid[1024] = {0};
-        int length = 0;
         dsError_t ret = func(param->handle, edid, &length);
         if (ret == dsERR_NONE && length <= 1024) {
             rc = memcpy_s(param->bytes,sizeof(param->bytes),edid,length);
