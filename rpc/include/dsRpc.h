@@ -1023,7 +1023,7 @@ typedef struct _dsVRRStatusParam_t
 {
     dsError_t               result;
     dsHdmiInPort_t          iHdmiPort;
-    dsVRRType_t             vrrStatus;
+    dsHdmiInVrrStatus_t             vrrStatus;
 }dsVRRStatusParam_t;
 
 typedef struct _dsGetHDMIARCPortIdParam_t {
