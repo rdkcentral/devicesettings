@@ -1469,9 +1469,9 @@ IARM_Result_t _dsGetVRRSupport (void *arg)
 }
 
 
-static dsError_t getVRRStatus (dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus) {
+static dsError_t getVRRStatus (dsHdmiInPort_t iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus) {
     dsError_t eRet = dsERR_GENERAL;
-    typedef dsError_t (*dsHdmiInGetVRRStatus_t)(dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus);
+    typedef dsError_t (*dsHdmiInGetVRRStatus_t)(dsHdmiInPort_t iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus);
     static dsHdmiInGetVRRStatus_t dsHdmiInGetVRRStatusFunc = 0;
     if (dsHdmiInGetVRRStatusFunc == 0) {
        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
@@ -1502,14 +1502,15 @@ static dsError_t getVRRStatus (dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus)
 
 IARM_Result_t _dsGetVRRStatus (void *arg)
 {
-    dsVRRType_t vrrStatus = dsVRR_NONE;
+    dsHdmiInVrrStatus_t vrrStatus = {dsVRR_NONE,0};
     _DEBUG_ENTER();
 
     dsVRRStatusParam_t *param = (dsVRRStatusParam_t *) arg;
     IARM_BUS_Lock(lock);
     param->result = getVRRStatus (param->iHdmiPort, &vrrStatus);
-    param->vrrStatus = vrrStatus;
-    INT_INFO("[srv] %s: dsGetVRRStatus vrrStatus: %d\r\n", __FUNCTION__, param->vrrStatus);
+    param->vrrStatus.vrrType = vrrStatus.vrrType;
+    param->vrrStatus.vrrAmdfreesyncFramerate_Hz = vrrStatus.vrrAmdfreesyncFramerate_Hz;
+    INT_INFO("[srv] %s: dsGetVRRStatus vrrType: %d vrrAmdfreesyncFramerate_Hz: %f\r\n", __FUNCTION__, param->vrrStatus.vrrType, param->vrrStatus.vrrAmdfreesyncFramerate_Hz);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
