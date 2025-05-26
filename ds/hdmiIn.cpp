@@ -567,13 +567,13 @@ void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
     printf ("%s:%d - EDID VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, *vrrSupport);
 }
 
-void HdmiInput::getVRRStatus (int iHdmiPort, dsVRRType_t *vrrStatus) {
+void HdmiInput::getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus) {
     dsError_t ret = dsHdmiInGetVRRStatus (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrStatus);
     if (ret != dsERR_NONE)
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - VRR Status = %d\n", __FUNCTION__, __LINE__, *vrrStatus);
+    printf ("%s:%d - VRR Type = %d , VRR FrameRate = %f\n", __FUNCTION__, __LINE__, vrrStatus->vrrType,vrrStatus->vrrAmdfreesyncFramerate_Hz);
 }
 
 void HdmiInput::getHdmiALLMStatus (int iHdmiPort, bool *allmStatus) {
