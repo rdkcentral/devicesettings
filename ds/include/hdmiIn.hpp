@@ -99,7 +99,7 @@ public:
     void getEdid2AllmSupport(int iHdmiPort, bool *allm_support);
     void setVRRSupport (int iHdmiPort, bool vrr_suppport);
     void getVRRSupport (int iHdmiPort, bool *vrr_suppport);
-    void getVRRStatus (int iHdmiPort, dsVRRType_t *vrrStatus);
+    void getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus);
     void getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion);
 private:
     HdmiInput ();           /* default constructor */
