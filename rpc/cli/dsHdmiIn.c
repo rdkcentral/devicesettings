@@ -506,7 +506,7 @@ dsError_t dsHdmiInGetVRRSupport (dsHdmiInPort_t iHdmiPort, bool *vrr_support)
     return dsERR_GENERAL;
 }
 
-dsError_t dsHdmiInGetVRRStatus (dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus)
+dsError_t dsHdmiInGetVRRStatus (dsHdmiInPort_t iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus)
 {
     _DEBUG_ENTER();
     dsVRRStatusParam_t param;
@@ -519,7 +519,8 @@ dsError_t dsHdmiInGetVRRStatus (dsHdmiInPort_t iHdmiPort, dsVRRType_t *vrrStatus
 
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
-        *vrrStatus =  param.vrrStatus;
+        vrrStatus->vrrType =  param.vrrStatus.vrrType;
+        vrrStatus->vrrAmdfreesyncFramerate_Hz =  param.vrrStatus.vrrAmdfreesyncFramerate_Hz;
         return param.result;
     }
     printf("%s:%d - dsERR_GENERAL\n", __FUNCTION__,__LINE__);
