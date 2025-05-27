@@ -25,8 +25,15 @@ cmake -G Ninja -S "$GITHUB_WORKSPACE" -B build/devicesettings \
 -DPLUGIN_FIRMWAREUPDATE=ON \
 -DPLUGIN_MAINTENANCEMANAGER=ON \
 -DCMAKE_CXX_FLAGS="-DEXCEPTIONS_ENABLE=ON \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/audiocapturemgr \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/rdk/iarmbus \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/rdk/iarmmgrs-hal \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/ccec/drivers \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/network \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/thunder \
+-I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/devicesettings \
 -include ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/Iarm.h \
 --coverage -Wall -Werror -Wno-error=format \
 -Wl,-wrap,system -Wl,-wrap,popen -Wl,-wrap,syslog -Wl,-wrap,wpa_ctrl_open -Wl,-wrap,wpa_ctrl_request -Wl,-wrap,wpa_ctrl_close -Wl,-wrap,wpa_ctrl_pending -Wl,-wrap,wpa_ctrl_recv -Wl,-wrap,wpa_ctrl_attach \
