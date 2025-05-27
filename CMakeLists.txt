@@ -18,3 +18,10 @@
 ###
 
 cmake_minimum_required(VERSION 3.3)
+
+add_custom_target(
+    rdk_build ALL
+    COMMAND ${CMAKE_SOURCE_DIR}/rdk_build.sh build
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running rdk_build.sh"
+)
