@@ -25,3 +25,10 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running rdk_build.sh"
 )
+
+add_custom_target(
+    install
+    COMMAND ${CMAKE_SOURCE_DIR}/rdk_build.sh install
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running rdk_build.sh install"
+)
