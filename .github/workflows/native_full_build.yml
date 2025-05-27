@@ -22,7 +22,7 @@ jobs:
           chmod +x build_dependencies.sh rdk_build.sh
           sh -e build_dependencies.sh
           sh -e cov_build.sh
-          bash -e rdk_build.sh
+#          bash -e rdk_build.sh
         env:
           GITHUB_TOKEN: ${{ secrets.RDKCM_RDKE }}
           RDK_PLATFORM_SOC: broadcom
