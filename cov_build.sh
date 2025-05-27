@@ -9,7 +9,9 @@ ls -la ${GITHUB_WORKSPACE}
 echo "======================================================================================"
 echo "building devicesettings"
 
+ls -la
 cd ${GITHUB_WORKSPACE}
+ls -la
 cmake -G Ninja -S "$GITHUB_WORKSPACE" -B build/devicesettings \
 -DUSE_THUNDER_R4=ON \
 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr" \
