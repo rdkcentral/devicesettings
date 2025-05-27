@@ -33,7 +33,6 @@ cmake -G Ninja -S "$GITHUB_WORKSPACE" -B build/devicesettings \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/network \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/thunder \
--I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/devicesettings \
 -include ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/Iarm.h \
 --coverage -Wall -Werror -Wno-error=format \
 -Wl,-wrap,system -Wl,-wrap,popen -Wl,-wrap,syslog -Wl,-wrap,wpa_ctrl_open -Wl,-wrap,wpa_ctrl_request -Wl,-wrap,wpa_ctrl_close -Wl,-wrap,wpa_ctrl_pending -Wl,-wrap,wpa_ctrl_recv -Wl,-wrap,wpa_ctrl_attach \
