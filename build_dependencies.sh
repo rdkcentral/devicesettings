@@ -17,8 +17,8 @@ export STRIP=strip
 
 apt-get update && apt-get install -y libsoup-3.0 libcjson-dev libdbus-1-dev
 
-mkdir -p /usr/local/include/wdmp-c
-cp $WORKDIR/stubs/wdmp-c.h /usr/local/include/wdmp-c/
+#mkdir -p /usr/local/include/wdmp-c
+#cp $WORKDIR/stubs/wdmp-c.h /usr/local/include/wdmp-c/
 
 cd $ROOT
 rm -rf rdk_logger
