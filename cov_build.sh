@@ -62,13 +62,13 @@ export RDK_COMPONENT_NAME=${RDK_COMPONENT_NAME-`basename $RDK_SOURCE_PATH`}
 cd ${RDK_SOURCE_PATH}
 
 export STANDALONE_BUILD_ENABLED=y
-export IARM_MGRS=$WORKDIR
-export UTILS_PATH=$IARM_MGRS/utils
+export DS_MGRS=$WORKDIR
+export UTILS_PATH=$DS_MGRS/utils
 
 find $WORKDIR -iname "*.o" -exec rm -v {} \;
 find $WORKDIR -iname "*.so*" -exec rm -v {} \;
 
 make -C $UTILS_PATH CFLAGS="-I${DS_PATH}/core/include/"
-#cp $UTILS_PATH/libiarmUtils.so* /usr/local/lib/
+cp $UTILS_PATH/libiarmUtils.so* /usr/local/lib/
 
-make CFLAGS="-I${DS_IF_PATH}/include  -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include -I$UTILS_PATH -I${IARM_MGRS}/sysmgr/include -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include -I${DS_HAL_PATH} -I${DS_PATH}/stubs -I${POWER_IF_PATH}/include/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${IARM_MGRS}/mfr/include/ -I${IARM_MGRS}/mfr/common -I${DEEPSLEEP_IF_PATH}/include -I${IARM_MGRS}/hal/include -I${IARM_MGRS}/power -I${IARM_MGRS}/power/include" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/include -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -lds -ldshal -ldshalsrv -liarmUtils"
+make CFLAGS="-I${DS_IF_PATH}/include  -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include -I$UTILS_PATH -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include -I${DS_HAL_PATH} -I${DS_PATH}/stubs -I${POWER_IF_PATH}/include/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${DEEPSLEEP_IF_PATH}/include" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/include -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -lds -ldshal -ldshalsrv -liarmUtils"
