@@ -36,13 +36,13 @@ echo "Building Devicesttings stubs"
 #g++ -fPIC -shared -o libdshalsrv.so dshalsrv_stubs.c -I${DS_IF_PATH}/include -I${IARMBUS_PATH}/core/include -I${DS_PATH}/rpc/include
 #g++ -fPIC -shared -o libds.so ds_stubs.cpp -I${DS_IF_PATH}/include/ -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include
 #
-cp libIARMBus.so /usr/local/lib/
-cp libtelemetry_msgsender.so /usr/local/lib/
-cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
-
-cp libds.so /usr/local/lib/
-cp libdshal.so /usr/local/lib/
-cp libdshalsrv.so /usr/local/lib/
+#cp libIARMBus.so /usr/local/lib/
+#cp libtelemetry_msgsender.so /usr/local/lib/
+#cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
+#
+#cp libds.so /usr/local/lib/
+#cp libdshal.so /usr/local/lib/
+#cp libdshalsrv.so /usr/local/lib/
 
 echo "##### Building DEVICESETTINGS modules"
 cd $WORKDIR
