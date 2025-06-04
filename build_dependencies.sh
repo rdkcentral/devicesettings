@@ -17,6 +17,9 @@ export STRIP=strip
 
 apt-get update && apt-get install -y libsoup-3.0 libcjson-dev libdbus-1-dev
 
+mkdir -p /usr/local/include/wdmp-c
+cp $WORKDIR/stubs/wdmp-c.h /usr/local/include/wdmp-c/
+
 cd $ROOT
 rm -rf rdk_logger
 git clone https://github.com/rdkcentral/rdk_logger.git
@@ -35,17 +38,6 @@ export PKG_CONFIG_PATH=${INSTALL_DIR}/rdk_logger/log4c-1.2.4:$PKG_CONFIG_PATH
 autoreconf -i
 ./configure
 make clean && make && make install
-
-cd $ROOT
-rm -rf iarmbus
-git clone https://github.com/rdkcentral/iarmbus.git
-export IARMBUS_PATH=$ROOT/iarmbus
-export IARM_PATH=$IARMBUS_PATH
-
-cd $ROOT
-rm -rf iarmmgrs
-git clone https://github.com/rdkcentral/iarmmgrs.git
-export IARMMGRS_PATH=$ROOT/iarmmgrs
 
 cd $ROOT
 rm -rf devicesettings
