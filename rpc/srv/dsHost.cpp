@@ -70,6 +70,11 @@ static dsSleepMode_t _SleepMode = dsHOST_SLEEP_MODE_LIGHT;
 
 using namespace std;
 
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
 static string enumToString( dsSleepMode_t mode );
 static dsSleepMode_t stringToEnum ( string mode );
 #define DSHAL_API_VERSION_MAJOR_DEFAULT     1 
