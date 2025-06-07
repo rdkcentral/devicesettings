@@ -97,6 +97,9 @@ public:
     void getAVLatency(int *audio_latency,int *video_latency);
     void setEdid2AllmSupport(int iHdmiPort,bool allm_suppport);
     void getEdid2AllmSupport(int iHdmiPort, bool *allm_support);
+    void setVRRSupport (int iHdmiPort, bool vrr_suppport);
+    void getVRRSupport (int iHdmiPort, bool *vrr_suppport);
+    void getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus);
     void getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion);
 private:
     HdmiInput ();           /* default constructor */
