@@ -27,7 +27,9 @@ clean:
 	@make -C rpc/srv $@ 
 	@make -C rpc/cli $@ 
 	@make -C ds $@
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 	@make -C hal/src $@
+else
 #	@make -C sample $@
 	@make -C test $@
 

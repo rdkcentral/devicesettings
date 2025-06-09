@@ -17,11 +17,18 @@
 # limitations under the License.
 ##########################################################################
 RM          := rm -rf 
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 INCLUDE     := -I$(PWD)/ds/include                      \
     	       -I$(PWD)/ds                              \
 			   -I$(PWD)/rpc/include 					\
     	       -I$(PWD)/hal/include                     \
     	       -I$(PWD)/hal/src
+else
+INCLUDE     := -I$(PWD)/ds/include                      \
+    	       -I$(PWD)/ds                              \
+			   -I$(PWD)/rpc/include 					\
+    	       -I$(PWD)/hal/include                     \
+endif
 
 
 INCLUDE      += $(HAL_INCLUDE)
