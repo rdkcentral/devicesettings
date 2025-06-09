@@ -41,7 +41,7 @@ gcc -fPIC -shared -o libdshal.so dshal_stubs.c -I${DS_IF_PATH}/include -I$WORKDI
 #cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
 
 #cp libds.so /usr/local/lib/
-#cp libdshal.so /usr/local/lib/
+cp libdshal.so /usr/local/lib/
 #cp libdshalsrv.so /usr/local/lib/
 
 echo "##### Building DEVICESETTINGS modules"
