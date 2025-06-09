@@ -69,4 +69,4 @@ find $WORKDIR -iname "*.so*" -exec rm -v {} \;
 
 echo "##### Triggering make"
 
-make CFLAGS="-I${DS_IF_PATH}/include -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include -I${DS_HAL_PATH} -I${DS_PATH}/stubs -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${DEEPSLEEP_IF_PATH}/include" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/include -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -lds -ldshal -ldshalsrv"
+make CFLAGS="-I${DS_IF_PATH}/include -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include  -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include -I${DS_HAL_PATH} -I${DS_PATH}/stubs -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${DEEPSLEEP_IF_PATH}/include" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/include -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -lds -ldshal -ldshalsrv"
