@@ -36,7 +36,7 @@ gcc -fPIC -shared -o libdshal.so dshal_stubs.c -I${DS_IF_PATH}/include -I$WORKDI
 #g++ -fPIC -shared -o libdshalsrv.so dshalsrv_stubs.c -I${DS_IF_PATH}/include -I${DS_PATH}/rpc/include
 #g++ -fPIC -shared -o libds.so ds_stubs.cpp -I${DS_IF_PATH}/include/ -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include
 
-cp libIARMBus.so /usr/local/lib/
+#cp libIARMBus.so /usr/local/lib/
 #cp libtelemetry_msgsender.so /usr/local/lib/
 #cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
 
@@ -70,4 +70,4 @@ find $WORKDIR -iname "*.so*" -exec rm -v {} \;
 
 echo "##### Triggering make"
 
-make CFLAGS="-I${DS_IF_PATH}/include -I${DS_MGRS}/stubs  -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include -I$UTILS_PATH -I${IARM_MGRS}/sysmgr/include -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include -I${DS_HAL_PATH} -I${POWER_IF_PATH}/include/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${IARM_MGRS}/mfr/include/ -I${IARM_MGRS}/mfr/common -I${DEEPSLEEP_IF_PATH}/include -I${IARM_MGRS}/hal/include -I${IARM_MGRS}/power -I${IARM_MGRS}/power/include" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/include -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -lds -ldshal -ldshalsrv -liarmUtils"
+make CFLAGS="-fPIC -I${DS_IF_PATH}/include -I${DS_MGRS}/stubs  -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include -I$UTILS_PATH -I${IARM_MGRS}/sysmgr/include -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include -I${DS_HAL_PATH} -I${POWER_IF_PATH}/include/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${IARM_MGRS}/mfr/include/ -I${IARM_MGRS}/mfr/common -I${DEEPSLEEP_IF_PATH}/include -I${IARM_MGRS}/hal/include -I${IARM_MGRS}/power -I${IARM_MGRS}/power/include" LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/include -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -lds -ldshal -ldshalsrv -liarmUtils"
