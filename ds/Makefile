@@ -33,15 +33,15 @@ INCLUDE     := -I$(PWD)                                 \
     		   -I$(PWD)/hal/src                \
     		   -I$(PWD)/ds                              \
     		   -I$(PWD)/rpc/include            \
-               -I$(PWD)/ds/include                      \
+               -I$(PWD)/ds/include                      
 else
 INCLUDE     := -I$(PWD)                                 \
-			   -I$(LOG4C_INSTALL_DIR)/include           \
-			   -I$(PWD)/hal/include                     \
-			   -I$(PWD)/ds                              \
-			   -I$(PWD)/rpc/include            \
-			   -I$(PWD)/ds/include                      \
-			   -I$(PWD)/config
+               -I$(LOG4C_INSTALL_DIR)/include           \
+               -I$(PWD)/config                       \
+    		   -I$(PWD)/hal/include                     \
+    		   -I$(PWD)/ds                              \
+    		   -I$(PWD)/rpc/include            \
+               -I$(PWD)/ds/include  
 endif
               
 

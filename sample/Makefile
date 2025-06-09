@@ -27,7 +27,7 @@ else
 INCLUDE     := -I$(PWD)/ds/include                      \
     	       -I$(PWD)/ds                              \
 			   -I$(PWD)/rpc/include 					\
-    	       -I$(PWD)/hal/include                     \
+    	       -I$(PWD)/hal/include                     
 endif
 
 
