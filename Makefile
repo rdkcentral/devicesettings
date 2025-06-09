@@ -29,7 +29,7 @@ clean:
 	@make -C ds $@
 ifneq ($(STANDALONE_BUILD_ENABLED),y)
 	@make -C hal/src $@
-else
+endif
 #	@make -C sample $@
 	@make -C test $@
 
