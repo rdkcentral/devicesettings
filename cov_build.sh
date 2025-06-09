@@ -32,7 +32,7 @@ cd ./stubs
 #g++ -fPIC -shared -o libIARMBus.so iarm_stubs.cpp -I$WORKDIR/stubs -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I$IARMBUS_PATH/core -I$IARMBUS_PATH/core/include -fpermissive
 #g++ -fPIC -shared -o libWPEFrameworkPowerController.so powerctrl_stubs.cpp  -I$WORKDIR/stubs -I${POWER_IF_PATH}/include -fpermissive
 
-gcc -fPIC -shared -o libdshal.so dshal_stubs.c -I${DS_IF_PATH}/include -I$WORKDIR/mfr/include -DRDK_DSHAL_NAME="libdshal.so"
+gcc -fPIC -shared -o libdshal.so dshal_stubs.c -I${DS_IF_PATH}/include -I$WORKDIR/mfr/include 
 #g++ -fPIC -shared -o libdshalsrv.so dshalsrv_stubs.c -I${DS_IF_PATH}/include -I${DS_PATH}/rpc/include
 #g++ -fPIC -shared -o libds.so ds_stubs.cpp -I${DS_IF_PATH}/include/ -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include
 
