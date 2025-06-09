@@ -40,9 +40,9 @@ cp libIARMBus.so /usr/local/lib/
 #cp libtelemetry_msgsender.so /usr/local/lib/
 #cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
 
-cp libds.so /usr/local/lib/
-cp libdshal.so /usr/local/lib/
-cp libdshalsrv.so /usr/local/lib/
+#cp libds.so /usr/local/lib/
+#cp libdshal.so /usr/local/lib/
+#cp libdshalsrv.so /usr/local/lib/
 
 echo "##### Building DEVICESETTINGS modules"
 cd $WORKDIR
