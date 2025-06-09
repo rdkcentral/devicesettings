@@ -40,6 +40,17 @@ autoreconf -i
 make clean && make && make install
 
 cd $ROOT
+rm -rf iarmbus
+git clone https://github.com/rdkcentral/iarmbus.git
+export IARMBUS_PATH=$ROOT/iarmbus
+export IARM_PATH=$IARMBUS_PATH
+
+cd $ROOT
+rm -rf iarmmgrs
+git clone https://github.com/rdkcentral/iarmmgrs.git
+export IARMMGRS_PATH=$ROOT/iarmmgrs
+
+cd $ROOT
 rm -rf devicesettings
 git clone https://github.com/rdkcentral/devicesettings.git
 export DS_PATH=$ROOT/devicesettings
