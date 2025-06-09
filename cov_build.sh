@@ -30,19 +30,19 @@ echo "Building Devicesttings stubs"
 cd $WORKDIR
 cd ./stubs
 g++ -fPIC -shared -o libIARMBus.so iarm_stubs.cpp -I$WORKDIR/stubs -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I$IARMBUS_PATH/core -I$IARMBUS_PATH/core/include -fpermissive
-#g++ -fPIC -shared -o libWPEFrameworkPowerController.so powerctrl_stubs.cpp  -I$WORKDIR/stubs -I${POWER_IF_PATH}/include -fpermissive
+g++ -fPIC -shared -o libWPEFrameworkPowerController.so powerctrl_stubs.cpp  -I$WORKDIR/stubs -I${POWER_IF_PATH}/include -fpermissive
 
 gcc -fPIC -shared -o libdshal.so dshal_stubs.c -I${DS_IF_PATH}/include -I$WORKDIR/mfr/include
-#g++ -fPIC -shared -o libdshalsrv.so dshalsrv_stubs.c -I${DS_IF_PATH}/include -I${DS_PATH}/rpc/include
-#g++ -fPIC -shared -o libds.so ds_stubs.cpp -I${DS_IF_PATH}/include/ -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include
-#
+g++ -fPIC -shared -o libdshalsrv.so dshalsrv_stubs.c -I${DS_IF_PATH}/include -I${DS_PATH}/rpc/include
+g++ -fPIC -shared -o libds.so ds_stubs.cpp -I${DS_IF_PATH}/include/ -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include
+
 cp libIARMBus.so /usr/local/lib/
-#cp libtelemetry_msgsender.so /usr/local/lib/
-#cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
-#
-#cp libds.so /usr/local/lib/
+cp libtelemetry_msgsender.so /usr/local/lib/
+cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
+
+cp libds.so /usr/local/lib/
 cp libdshal.so /usr/local/lib/
-#cp libdshalsrv.so /usr/local/lib/
+cp libdshalsrv.so /usr/local/lib/
 
 echo "##### Building DEVICESETTINGS modules"
 cd $WORKDIR
