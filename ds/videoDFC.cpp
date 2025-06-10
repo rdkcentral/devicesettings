@@ -65,7 +65,7 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsVIDEO_ZOOM_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsVIDEO_ZOOM_MAX, "Video DFC names array size mismatch");
 
 const int VideoDFC::kUnknown 				= dsVIDEO_ZOOM_UNKNOWN;
 const int VideoDFC::kNone 					= dsVIDEO_ZOOM_NONE;
