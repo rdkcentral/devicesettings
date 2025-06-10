@@ -14,3 +14,12 @@ dsError_t dsGetDisplay(dsVideoPortType_t m_vType, int index, intptr_t *handle)
     return dsERR_NONE;
 }
 
+dsError_t dsDisplayInit()
+{
+    return dsERR_NONE;
+}
+
+dsError_t dsRegisterDisplayEventCallback(intptr_t handle, dsDisplayEventCallback_t callback)
+{
+    return dsERR_NONE;
+}
