@@ -39,6 +39,18 @@ autoreconf -i
 ./configure
 make clean && make && make install
 
+#Build rfc
+cd $ROOT
+rm -rf rfc
+git clone https://github.com/rdkcentral/rfc.git
+cd rfc
+autoreconf -i
+./configure --enable-rfctool=yes --enable-tr181set=yes
+cd rfcapi
+make librfcapi_la_CPPFLAGS="-I/usr/include/cjson"
+make install
+export RFC_PATH=$ROOT/rfc
+
 cd $ROOT
 rm -rf iarmbus
 git clone https://github.com/rdkcentral/iarmbus.git
