@@ -51,6 +51,11 @@ git clone https://github.com/rdkcentral/iarmmgrs.git
 export IARMMGRS_PATH=$ROOT/iarmmgrs
 
 cd $ROOT
+rm -rf rdk-halif-power_manager
+git clone https://github.com/rdkcentral/rdk-halif-power_manager.git
+export POWER_IF_PATH=$ROOT/rdk-halif-power_manager
+
+cd $ROOT
 rm -rf devicesettings
 git clone https://github.com/rdkcentral/devicesettings.git
 export DS_PATH=$ROOT/devicesettings
