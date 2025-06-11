@@ -45,6 +45,12 @@ namespace {
 			29.97,
 			50,
 			59.94,
+            100,
+            119.94,
+            120,
+            200,
+            239.76,
+            240
 	};
 	const char * _names[] = {
 			"UnKnown", //unkown
@@ -56,6 +62,12 @@ namespace {
 			"29.97",
 			"50",
 			"59.94",
+            "100",
+            "119.94",
+            "120",
+            "200",
+            "239.76",
+            "240"
 	};
 
 	inline bool isValid(int id) {
@@ -66,7 +78,9 @@ namespace {
 
 namespace device {
 typedef int _SafetyCheck[(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
 typedef int _SafetyCheck[(dsUTL_DIM(_names)  == dsVIDEO_FRAMERATE_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
 
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;

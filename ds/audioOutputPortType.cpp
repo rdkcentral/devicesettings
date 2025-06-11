@@ -61,7 +61,7 @@ namespace {
 
 namespace device {
 
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsAUDIOPORT_TYPE_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsAUDIOPORT_TYPE_MAX, "Audio output port type names array size mismatch");
 
 const int AudioOutputPortType::kIDLR 			= dsAUDIOPORT_TYPE_ID_LR;
 const int AudioOutputPortType::kHDMI 			= dsAUDIOPORT_TYPE_HDMI;
