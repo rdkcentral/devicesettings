@@ -59,7 +59,7 @@ namespace {
 
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsVIDEO_PIXELRES_MAX) ? 1 : 0];
+static_assert(dsUTL_DIM(_names) == dsVIDEO_PIXELRES_MAX, "Pixel resolution names array size mismatch");
 
 const int PixelResolution::k720x480             = dsVIDEO_PIXELRES_720x480;
 const int PixelResolution::k720x576             = dsVIDEO_PIXELRES_720x576;

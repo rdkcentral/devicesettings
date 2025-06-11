@@ -108,8 +108,8 @@ namespace {
 
 namespace device {
 
-typedef int _SafetyCheck[(dsUTL_DIM(_colorNames) == dsFPD_COLOR_MAX) ? 1 : -1];
-typedef int _SafetyCheck[(dsUTL_DIM(_indicatorNames) == dsFPD_INDICATOR_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_indicatorNames) == dsFPD_INDICATOR_MAX, "Indicator names array size mismatch");
+static_assert(dsUTL_DIM(_colorNames) == dsFPD_COLOR_MAX, "Color names array size mismatch");
 
 const int FrontPanelIndicator::Color::kBlue   = dsFPD_COLOR_BLUE;
 const int FrontPanelIndicator::Color::kGreen  = dsFPD_COLOR_GREEN;

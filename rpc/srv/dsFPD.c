@@ -412,7 +412,7 @@ IARM_Result_t _dsGetFPBrightness(void *arg)
 	     param->eBrightness = _dsPowerBrightness;
 	}
 
-	INT_INFO("_dsGetFPBrightness Power  Brightness is %d _dsPowerBrightness: %d from persist: %d   \r\n",param->eBrightness,_dsPowerBrightness,param->toPersist)
+	INT_INFO("_dsGetFPBrightness Power  Brightness is %d _dsPowerBrightness: %d from persist: %d   \r\n",param->eBrightness,_dsPowerBrightness,param->toPersist);
 
 	IARM_BUS_Unlock(lock);
 	return IARM_RESULT_SUCCESS;

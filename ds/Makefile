@@ -25,6 +25,7 @@ INSTALL     := $(PWD)/install
 OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 #$(PWD)/config should be first include path
 # to override generic configs
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 INCLUDE     := -I$(PWD)                                 \
                -I$(LOG4C_INSTALL_DIR)/include           \
                -I$(PWD)/config                       \
@@ -32,7 +33,16 @@ INCLUDE     := -I$(PWD)                                 \
     		   -I$(PWD)/hal/src                \
     		   -I$(PWD)/ds                              \
     		   -I$(PWD)/rpc/include            \
-               -I$(PWD)/ds/include                      \
+               -I$(PWD)/ds/include                      
+else
+INCLUDE     := -I$(PWD)                                 \
+               -I$(LOG4C_INSTALL_DIR)/include           \
+               -I$(PWD)/config                       \
+    		   -I$(PWD)/hal/include                     \
+    		   -I$(PWD)/ds                              \
+    		   -I$(PWD)/rpc/include            \
+               -I$(PWD)/ds/include  
+endif
               
 
 

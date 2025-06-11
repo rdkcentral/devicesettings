@@ -56,7 +56,7 @@ namespace {
 
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsVIDEO_SSMODE_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsVIDEO_SSMODE_MAX, "StereoScopicMode names array size mismatch");
 
 const int StereoScopicMode::kUnkown				= dsVIDEO_SSMODE_UNKNOWN;
 const int StereoScopicMode::k2D					= dsVIDEO_SSMODE_2D;

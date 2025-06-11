@@ -18,12 +18,18 @@
 ##########################################################################
 RM:= rm -rf 
 
-
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 INCLUDE:= -I$(PWD)/ds                              \
     	  -I$(PWD)/ds/include                     \
     	  -I$(PWD)/hal/include                     \
     	  -I$(PWD)/hal/src                         \
 	  -I$(PWD)/boost_1_50_0 
+else
+INCLUDE:= -I$(PWD)/ds                              \
+		  -I$(PWD)/ds/include                     \
+		  -I$(PWD)/hal/include                     \
+	  -I$(PWD)/boost_1_50_0
+endif
 
 
 

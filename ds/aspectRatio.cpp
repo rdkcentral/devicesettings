@@ -52,7 +52,7 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsVIDEO_ASPECT_RATIO_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsVIDEO_ASPECT_RATIO_MAX, "Aspect ratio names array size mismatch");
 
 const int AspectRatio::k4x3 	= dsVIDEO_ASPECT_RATIO_4x3;
 const int AspectRatio::k16x9 	= dsVIDEO_ASPECT_RATIO_16x9;

@@ -23,10 +23,16 @@ LIBNAMEFULL := lib$(LIBNAME).so
 INSTALL     := $(PWD)/install
 OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJS        += $(patsubst %.c,%.o,$(wildcard *.c))
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 INCLUDE     := -I$(PWD)                         \
                -I$(PWD)/hal/include             \
                -I$(PWD)/hal/src             \
-               -I$(PWD)/rpc/include             
+               -I$(PWD)/rpc/include  
+else
+INCLUDE     := -I$(PWD)                         \
+			   -I$(PWD)/hal/include             \
+			   -I$(PWD)/rpc/include   
+endif        
 
 
 INCLUDE      += $(HAL_INCLUDE)
