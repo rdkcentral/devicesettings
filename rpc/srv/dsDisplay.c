@@ -67,7 +67,7 @@ IARM_Result_t _dsGetDisplayAspectRatio(void *arg);
 IARM_Result_t _dsGetEDID(void *arg);
 IARM_Result_t _dsGetEDIDBytes(void *arg);
 IARM_Result_t _dsDisplayTerm(void *arg);
-void _dsDisplayEventCallback(int handle, dsDisplayEvent_t event, void *eventData);
+void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *eventData);
 static void  filterEDIDResolution(intptr_t Shandle, dsDisplayEDID_t *edid);
 static void  dumpEDIDInformation( dsDisplayEDID_t *edid);
 static dsVideoPortType_t _GetDisplayPortType(intptr_t handle);

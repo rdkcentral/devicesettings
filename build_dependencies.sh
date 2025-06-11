@@ -74,6 +74,6 @@ export DS_PATH=$ROOT/devicesettings
 
 cd $ROOT
 rm -rf rdk-halif-device_settings
-git clone https://github.com/rdkcentral/rdk-halif-device_settings.git
+git clone --branch 4.1.3 --depth 1 https://github.com/rdkcentral/rdk-halif-device_settings.git
 export DS_IF_PATH=$ROOT/rdk-halif-device_settings
 
