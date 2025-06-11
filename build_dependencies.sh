@@ -78,5 +78,5 @@ git clone --branch 4.1.3 --depth 1 https://github.com/rdkcentral/rdk-halif-devic
 export DS_IF_PATH=$ROOT/rdk-halif-device_settings
 
 
-patch -p1 < "$WORKDIR/patch/dsDisplay.patch"
+patch -p1 < "$WORKDIR/patches/dsDisplay.patch"
 
