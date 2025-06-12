@@ -17,7 +17,9 @@
 # limitations under the License.
 ##########################################################################
 all:
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 	@make -C hal/src uninstall clean all
+endif
 	@make -C rpc/cli uninstall clean all
 	@make -C rpc/srv uninstall clean all
 	@make -C ds uninstall clean all
@@ -27,7 +29,9 @@ clean:
 	@make -C rpc/srv $@ 
 	@make -C rpc/cli $@ 
 	@make -C ds $@
+ifneq ($(STANDALONE_BUILD_ENABLED),y)
 	@make -C hal/src $@
+endif
 #	@make -C sample $@
 	@make -C test $@
 

@@ -2065,7 +2065,20 @@ IARM_Result_t dsAudioMgr_init()
 #else
 		std::string _AudioModeSettings("STEREO");
 #endif     
-		_AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode",_AudioModeSettings);
+		INT_INFO("[%s] Checking Host persistance", __FUNCTION__);
+        try{
+		_AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode");
+        }
+        catch(...)
+        {
+              INT_INFO("[%s] HDMI0.AudioMode not in host persistance. Checking default.", __FUNCTION__);
+               try{
+                  _AudioModeSettings = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.AudioMode");
+               }
+               catch(...){
+                  INT_INFO("[%s] HDMI0.AudioMode not in default host persistance.", __FUNCTION__);
+               }
+        }
 		INT_DEBUG("The HDMI Audio Mode Setting on startup  is %s \r\n",_AudioModeSettings.c_str());
 		if (_AudioModeSettings.compare("SURROUND") == 0)
 		{
@@ -2111,27 +2124,27 @@ IARM_Result_t dsAudioMgr_init()
                 }
             #endif
 
-            bool isHDMIAutoPersisted = false;
-            bool isARCAutoPersisted = false;
-            bool isSPDIFAutoPersisted = false;
-
             try {
-            _AudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode.AUTO",_AudioModeAuto);
-            isHDMIAutoPersisted = true;
-	    }
-	    catch(...) {
+                _AudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode.AUTO",_AudioModeAuto);
+            }
+	        catch(...) {
+                INT_INFO("HDMI0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                try {
+                    _AudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.AudioMode.AUTO");
+                }
+                catch(...) {
 #ifdef IGNORE_EDID_LOGIC
-	        _AudioModeAuto = true;
+	                _AudioModeAuto = true;
 #else
-	        _AudioModeAuto = false;
+	                _AudioModeAuto = false;
 #endif
+                }
 	    }
            std::string _ARCAudioModeAuto("FALSE");
 	   std::string _SPDIFAudioModeAuto("FALSE");
 
 	   try {
 		    _ARCAudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode.AUTO");
-            isARCAutoPersisted = true;
 	   }
 	   catch(...) {
                try {
@@ -2146,7 +2159,6 @@ IARM_Result_t dsAudioMgr_init()
 
            try {
                 _SPDIFAudioModeAuto = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode.AUTO");
-                isSPDIFAutoPersisted = true;
            }
            catch(...) {
                try {
@@ -3039,6 +3051,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
                     }
                     else {
                         INT_INFO("dsGetAudioLevel_t(int, float *) is not defined\r\n");
+                        dlclose(dllib);
                         IARM_BUS_Unlock(lock);
                         return IARM_RESULT_INVALID_STATE;
                     }
@@ -6045,7 +6058,17 @@ static void _GetAudioModeFromPersistent(void *arg)
            INT_INFO("The SPDIF Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
         }
         else if (_APortType == dsAUDIOPORT_TYPE_HDMI) {
-            _AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode",_AudioModeSettings);
+            try{
+                _AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode");
+            }
+            catch(...){
+                  try{
+                      _AudioModeSettings = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.AudioMode");
+                  }
+                  catch(...){
+                      INT_INFO("HDMI0.AudioMode Not in persistent");
+                  }
+            }
             INT_INFO("The HDMI Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
         }
 	else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC){
