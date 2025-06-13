@@ -77,9 +77,7 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX) ? 1 : -1];
 static_assert(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
-typedef int _SafetyCheck[(dsUTL_DIM(_names)  == dsVIDEO_FRAMERATE_MAX) ? 1 : -1];
 static_assert(dsUTL_DIM(_names) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
 
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
