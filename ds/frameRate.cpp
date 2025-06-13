@@ -77,8 +77,8 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX) ? 1 : -1];
-typedef int _SafetyCheck[(dsUTL_DIM(_names)  == dsVIDEO_FRAMERATE_MAX) ? 1 : -1];
+typedef int _SafetyCheck[(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX) ? 1 : 0];
+typedef int _SafetyCheck[(dsUTL_DIM(_names)  == dsVIDEO_FRAMERATE_MAX) ? 1 : 0];
 
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;

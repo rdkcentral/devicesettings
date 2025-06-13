@@ -105,6 +105,11 @@ profile_t searchRdkProfile(void) {
     return ret;
 }
 
+void dsServer_Rdklogger_Init()
+{
+   
+}
+
 IARM_Result_t dsMgr_init()
 {
     IARM_Result_t ret = IARM_RESULT_SUCCESS;
