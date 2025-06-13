@@ -1030,12 +1030,12 @@ IARM_Result_t _dsGetEDIDBytesInfo (void *arg)
     eRet = getEDIDBytesInfo (param->iHdmiPort, edidArg, &(param->length));
     param->result = eRet;
     INT_INFO("[srv] %s: getEDIDBytesInfo eRet: %d\r\n", __FUNCTION__, param->result);
-    if (edidArg != NULL) {
-	rc = memcpy_s(param->edid,sizeof(param->edid), edidArg, param->length);
-	if(rc!=EOK)
-	{
-		ERR_CHK(rc);
-	}
+    if (eRet == dsERR_NONE && param->length > 0 && param->length <= MAX_EDID_BYTES_LEN) {//Make sure the result was true, and there is a valid length.
+        rc = memcpy_s(param->edid,sizeof(param->edid), edidArg, param->length);
+        if(rc!=EOK)
+        {
+        	ERR_CHK(rc);
+        }
     }
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
@@ -1055,7 +1055,7 @@ IARM_Result_t _dsGetHDMISPDInfo(void *arg)
     unsigned char spdArg[sizeof(struct dsSpd_infoframe_st)] = {0};
     param->result = getHDMISPDInfo(param->iHdmiPort, spdArg);
     INT_INFO("[srv] %s: dsGetHDMISPDInfo eRet: %d\r\n", __FUNCTION__, param->result);
-    if (spdArg != NULL) {
+    if (param->result == dsERR_NONE) {
             rc = memcpy_s(param->spdInfo,sizeof(param->spdInfo), spdArg, sizeof(struct dsSpd_infoframe_st));
             if(rc!=EOK)
             {
@@ -1200,9 +1200,9 @@ IARM_Result_t _dsSetEdid2AllmSupport (void *arg)
     _DEBUG_ENTER();
 
     dsEdidAllmSupportParam_t *param = (dsEdidAllmSupportParam_t *) arg;
+    IARM_BUS_Lock(lock);
     param->result = dsERR_NONE;
     INT_INFO("[srv] :  In _dsSetEdid2AllmSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
-    IARM_BUS_Lock(lock);
     if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the allm bit in edid
     {
         param->result = setEdid2AllmSupport (param->iHdmiPort, param->allmSupport);

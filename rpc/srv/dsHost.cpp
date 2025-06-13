@@ -88,7 +88,7 @@ IARM_Result_t dsHostMgr_init()
         string mode="LIGHT_SLEEP";
         mode = device::HostPersistence::getInstance().getProperty("Power.Mode",mode);
         INT_INFO("Sleep mode Persistent value is -> %s\n",mode.c_str());
-        _SleepMode = stringToEnum(mode);        
+        _SleepMode = stringToEnum(std::move(mode));        
         IARM_Bus_DSMgr_EventData_t eventData = {0};
         eventData.data.sleepModeInfo.sleepMode = _SleepMode;
         IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED,(void *)&eventData, sizeof(eventData));
@@ -253,7 +253,6 @@ IARM_Result_t _dsGetMS12ConfigType(void *arg)
    dsMS12ConfigTypeParam_t *param = (dsMS12ConfigTypeParam_t*) arg;
    dsError_t retValue = dsERR_NONE;
    string ms12ConfigType;
-   errno_t rc = -1;
 
    printf("Read default platform ms12 config type\n");
    try {
@@ -265,15 +264,11 @@ IARM_Result_t _dsGetMS12ConfigType(void *arg)
 	ms12ConfigType = "CONFIG_NONE";
    }
    if (retValue == dsERR_NONE) {
-       rc = strcpy_s(param->configType, MS12_CONFIG_BUF_SIZE, ms12ConfigType.c_str());
-       if(rc!=EOK)
-       {
-            param->result = dsERR_GENERAL;
-            ERR_CHK(rc);
-       } else {
-            param->result = dsERR_NONE;
-	    ret = IARM_RESULT_SUCCESS;
-       }
+       strncpy(param->configType, ms12ConfigType.c_str(), MS12_CONFIG_BUF_SIZE);
+       param->configType[MS12_CONFIG_BUF_SIZE-1] = '\0';
+       
+        param->result = dsERR_NONE;
+        ret = IARM_RESULT_SUCCESS;
     }
     return ret; 
 }

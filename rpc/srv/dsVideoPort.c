@@ -116,6 +116,7 @@ IARM_Result_t _dsGetCurrentOutputSettings(void* arg);
 IARM_Result_t _dsSetBackgroundColor(void *arg);
 IARM_Result_t _dsSetForceHDRMode(void *arg);
 IARM_Result_t _dsGetIgnoreEDIDStatus(void *arg);
+IARM_Result_t _dsSetAllmEnabled(void *arg);
 
 
 void _dsVideoFormatUpdateCB(dsHDRStandard_t videoFormat);
@@ -272,7 +273,13 @@ IARM_Result_t _dsVideoPortInit(void *arg)
 		dsIsDisplayConnected(dsGetDefaultPortHandle(),&isConnected);
 		_dsSyncHdmiStatus(DS_HDMI_TAG_HOTPLUP, (isConnected?dsDISPLAY_EVENT_CONNECTED:dsDISPLAY_EVENT_DISCONNECTED));
 		#ifdef HAS_HDCP_CALLBACK
-			dsRegisterHdcpStatusCallback(NULL,_dsHdcpCallback);
+	           intptr_t handle = NULL;
+                   dsError_t eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_HDMI,0,&handle);
+                   if (dsERR_NONE != eReturn) {
+                        eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_INTERNAL,0,&handle);
+                   }
+                   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",handle);
+		   dsRegisterHdcpStatusCallback(handle,_dsHdcpCallback);
 		#endif
 		
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetVideoPort,_dsGetVideoPort);
@@ -310,6 +317,7 @@ IARM_Result_t _dsVideoPortInit(void *arg)
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsColorDepthCapabilities,_dsColorDepthCapabilities);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetPreferredColorDepth,_dsGetPreferredColorDepth);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetPreferredColorDepth,_dsSetPreferredColorDepth);
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAllmEnabled,_dsSetAllmEnabled);
 	
         dsError_t eRet = _dsVideoFormatUpdateRegisterCB (_dsVideoFormatUpdateCB) ;
         if (dsERR_NONE != eRet) {
@@ -855,6 +863,7 @@ IARM_Result_t _dsGetResolution(void *arg)
                 }
         }
         strncpy(resolution->name, _Resolution.c_str(), sizeof(resolution->name));
+        resolution->name[sizeof(resolution->name)-1] = '\0';
      	INT_INFO("%s _VPortType:%d  resolution::%s \n",__FUNCTION__,_VPortType,resolution->name);
 	IARM_BUS_Unlock(lock);
 	
@@ -1729,7 +1738,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
 			}
 			
 			INT_INFO("Set Resolution on HDMI Port!!!!!!..\r\n");
-			_dsHDMIResolution = resolutionName;
+			_dsHDMIResolution = std::move(resolutionName);
 
 			if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsCompResolution)))
 			{
@@ -2393,6 +2402,73 @@ intptr_t dsGetDefaultPortHandle()
         }
     }
     return halhandle;
+}
+
+IARM_Result_t _dsSetAllmEnabled(void* arg)
+{
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+    dsError_t ret = dsERR_NONE;
+
+    typedef dsError_t (*dsSetAllmEnabled_t)(intptr_t handle, bool enabled);
+    typedef dsError_t (*dsGetAllmEnabled_t)(intptr_t handle, bool *enabled);
+    static dsSetAllmEnabled_t func_dsSetAllmEnabled = 0;
+    static dsGetAllmEnabled_t func_dsGetAllmEnabled = 0;
+    if (func_dsGetAllmEnabled == 0 &&  func_dsSetAllmEnabled  == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func_dsGetAllmEnabled = (dsGetAllmEnabled_t) dlsym(dllib, "dsGetAllmEnabled");
+            func_dsSetAllmEnabled = (dsSetAllmEnabled_t) dlsym(dllib, "dsSetAllmEnabled");
+            if (func_dsGetAllmEnabled && func_dsSetAllmEnabled) {
+                INT_DEBUG(" dsGetAllmEnabled (intptr_t  handle, bool *enabled) and dsSetAllmEnabled (intptr_t  handle, bool enabled) is defined and loaded\r\n");
+            }
+            else {
+                INT_INFO(" dsGetAllmEnabled (intptr_t  handle, bool *enabled) and dsSetAllmEnabled (intptr_t  handle, bool enabled) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+
+    dsSetAllmEnabledParam_t *param = (dsSetAllmEnabledParam_t *)arg;
+
+    if (func_dsGetAllmEnabled != 0 &&  func_dsSetAllmEnabled  != 0)
+    {
+	    bool currentALLMState = false;
+	    ret = func_dsGetAllmEnabled (param->handle, &currentALLMState);
+	    if (ret == dsERR_NONE)
+	    {
+		    if (currentALLMState == param->enabled)
+		    {
+			    INT_INFO("ALLM mode already %s for HDMI output video port \r\n",currentALLMState ? "Enabled" :"Disabled");
+		    }
+		    else{    
+			    INT_INFO("Current ALLM state  %s Requested to %s\r\n", (currentALLMState ? "Enabled" :"Disabled") ,(param->enabled ? "Enabled" :"Disabled"));
+			    ret = func_dsSetAllmEnabled(param->handle, param->enabled);
+			    param->result = ret;
+			    INT_INFO("dsSetAllmEnabled ret: %d \r\n",ret);
+		    }
+	    }
+	    else
+	    {
+		    INT_INFO("dsGetAllmEnabled failed ret: %d \r\n",ret);
+		    param->result = dsERR_GENERAL;
+	    }
+
+    }
+    else {
+        param->result = dsERR_GENERAL;
+    }
+
+    IARM_BUS_Unlock(lock);
+
+    return IARM_RESULT_SUCCESS;
 }
 
 /** @} */

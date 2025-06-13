@@ -259,6 +259,29 @@ dsError_t dsVideoPortSetPreferredColorDepth(intptr_t handle,dsDisplayColorDepth_
 dsError_t dsVideoPortGetPreferredColorDepth(intptr_t handle, dsDisplayColorDepth_t *colorDepth, bool persist );
 
 /**
+ * @brief Gets the EDID ALLM support
+ *
+ * For sink devices, this function gets the EDID ALLM support.
+ * For source devices, this function returns dsERR_OPERATION_NOT_SUPPORTED always.
+ *
+ * @param[in] iHdmiPort      - HDMI input port.  Please refer ::dsHdmiInPort_t
+ * @param[in] allmSupport    - Allm support. False for disabled, True for enabled
+ *
+ * @return dsError_t                        - Status
+ * @retval dsERR_NONE                       - Success
+ * @retval dsERR_NOT_INITIALIZED            - Module is not initialised
+ * @retval dsERR_INVALID_PARAM              - Parameter passed to this function is invalid
+ * @retval dsERR_OPERATION_NOT_SUPPORTED    - The attempted operation is not supported; e.g: source devices
+ * @retval dsERR_OPERATION_FAILED           - The attempted operation has failed
+ *
+ * @pre dsHdmiInInit() must be called before calling this API
+ *
+ * @warning  This API is Not thread safe
+ *
+ */
+dsError_t dsGetEdid2AllmSupport (dsHdmiInPort_t iHdmiPort, bool *allmSupport);
+
+/**
  * @brief Gets the encoding type of an audio port
  *
  * This function returns the current audio encoding setting for the specified audio port.
