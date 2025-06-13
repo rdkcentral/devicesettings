@@ -316,7 +316,7 @@ int VideoDevice::setDisplayframerate(const char *framerate) const
 {
         dsError_t ret;
         char buf[20] = {0};
-	    strncpy(buf, framerate, sizeof(buf));
+	    strncpy(buf, framerate, sizeof(buf)-1);
 
         ret = dsSetDisplayframerate(_handle, buf);
         return 0;

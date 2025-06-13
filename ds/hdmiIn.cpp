@@ -65,6 +65,7 @@
 #include "dsHdmiIn.h"
 #include "dsUtl.h"
 #include "edid-parser.hpp"
+#include "dsInternal.h"
 
 
 namespace device 
@@ -382,6 +383,30 @@ static std::string getFrameRateStr (dsVideoFrameRate_t frameRate)
             FrameRateStr = "59.94";
             break;
 
+        case dsVIDEO_FRAMERATE_100:
+            FrameRateStr = "100";
+            break;
+
+        case dsVIDEO_FRAMERATE_119dot88:
+            FrameRateStr = "119.88";
+            break;
+
+        case dsVIDEO_FRAMERATE_120:
+            FrameRateStr = "120";
+            break;
+
+        case dsVIDEO_FRAMERATE_200:
+            FrameRateStr = "200";
+            break;
+
+        case dsVIDEO_FRAMERATE_239dot76:
+            FrameRateStr = "239.76";
+            break;
+
+        case dsVIDEO_FRAMERATE_240:
+            FrameRateStr = "240";
+            break;
+
          default:
             // Not all video formats have a specified framerate.
             break;
@@ -467,11 +492,6 @@ void HdmiInput::getEDIDBytesInfo (int iHdmiPort, std::vector<uint8_t> &edidArg) 
 
     const char* exceptionstr = "";
     ret = dsGetEDIDBytesInfo (static_cast<dsHdmiInPort_t>(iHdmiPort), edid, &length);
-    if (NULL == edid) {
-        printf("HdmiInput::getEDIDBytesInfo dsGetEDIDBytesInfo returned NULL \r\n");
-        exceptionstr = "EDID is NULL";
-        ret = dsERR_GENERAL;
-    }
 
     printf("HdmiInput::getEDIDBytesInfo has ret %d\r\n", ret);
     if (ret == dsERR_NONE) {
@@ -503,11 +523,6 @@ void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
     unsigned char spdinfo[sizeof(struct dsSpd_infoframe_st)] = {0};
     const char* exceptionstr = "";
     dsError_t ret = dsGetHDMISPDInfo (static_cast<dsHdmiInPort_t>(iHdmiPort), spdinfo);
-    if (NULL == spdinfo) {
-        printf("HdmiInput::dsGetHDMISPDInfo returned NULL \r\n");
-        exceptionstr = "SPDInfo is NULL";
-        ret = dsERR_GENERAL;
-    }
  
     printf("HdmiInput::getHDMISPDInfo has ret %d\r\n", ret);
     data.clear();

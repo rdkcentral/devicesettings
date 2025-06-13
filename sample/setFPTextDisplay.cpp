@@ -115,12 +115,11 @@ int main(int argc, char *argv[])
 			printf("RfByPass : brightness is %d\n",bright);
 			bright = device::FrontPanelConfig::getInstance().getTextDisplay("Text").getTextBrightness();
 			printf("Text : brightness is %d\n",bright);
+            device::Manager::DeInitialize();
 		}
     catch (...) {
     	printf("Exception Caught during [%s]\r\n", argv[0]);
     }
-
-    device::Manager::DeInitialize();
 
 
 	IARM_Bus_Disconnect();

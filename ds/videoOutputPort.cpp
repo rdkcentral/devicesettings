@@ -300,7 +300,7 @@ const VideoResolution & VideoOutputPort::getResolution()
 
 	/*Copy onto Temp - Safe*/
 	std::string temp( resolution.name,strlen(resolution.name));
-	_resolution = string(temp);
+	_resolution = string(std::move(temp));
 	
 	return VideoResolution::getInstance(_resolution,true);
 }
@@ -909,6 +909,19 @@ int VideoOutputPort::GetHdmiPreference()
 
     return hdcpProtocol;
 }
+
+/**
+ * @fn void setAllmEnabled(bool enable); 
+ * @brief Enables/Disables ALLM mode for HDMI output video port.
+ */
+ void VideoOutputPort::setAllmEnabled(bool enable)
+ {
+     dsError_t ret = dsSetAllmEnabled(_handle,enable);
+     if (ret != dsERR_NONE) {
+         throw Exception(ret);
+     }
+ }
+ 
 
 }
 
