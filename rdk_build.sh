@@ -136,8 +136,6 @@ function build()
     DeviceSettings_PATH=${CC_PATH}
     CURR_DIR=`pwd`
 
-    echo "DeviceSettings_PATH: $DeviceSettings_PATH"
-    cat $DeviceSettings_PATH/hal/src/Makefile
     cd $DeviceSettings_PATH
     echo "Setting Device Settings Build Environment Variables..."
     
