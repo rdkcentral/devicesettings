@@ -465,7 +465,7 @@ bool VideoOutputPort::isDynamicResolutionSupported() const
  */
 void VideoOutputPort::setResolution(const std::string &resolutionName, bool persist/* = true*/, bool isIgnoreEdid/* = false*/)
 {
-        printf("ResOverride VideoOutputPort::setResolution resolutionName:%s persist:%d isIgnoreEdid:%d line:%d\r\n", resolutionName.c_str(), persist, isIgnoreEdid, __LINE__);
+        printf("ResOverride VideoOutputPort::setResolution resolutionName:%s persist:%d isIgnoreEdid:%d line:%d\r\n", persist, isIgnoreEdid, __LINE__);
 	if (0 && resolutionName.compare(_resolution) == 0) {
 		return;
 	}
