@@ -37,7 +37,6 @@
 namespace {
 	const float _values[] = {
 			0, //unkown
-			0, //unkown
 			24,
 			25,
 			30,
