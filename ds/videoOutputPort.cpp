@@ -18,7 +18,6 @@
 */
 
 
-
 /**
 * @defgroup devicesettings
 * @{
