@@ -65,6 +65,7 @@
 #include "dsHdmiIn.h"
 #include "dsUtl.h"
 #include "edid-parser.hpp"
+#include "dsInternal.h"
 
 
 namespace device 
@@ -380,6 +381,30 @@ static std::string getFrameRateStr (dsVideoFrameRate_t frameRate)
 
         case dsVIDEO_FRAMERATE_59dot94:
             FrameRateStr = "59.94";
+            break;
+
+        case dsVIDEO_FRAMERATE_100:
+            FrameRateStr = "100";
+            break;
+
+        case dsVIDEO_FRAMERATE_119dot88:
+            FrameRateStr = "119.88";
+            break;
+
+        case dsVIDEO_FRAMERATE_120:
+            FrameRateStr = "120";
+            break;
+
+        case dsVIDEO_FRAMERATE_200:
+            FrameRateStr = "200";
+            break;
+
+        case dsVIDEO_FRAMERATE_239dot76:
+            FrameRateStr = "239.76";
+            break;
+
+        case dsVIDEO_FRAMERATE_240:
+            FrameRateStr = "240";
             break;
 
          default:

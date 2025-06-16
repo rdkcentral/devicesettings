@@ -56,7 +56,7 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsAUDIO_CMP_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsAUDIO_CMP_MAX, "Audio compression names array size mismatch");
 
 const int AudioCompression::kNone 			= dsAUDIO_CMP_NONE;
 const int AudioCompression::kLight 			= dsAUDIO_CMP_LIGHT;
