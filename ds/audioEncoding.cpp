@@ -57,7 +57,7 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsAUDIO_ENC_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsAUDIO_ENC_MAX, "Audio encoding names array size mismatch");
 
 const int AudioEncoding::kNone 			= dsAUDIO_ENC_NONE;
 const int AudioEncoding::kDisplay 		= dsAUDIO_ENC_DISPLAY;

@@ -60,7 +60,7 @@ namespace {
 }
 
 namespace device {
-typedef int _SafetyCheck[(dsUTL_DIM(_names) == dsAUDIO_STEREO_MAX) ? 1 : -1];
+static_assert(dsUTL_DIM(_names) == dsAUDIO_STEREO_MAX, "Audio stereo mode names array size mismatch");
 
 const int AudioStereoMode::kMono 			= dsAUDIO_STEREO_MONO;
 const int AudioStereoMode::kStereo 			= dsAUDIO_STEREO_STEREO;
