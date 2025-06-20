@@ -30,6 +30,7 @@
 #include "videoOutputPortType.hpp"
 #include "videoOutputPort.hpp"
 #include "list.hpp"
+#include "host.hpp"
 #include "dsUtl.h"
 #include "dsError.h"
 #include "illegalArgumentException.hpp"
