@@ -209,7 +209,13 @@ void VideoOutputPortType::enabledDTCP()
 void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size_t keySize )
 {
   	dsError_t ret = dsERR_NONE;
-  	ret = dsEnableHDCP(0, contentProtect, hdcpKey, keySize);
+    if (device::Host::getInstance().isHDMIOutPortPresent()){
+        ret = dsEnableHDCP(dsVIDEOPORT_TYPE_HDMI, contentProtect, hdcpKey, keySize);
+    }
+    else{
+        ret = dsEnableHDCP(dsVIDEOPORT_TYPE_INTERNAL , contentProtect, hdcpKey, keySize);
+    }
+    
   	if (ret != dsERR_NONE)
   	{
   		throw IllegalArgumentException();
