@@ -65,6 +65,7 @@
 #include "dsHdmiIn.h"
 #include "dsUtl.h"
 #include "edid-parser.hpp"
+#include "dsInternal.h"
 
 
 namespace device 
@@ -382,6 +383,30 @@ static std::string getFrameRateStr (dsVideoFrameRate_t frameRate)
             FrameRateStr = "59.94";
             break;
 
+        case dsVIDEO_FRAMERATE_100:
+            FrameRateStr = "100";
+            break;
+
+        case dsVIDEO_FRAMERATE_119dot88:
+            FrameRateStr = "119.88";
+            break;
+
+        case dsVIDEO_FRAMERATE_120:
+            FrameRateStr = "120";
+            break;
+
+        case dsVIDEO_FRAMERATE_200:
+            FrameRateStr = "200";
+            break;
+
+        case dsVIDEO_FRAMERATE_239dot76:
+            FrameRateStr = "239.76";
+            break;
+
+        case dsVIDEO_FRAMERATE_240:
+            FrameRateStr = "240";
+            break;
+
          default:
             // Not all video formats have a specified framerate.
             break;
@@ -545,6 +570,34 @@ void HdmiInput::getEdidVersion (int iHdmiPort, int *iEdidVersion) {
     int tmp = static_cast<int>(EdidVersion);
     *iEdidVersion = tmp;
     printf ("%s:%d - EDID Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *iEdidVersion);
+}
+
+void HdmiInput::setVRRSupport(int iHdmiPort, bool vrrSupport)
+{
+    dsError_t ret = dsHdmiInSetVRRSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrSupport);
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+    printf ("%s:%d - Set VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, vrrSupport);
+}
+
+void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
+    dsError_t ret = dsHdmiInGetVRRSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrSupport);
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+    printf ("%s:%d - EDID VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, *vrrSupport);
+}
+
+void HdmiInput::getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus) {
+    dsError_t ret = dsHdmiInGetVRRStatus (static_cast<dsHdmiInPort_t>(iHdmiPort), vrrStatus);
+    if (ret != dsERR_NONE)
+    {
+        throw Exception(ret);
+    }
+    printf ("%s:%d - VRR Type = %d , VRR FrameRate = %f\n", __FUNCTION__, __LINE__, vrrStatus->vrrType,vrrStatus->vrrAmdfreesyncFramerate_Hz);
 }
 
 void HdmiInput::getHdmiALLMStatus (int iHdmiPort, bool *allmStatus) {

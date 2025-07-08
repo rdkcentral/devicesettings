@@ -54,6 +54,7 @@
 #include "libIARM.h"
 #include "libIBus.h"
 #include "safec_lib.h" 
+#include "dsInternal.h"
 
 
 dsError_t dsHdmiInInit (void)
@@ -460,6 +461,69 @@ dsError_t dsGetEdid2AllmSupport (dsHdmiInPort_t iHdmiPort, bool *allm_support)
         return param.result;
     }
     printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
+
+dsError_t dsHdmiInSetVRRSupport (dsHdmiInPort_t iHdmiPort, bool vrr_support)
+{
+    _DEBUG_ENTER();
+
+    dsVRRSupportParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    param.vrrSupport = vrr_support;
+    rpcRet = IARM_Bus_Call (IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsSetVRRSupport,
+                            (void *)&param,
+                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
+
+dsError_t dsHdmiInGetVRRSupport (dsHdmiInPort_t iHdmiPort, bool *vrr_support)
+{
+    _DEBUG_ENTER();
+
+    dsVRRSupportParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    rpcRet = IARM_Bus_Call (IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsGetVRRSupport,
+                            (void *)&param,
+                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        *vrr_support =  param.vrrSupport;
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    return dsERR_GENERAL;
+}
+
+dsError_t dsHdmiInGetVRRStatus (dsHdmiInPort_t iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus)
+{
+    _DEBUG_ENTER();
+    dsVRRStatusParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    param.iHdmiPort = iHdmiPort;
+    rpcRet = IARM_Bus_Call (IARM_BUS_DSMGR_NAME,
+                            (char *)IARM_BUS_DSMGR_API_dsGetVRRStatus,
+                            (void *)&param,
+                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        vrrStatus->vrrType =  param.vrrStatus.vrrType;
+        vrrStatus->vrrAmdfreesyncFramerate_Hz =  param.vrrStatus.vrrAmdfreesyncFramerate_Hz;
+        return param.result;
+    }
+    printf("%s:%d - dsERR_GENERAL\n", __FUNCTION__,__LINE__);
     return dsERR_GENERAL;
 }
 
