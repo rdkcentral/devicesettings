@@ -138,8 +138,8 @@ void Manager::Initialize()
         IsInitialized++;
     }
     catch(const Exception &e) {
-		cout << "Caught exception during Initialization" << e.what() << endl;
-		throw e;
+		cout << "Sona Testing Caught exception during Initialization" << e.what() << endl;
+		
 	}
 	}
 	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
