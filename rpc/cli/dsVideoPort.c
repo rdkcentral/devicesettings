@@ -965,27 +965,6 @@ dsError_t dsSetForceHDRMode(intptr_t handle, dsHDRStandard_t mode)
         return dsERR_GENERAL ;
 }
 
-dsError_t dsSetAllmEnabled (intptr_t  handle, bool enabled)
-{
-	_DEBUG_ENTER();
-
-	dsSetAllmEnabledParam_t param;
-	memset(&param, 0, sizeof(param));
-	param.handle = handle;
-	param.enabled = enabled;
-
-	IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-			(char *) IARM_BUS_DSMGR_API_dsSetAllmEnabled,
-			(void *) &param,
-			sizeof(param));
-
-	if (IARM_RESULT_SUCCESS == rpcRet)
-	{
-		return param.result;
-	}
-
-	return dsERR_GENERAL ;
-}
 
 /** @} */
 /** @} */
