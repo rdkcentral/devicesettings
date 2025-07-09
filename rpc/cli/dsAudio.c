@@ -66,6 +66,7 @@ dsError_t dsAudioPortInit()
 
 dsError_t dsGetAudioPort(dsAudioPortType_t type, int index, intptr_t *handle)
 {
+        printf("PWRDEBUG Entering dsGetAudioPort cli\n");
      dsAudioGetHandleParam_t param;
 	  IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 	

@@ -2401,6 +2401,7 @@ IARM_Result_t _dsAudioPortInit(void *arg)
 IARM_Result_t _dsGetAudioPort(void *arg)
 {
     _DEBUG_ENTER();
+    printf("PWRDEBUG: Entering _dsGetAudioPort srv\n");
 
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsError_t ret = dsERR_NONE;
