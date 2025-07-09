@@ -139,7 +139,7 @@ void Manager::Initialize()
     }
     catch(const Exception &e) {
 		cout << "Caught exception during Initialization" << e.what() << endl;
-		throw e;
+		//throw e;
 	}
 	}
 	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
