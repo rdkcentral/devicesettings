@@ -2363,6 +2363,7 @@ IARM_Result_t _dsAudioPortInit(void *arg)
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsResetBassEnhancer,_dsResetBassEnhancer);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsResetSurroundVirtualizer,_dsResetSurroundVirtualizer);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsResetVolumeLeveller,_dsResetVolumeLeveller);
+        INT_INFO("[%s][%d] Registering dsGetHDMIARCPortId IARM call\n", __FUNCTION__, __LINE__);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetHDMIARCPortId, _dsGetHDMIARCPortId);
 
         dsError_t eRet = _dsAudioOutRegisterConnectCB (_dsAudioOutPortConnectCB);
