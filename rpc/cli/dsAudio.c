@@ -67,6 +67,7 @@ dsError_t dsAudioPortInit()
 dsError_t dsGetAudioPort(dsAudioPortType_t type, int index, intptr_t *handle)
 {
         printf("PWRDEBUG Entering dsGetAudioPort cli\n");
+        printf("PWRDEBUG type:%d index:%d\n", type, index);
      dsAudioGetHandleParam_t param;
 	  IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 	
@@ -327,7 +328,8 @@ dsError_t dsIsAudioPortEnabled(intptr_t handle, bool *enabled)
 dsError_t  dsEnableAudioPort(intptr_t handle, bool enabled, const char* portName)
 {
     _DEBUG_ENTER();
-
+    printf("PWRDEBUG: Entering dsEnableAudioPort cli\n");
+    printf("PWRDEBUG: handle:%ld enabled:%d portName:%s\n", handle, enabled, portName);
     dsAudioPortEnabledParam_t param;
     param.handle = handle;
     param.enabled = enabled;
@@ -350,6 +352,8 @@ dsError_t  dsEnableAudioPort(intptr_t handle, bool enabled, const char* portName
 
 dsError_t dsGetEnablePersist(intptr_t handle, const char* portName, bool *enabled)
 {
+        printf("PWRDEBUG: Inside dsGetEnablePersist cli\n");
+        printf("PWRDEBUG: handle:%ld portName:%s\n", handle, portName);
 	dsAudioPortEnabledParam_t param;
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
@@ -365,6 +369,8 @@ dsError_t dsGetEnablePersist(intptr_t handle, const char* portName, bool *enable
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
 		*enabled = param.enabled;
+                printf("PWRDEBUG: dsGetEnablePersist cli portName:%s rpcRet:%d param.enabled:%d enabled:%d\n", 
+                        portName, rpcRet, param.enabled, *enabled);
 		return dsERR_NONE;
 	}
     printf ("dsGetEnablePersist cli portName:%s rpcRet:%d param.enabled:%d enabled:%d\n", 
