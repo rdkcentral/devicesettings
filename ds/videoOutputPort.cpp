@@ -912,16 +912,42 @@ int VideoOutputPort::GetHdmiPreference()
 
 /**
  * @fn void setAllmEnabled(bool enable); 
- * @brief Enables/Disables ALLM mode for HDMI output video port.
+ * @brief Enables/Disables ALLM mode for connected HDMI display.
  */
- void VideoOutputPort::setAllmEnabled(bool enable)
+ void VideoOutputPort::Display::setAllmEnabled(bool enable) const
  {
+     printf("VideoOutputPort::Display::setAllmEnabled \r\n");
      dsError_t ret = dsSetAllmEnabled(_handle,enable);
      if (ret != dsERR_NONE) {
          throw Exception(ret);
      }
  }
- 
+
+/**
+ * @fn void setAVIContentType(dsAviContentType_t contentType);
+ * @brief Sets HDMI AVI content type signalling.
+ */
+void VideoOutputPort::Display::setAVIContentType(dsAviContentType_t contentType) const
+{
+    printf("VideoOutputPort::Display::setAVIContentType \r\n");
+    dsError_t ret = dsSetAVIContentType(_handle,contentType);
+    if (ret != dsERR_NONE) {
+        throw Exception(ret);
+    }
+}
+
+/**
+ * @fn void setAVIScanInformation(dsAVIScanInformation_t scanInfo);
+ * @brief ets HDMI AVI scan info signalling.
+ */
+void VideoOutputPort::Display::setAVIScanInformation(dsAVIScanInformation_t scanInfo) const
+{
+    printf("VideoOutputPort::Display::setAVIScanInformation \r\n");
+    dsError_t ret = dsSetAVIScanInformation(_handle,scanInfo);
+    if (ret != dsERR_NONE) {
+        throw Exception(ret);
+    }
+}
 
 }
 
