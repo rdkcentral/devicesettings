@@ -3323,71 +3323,8 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
     dsAudioPortEnabledParam_t *param = (dsAudioPortEnabledParam_t *)arg;
 
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
-    if (_APortType == dsAUDIOPORT_TYPE_HDMI)
-    {
-        if (param->enabled) {
-            INT_INFO("Enabling HDMI Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("HDMI0.isEnabled", "TRUE");
-        }
-        else {
-            INT_INFO("Disabling HDMI Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("HDMI0.isEnabled", "FALSE");
-        }
-    }
-    else if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
-    {
-        if (param->enabled) {
-            INT_INFO("Enabling SPDIF Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("SPDIF0.isEnabled", "TRUE");
-        }
-        else {
-            INT_INFO("Disabling SPDIF Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("SPDIF0.isEnabled", "FALSE");
-        }
-    }
-    else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC)
-    {
-        if (param->enabled) {
-            INT_INFO("Enabling HDMI ARC Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.isEnabled", "TRUE");
-        }
-        else {
-            INT_INFO("Disabling HDMI ARC Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.isEnabled", "FALSE");
-        }
-    }
-    else if (_APortType == dsAUDIOPORT_TYPE_HEADPHONE)
-    {
-        if (param->enabled) {
-            INT_INFO("Enabling Headphone Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.isEnabled", "TRUE");
-        }
-        else {
-            INT_INFO("Disabling Headphone Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.isEnabled", "FALSE");
-        }
-    }
-    else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
-    {
-        if (param->enabled) {
-            INT_INFO("Enabling Speaker Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.isEnabled", "TRUE");
-        }
-        else {
-            INT_INFO("Disabling Speaker Audio Port with persistent value %d \r\n", param->toPersist);
-            if (param->toPersist)
-                device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.isEnabled", "FALSE");
-        }
-    }
+
+    printf("PWRDEBUG _APortType: %d\n", _APortType);
     if( _APortType == dsAUDIOPORT_TYPE_SPEAKER )
     {
         bool muted = false;
@@ -3451,6 +3388,11 @@ IARM_Result_t _dsGetEnablePersist(void *arg)
     dsAudioPortEnabledParam_t *param = (dsAudioPortEnabledParam_t *)arg;
     //By default all the ports are enabled.
     bool enabled = true;
+    if(param->portName.empty()) {
+        INT_ERROR("%s: portName is empty, returning IARM_RESULT_INVALID_STATE\n", __FUNCTION__);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
 
     std::string isEnabledAudioPortKey("audio.");
     isEnabledAudioPortKey.append (param->portName);
