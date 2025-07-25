@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "forward_list": "c",
+        "list": "c",
+        "vector": "c",
+        "xlocinfo": "c",
+        "xstring": "c",
+        "xtree": "c",
+        "xutility": "c"
+    }
+}

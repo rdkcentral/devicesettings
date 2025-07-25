@@ -3388,11 +3388,7 @@ IARM_Result_t _dsGetEnablePersist(void *arg)
     dsAudioPortEnabledParam_t *param = (dsAudioPortEnabledParam_t *)arg;
     //By default all the ports are enabled.
     bool enabled = true;
-    if(param->portName.empty()) {
-        INT_ERROR("%s: portName is empty, returning IARM_RESULT_INVALID_STATE\n", __FUNCTION__);
-        IARM_BUS_Unlock(lock);
-        return IARM_RESULT_INVALID_STATE;
-    }
+
 
     std::string isEnabledAudioPortKey("audio.");
     isEnabledAudioPortKey.append (param->portName);
