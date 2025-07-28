@@ -63,6 +63,7 @@ static int m_volumeDuckingLevel = 0;
 static float m_volumeLevel = 0;
 static int m_MuteStatus = false;
 static int m_isDuckingInProgress = false;
+static bool m_AudioPortEnabled[dsAUDIOPORT_TYPE_MAX] = {false};
 
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t audioLevelMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -178,6 +179,8 @@ IARM_Result_t _dsResetDialogEnhancement(void *arg);
 IARM_Result_t _dsSetMS12SetttingsOverride(void *arg);
 IARM_Result_t _dsGetHDMIARCPortId(void *arg);
 
+bool dsSetAudioDelayInternal(intptr_t handle,uint32_t audioDelay);
+uint32_t dsGetAudioDelayInternal(dsAudioPortType_t _APortType);
 
 static void _GetAudioModeFromPersistent(void *arg);
 static dsAudioPortType_t _GetAudioPortType(intptr_t handle);
@@ -3308,6 +3311,45 @@ IARM_Result_t _dsIsAudioPortEnabled(void *arg)
     return result;
 }
 
+bool dsSetAudioDelayInternal(intptr_t handle, uint32_t audioDelay)
+{
+    bool result = false;
+    typedef dsError_t (*dsSetAudioDelay_t)(intptr_t handle, uint32_t audioDelayMs);
+    static dsSetAudioDelay_t func = 0;
+    if (func == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func = (dsSetAudioDelay_t) dlsym(dllib, "dsSetAudioDelay");
+            if (func) {
+                INT_DEBUG("dsSetAudioDelay_t(int, uint32_t) is defined and loaded\r\n");
+            }
+            else {
+                INT_INFO("dsSetAudioDelay_t(int, uint32_t) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+
+    if (func != 0 )
+    {
+             // Amit add a check for enable
+        if (func(handle, audioDelay) != dsERR_NONE)
+        {
+            INT_INFO("%s: (SERVER) Unable to set audiodelay\n", __FUNCTION__);
+        }
+        else
+        {
+            INT_INFO("%s: (SERVER) success \n", __FUNCTION__);
+	    result = true;
+        }
+    }
+    return result;
+}
+
+
 
 IARM_Result_t _dsEnableAudioPort(void *arg)
 {
@@ -3357,7 +3399,16 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
                     __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled, bAudioPortEnableVerify);
         }
         else {
-            INT_DEBUG("%s : %s Audio port status verification passed. status %d\n", __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled); 
+            INT_DEBUG("%s : %s Audio port status verification passed. status %d\n", __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled);
+	   //Amit update cache and apply audio delay if port enabled
+	   m_AudioPortEnabled[_APortType]= param->enabled; 
+	   INT_INFO("Amit %s : port id:%d enabled status :%d\n", __FUNCTION__, _APortType , param->enabled);
+	   if(m_AudioPortEnabled[_APortType])
+	   {
+               uint32_t audioDelay = dsGetAudioDelayInternal(_APortType);
+	       dsSetAudioDelayInternal(param->handle,audioDelay);
+	   }
+
         }
     }
     else {
@@ -3722,15 +3773,20 @@ IARM_Result_t _dsSetAudioDelay(void *arg)
 
     if (func != 0 && param != NULL)
     {
-        if (func(param->handle, param->audioDelayMs) != dsERR_NONE)
+        dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
+	     // Amit add a check for enable
+        if (m_AudioPortEnabled[_APortType] && func(param->handle, param->audioDelayMs) != dsERR_NONE)
         {
             INT_INFO("%s: (SERVER) Unable to set audiodelay\n", __FUNCTION__);
             result = IARM_RESULT_INVALID_STATE;
         }
+	else
+	{
+            INT_INFO("%s: (SERVER) Unable to set audiodelay as port is not enabled: %d \n", __FUNCTION__,m_AudioPortEnabled[_APortType]);
+	}
 
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioDelay = std::to_string(param->audioDelayMs);
-        dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         switch(_APortType) {
             case dsAUDIOPORT_TYPE_SPDIF:
                 INT_DEBUG("%s: port: %s , persist audio delay: %d\n",__func__,"SPDIF0", param->audioDelayMs);
@@ -3763,6 +3819,89 @@ IARM_Result_t _dsSetAudioDelay(void *arg)
 
 }
 
+uint32_t dsGetAudioDelayInternal(dsAudioPortType_t _APortType)
+{
+       std::string audioDelayMs = "0";
+       uint32_t returnAudioDelayMs = 0;
+       switch(_APortType) {
+            case dsAUDIOPORT_TYPE_SPDIF:
+                {
+                   try {
+                        audioDelayMs = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Delay");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Delay not found in persistence store. Try system default\n");
+                                audioDelayMs = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Delay");
+                            }
+                            catch(...) {
+                                audioDelayMs = "0";
+                            }
+                    }
+                }
+                break;
+            case dsAUDIOPORT_TYPE_HDMI:
+                {
+                   try {
+                        audioDelayMs = device::HostPersistence::getInstance().getProperty("HDMI0.audio.Delay");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("HDMI0.audio.Delay not found in persistence store. Try system default\n");
+                                audioDelayMs = device::HostPersistence::getInstance().getDefaultProperty("HDMI0.audio.Delay");
+                            }
+                            catch(...) {
+                                audioDelayMs = "0";
+                            }
+                    }
+                }
+                break;
+            case dsAUDIOPORT_TYPE_SPEAKER:
+                {
+                   try {
+                        audioDelayMs = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.Delay");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPEAKER0.audio.Delay not found in persistence store. Try system default\n");
+                                audioDelayMs = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.audio.Delay");
+                            }
+                            catch(...) {
+                                audioDelayMs = "0";
+                            }
+                    }
+                }
+                break;
+            case dsAUDIOPORT_TYPE_HDMI_ARC:
+                {
+                   try {
+                        audioDelayMs = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.audio.Delay");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("HDMI_ARC0.audio.Delay not found in persistence store. Try system default\n");
+                                audioDelayMs = device::HostPersistence::getInstance().getDefaultProperty("HDMI_ARC0.audio.Delay");
+                            }
+                            catch(...) {
+                                audioDelayMs = "0";
+                            }
+                    }
+                }                break;
+            default:
+                INT_DEBUG("%s: port: UNKNOWN , persist audio delay: %d : NOT SET\n",__func__, audioDelayMs);
+                break;
+        }
+    try {
+        returnAudioDelayMs = std::stoul(audioDelayMs);
+    }
+    catch(...) {
+        INT_INFO("%s: Exception in getting the audio delay from persistence storage, returning default value 0\n", __FUNCTION__);
+        returnAudioDelayMs = 0;
+    }
+    return returnAudioDelayMs;
+}
+
+
 IARM_Result_t _dsGetAudioDelay(void *arg)
 {
 #ifndef RDK_DSHAL_NAME
@@ -3771,38 +3910,16 @@ IARM_Result_t _dsGetAudioDelay(void *arg)
 #endif
     _DEBUG_ENTER();
     IARM_BUS_Lock(lock);
-
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
-    typedef dsError_t (*dsGetAudioDelay_t)(intptr_t handle, uint32_t *audioDelayMs);
-    static dsGetAudioDelay_t func = 0;
-    if (func == 0) {
-        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-        if (dllib) {
-            func = (dsGetAudioDelay_t) dlsym(dllib, "dsGetAudioDelay");
-            if (func) {
-                INT_DEBUG("dsGetAudioDelay_t(int, uint32_t*) is defined and loaded\r\n");
-            }
-            else {
-                INT_INFO("dsGetAudioDelay_t(int, uint32_t*) is not defined\r\n");
-            }
-            dlclose(dllib);
-        }
-        else {
-            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
-        }
-    }
-
     dsGetAudioDelayParam_t *param = (dsGetAudioDelayParam_t *)arg;
-
-    if (func != 0 && param != NULL)
+    if (param != NULL)
     {
-        uint32_t audioDelayMs = 0;
-        param->audioDelayMs = 0;
-        if (func(param->handle, &audioDelayMs) == dsERR_NONE)
-        {
-            param->audioDelayMs = audioDelayMs;
-            result = IARM_RESULT_SUCCESS;
-        }
+       uint32_t audioDelayMs = 0;
+       dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
+       audioDelayMs = dsGetAudioDelayInternal(_APortType);
+       param->audioDelayMs = audioDelayMs;
+       INT_INFO("%s: (SERVER) getAudioDelay audioDelayMs: %d \n", __FUNCTION__,audioDelayMs);
+       result = IARM_RESULT_SUCCESS;
     }
 
     IARM_BUS_Unlock(lock);
