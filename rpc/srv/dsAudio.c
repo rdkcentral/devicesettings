@@ -3821,7 +3821,8 @@ IARM_Result_t _dsSetAudioDelay(void *arg)
 
 uint32_t dsGetAudioDelayInternal(dsAudioPortType_t _APortType)
 {
-       uint32_t audioDelayMs = 0;
+       std::string audioDelayMs = "0";
+       uint32_t returnAudioDelayMs = 0;
        switch(_APortType) {
             case dsAUDIOPORT_TYPE_SPDIF:
                 {
@@ -3887,10 +3888,17 @@ uint32_t dsGetAudioDelayInternal(dsAudioPortType_t _APortType)
                     }
                 }                break;
             default:
-                INT_DEBUG("%s: port: UNKNOWN , persist audio delay: %d : NOT SET\n",__func__, param->audioDelayMs);
+                INT_DEBUG("%s: port: UNKNOWN , persist audio delay: %d : NOT SET\n",__func__, audioDelayMs);
                 break;
         }
-    return audioDelayMs;
+    try {
+        returnAudioDelayMs = std::stoul(audioDelayMs);
+    }
+    catch(...) {
+        INT_INFO("%s: Exception in getting the audio delay from persistence storage, returning default value 0\n", __FUNCTION__);
+        returnAudioDelayMs = 0;
+    }
+    return returnAudioDelayMs;
 }
 
 
