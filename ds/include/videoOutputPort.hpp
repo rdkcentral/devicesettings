@@ -155,6 +155,9 @@ public:
         int getConnectedDeviceType() const {return _hdmiDeviceType;};
         bool isConnectedDeviceRepeater() const {return _isDeviceRepeater;};
         void getEDIDBytes(std::vector<uint8_t> &edid) const;
+	void setAllmEnabled(bool enable) const;
+	void setAVIContentType(dsAviContentType_t contentType) const;
+	void setAVIScanInformation(dsAVIScanInformation_t scanInfo) const;
 
 /**
  * @fn int hasSurround() const
@@ -269,7 +272,6 @@ public:
         void ResetOutputToSDR();
         bool SetHdmiPreference(dsHdcpProtocolVersion_t hdcpProtocol);
         int GetHdmiPreference();
-        void setAllmEnabled(bool enable);
 
 	bool setScartParameter(const std::string parameter, const std::string value);
 	int getVideoEOTF() const;

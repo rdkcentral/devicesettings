@@ -201,6 +201,72 @@ dsError_t dsGetEDIDBytes(intptr_t handle, unsigned char *edid, int *length)
     }
 }
 
+dsError_t dsSetAllmEnabled (intptr_t  handle, bool enabled)
+{
+	_DEBUG_ENTER();
+
+	dsDisplaySetAllmEnabledParam_t param;
+	memset(&param, 0, sizeof(param));
+	param.handle = handle;
+	param.enabled = enabled;
+
+	IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+			(char *) IARM_BUS_DSMGR_API_dsSetAllmEnabled,
+			(void *) &param,
+			sizeof(param));
+
+	if (IARM_RESULT_SUCCESS == rpcRet)
+	{
+		return param.result;
+	}
+
+	return dsERR_GENERAL ;
+}
+
+dsError_t dsSetAVIContentType (intptr_t  handle, dsAviContentType_t contentType)
+{
+        _DEBUG_ENTER();
+
+        dsDisplaySetAVIContentTypeParam_t param;
+        memset(&param, 0, sizeof(param));
+        param.handle = handle;
+        param.contentType = contentType;
+
+        IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                        (char *) IARM_BUS_DSMGR_API_dsSetAVIContentType,
+                        (void *) &param,
+                        sizeof(param));
+
+        if (IARM_RESULT_SUCCESS == rpcRet)
+        {
+                return param.result;
+        }
+
+        return dsERR_GENERAL ;
+}
+
+dsError_t dsSetAVIScanInformation (intptr_t  handle, dsAVIScanInformation_t scanInfo)
+{
+        _DEBUG_ENTER();
+
+        dsDisplaySetAVIScanInfoParam_t param;
+        memset(&param, 0, sizeof(param));
+        param.handle = handle;
+        param.scanInfo = scanInfo;
+
+        IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                        (char *) IARM_BUS_DSMGR_API_dsSetAVIScanInformation,
+                        (void *) &param,
+                        sizeof(param));
+
+        if (IARM_RESULT_SUCCESS == rpcRet)
+        {
+                return param.result;
+        }
+
+        return dsERR_GENERAL ;
+}
+
 dsError_t dsDisplayTerm(void)
 {
    _DEBUG_ENTER();
