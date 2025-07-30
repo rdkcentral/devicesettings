@@ -6925,6 +6925,7 @@ static void* persist_audioLevel_timer_threadFunc(void* arg) {
               pthread_mutex_lock(&audioLevelMutex);
               pthread_cond_wait(&audioLevelTimerCV, &audioLevelMutex);
               if(!persist_audioLevel_timer_threadIsAlive){
+		pthread_mutex_unlock(&audioLevelMutex);
                 break;
               }
               sleep(3);
