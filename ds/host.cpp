@@ -913,6 +913,52 @@ namespace device
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
 
+/**
+ * @fn void  Host::Register(IEvent &Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IEvent &Evtnotification)
+ * @brief This API is used to Unregister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  DisplayConnectionChangeListener::Register(IEvent &Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::Register(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent &Evtnotification)
+ * @brief This API is used to Unregister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::UnRegister(IEvent &Evtnotification) 
+{
+  return 0;
+}
 
 }
 

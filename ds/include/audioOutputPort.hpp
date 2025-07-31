@@ -52,6 +52,9 @@ class AudioOutputPortType;
 class AudioOutputPortConfig;
 
 
+
+
+
 /**
  * @class  AudioOutputPort
  * @brief Class extending Enumerable to implement the audiooutputport interface.
@@ -82,7 +85,67 @@ class AudioOutputPort  : public Enumerable {
 	bool  _muted; //!< Method variable to check whether audio is muted or not.
 
 
+
+
+
 public:
+
+	 struct IEvent{
+
+            // @brief Associated Audio mixing changed
+            // @text onAssociatedAudioMixingChanged
+            // @param mixing: true or false
+            virtual void OnAssociatedAudioMixingChanged(bool mixing) { };
+    
+            // @brief Audio Fader balance changed
+            // @text onAudioFaderControlChanged
+            // @param mixerBalance: applied mixer balance value
+            virtual void OnAudioFaderControlChanged(int mixerBalance) { };
+    
+            // @brief Primary language for Audio changed
+            // @text onAudioPrimaryLanguageChanged
+            // @param primaryLanguage: current primary language for audio
+            virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage) { };
+
+            // @brief Secondary language for Audio changed
+            // @text onAudioSecondaryLanguageChanged
+            // @param secondaryLanguage: current secondary language for audio
+            virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage) { };
+    
+            // @brief Audio output hot plug event
+            // @text onAudioOutHotPlug
+            // @param portType: Type of audio port see AudioPortType
+            // @param uiPortNumber: The port number assigned by UI
+            // @param isPortConnected: true (connected) or false (not connected)
+            virtual void OnAudioOutHotPlug(dsAudioPortType_t portType, int uiPortNumber, bool isPortConnected) { };
+
+
+            // @brief Dolby Atmos capabilities changed
+            // @text onDolbyAtmosCapabilitiesChanged
+            // @param atmosCapability: the dolby atmos capability
+            // @param status: true (available) or false (not available)
+            virtual void OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status) { };
+
+            // @brief Audio port state changed
+            // @text onAudioPortStateChanged
+            // @param audioPortState: audio port state
+            virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { };
+
+            // @brief Audio mode for the respective audio port - raised for every type of port
+            // @text onAudioModeEvent
+            // @param audioPortType: audio port type see AudioPortType
+            // @param audioMode: audio mode - see StereoMode
+            virtual void OnAudioModeEvent(dsAudioPortType_t  audioPortType, dsAudioStereoMode_t audioMode) { };
+
+            // @brief Audio mode for the respective audio port - raised for every type of port
+            // @text onAudioModeEvent
+            // @param audioPortType: audio port type see AudioPortType
+            // @param audioMode: audio mode - see StereoMode
+            virtual void OnAudioLevelChangedEvent(int audioLevel) { };
+        };
+
+        uint32_t Register(IEvent &Evtnotification);
+        uint32_t Unregister(IEvent &Evtnotification);
 
 	static AudioOutputPort & getInstance(int id);
 	static AudioOutputPort & getInstance(const std::string &name);

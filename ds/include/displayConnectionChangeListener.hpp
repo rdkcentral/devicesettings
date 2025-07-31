@@ -37,9 +37,21 @@ namespace device {
 
 class DisplayConnectionChangeListener {
 public:
+
+    	struct IEvent {
+    
+            // @brief RX Sense event
+            // @text OnRxSense
+            // @param displayEvent: RX Sense On or Off
+            virtual void OnRxSense(DisplayEvent displayEvent) { };
+    	};
+    	
+	uint32_t Register(IEvent &Evtnotification);
+    	uint32_t Unregister(IEvent &Evtnotification);
+
 	DisplayConnectionChangeListener() {}
 	virtual ~DisplayConnectionChangeListener() {}
-    virtual void displayConnectionChanged(VideoOutputPort &port, int newConnectionStatus) = 0;
+        virtual void displayConnectionChanged(VideoOutputPort &port, int newConnectionStatus) = 0;
 };
 
 }

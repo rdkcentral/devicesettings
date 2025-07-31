@@ -34,6 +34,7 @@
 #include "videoDFC.hpp"
 #include "videoResolution.hpp"
 #include "list.hpp"
+#include "dsTypes.h"
 #include <string>
 #include <list>
 
@@ -60,6 +61,22 @@ class VideoDevice : public DSConstant {
 	static const char * kPropertyDFC;
 
 public:
+
+       struct IEvent {
+            // @brief Display Framerate Pre-change
+            // @text OnDisplayFrameratePreChange
+            // @param frameRate: PreChange framerate
+            virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
+
+            // @brief Display Framerate Post-change
+            // @text OnDisplayFrameratePostChange
+            // @param frameRate:  framerate post change
+            virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+        };
+        
+        uint32_t Register(IEvent &Evtnotification);
+        uint32_t Unregister(IEvent &Evtnotification);
+	
 	static VideoDevice & getInstance(int id);
 	static VideoDevice & getInstance(const std::string &name);
 

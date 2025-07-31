@@ -32,6 +32,7 @@
 #include "dsConstant.hpp"
 #include "list"
 #include "frontPanelIndicator.hpp"
+#include "dsTypes.h"
 
 
 /**
@@ -131,6 +132,18 @@ private:
     static const char * kPropertyBrightness;
 
 public:
+    
+    struct IEvent {
+ 
+            // @brief On Front Panel display time format changed
+            // @text OnFPDTimeFormatChanged
+            // @param timeFormat: current time format 12 or 24 hour
+            virtual void OnFPDTimeFormatChanged(dsFPDTimeFormat_t timeFormat) { };
+    };
+
+    uint32_t Register(IEvent &Evtnotification);
+    uint32_t Unregister(IEvent &Evtnotification);
+    
     static const int kModeClock12Hr;  //!< Indicates 12 hour time format.
     static const int kModeClock24Hr;  //!< Indicates 24 hour time format.
     static const int kModeString;     //!< Indicates text string.

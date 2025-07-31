@@ -38,6 +38,7 @@
 #include "videoDevice.hpp"
 #include "sleepMode.hpp"
 #include  "list.hpp"
+#include "dsTypes.h"
 
 #include  <list>
 #include <string>
@@ -59,6 +60,24 @@ namespace device {
  */
 class Host {
 public:
+       
+    struct IEvent{
+            
+	    // @brief Sleep mode changed
+            // @text onSleepModeChanged
+            // @param sleepMode: see SleepMode
+            virtual void OnSleepModeChanged(dsSleepMode_t sleepMode) { };
+    
+            // @brief Audio Output format changed
+            // @text onAudioFormatUpdate
+            // @param audioFormat: Type of audio format see AudioFormat
+            virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
+    
+    };
+    
+    uint32_t Register(IEvent &Evtnotification);
+    uint32_t Unregister(IEvent &Evtnotification);
+
     static const int kPowerOn;
     static const int kPowerOff;
     static const int kPowerStandby;

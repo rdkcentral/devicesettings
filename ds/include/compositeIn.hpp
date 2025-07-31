@@ -49,6 +49,7 @@
 #define _DS_COMPOSITEIN_HPP_
 
 #include <stdint.h>
+#include "dsTypes.h"
 
 /**
  * @file compositeIn.hpp
@@ -70,6 +71,29 @@ class CompositeInput
 {
 
 public:
+    struct IEvent {
+            // @brief Composite In Hotplug event
+            // @text onCompositeInHotPlug
+            // @param port: Port of the hotplug
+            // @param isConnected: Is it connected (true) or not(false)
+            virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
+ 
+            // @brief Composite In Signal status
+            // @text onCompositeInSignalStatus
+            // @param port: Port of the hotplug
+            // @param signalStatus: Signal status
+            virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
+ 
+            // @brief Composite In status
+            // @text onCompositeInStatus
+            // @param activePort: Active port
+            // @param isPresented: is it presented to user
+            virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
+        };
+
+    uint32_t Register(IEvent &Evtnotification);
+    uint32_t Unregister(IEvent &Evtnotification);
+    
     static CompositeInput & getInstance();
 
     uint8_t getNumberOfInputs        () const;

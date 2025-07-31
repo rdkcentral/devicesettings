@@ -265,6 +265,29 @@ FrontPanelTextDisplay &FrontPanelConfig::getTextDisplay(const string &name)
 
 
 /**
+ * @fn void  FrontPanelTextDisplay::Register(IEvent &Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t FrontPanelTextDisplay::Register(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  FrontPanelTextDisplay::UnRegister(IEvent &Evtnotification)
+ * @brief This API is used to Unregister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t FrontPanelTextDisplay::UnRegister(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+/**
  * @fn FrontPanelConfig::getColors()
  * @brief This API gets the list of colors supported by front panel indicators.
  *

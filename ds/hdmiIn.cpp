@@ -678,6 +678,31 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
     printf ("%s:%d - HDMI Compatibility Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *capversion);
 }
 
+
+/**
+ * @fn void  HdmiInput::Register(IEvent &Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t HdmiInput::Register(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  CompositeInput::UnRegister(IEvent &Evtnotification)
+ * @brief This API is used to Unregister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t HdmiInput::UnRegister(IEvent &Evtnotification) 
+{
+  return 0;
+}
+
+
 }
 
 

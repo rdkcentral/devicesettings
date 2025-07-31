@@ -74,6 +74,66 @@ class HdmiInput
 {
 
 public:
+
+
+    struct IEvent {
+            
+	    // @brief HDMI Event Hot Plug
+            // @text onHDMIInEventHotPlug
+            // @param port: port 0 or 1 et al
+            // @param isConnected: is it connected (true) or not (false)
+            virtual void OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected) { };
+ 
+            // @brief HDMI Event Signal status
+            // @text OnHDMIInEventSignalStatus
+            // @param port: port 0 or 1 et al
+            // @param signalStatus: Signal Status
+            virtual void OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus) { };
+ 
+            // @brief HDMI Event Signal status
+            // @text onHDMIInEventStatus
+            // @param activePort: port 0 or 1 et al
+            // @param isPresented: is it presented or not
+            virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
+ 
+            // @brief HDMI Video Mode update
+            // @text onHDMInVideoModeUpdate
+            // @param port: port 0 or 1 et al
+            // @param videoPortResolution: Video port resolution
+            virtual void OnHDMInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
+ 
+            // @brief HDMI ALLM (Auto Low Latency Mode) status
+            // @text onHDMInAllmStatus
+            // @param port: port 0 or 1 et al
+            // @param allmStatus: allm status
+            virtual void OnHDMInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
+ 
+            // @brief HDMI Event AVI content type
+            // @text OnHDMInAVIContentType
+            // @param port: port 0 or 1 et al
+            // @param aviContentType: AVI content type
+            virtual void OnHDMInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
+ 
+            // @brief HDMI Event AV Latency
+            // @text OnHDMInAVLatency
+            // @param audioDelay: audio delay (in millisecs)
+            // @param videoDelay: video delay (in millisecs)
+            virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
+	    
+	    // @brief Zoom settings changed
+            // @text OnZoomSettingsChanged
+            // @param zoomSetting: Currently applied zoom setting
+            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
+
+	    // @brief HDMI Hotplug event
+            // @text OnHDMIHotPlug
+            // @param displayEvent: CONNECTED or DISCONNECTED
+    	    virtual void OnHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
+    };
+
+    uint32_t Register(IEvent &Evtnotification);
+    uint32_t Unregister(IEvent &Evtnotification);
+    
     static HdmiInput & getInstance();
 
     uint8_t getNumberOfInputs        () const;

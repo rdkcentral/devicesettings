@@ -77,6 +77,43 @@ class  VideoOutputPort : public Enumerable {
 
 public:
 
+	struct ResolutionChange {
+            uint32_t width;
+            uint32_t height;
+        };
+
+        struct IEvent {
+            
+	    // @brief On Resolution Pre changed
+            // @text OnResolutionPreChange
+            // @param resolution: resolution
+            virtual void OnResolutionPreChange(const ResolutionChange& resolution) { };
+ 
+            // @brief On Resolution Post change
+            // @text onResolutionPostChange
+            // @param resolution: resolution
+            virtual void OnResolutionPostChange(const ResolutionChange& resolution) { };
+ 
+            // @brief On HDCP Status change
+            // @text OnHDCPStatusChange
+            // @param hdcpStatus: HDCP Status
+            virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
+ 
+            // @brief On Video Format update
+            // @text OnVideoFormatUpdate
+            // @param videoFormatHDR: Video format HDR standard
+            virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+
+	    // @brief HDCP Protocol version change
+            // @text OnHDCPProtocolChangeStatus
+	    virtual void OnHDCPProtocolChangeStatus() { };
+
+	};
+
+        uint32_t Register(IEvent &Evtnotification);
+        uint32_t Unregister(IEvent &Evtnotification);
+
+
     class Display {
     	friend class VideoOutputPort;
 	 intptr_t _handle;
