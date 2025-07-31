@@ -680,24 +680,24 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
 
 
 /**
- * @fn void  HdmiInput::Register(IEvent &Evtnotification)
+ * @fn void  HdmiInput::Register(IEvent &listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t HdmiInput::Register(IEvent &Evtnotification) 
+uint32_t HdmiInput::Register(IEvent &listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  CompositeInput::UnRegister(IEvent &Evtnotification)
+ * @fn void  CompositeInput::UnRegister(IEvent &listener)
  * @brief This API is used to Unregister the Events
  *
  * @return unint32_t
  */
-uint32_t HdmiInput::UnRegister(IEvent &Evtnotification) 
+uint32_t HdmiInput::UnRegister(IEvent &listener) 
 {
   return 0;
 }

@@ -334,24 +334,24 @@ int VideoDevice::getCurrentDisframerate(char *framerate) const
 
 
 /**
- * @fn void  VideoDevice::Register(IEvent &Evtnotification)
+ * @fn void  VideoDevice::Register(IEvent &listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t VideoDevice::Register(IEvent &Evtnotification) 
+uint32_t VideoDevice::Register(IEvent &listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  VideoDevice::UnRegister(IEvent &Evtnotification)
+ * @fn void  VideoDevice::UnRegister(IEvent &listener)
  * @brief This API is used to Unregister the Events
  *
  * @return unint32_t
  */
-uint32_t VideoDevice::UnRegister(IEvent &Evtnotification) 
+uint32_t VideoDevice::UnRegister(IEvent &listener) 
 {
   return 0;
 }

@@ -131,8 +131,8 @@ public:
     	    virtual void OnHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
     };
 
-    uint32_t Register(IEvent &Evtnotification);
-    uint32_t Unregister(IEvent &Evtnotification);
+    uint32_t Register(IEvent &listener);
+    uint32_t Unregister(IEvent &listener);
     
     static HdmiInput & getInstance();
 

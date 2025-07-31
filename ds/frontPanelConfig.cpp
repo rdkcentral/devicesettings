@@ -265,24 +265,24 @@ FrontPanelTextDisplay &FrontPanelConfig::getTextDisplay(const string &name)
 
 
 /**
- * @fn void  FrontPanelTextDisplay::Register(IEvent &Evtnotification)
+ * @fn void  FrontPanelTextDisplay::Register(IEvent &listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t FrontPanelTextDisplay::Register(IEvent &Evtnotification) 
+uint32_t FrontPanelTextDisplay::Register(IEvent &listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  FrontPanelTextDisplay::UnRegister(IEvent &Evtnotification)
+ * @fn void  FrontPanelTextDisplay::UnRegister(IEvent &listenerlistener)
  * @brief This API is used to Unregister the Events
  *
  * @return unint32_t
  */
-uint32_t FrontPanelTextDisplay::UnRegister(IEvent &Evtnotification) 
+uint32_t FrontPanelTextDisplay::UnRegister(IEvent &listener) 
 {
   return 0;
 }

@@ -141,8 +141,8 @@ public:
             virtual void OnFPDTimeFormatChanged(dsFPDTimeFormat_t timeFormat) { };
     };
 
-    uint32_t Register(IEvent &Evtnotification);
-    uint32_t Unregister(IEvent &Evtnotification);
+    uint32_t Register(IEvent &listener);
+    uint32_t Unregister(IEvent &listener);
     
     static const int kModeClock12Hr;  //!< Indicates 12 hour time format.
     static const int kModeClock24Hr;  //!< Indicates 24 hour time format.

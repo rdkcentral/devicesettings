@@ -144,8 +144,8 @@ public:
             virtual void OnAudioLevelChangedEvent(int audioLevel) { };
         };
 
-        uint32_t Register(IEvent &Evtnotification);
-        uint32_t Unregister(IEvent &Evtnotification);
+        uint32_t Register(IEvent &listener);
+        uint32_t Unregister(IEvent &listener);
 
 	static AudioOutputPort & getInstance(int id);
 	static AudioOutputPort & getInstance(const std::string &name);

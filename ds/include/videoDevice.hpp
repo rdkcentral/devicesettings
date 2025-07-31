@@ -74,8 +74,8 @@ public:
             virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
         };
         
-        uint32_t Register(IEvent &Evtnotification);
-        uint32_t Unregister(IEvent &Evtnotification);
+        uint32_t Register(IEvent &listener);
+        uint32_t Unregister(IEvent &listener);
 	
 	static VideoDevice & getInstance(int id);
 	static VideoDevice & getInstance(const std::string &name);

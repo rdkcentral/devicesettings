@@ -110,8 +110,8 @@ public:
 
 	};
 
-        uint32_t Register(IEvent &Evtnotification);
-        uint32_t Unregister(IEvent &Evtnotification);
+        uint32_t Register(IEvent &listener);
+        uint32_t Unregister(IEvent &listener);
 
 
     class Display {
