@@ -947,11 +947,11 @@ uint32_t DisplayConnectionChangeListener::Register(IEvent *listener)
 }
 
 /**
-+ * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
-+ * @brief This API is used to Unregister the Events
-+ *
-+ * @return unint32_t
-+ */
+ * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
+ * @brief This API is used to Unregister the Events
+ *
+ * @return unint32_t
+ */
 uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *listener)
 {
   return 0;
