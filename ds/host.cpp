@@ -941,7 +941,7 @@ uint32_t Host::UnRegister(IEvent *listener)
  *
  * @return unint32_t
  */
-uint32_t DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
+uint32_t DisplayConnectionChangeListener::Register(IEvent *listener)
 {
   return 0;
 }
@@ -952,7 +952,7 @@ uint32_t DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
 + *
 + * @return unint32_t
 + */
-uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
+uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *listener)
 {
   return 0;
 }
