@@ -113,7 +113,6 @@ private:
 
     std::list < PowerModeChangeListener* > powerEvntListeners;
     std::list < DisplayConnectionChangeListener* > dispEvntListeners;
-    void notifyDisplayConnectionChange(int portHandle, bool newConnectionStatus);
 };
 
 }

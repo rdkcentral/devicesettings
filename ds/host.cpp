@@ -231,17 +231,6 @@ namespace device
         }
     }
 
-    void Host::notifyDisplayConnectionChange (int portHandle, bool newConnectionStatus)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        for ( it = dispEvntListeners.begin() ; it != dispEvntListeners.end(); it++ )
-        {
-            (*it)->displayConnectionChanged(getVideoOutputPort(portHandle), newConnectionStatus);
-            getVideoOutputPort(portHandle).setDisplayConnected(newConnectionStatus);
-        }
-    }
-
-
 /**
  * @fn bool Host::setPowerMode(int mode)
  * @brief This API is used to change the power mode of the device.
