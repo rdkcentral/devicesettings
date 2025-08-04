@@ -103,7 +103,7 @@ namespace device
         return instance;
     }
 
-
+#if 0
 /**
  * @fn void Host::addPowerModeListener(PowerModeChangeListener *l)
  * @brief This API is used to register listeners for Power Mode change event.
@@ -231,16 +231,7 @@ namespace device
         }
     }
 
-    void Host::notifyDisplayConnectionChange (int portHandle, bool newConnectionStatus)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        for ( it = dispEvntListeners.begin() ; it != dispEvntListeners.end(); it++ )
-        {
-            (*it)->displayConnectionChanged(getVideoOutputPort(portHandle), newConnectionStatus);
-            getVideoOutputPort(portHandle).setDisplayConnected(newConnectionStatus);
-        }
-    }
-
+ #endif
 
 /**
  * @fn bool Host::setPowerMode(int mode)
