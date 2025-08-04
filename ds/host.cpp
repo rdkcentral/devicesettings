@@ -241,16 +241,6 @@ namespace device
         }
     }
 
-    
-    void Host::notifyRxSense(dsDisplayEvent_t dispEvt)
-    {
-        std::list<DisplayConnectionChangeListener*>::iterator it;
-        for (it = dispEvntListeners.begin(); it != dispEvntListeners.end(); ++it)
-        {
-            (*it)->OnRxSense(dispEvt); 
-        }
-    }  
-
 /**
  * @fn bool Host::setPowerMode(int mode)
  * @brief This API is used to change the power mode of the device.
@@ -923,27 +913,50 @@ namespace device
    }
 
 /**
- * @fn void  Host::Register(IEvent &listener)
+ * @fn void  Host::Register(IEvent *listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IEvent &listener) 
+uint32_t Host::Register(IEvent *listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  Host::UnRegister(IEvent &listener)
+ * @fn void  Host::UnRegister(IEvent *listener)
  * @brief This API is used to Unregister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IEvent &listener) 
+uint32_t Host::UnRegister(IEvent *listener) 
 {
   return 0;
 }
+
+/**
+ * @fn void  DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
+{
+  return 0;
+}
+
+/**
++ * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
++ * @brief This API is used to Unregister the Events
++ *
++ * @return unint32_t
++ */
+uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
+{
+  return 0;
+}
+
 
 }
 

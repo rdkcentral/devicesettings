@@ -75,8 +75,8 @@ public:
     
     };
     
-    uint32_t Register(IEvent &listener);
-    uint32_t Unregister(IEvent &listener);
+    uint32_t Register(IEvent *listener);
+    uint32_t Unregister(IEvent *listener);
 
     static const int kPowerOn;
     static const int kPowerOff;

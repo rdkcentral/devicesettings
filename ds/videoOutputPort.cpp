@@ -951,24 +951,24 @@ void VideoOutputPort::Display::setAVIScanInformation(dsAVIScanInformation_t scan
 
 
 /**
- * @fn void  VideoOutputPort::Register(IEvent &listener)
+ * @fn void  VideoOutputPort::Register(IEvent *listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t VideoOutputPort::Register(IEvent &listener) 
+uint32_t VideoOutputPort::Register(IEvent *listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  VideoOutputPort::UnRegister(IEvent &listener)
+ * @fn void  VideoOutputPort::UnRegister(IEvent *listener)
  * @brief This API is used to Unregister the Events
  *
  * @return unint32_t
  */
-uint32_t VideoOutputPort::UnRegister(IEvent &listener) 
+uint32_t VideoOutputPort::UnRegister(IEvent *listener) 
 {
   return 0;
 }

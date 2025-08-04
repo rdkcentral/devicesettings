@@ -272,24 +272,24 @@ void CompositeInput::scaleVideo (int32_t x, int32_t y, int32_t width, int32_t he
 
 
 /**
- * @fn void  CompositeInput::Register(IEvent &listener)
+ * @fn void  CompositeInput::Register(IEvent *listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t CompositeInput::Register(IEvent &listener) 
+uint32_t CompositeInput::Register(IEvent *listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  CompositeInput::UnRegister(IEvent &listener)
+ * @fn void  CompositeInput::UnRegister(IEvent *listener)
  * @brief This API is used to Unregister the Events
  *
  * @return unint32_t
  */
-uint32_t CompositeInput::UnRegister(IEvent &listener) 
+uint32_t CompositeInput::UnRegister(IEvent *listener) 
 {
   return 0;
 }

@@ -91,8 +91,8 @@ public:
             virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
         };
 
-    uint32_t Register(IEvent &listener);
-    uint32_t Unregister(IEvent &listener);
+    uint32_t Register(IEvent *listener);
+    uint32_t Unregister(IEvent *listener);
     
     static CompositeInput & getInstance();
 
