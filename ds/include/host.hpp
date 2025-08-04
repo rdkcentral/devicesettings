@@ -68,11 +68,12 @@ public:
     SleepMode getPreferredSleepMode();
     int setPreferredSleepMode(const SleepMode);
     List <SleepMode> getAvailableSleepModes();
-	void addPowerModeListener(PowerModeChangeListener *l);
+#if 0	
+    void addPowerModeListener(PowerModeChangeListener *l);
     void removePowerModeChangeListener(PowerModeChangeListener *l);
     void addDisplayConnectionListener(DisplayConnectionChangeListener *l);
     void removeDisplayConnectionListener(DisplayConnectionChangeListener *l);
-
+#endif
 	static Host& getInstance(void);
 
     List<VideoOutputPort> getVideoOutputPorts();

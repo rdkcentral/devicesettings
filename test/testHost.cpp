@@ -86,12 +86,15 @@ BOOST_AUTO_TEST_CASE(test_Host)
             device::Host::getInstance().setPowerMode(0);
             device::Host::getInstance().getPowerMode();
 
+#if 0    
             power p;
             disp d;
-            device::Host::getInstance().addDisplayConnectionListener(&d);
+	    device::Host::getInstance().addDisplayConnectionListener(&d);
             device::Host::getInstance().removeDisplayConnectionListener(&d);
             device::Host::getInstance().addPowerModeListener(&p);
             device::Host::getInstance().removePowerModeChangeListener(&p);
+#endif
+
         }
     }
 	catch(...) {

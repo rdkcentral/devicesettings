@@ -103,7 +103,7 @@ namespace device
         return instance;
     }
 
-
+#if 0
 /**
  * @fn void Host::addPowerModeListener(PowerModeChangeListener *l)
  * @brief This API is used to register listeners for Power Mode change event.
@@ -230,6 +230,8 @@ namespace device
             (*it)->powerModeChanged (mode);
         }
     }
+
+ #endif
 
 /**
  * @fn bool Host::setPowerMode(int mode)
