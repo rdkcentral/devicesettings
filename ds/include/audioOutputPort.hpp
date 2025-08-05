@@ -137,10 +137,9 @@ public:
             // @param audioMode: audio mode - see StereoMode
             virtual void OnAudioModeEvent(dsAudioPortType_t  audioPortType, dsAudioStereoMode_t audioMode) { };
 
-            // @brief Audio mode for the respective audio port - raised for every type of port
-            // @text onAudioModeEvent
-            // @param audioPortType: audio port type see AudioPortType
-            // @param audioMode: audio mode - see StereoMode
+            // @brief Audio level changed
+            // @text OnAudioLevelChangedEvent
+            // @param audioiLevel: audio level value
             virtual void OnAudioLevelChangedEvent(int audioLevel) { };
         };
 

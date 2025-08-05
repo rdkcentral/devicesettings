@@ -38,16 +38,35 @@ namespace device {
 class DisplayConnectionChangeListener {
 public:
 
+    	struct IDisplayHDMIHotPlugEvent{
+
+            // @brief Display HDMI Hot plug event
+            // @text onDisplayHDMIHotPlug
+            // @param displayEvent: DS_DISPLAY_EVENT_CONNECTED or DS_DISPLAY_EVENT_DISCONNECTED
+            virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) = 0;
+    	};
+    
+    	uint32_t Register(IDisplayHDMIHotPlugEvent*listener);
+    	uint32_t Unregister(IDisplayHDMIHotPlugEvent *listener);
+
+
+
     	struct IEvent{
-            
-	    // @brief RX Sense event
-            // @text OnRxSense
-            // @param displayEvent: RX Sense On or Off
-            virtual void OnRxSense(dsDisplayEvent_t displayEvent) { };
+
+            // @brief Display RX Sense event
+            // @text onDisplayRxSense
+            // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
+            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) = 0;
+ 
+            // @brief Display HDCP Status
+            // @text OnDisplayHDCPStatus
+            virtual void OnDisplayHDCPStatus() = 0
+
     	};
     
     	uint32_t Register(IEvent *listener);
     	uint32_t Unregister(IEvent *listener);
+
 
 	DisplayConnectionChangeListener() {}
 	virtual ~DisplayConnectionChangeListener() {}
