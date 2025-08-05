@@ -6919,42 +6919,50 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
 	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = 0.0, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
+	struct timespec ts;
 	    while(1){
-              // wait for 3 sec, then update the latest audio level from cache variable
+	      clock_gettime(CLOCK_REALTIME, &ts);
+              ts.tv_sec += 5;
 
               pthread_mutex_lock(&audioLevelMutex);
-              pthread_cond_wait(&audioLevelTimerCV, &audioLevelMutex);
+              while(!audioLevel_timer_set){
+                int rc = pthread_cond_timedwait(&audioLevelTimerCV, &audioLevelMutex, &ts);
+                if (rc == ETIMEDOUT)
+                        continue;
+              }
               if(!persist_audioLevel_timer_threadIsAlive){
 		pthread_mutex_unlock(&audioLevelMutex);
                 break;
               }
-              sleep(3);
+	      // wait for 3 sec, then update the latest audio level from cache variable
+	      if(audioLevel_timer_set){
+                sleep(3);
 
-              if(float(audioLevel_cache_spdif) != prev_audioLevel_spdif){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPDIF0.audio.Level",float(audioLevel_cache_spdif));
-                device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.Level",std::to_string(audioLevel_cache_spdif));
-                prev_audioLevel_spdif = float(audioLevel_cache_spdif);
-              }
-              if(float(audioLevel_cache_hdmi) != prev_audioLevel_hdmi){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HDMI0.audio.Level",float(audioLevel_cache_hdmi));
-                device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.Level",std::to_string(audioLevel_cache_hdmi));
-                prev_audioLevel_hdmi = float(audioLevel_cache_hdmi);
-              }
-              if(float(audioLevel_cache_speaker) != prev_audioLevel_speaker){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPEAKER0.audio.Level",float(audioLevel_cache_speaker));
-                device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.Level",std::to_string(audioLevel_cache_speaker));
-                prev_audioLevel_speaker = float(audioLevel_cache_speaker);
-              }
-              if(float(audioLevel_cache_headphone) != prev_audioLevel_headphone){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HEADPHONE0.audio.Level",float(audioLevel_cache_headphone));
-                device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.Level",std::to_string(audioLevel_cache_headphone));
-                prev_audioLevel_headphone = float(audioLevel_cache_headphone);
-              }
-              else{
-                INT_INFO("%s Audio level is same as last set value.Not updating persistence\n",__func__);
-              }
-
-              audioLevel_timer_set = false;
+                if(float(audioLevel_cache_spdif) != prev_audioLevel_spdif){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPDIF0.audio.Level",float(audioLevel_cache_spdif));
+                  device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.Level",std::to_string(audioLevel_cache_spdif));
+                  prev_audioLevel_spdif = float(audioLevel_cache_spdif);
+                }
+                if(float(audioLevel_cache_hdmi) != prev_audioLevel_hdmi){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HDMI0.audio.Level",float(audioLevel_cache_hdmi));
+                  device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.Level",std::to_string(audioLevel_cache_hdmi));
+                  prev_audioLevel_hdmi = float(audioLevel_cache_hdmi);
+                }
+                if(float(audioLevel_cache_speaker) != prev_audioLevel_speaker){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPEAKER0.audio.Level",float(audioLevel_cache_speaker));
+                  device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.Level",std::to_string(audioLevel_cache_speaker));
+                  prev_audioLevel_speaker = float(audioLevel_cache_speaker);
+                }
+                if(float(audioLevel_cache_headphone) != prev_audioLevel_headphone){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HEADPHONE0.audio.Level",float(audioLevel_cache_headphone));
+                  device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.Level",std::to_string(audioLevel_cache_headphone));
+                  prev_audioLevel_headphone = float(audioLevel_cache_headphone);
+                }
+                else{
+                  INT_INFO("%s Audio level is same as last set value.Not updating persistence\n",__func__);
+                }
+                audioLevel_timer_set = false;
+	      }
               pthread_mutex_unlock(&audioLevelMutex);
             }
 
