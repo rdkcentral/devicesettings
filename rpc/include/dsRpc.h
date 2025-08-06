@@ -132,6 +132,9 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsGetDisplayAspectRatio		"dsGetDisplayAspectRatio"
 #define IARM_BUS_DSMGR_API_dsGetEDID					"dsGetEDID"
 #define IARM_BUS_DSMGR_API_dsGetEDIDBytes               "dsGetEDIDBytes"
+#define IARM_BUS_DSMGR_API_dsSetAllmEnabled "dsSetAllmEnabled"
+#define IARM_BUS_DSMGR_API_dsSetAVIContentType "dsSetAVIContentType"
+#define IARM_BUS_DSMGR_API_dsSetAVIScanInformation "dsSetAVIScanInformation"
 #define IARM_BUS_DSMGR_API_dsDisplayTerm				"dsDisplayTerm"
 
 
@@ -612,6 +615,27 @@ typedef struct _dsDisplayGetEDIDParam_t {
     dsDisplayEDID_t edid;
 } dsDisplayGetEDIDParam_t;
 
+typedef struct _dsDisplaySetAVIContentTypeParam_t
+{
+    dsError_t result;
+    intptr_t  handle;
+    dsAviContentType_t contentType;
+}dsDisplaySetAVIContentTypeParam_t;
+
+typedef struct _dsDisplaySetAVIScanInfoParam_t
+{
+    dsError_t result;
+    intptr_t  handle;
+    dsAVIScanInformation_t scanInfo;
+}dsDisplaySetAVIScanInfoParam_t;
+
+typedef struct _dsDisplaySetAllmEnabledParam_t
+{
+    dsError_t result;
+    intptr_t  handle;
+    bool     enabled;
+}dsDisplaySetAllmEnabledParam_t;
+
 typedef struct _dsSupportedResolutionParam_t {
     dsError_t result;
     intptr_t  handle;
@@ -996,14 +1020,6 @@ typedef struct _dsEdidVersionParam_t
     dsHdmiInPort_t          iHdmiPort;
     tv_hdmi_edid_version_t  iEdidVersion;
 }dsEdidVersionParam_t;
-
-typedef struct _dsSetAllmEnabledParam_t
-{
-    dsError_t result;
-    intptr_t  handle;
-    bool     enabled;
-}dsSetAllmEnabledParam_t;
-
 
 typedef struct _dsEdidAllmSupportParam_t
 {
