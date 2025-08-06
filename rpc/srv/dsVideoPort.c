@@ -923,7 +923,7 @@ IARM_Result_t _dsSetResolution(void *arg)
 		//IsIgnoreEdid is true platform will take care of current resolution cache.
 		if (!IsIgnoreEdid) {
 			dsVideoPortResolution_t platresolution;
-			memset(platresolution.name,'\0',sizeof(platresolution.name));
+			memset(&platresolution,'\0',sizeof(platresolution));
 			dsGetResolution(param->handle,&platresolution);
 			INT_INFO("Resolution Requested ..%s Platform Resolution - %s\r\n",resolution.name,platresolution.name);
 			if ((strcmp(resolution.name,platresolution.name) == 0 ))
