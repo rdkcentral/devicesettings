@@ -480,8 +480,9 @@ void VideoOutputPort::setResolution(const std::string &resolutionName, bool pers
 	resolution.pixelResolution 	= (dsVideoResolution_t)	newResolution.getPixelResolution().getId();
 	resolution.stereoScopicMode = (dsVideoStereoScopicMode_t)newResolution.getStereoscopicMode().getId();
         strncpy(resolution.name,resolutionName.c_str(),sizeof(resolution.name));
-
-       dsError_t ret = dsVideoPortSetResolution(_handle, &resolution, persist);
+        resolution.name[sizeof(resolution.name) - 1] = '\0';  // Ensure null-termination
+	
+        dsError_t ret = dsVideoPortSetResolution(_handle, &resolution, persist);
 
 	if (ret != dsERR_NONE) {
 		throw Exception(ret);
