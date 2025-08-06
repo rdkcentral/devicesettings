@@ -89,7 +89,14 @@ public:
             // @param activePort: Active port
             // @param isPresented: is it presented to user
             virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
-        };
+
+
+            // @brief Composite In Video Mode Update
+            // @text OnCompositeInVideoModeUpdate
+            // @param activePort: Active port
+            // @param videoResolution: See DisplayVideoPortResolution
+            virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) = 0;
+	    };
 
     uint32_t Register(IEvent *listener);
     uint32_t Unregister(IEvent *listener);

@@ -120,6 +120,12 @@ public:
             // @param videoDelay: video delay (in millisecs)
             virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
 	    
+            // @brief HDMI VRR status
+            // @text OnHDMInVRRStatus
+            // @param port: port 0 or 1 et al
+            // @param vrrType: VRR type
+            virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
+
 	    // @brief Zoom settings changed
             // @text OnZoomSettingsChanged
             // @param zoomSetting: Currently applied zoom setting
