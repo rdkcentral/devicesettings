@@ -1772,7 +1772,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
 			}
 
 			INT_DEBUG("Set Resolution on Component/Composite Ports!!!!!!..\r\n");
-			_dsCompResolution = resolutionName;
+			_dsCompResolution = std::move(resolutionName);
 			if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsHDMIResolution)))
 			{
 				INT_INFO("HDMI Resolution is not Compatible with Analog ports..\r\n");
@@ -1800,7 +1800,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
                         }
 
                         INT_DEBUG("Set Resolution on Composite Ports!!!!!!..\r\n");
-                        _dsBBResolution = resolutionName;
+                        _dsBBResolution = std::move(resolutionName);
                         if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsHDMIResolution)))
                         {
                                 INT_INFO("HDMI Resolution is not Compatible with Analog ports..\r\n");
@@ -1824,7 +1824,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
                         }
 
                         INT_DEBUG("Set Resolution on RF Ports!!!!!!..\r\n");
-                        _dsRFResolution = resolutionName;
+                        _dsRFResolution = std::move(resolutionName);
                         if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsHDMIResolution)))
                         {
                                 INT_INFO("HDMI Resolution is not Compatible with Analog ports..\r\n");
