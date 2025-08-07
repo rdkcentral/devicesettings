@@ -482,11 +482,10 @@ IARM_Result_t dsHdmiInMgr_term()
 
 IARM_Result_t _dsHdmiInInit(void *arg)
 {
+    IARM_BUS_Lock(lock);
     INT_INFO("%s:%d ---> m_isInitialized=%d, m_isPlatInitialized=%d \n",
                    __PRETTY_FUNCTION__,__LINE__, m_isInitialized, m_isPlatInitialized);
 
-
-    IARM_BUS_Lock(lock);
     getDynamicAutoLatencyConfig();
 
     if (PROFILE_TV == profileType)
@@ -1404,9 +1403,9 @@ IARM_Result_t _dsSetVRRSupport (void *arg)
     _DEBUG_ENTER();
 
     dsVRRSupportParam_t *param = (dsVRRSupportParam_t *) arg;
+    IARM_BUS_Lock(lock);
     param->result = dsERR_NONE;
     INT_INFO("[srv] :  In _dsSetVRRSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
-    IARM_BUS_Lock(lock);
     if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the VRR bit in edid
     {
         param->result = setVRRSupport (param->iHdmiPort, param->vrrSupport);
