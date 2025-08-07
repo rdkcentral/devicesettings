@@ -666,7 +666,9 @@ void AudioConfigInit()
                 if (dsSetMS12AudioProfileFunc) {
                     INT_DEBUG("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
                     handle = 0;
-                    dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
+                    if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+                        INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+                    }
 
                     try {
                         _AProfile = device::HostPersistence::getInstance().getProperty("audio.MS12Profile");
@@ -1265,10 +1267,11 @@ void AudioConfigInit()
                             }
                 //SPEAKER init
                             handle = 0;
-                            dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
-                            if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
-                                INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
-                            }
+                            if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                                if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
+                                    INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
+                                }
+			    }
                 //HDMI init
                             handle = 0;
                             if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
@@ -1317,8 +1320,11 @@ void AudioConfigInit()
                         std::string _GEQMode("0");
                         int m_GEQMode = 0;
                         handle = 0;
-                        dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
-                        try {
+                        if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+                            INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+                        }
+
+		        try {
                             _GEQMode = device::HostPersistence::getInstance().getProperty("audio.GraphicEQ");
                             m_GEQMode = atoi(_GEQMode.c_str());
                 //SPEAKER init
@@ -1518,7 +1524,9 @@ void AudioConfigInit()
                        std::string _IEQMode("0");
                        int m_IEQMode = 0;
                        handle = 0;
-                       dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
+                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+		           INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+		       }
                        try {
                            _IEQMode = device::HostPersistence::getInstance().getProperty("audio.IntelligentEQ");
                        }
@@ -1898,7 +1906,9 @@ void AudioConfigInit()
                        std::string _GEQMode("0");
                        int m_GEQMode = 0;
                        handle = 0;
-                       dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
+                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+			       INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+		       }
                        try {
                            _GEQMode = device::HostPersistence::getInstance().getProperty("audio.GraphicEQ");
                        }
@@ -2653,7 +2663,9 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 IARM_Result_t _dsGetStereoAuto(void *arg)
 {
     _DEBUG_ENTER();
-
+    if ( !arg ) {
+        return IARM_RESULT_INVALID_PARAM;
+    }
     IARM_BUS_Lock(lock);
 
     dsAudioSetStereoAutoParam_t *param = (dsAudioSetStereoAutoParam_t *)arg;

@@ -277,7 +277,8 @@ IARM_Result_t _dsVideoPortInit(void *arg)
                    if (dsERR_NONE != eReturn) {
                         eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_INTERNAL,0,&handle);
                    }
-                   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",handle);
+                   /* coverity[print_args] */
+		   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",(void *)handle);
 		   dsRegisterHdcpStatusCallback(handle,_dsHdcpCallback);
 		#endif
 		
@@ -2356,7 +2357,7 @@ void _dsSyncHdmiStatus(const std::string& key, int val) {
 	} else if (0 == strncmp (key.c_str(), DS_HDMI_TAG_HDCPVERSION, strlen(DS_HDMI_TAG_HDCPVERSION))){
 		value = getHdcpVersionName (val);
 	} else {
-		INT_INFO("dsSRV: %s: unknown key is passed %s\r\n", __FUNCTION__, key);
+		INT_INFO("dsSRV: %s: unknown key is passed %s\r\n", __FUNCTION__, key.c_str());
 	}
     // Read existing lines and remove the target line if it exists
     while (std::getline(statusFile, line)) {
