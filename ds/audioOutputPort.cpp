@@ -2024,7 +2024,7 @@ uint32_t AudioOutputPort::UnRegister(IEvent *listener)
   return 0;
 }
 
-
+}
 /** @} */
 
 /** @} */
