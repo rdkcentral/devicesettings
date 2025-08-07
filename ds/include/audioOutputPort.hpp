@@ -35,8 +35,8 @@
 #include "list.hpp"
 #include "enumerable.hpp"
 #include "dsTypes.h"
-
 #include "dsError.h"
+#include "dsMgr.h"
 
 #include <string>
 #include <stdint.h>
