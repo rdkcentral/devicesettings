@@ -31,7 +31,9 @@
 #ifndef _DS_DISPLAYCONNECTIONCHANGELISTENER_H_
 #define _DS_DISPLAYCONNECTIONCHANGELISTENER_H_
 
+#include "dsTypes.h"
 #include "videoOutputPort.hpp"
+#include "dsDisplay.h"
 
 namespace device {
 
