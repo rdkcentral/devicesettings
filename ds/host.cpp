@@ -963,7 +963,7 @@ uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *listener)
  *
  * @return unint32_t
  */
-uint32_t DisplayConnectionChangeListener::Register(IDisplayHDMIHotPlugEvent*listener)
+uint32_t DisplayConnectionChangeListener::Register(IDisplayHDMIHotPlugEvent *listener)
 {
   return 0;
 }
@@ -975,7 +975,7 @@ uint32_t DisplayConnectionChangeListener::Register(IDisplayHDMIHotPlugEvent*list
  *
  * @return unint32_t
  */
-uint32_t DisplayConnectionChangeListener::UnRegister(IDisplayHDMIHotPlugEvent *listener);
+uint32_t DisplayConnectionChangeListener::UnRegister(IDisplayHDMIHotPlugEvent *listener)
 {
   return 0;
 }
