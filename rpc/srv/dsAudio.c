@@ -3399,15 +3399,16 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
         }
         else {
             INT_DEBUG("%s : %s Audio port status verification passed. status %d\n", __FUNCTION__, isEnabledAudioPortKey.c_str(), param->enabled);
-	   m_AudioPortEnabled[_APortType] = param->enabled; 
-	   INT_INFO(" %s : port id:%d enabled status :%d\n", __FUNCTION__, _APortType , param->enabled);
-	   if(m_AudioPortEnabled[_APortType])
-	   {
-               uint32_t audioDelay = dsGetAudioDelayInternal(_APortType);
-	       bool isAudioDelaySet = dsSetAudioDelayInternal(param->handle,audioDelay);
-	       INT_INFO(" %s :updated audio delay for port enable  port id:%d audioDelay:%d\n", __FUNCTION__, _APortType , audioDelay);
-	   }
-
+            if (dsAUDIOPORT_TYPE_MAX>_APortType) {
+                m_AudioPortEnabled[_APortType] = param->enabled;
+                INT_INFO(" %s : port id:%d enabled status :%d\n", __FUNCTION__, _APortType , param->enabled);
+                if(m_AudioPortEnabled[_APortType])
+                {
+                    uint32_t audioDelay = dsGetAudioDelayInternal(_APortType);
+                    bool isAudioDelaySet = dsSetAudioDelayInternal(param->handle,audioDelay);
+                    INT_INFO(" %s :updated audio delay for port enable  port id:%d audioDelay:%d\n", __FUNCTION__, _APortType , audioDelay);
+                }
+            }
         }
     }
     else {
@@ -3773,19 +3774,20 @@ IARM_Result_t _dsSetAudioDelay(void *arg)
     if (func != 0 && param != NULL)
     {
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
-        if (m_AudioPortEnabled[_APortType])
-        {
-	    if(func(param->handle, param->audioDelayMs) != dsERR_NONE)
-	    {	    
-                INT_INFO("%s: (SERVER) Unable to set audiodelay\n", __FUNCTION__);
-                result = IARM_RESULT_INVALID_STATE;
-	    }
+        if (dsAUDIOPORT_TYPE_MAX>_APortType ) {
+            if (m_AudioPortEnabled[_APortType])
+            {
+                if(func(param->handle, param->audioDelayMs) != dsERR_NONE)
+                {
+                    INT_INFO("%s: (SERVER) Unable to set audiodelay\n", __FUNCTION__);
+                    result = IARM_RESULT_INVALID_STATE;
+                }
+            }
+            else
+            {
+                INT_INFO("%s: (SERVER) Not setting  audiodelay as port is not enabled: %d \n", __FUNCTION__,m_AudioPortEnabled[_APortType]);
+            }
         }
-	else
-	{
-            INT_INFO("%s: (SERVER) Not setting  audiodelay as port is not enabled: %d \n", __FUNCTION__,m_AudioPortEnabled[_APortType]);
-	}
-
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioDelay = std::to_string(param->audioDelayMs);
         switch(_APortType) {
