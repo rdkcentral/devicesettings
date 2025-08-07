@@ -3891,7 +3891,7 @@ uint32_t dsGetAudioDelayInternal(dsAudioPortType_t _APortType)
                     }
                 }                break;
             default:
-                INT_DEBUG("%s: port: UNKNOWN , persist audio delay: %d : NOT SET\n",__func__, audioDelayMs);
+                INT_DEBUG("%s: port: UNKNOWN , persist audio delay: %s : NOT SET\n",__func__, audioDelayMs.c_str());
                 break;
         }
     try {
