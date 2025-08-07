@@ -75,7 +75,7 @@ public:
         };
         
         uint32_t Register(IEvent *listener);
-        uint32_t Unregister(IEvent *listener);
+        uint32_t UnRegister(IEvent *listener);
 	
 	static VideoDevice & getInstance(int id);
 	static VideoDevice & getInstance(const std::string &name);

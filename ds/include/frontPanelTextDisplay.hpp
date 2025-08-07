@@ -142,7 +142,7 @@ public:
     };
 
     uint32_t Register(IEvent *listener);
-    uint32_t Unregister(IEvent *listener);
+    uint32_t UnRegister(IEvent *listener);
     
     static const int kModeClock12Hr;  //!< Indicates 12 hour time format.
     static const int kModeClock24Hr;  //!< Indicates 24 hour time format.

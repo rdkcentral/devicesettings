@@ -111,7 +111,7 @@ public:
 	};
 
         uint32_t Register(IEvent *listener);
-        uint32_t Unregister(IEvent *listener);
+        uint32_t UnRegister(IEvent *listener);
 
 
     class Display {

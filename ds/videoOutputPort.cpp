@@ -964,7 +964,7 @@ uint32_t VideoOutputPort::Register(IEvent *listener)
 
 /**
  * @fn void  VideoOutputPort::UnRegister(IEvent *listener)
- * @brief This API is used to Unregister the Events
+ * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */

@@ -150,7 +150,7 @@ public:
         };
 
         uint32_t Register(IEvent *listener);
-        uint32_t Unregister(IEvent *listener);
+        uint32_t UnRegister(IEvent *listener);
 
 	static AudioOutputPort & getInstance(int id);
 	static AudioOutputPort & getInstance(const std::string &name);

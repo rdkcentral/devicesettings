@@ -49,7 +49,7 @@ public:
     	};
     
     	uint32_t Register(IDisplayHDMIHotPlugEvent*listener);
-    	uint32_t Unregister(IDisplayHDMIHotPlugEvent *listener);
+    	uint32_t UnRegister(IDisplayHDMIHotPlugEvent *listener);
 
 
 
@@ -67,7 +67,7 @@ public:
     	};
     
     	uint32_t Register(IEvent *listener);
-    	uint32_t Unregister(IEvent *listener);
+    	uint32_t UnRegister(IEvent *listener);
 
 
 	DisplayConnectionChangeListener() {}

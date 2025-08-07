@@ -285,7 +285,7 @@ uint32_t CompositeInput::Register(IEvent *listener)
 
 /**
  * @fn void  CompositeInput::UnRegister(IEvent *listener)
- * @brief This API is used to Unregister the Events
+ * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
