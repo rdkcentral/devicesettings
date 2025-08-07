@@ -141,6 +141,12 @@ public:
             // @text OnAudioLevelChangedEvent
             // @param audioiLevel: audio level value
             virtual void OnAudioLevelChangedEvent(int audioLevel) { };
+
+            // @brief Audio Output format changed
+            // @text onAudioFormatUpdate
+            // @param audioFormat: Type of audio format see AudioFormat
+            virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
+
         };
 
         uint32_t Register(IEvent *listener);

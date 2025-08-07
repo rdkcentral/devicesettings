@@ -68,10 +68,6 @@ public:
             // @param sleepMode: see SleepMode
             virtual void OnSleepModeChanged(dsSleepMode_t sleepMode) { };
     
-            // @brief Audio Output format changed
-            // @text onAudioFormatUpdate
-            // @param audioFormat: Type of audio format see AudioFormat
-            virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
     
     };
     
