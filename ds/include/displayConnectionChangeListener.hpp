@@ -62,7 +62,7 @@ public:
  
             // @brief Display HDCP Status
             // @text OnDisplayHDCPStatus
-            virtual void OnDisplayHDCPStatus() = 0
+            virtual void OnDisplayHDCPStatus() = 0;
 
     	};
     
