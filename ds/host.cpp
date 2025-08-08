@@ -241,7 +241,6 @@ namespace device
         }
     }
 
-
 /**
  * @fn bool Host::setPowerMode(int mode)
  * @brief This API is used to change the power mode of the device.
@@ -913,6 +912,73 @@ namespace device
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
 
+/**
+ * @fn void  Host::Register(IEvent *listener)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IEvent *listener) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IEvent *listener)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IEvent *listener) 
+{
+  return 0;
+}
+
+/**
+ * @fn void  DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::Register(IEvent *listener)
+{
+  return 0;
+}
+
+/**
+ * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *listener)
+{
+  return 0;
+}
+
+/**
+ * @fn void  DisplayConnectionChangeListener::UnRegister(IDisplayHDMIHotPlugEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::Register(IDisplayHDMIHotPlugEvent *listener)
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t DisplayConnectionChangeListener::UnRegister(IDisplayHDMIHotPlugEvent *listener)
+{
+  return 0;
+}
 
 }
 

@@ -1,8 +1,9 @@
+
 /*
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +18,6 @@
  * limitations under the License.
 */
 
- 
-
 
 /**
 * @defgroup devicesettings
@@ -31,15 +30,49 @@
 #ifndef _DS_DISPLAYCONNECTIONCHANGELISTENER_H_
 #define _DS_DISPLAYCONNECTIONCHANGELISTENER_H_
 
+#include "dsTypes.h"
 #include "videoOutputPort.hpp"
+#include "dsDisplay.h"
 
 namespace device {
 
 class DisplayConnectionChangeListener {
 public:
+
+    	struct IDisplayHDMIHotPlugEvent{
+
+            // @brief Display HDMI Hot plug event
+            // @text onDisplayHDMIHotPlug
+            // @param displayEvent: DS_DISPLAY_EVENT_CONNECTED or DS_DISPLAY_EVENT_DISCONNECTED
+            virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) = 0;
+    	};
+    
+    	uint32_t Register(IDisplayHDMIHotPlugEvent*listener);
+    	uint32_t UnRegister(IDisplayHDMIHotPlugEvent *listener);
+
+
+
+    	struct IEvent{
+
+            // @brief Display RX Sense event
+            // @text onDisplayRxSense
+            // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
+            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) = 0;
+ 
+            // @brief Display HDCP Status
+            // @text OnDisplayHDCPStatus
+            virtual void OnDisplayHDCPStatus() = 0;
+
+    	};
+    
+    	uint32_t Register(IEvent *listener);
+    	uint32_t UnRegister(IEvent *listener);
+
+
 	DisplayConnectionChangeListener() {}
 	virtual ~DisplayConnectionChangeListener() {}
-    virtual void displayConnectionChanged(VideoOutputPort &port, int newConnectionStatus) = 0;
+        virtual void displayConnectionChanged(VideoOutputPort &port, int newConnectionStatus) = 0;
+        
 };
 
 }
