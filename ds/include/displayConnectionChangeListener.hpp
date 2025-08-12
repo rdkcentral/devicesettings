@@ -32,7 +32,7 @@
 
 #include "dsTypes.h"
 #include "videoOutputPort.hpp"
-#include "dsDisplay.h"
+//#include "dsDisplay.h"
 
 namespace device {
 
