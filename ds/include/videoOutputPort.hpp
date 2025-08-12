@@ -1,8 +1,9 @@
+
 /*
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +77,43 @@ class  VideoOutputPort : public Enumerable {
 
 
 public:
+
+	struct ResolutionChange {
+            uint32_t width;
+            uint32_t height;
+        };
+
+        struct IEvent {
+            
+	    // @brief On Resolution Pre changed
+            // @text OnResolutionPreChange
+            // @param resolution: resolution
+            virtual void OnResolutionPreChange(const ResolutionChange& resolution) { };
+ 
+            // @brief On Resolution Post change
+            // @text onResolutionPostChange
+            // @param resolution: resolution
+            virtual void OnResolutionPostChange(const ResolutionChange& resolution) { };
+ 
+            // @brief On HDCP Status change
+            // @text OnHDCPStatusChange
+            // @param hdcpStatus: HDCP Status
+            virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
+ 
+            // @brief On Video Format update
+            // @text OnVideoFormatUpdate
+            // @param videoFormatHDR: Video format HDR standard
+            virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+
+	    // @brief HDCP Protocol version change
+            // @text OnHDCPProtocolChangeStatus
+	    virtual void OnHDCPProtocolChangeStatus() { };
+
+	};
+
+        uint32_t Register(IEvent *listener);
+        uint32_t UnRegister(IEvent *listener);
+
 
     class Display {
     	friend class VideoOutputPort;
