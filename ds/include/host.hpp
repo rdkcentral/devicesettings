@@ -63,7 +63,7 @@ public:
 	    // @brief Sleep mode changed
             // @text onSleepModeChanged
             // @param sleepMode: see SleepMode
-            virtual void OnSleepModeChanged(dsSleepMode_t sleepMode) { };
+            virtual void OnSleepModeChanged(SleepMode sleepMode) { };
     
     
     };

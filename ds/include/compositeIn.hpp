@@ -76,26 +76,26 @@ public:
             // @text onCompositeInHotPlug
             // @param port: Port of the hotplug
             // @param isConnected: Is it connected (true) or not(false)
-            virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
+            virtual void OnCompositeInHotPlug(CompositeInPort port, bool isConnected) { };
  
             // @brief Composite In Signal status
             // @text onCompositeInSignalStatus
             // @param port: Port of the hotplug
             // @param signalStatus: Signal status
-            virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
+            virtual void OnCompositeInSignalStatus(CompositeInPort port, CompositeInSignalStatus signalStatus) { };
  
             // @brief Composite In status
             // @text onCompositeInStatus
             // @param activePort: Active port
             // @param isPresented: is it presented to user
-            virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
+            virtual void OnCompositeInStatus(CompositeInPort activePort, bool isPresented) { };
 
 
             // @brief Composite In Video Mode Update
             // @text OnCompositeInVideoModeUpdate
             // @param activePort: Active port
             // @param videoResolution: See DisplayVideoPortResolution
-            virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) = 0;
+            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) = 0;
 	    };
 
     uint32_t Register(IEvent *listener);

@@ -42,7 +42,7 @@ public:
             // @brief Display HDMI Hot plug event
             // @text onDisplayHDMIHotPlug
             // @param displayEvent: DS_DISPLAY_EVENT_CONNECTED or DS_DISPLAY_EVENT_DISCONNECTED
-            virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) = 0;
+            virtual void OnDisplayHDMIHotPlug(DisplayEvent displayEvent) = 0;
     	};
     
     	uint32_t Register(IDisplayHDMIHotPlugEvent*listener);
@@ -55,7 +55,7 @@ public:
             // @brief Display RX Sense event
             // @text onDisplayRxSense
             // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
-            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) = 0;
+            virtual void OnDisplayRxSense(DisplayEvent displayEvent) = 0;
  
             // @brief Display HDCP Status
             // @text OnDisplayHDCPStatus

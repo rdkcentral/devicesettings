@@ -138,7 +138,7 @@ public:
             // @brief On Front Panel display time format changed
             // @text OnFPDTimeFormatChanged
             // @param timeFormat: current time format 12 or 24 hour
-            virtual void OnFPDTimeFormatChanged(dsFPDTimeFormat_t timeFormat) { };
+            virtual void OnFPDTimeFormatChanged(FPDTimeFormat timeFormat) { };
     };
 
     uint32_t Register(IEvent *listener);

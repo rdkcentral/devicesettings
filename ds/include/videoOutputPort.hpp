@@ -98,12 +98,12 @@ public:
             // @brief On HDCP Status change
             // @text OnHDCPStatusChange
             // @param hdcpStatus: HDCP Status
-            virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
+            virtual void OnHDCPStatusChange(HDCPStatus  hdcpStatus) { };
  
             // @brief On Video Format update
             // @text OnVideoFormatUpdate
             // @param videoFormatHDR: Video format HDR standard
-            virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+            virtual void OnVideoFormatUpdate(HDRStandard videoFormatHDR) { };
 
 	    // @brief HDCP Protocol version change
             // @text OnHDCPProtocolChangeStatus
