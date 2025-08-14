@@ -50,6 +50,7 @@
 #define _DS_COMPOSITEIN_HPP_
 
 #include <stdint.h>
+#include "dsMgrNtf.h"
 
 /**
  * @file compositeIn.hpp

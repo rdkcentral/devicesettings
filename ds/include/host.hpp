@@ -36,6 +36,7 @@
 #include "videoDevice.hpp"
 #include "sleepMode.hpp"
 #include  "list.hpp"
+#include "dsMgrNtf.h"
 
 #include  <list>
 #include <string>

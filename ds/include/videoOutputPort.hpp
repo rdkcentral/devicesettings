@@ -39,6 +39,7 @@
 #include <stdint.h>
 
 #include "dsTypes.h"
+#include "dsMgrNtf.h"
 
 /**
  * @file videoOutputPort.hpp

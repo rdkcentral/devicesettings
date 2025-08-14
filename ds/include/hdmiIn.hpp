@@ -52,6 +52,7 @@
 #include <vector>
 
 #include "dsTypes.h"
+#include "dsMgrNtf.h"
 
 /**
  * @file hdmiIn.hpp

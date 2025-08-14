@@ -35,6 +35,7 @@
 #include "list.hpp"
 #include <string>
 #include <list>
+#include "dsMgrNtf.h"
 
 
 /**

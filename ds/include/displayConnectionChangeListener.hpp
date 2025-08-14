@@ -31,6 +31,7 @@
 #define _DS_DISPLAYCONNECTIONCHANGELISTENER_H_
 
 #include "videoOutputPort.hpp"
+#include "dsMgrNtf.h"
 
 namespace device {
 

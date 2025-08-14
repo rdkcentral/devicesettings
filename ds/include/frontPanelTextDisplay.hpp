@@ -33,6 +33,7 @@
 #include "dsConstant.hpp"
 #include "list"
 #include "frontPanelIndicator.hpp"
+#include "dsMgrNtf.h"
 
 
 /**
