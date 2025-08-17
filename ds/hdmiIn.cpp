@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -677,6 +677,31 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
 
     printf ("%s:%d - HDMI Compatibility Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *capversion);
 }
+
+
+/**
+ * @fn void  HdmiInput::Register(IEvent *listener)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t HdmiInput::Register(IEvent *listener) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  CompositeInput::UnRegister(IEvent *listener)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t HdmiInput::UnRegister(IEvent *listener) 
+{
+  return 0;
+}
+
 
 }
 

@@ -1,8 +1,9 @@
+
 /*
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +50,7 @@
 #define _DS_COMPOSITEIN_HPP_
 
 #include <stdint.h>
+#include "dsMgrNtf.h"
 
 /**
  * @file compositeIn.hpp
@@ -70,6 +72,36 @@ class CompositeInput
 {
 
 public:
+    struct IEvent {
+            // @brief Composite In Hotplug event
+            // @text onCompositeInHotPlug
+            // @param port: Port of the hotplug
+            // @param isConnected: Is it connected (true) or not(false)
+            virtual void OnCompositeInHotPlug(CompositeInPort port, bool isConnected) { };
+ 
+            // @brief Composite In Signal status
+            // @text onCompositeInSignalStatus
+            // @param port: Port of the hotplug
+            // @param signalStatus: Signal status
+            virtual void OnCompositeInSignalStatus(CompositeInPort port, CompositeInSignalStatus signalStatus) { };
+ 
+            // @brief Composite In status
+            // @text onCompositeInStatus
+            // @param activePort: Active port
+            // @param isPresented: is it presented to user
+            virtual void OnCompositeInStatus(CompositeInPort activePort, bool isPresented) { };
+
+
+            // @brief Composite In Video Mode Update
+            // @text OnCompositeInVideoModeUpdate
+            // @param activePort: Active port
+            // @param videoResolution: See DisplayVideoPortResolution
+            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) = 0;
+	    };
+
+    uint32_t Register(IEvent *listener);
+    uint32_t UnRegister(IEvent *listener);
+    
     static CompositeInput & getInstance();
 
     uint8_t getNumberOfInputs        () const;
