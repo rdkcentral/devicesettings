@@ -104,15 +104,6 @@ typedef enum _HDMIInPort {
             DS_HDMI_IN_PORT_MAX     = 5
         }HDMIInPort;
 
-typedef enum _DisplayEvent {
-            DS_DISPLAY_EVENT_CONNECTED    =0,  ///< Display connected event  
-            DS_DISPLAY_EVENT_DISCONNECTED =1,   ///< Display disconnected event      
-            DS_DISPLAY_RXSENSE_ON         =2,           ///< Rx Sense ON event
-            DS_DISPLAY_RXSENSE_OFF         =3,          ///< Rx Sense OFF event
-            DS_DISPLAY_HDCPPROTOCOL_CHANGE=4,  ///< HDCP Protocol Version Change event
-            DS_DISPLAY_EVENT_MAX             ///< Display max event
-        }DisplayEvent;
-
 
  typedef  enum _VideoZoom{
             DS_VIDEO_DEVICE_ZOOM_UNKNOWN           = -1,
@@ -162,7 +153,6 @@ typedef enum _HDMIInTVResolution {
             DS_HDMIIN_RESOLUTION_1080P    = 0x000100,   
             DS_HDMIIN_RESOLUTION_1080P24  = 0x000200, 
             DS_HDMIIN_RESOLUTION_1080I25  = 0x000400, 
-            DS_HDMIIN_RESOLUTION_1080I25  = 0x000800, 
             DS_HDMIIN_RESOLUTION_1080P30  = 0x001000, 
             DS_HDMIIN_RESOLUTION_1080I50  = 0x002000, 
             DS_HDMIIN_RESOLUTION_1080P50  = 0x004000, 
@@ -200,7 +190,7 @@ typedef enum _HDMIInVideoStereoScopicMode{
    }HDMIInVideoFrameRate;
 
 typedef struct _HDMIVideoPortResolution {
-            string name;
+            std::string name;
             HDMIInTVResolution pixelResolution;
             HDMIVideoAspectRatio aspectRatio;
             HDMIInVideoStereoScopicMode stereoScopicMode;
@@ -215,7 +205,7 @@ typedef enum _HDMIInSignalStatus{
             DS_HDMI_IN_SIGNAL_STATUS_UNSTABLE     = 1,                                
             DS_HDMI_IN_SIGNAL_STATUS_NOTSUPPORTED = 2,                              
             DS_HDMI_IN_SIGNAL_STATUS_STABLE       = 3,
-            DS_HDMI_IN_SIGNAL_STATUS_MAX.         = 4
+            DS_HDMI_IN_SIGNAL_STATUS_MAX          = 4
  }HDMIInSignalStatus;
 
 
@@ -255,7 +245,6 @@ typedef enum _DisplayTVResolution{
             DS_DISPLAY_RESOLUTION_1080P    = 0x000100,   
             DS_DISPLAY_RESOLUTION_1080P24  = 0x000200, 
             DS_DISPLAY_RESOLUTION_1080I25  = 0x000400, 
-            DS_DISPLAY_RESOLUTION_1080I25  = 0x000800, 
             DS_DISPLAY_RESOLUTION_1080P30  = 0x001000, 
             DS_DISPLAY_RESOLUTION_1080I50  = 0x002000, 
             DS_DISPLAY_RESOLUTION_1080P50  = 0x004000, 
@@ -322,14 +311,9 @@ typedef enum _DisplayInVideoStereoScopicMode{
 
   typedef enum _FPDTimeFormat{
             DS_FPD_TIMEFORMAT_12_HOUR    = 0,
-            DS_FPD_TIMEFORMAT_24_HOUR    = 1
+            DS_FPD_TIMEFORMAT_24_HOUR    = 1,
             DS_FPD_TIMEFORMAT_MAX        = 2
         }FPDTimeFormat;
-
-  typedef struct ResolutionChange {
-            uint32_t width;
-            uint32_t height;
-        };
 
   typedef enum _HDCPStatus{
             DS_HDCP_STATUS_UNPOWERED              = 0,           
