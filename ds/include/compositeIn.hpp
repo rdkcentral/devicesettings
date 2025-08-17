@@ -51,6 +51,12 @@
 
 #include <stdint.h>
 #include "dsMgrNtf.h"
+#ifdef ENABLE_IARM
+#include "iarmCompositeIn.hpp"
+#else
+//include the plugin file
+#endif    
+
 
 /**
  * @file compositeIn.hpp
@@ -59,6 +65,9 @@
  */
 
 static const int8_t COMPOSITE_IN_PORT_NONE = -1;
+
+#define SUCCESS (0)
+#define FAIL    (1)
 
 namespace device
 {
@@ -70,6 +79,13 @@ namespace device
  */
 class CompositeInput
 {
+
+#ifdef ENABLE_IARM
+    using DefaultImpl = IarmCompositeInput;
+#else
+    //include the plugin file class as the DefaultImpl
+#endif
+
 
 public:
     struct IEvent {
@@ -115,6 +131,7 @@ public:
 private:
     CompositeInput ();           /* default constructor */
     virtual ~CompositeInput ();  /* destructor */
+    std::unique_ptr<DefaultImpl> implComposite;
 };
 
 

@@ -94,6 +94,7 @@ CompositeInput::CompositeInput()
 CompositeInput::~CompositeInput()
 {
     dsCompositeInTerm();
+    implComposite.reset(new DefaultImpl()); 
 }
 
 /**
@@ -279,7 +280,18 @@ void CompositeInput::scaleVideo (int32_t x, int32_t y, int32_t width, int32_t he
  */
 uint32_t CompositeInput::Register(IEvent *listener)
 {
-  return 0;
+   uint32_t retStatus=FAIL;
+
+   INT_INFO("CompositeInput::Register Entry \n");
+   if(implComposite) 
+   {
+	retStatus = implComposite->Register(listener);
+   }
+   else
+   {
+       INT_INFO("CompositeInput::Register impl is null\n");
+   }
+   return retStatus;
 }
 
 
@@ -291,10 +303,20 @@ uint32_t CompositeInput::Register(IEvent *listener)
  */
 uint32_t CompositeInput::UnRegister(IEvent *listener)
 {
-  return 0;
+   uint32_t retStatus=FAIL;
+
+   INT_INFO("CompositeInput::Register Entry \n");
+   if(implComposite) 
+   {
+	retStatus = implComposite->UnRegister(listener);
+   }
+   else
+   {
+       INT_INFO("CompositeInput::Register impl is null\n");
+   }
+   return retStatus;
 }
 
-}
 
 
 

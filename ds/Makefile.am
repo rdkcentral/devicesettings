@@ -63,3 +63,11 @@ libds_la_SOURCES = aspectRatio.cpp \
                    host.cpp \
                    manager.cpp \
                    videoDFC.cpp
+
+# IARM_ENABLED  to be defined from the config.ac file
+if IARM_ENABLED
+libds_la_SOURCES += iarm\iarmCompositeIn.cpp 
+else
+# plugin files of future
+endif
+
