@@ -53,7 +53,7 @@
 
 // Static data definitions
 std::mutex IarmCompositeInput::s_mutex;
-std::vector<IarmCompositeInput::IEvent*> IarmCompositeInput::compIpListener;
+std::vector<IarmCompositeInput::IEvent*> IarmCompositeInput::compInListener;
 
 constexpr IarmCompositeInput::EventHandlerMapping IarmCompositeInput::eventHandlers[] = {
     { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG,           IarmCompositeInput::OnCompositeInHotPlugHandler },
@@ -72,15 +72,15 @@ uint32_t IarmCompositeInput::Register(IEvent* listener) {
     std::lock_guard<std::mutex> lock(s_mutex);
 
     // First listener, register all handlers
-    if (compIpListener.empty()) {
+    if (compInListener.empty()) {
         for (auto& eh : eventHandlers) {
             IARM_Bus_RegisterEventHandler(OWNER_NAME, eh.eventId, eh.handler);
         }
     }
 
     // Add to listener list if not already present
-    if (std::find(compIpListener.begin(), compIpListener.end(), listener) == compIpListener.end()) {
-        compIpListener.push_back(listener);
+    if (std::find(compInListener.begin(), compInListener.end(), listener) == compInListener.end()) {
+        compInListener.push_back(listener);
     }
 
     return 0; // Success
@@ -90,13 +90,13 @@ uint32_t IarmCompositeInput::Register(IEvent* listener) {
 uint32_t IarmCompositeInput::UnRegister(IEvent* listener) {
     std::lock_guard<std::mutex> lock(s_mutex);
 
-    auto it = std::remove(compIpListener.begin(), compIpListener.end(), listener);
-    if (it != compIpListener.end()) {
-        compIpListener.erase(it, compIpListener.end());
+    auto it = std::remove(compInListener.begin(), compInListener.end(), listener);
+    if (it != compInListener.end()) {
+        compInListener.erase(it, compInListener.end());
     }
 
     // If no more listeners, unregister all handlers
-    if (compIpListener.empty()) {
+    if (compInListener.empty()) {
         for (auto& eh : eventHandlers) {
             IARM_Bus_UnRegisterEventHandler(OWNER_NAME, eh.eventId);
         }
@@ -111,7 +111,7 @@ template<typename F>
 
 void IarmCompositeInput::Dispatch(F&& fn) {
     std::lock_guard<std::mutex> lock(s_mutex);
-    for (auto* listener : compIpListener) {
+    for (auto* listener : compInListener) {
         fn(listener);
     }
 }

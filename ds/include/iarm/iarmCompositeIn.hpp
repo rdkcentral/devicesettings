@@ -26,8 +26,8 @@
 **/
 
 
-#ifndef _IARM_IARM_COMPOSITEIN_HPP_
-#define _IARM_IARM_COMPOSITEIN_HPP_
+#ifndef _DS_IARM_COMPOSITEIN_HPP_
+#define _DS_IARM_COMPOSITEIN_HPP_
 
 #include <stdint.h>
 #include "dsTypes.h"
@@ -68,10 +68,10 @@ private:
     static constexpr const char* OWNER_NAME;
 
     static std::mutex s_mutex;
-    static std::vector<IEvent*> compIpListener;
+    static std::vector<IEvent*> compInListener;
 };
 
-#endif /* _DS_COMPOSITEIN_HPP_ */
+#endif /* _DS_IARM_COMPOSITEIN_HPP_ */
 
 
 /** @} */

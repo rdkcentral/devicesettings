@@ -51,10 +51,10 @@
 
 #include <stdint.h>
 #include "dsMgrNtf.h"
-#ifdef ENABLE_IARM
-#include "iarmCompositeIn.hpp"
+#ifdef DS_ENABLE_IARM_PATH
+class IarmCompositeInput; //Forward Declaration
 #else
-//include the plugin file
+//include the plugin class
 #endif    
 
 
@@ -80,7 +80,7 @@ namespace device
 class CompositeInput
 {
 
-#ifdef ENABLE_IARM
+#ifdef DS_ENABLE_IARM_PATH
     using DefaultImpl = IarmCompositeInput;
 #else
     //include the plugin file class as the DefaultImpl
