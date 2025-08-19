@@ -130,11 +130,6 @@ public:
             // @text OnZoomSettingsChanged
             // @param zoomSetting: Currently applied zoom setting
             virtual void OnZoomSettingsChanged(VideoZoom zoomSetting) { };
-
-	    // @brief HDMI Hotplug event
-            // @text OnHDMIHotPlug
-            // @param displayEvent: CONNECTED or DISCONNECTED
-    	    virtual void OnHDMIHotPlug(DisplayEvent  displayEvent) { };
     };
 
     uint32_t Register(IEvent *listener);
