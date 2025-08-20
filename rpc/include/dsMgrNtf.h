@@ -29,9 +29,6 @@
 
 #ifndef RPDSMGRNTF_H_
 #define RPDSMGRNTF_H_
-#include "libIARM.h"
-#include "dsTypes.h"
-#include "dsRpc.h"
 
 #ifdef __cplusplus
 extern "C" {
