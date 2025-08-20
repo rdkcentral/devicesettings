@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-
 
 /**
 * @defgroup devicesettings
@@ -38,6 +36,7 @@
 #include "videoDevice.hpp"
 #include "sleepMode.hpp"
 #include  "list.hpp"
+#include "dsMgrNtf.h"
 
 #include  <list>
 #include <string>
@@ -59,6 +58,20 @@ namespace device {
  */
 class Host {
 public:
+       
+    struct IEvent{
+            
+	    // @brief Sleep mode changed
+            // @text onSleepModeChanged
+            // @param sleepMode: see SleepMode
+            virtual void OnSleepModeChanged(SleepMode sleepMode) { };
+    
+    
+    };
+    
+    uint32_t Register(IEvent *listener);
+    uint32_t UnRegister(IEvent *listener);
+
     static const int kPowerOn;
     static const int kPowerOff;
     static const int kPowerStandby;
