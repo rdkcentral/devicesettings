@@ -63,7 +63,7 @@ typedef enum _DolbyAtmosCapability {
  }DolbyAtmosCapability;
 
 
-typedef enum _StereoMode {
+typedef enum _AudioStereoMode {
             AUDIO_STEREO_UNKNOWN     = 0,
             AUDIO_STEREO_MONO        = 1,
             AUDIO_STEREO_STEREO      = 2,
@@ -72,7 +72,7 @@ typedef enum _StereoMode {
             AUDIO_STEREO_DD          = 5,
             AUDIO_STEREO_DDPLUS      = 6,
             AUDIO_STEREO_MAX         = 7
- }StereoMode;
+ }AudioStereoMode;
 
 typedef enum _AudioFormat {
             AUDIO_FORMAT_NONE               = 0,
@@ -131,7 +131,7 @@ typedef  enum _HDMIInVRRType{
             DS_HDMIIN_AMD_FREESYNC_PREMIUM_PRO  = 4
         }HDMIInVRRType;
 
-enum _HDMIInAviContentType {
+typedef enum _HDMIInAviContentType {
             DS_HDMIIN_AVICONTENT_TYPE_GRAPHICS      =0,    
             DS_HDMIIN_AVICONTENT_TYPE_PHOTO         =1,       
             DS_HDMIIN_AVICONTENT_TYPE_CINEMA        =2,      

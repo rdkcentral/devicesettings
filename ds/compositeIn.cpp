@@ -296,11 +296,5 @@ uint32_t CompositeInput::UnRegister(IEvent *listener)
 
 }
 
-
-
-
-}
-
-
 /** @} */
 /** @} */
