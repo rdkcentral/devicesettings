@@ -133,8 +133,8 @@ public:
             // @brief Audio mode for the respective audio port - raised for every type of port
             // @text onAudioModeEvent
             // @param audioPortType: audio port type see AudioPortType
-            // @param audioMode: audio mode - see StereoMode
-            virtual void OnAudioModeEvent(AudioPortType  audioPortType, StereoMode audioMode) { };
+            // @param audioMode: audio mode - see audioStereoMode
+            virtual void OnAudioModeEvent(AudioPortType  audioPortType, AudioStereoMode audioStereoMode) { };
 
             // @brief Audio level changed
             // @text OnAudioLevelChangedEvent
