@@ -62,7 +62,7 @@
 #include "dsTypes.h"
 #include "dsCompositeIn.h"
 #include "dsUtl.h"
-
+#include "iarmCompositeIn.hpp"
 
 namespace device
 {
@@ -78,6 +78,7 @@ namespace device
  * @callergraph
  */
 CompositeInput::CompositeInput()
+        : implComposite(std::unique_ptr<IarmCompositeInput>(new IarmCompositeInput()))
 {
     dsCompositeInInit();
 }

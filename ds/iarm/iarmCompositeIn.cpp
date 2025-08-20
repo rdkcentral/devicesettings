@@ -19,7 +19,7 @@
 
 
 /**
- * @file IarmCompositeIn.cpp
+ * @file iarmCompositeIn.cpp
  * @brief Configuration of COMPOSITE Input
  */
 
@@ -47,7 +47,7 @@
 #include "utils.h" // for Utils::IARM and IARM_CHECK
 
 
-#include "IarmCompositeInput.hpp"
+#include "iarmCompositeIn.hpp"
 #include <algorithm>
 #include <cstring>
 
@@ -62,7 +62,7 @@ constexpr IarmCompositeInput::EventHandlerMapping IarmCompositeInput::eventHandl
     { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE, IarmCompositeInput::OnCompositeInVideoModeUpdateHandler },
 };
 
-constexpr const char* IarmCompositeInput::OWNER_NAME = IARM_BUS_DSMGR_NAME;
+const char* IarmCompositeInput::OWNER_NAME = IARM_BUS_DSMGR_NAME;
 
 IarmCompositeInput::IarmCompositeInput() {}
 IarmCompositeInput::~IarmCompositeInput() {}
@@ -118,7 +118,7 @@ void IarmCompositeInput::Dispatch(F&& fn) {
 
 // ====== Handlers ======
 
-void IarmCompositeInput::OnCompositeInHotPlugHandler(IARM_EventId_t, void* data, size_t) {
+void IarmCompositeInput::OnCompositeInHotPlugHandler(const char* owner, IARM_EventId_t, void* data, size_t) {
     auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
     dsCompositeInPort_t dsPort = static_cast<dsCompositeInPort_t>(
         eventData->data.composite_in_connect.port
@@ -129,7 +129,7 @@ void IarmCompositeInput::OnCompositeInHotPlugHandler(IARM_EventId_t, void* data,
     Dispatch([&](IEvent* l) { l->OnCompositeInHotPlug(compPort, isConnected); });
 }
 
-void IarmCompositeInput::OnCompositeInSignalStatusHandler(IARM_EventId_t, void* data, size_t) {
+void IarmCompositeInput::OnCompositeInSignalStatusHandler(const char* owner, IARM_EventId_t, void* data, size_t) {
     auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
     CompositeInPort compPort = static_cast<CompositeInPort>(
         static_cast<dsCompositeInPort_t>(eventData->data.composite_in_sig_status.port)
@@ -141,7 +141,7 @@ void IarmCompositeInput::OnCompositeInSignalStatusHandler(IARM_EventId_t, void* 
     Dispatch([&](IEvent* l) { l->OnCompositeInSignalStatus(compPort, compStatus); });
 }
 
-void IarmCompositeInput::OnCompositeInStatusHandler(IARM_EventId_t, void* data, size_t) {
+void IarmCompositeInput::OnCompositeInStatusHandler(const char* owner, IARM_EventId_t, void* data, size_t) {
     auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
     CompositeInPort compPort = static_cast<CompositeInPort>(
         static_cast<dsCompositeInPort_t>(eventData->data.composite_in_status.port)
@@ -151,7 +151,7 @@ void IarmCompositeInput::OnCompositeInStatusHandler(IARM_EventId_t, void* data, 
     Dispatch([&](IEvent* l) { l->OnCompositeInStatus(compPort, isPresented); });
 }
 
-void IarmCompositeInput::OnCompositeInVideoModeUpdateHandler(IARM_EventId_t, void* data, size_t) {
+void IarmCompositeInput::OnCompositeInVideoModeUpdateHandler(const char* owner, IARM_EventId_t, void* data, size_t) {
     auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
     CompositeInPort compPort = static_cast<CompositeInPort>(
         static_cast<dsCompositeInPort_t>(eventData->data.composite_in_video_mode.port)

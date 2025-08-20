@@ -35,13 +35,14 @@
 
 
 #pragma once
-#include "CompositeInput.hpp"
+#include "compositeIn.hpp"
 #include "dsMgr.h"
 #include "libIARM.h"
+#include "libIBus.h"
 #include <mutex>
 #include <vector>
 
-class IarmCompositeInput : public CompositeInput {
+class IarmCompositeInput : public device::CompositeInput {
 public:
     IarmCompositeInput();
     ~IarmCompositeInput() override;
@@ -51,10 +52,10 @@ public:
 
 private:
     // Event Handlers
-    static void OnCompositeInHotPlugHandler(IARM_EventId_t eventId, void *data, size_t len);
-    static void OnCompositeInSignalStatusHandler(IARM_EventId_t eventId, void *data, size_t len);
-    static void OnCompositeInStatusHandler(IARM_EventId_t eventId, void *data, size_t len);
-    static void OnCompositeInVideoModeUpdateHandler(IARM_EventId_t eventId, void *data, size_t len);
+    static void OnCompositeInHotPlugHandler(const char* owner, IARM_EventId_t eventId, void *data, size_t len);
+    static void OnCompositeInSignalStatusHandler(const char* owner, IARM_EventId_t eventId, void *data, size_t len);
+    static void OnCompositeInStatusHandler(const char* owner, IARM_EventId_t eventId, void *data, size_t len);
+    static void OnCompositeInVideoModeUpdateHandler(const char* owner, IARM_EventId_t eventId, void *data, size_t len);
 
     template<typename F>
     static void Dispatch(F&& fn);
@@ -64,8 +65,8 @@ private:
         IARM_EventHandler_t handler;
     };
 
-    static constexpr EventHandlerMapping eventHandlers[];
-    static constexpr const char* OWNER_NAME;
+    static const EventHandlerMapping eventHandlers[];
+    static const char* OWNER_NAME;
 
     static std::mutex s_mutex;
     static std::vector<IEvent*> compInListener;

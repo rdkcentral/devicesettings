@@ -50,6 +50,7 @@
 #define _DS_COMPOSITEIN_HPP_
 
 #include <stdint.h>
+#include <memory>
 #include "dsMgrNtf.h"
 #ifdef DS_ENABLE_IARM_PATH
 class IarmCompositeInput; //Forward Declaration
@@ -115,8 +116,8 @@ public:
             virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) = 0;
 	    };
 
-    uint32_t Register(IEvent *listener);
-    uint32_t UnRegister(IEvent *listener);
+    virtual uint32_t Register(IEvent *listener);
+    virtual uint32_t UnRegister(IEvent *listener);
     
     static CompositeInput & getInstance();
 
@@ -128,9 +129,10 @@ public:
     void    selectPort               (int8_t Port) const;
     void    scaleVideo               (int32_t x, int32_t y, int32_t width, int32_t height) const;
 
-private:
+protected:
     CompositeInput ();           /* default constructor */
     virtual ~CompositeInput ();  /* destructor */
+private:
     std::unique_ptr<DefaultImpl> implComposite;
 };
 

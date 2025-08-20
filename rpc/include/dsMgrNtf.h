@@ -29,14 +29,10 @@
 
 #ifndef RPDSMGRNTF_H_
 #define RPDSMGRNTF_H_
-#include "libIARM.h"
-#include "dsTypes.h"
-#include "dsRpc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 typedef enum _AudioPortState {
             AUDIO_PORT_STATE_UNKNOWN       = 0,
@@ -62,7 +58,8 @@ typedef enum _DolbyAtmosCapability {
             AUDIO_DOLBYATMOS_MAX               = 3
  }DolbyAtmosCapability;
 
-
+#if 0
+//Need to change this name as hal also has the same type
 typedef enum _StereoMode {
             AUDIO_STEREO_UNKNOWN     = 0,
             AUDIO_STEREO_MONO        = 1,
@@ -73,6 +70,8 @@ typedef enum _StereoMode {
             AUDIO_STEREO_DDPLUS      = 6,
             AUDIO_STEREO_MAX         = 7
  }StereoMode;
+
+#endif
 
 typedef enum _AudioFormat {
             AUDIO_FORMAT_NONE               = 0,
