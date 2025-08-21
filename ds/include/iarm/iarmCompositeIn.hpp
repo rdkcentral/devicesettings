@@ -42,13 +42,13 @@
 #include <mutex>
 #include <vector>
 
-class IarmCompositeInput : public device::CompositeInput {
+class IarmCompositeInput  {
 public:
     IarmCompositeInput();
-    ~IarmCompositeInput() override;
-	
-    uint32_t Register(IEvent* listener) override;
-    uint32_t UnRegister(IEvent* listener) override;
+    ~IarmCompositeInput();
+
+    uint32_t Register(device::CompositeInput::IEvent* listener);
+    uint32_t UnRegister(device::CompositeInput::IEvent* listener);
 
 private:
     // Event Handlers
@@ -69,7 +69,7 @@ private:
     static const char* OWNER_NAME;
 
     static std::mutex s_mutex;
-    static std::vector<IEvent*> compInListener;
+    static std::vector<device::CompositeInput::IEvent*> compInListener;
 };
 
 #endif /* _DS_IARM_COMPOSITEIN_HPP_ */

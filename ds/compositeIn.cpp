@@ -95,7 +95,7 @@ CompositeInput::CompositeInput()
 CompositeInput::~CompositeInput()
 {
     dsCompositeInTerm();
-    implComposite.reset(new DefaultImpl()); 
+    implComposite.reset();
 }
 
 /**
@@ -306,14 +306,14 @@ uint32_t CompositeInput::UnRegister(IEvent *listener)
 {
    uint32_t retStatus=FAIL;
 
-   INT_INFO("CompositeInput::Register Entry \n");
+   INT_INFO("CompositeInput::UnRegister Entry \n");
    if(implComposite) 
    {
 	retStatus = implComposite->UnRegister(listener);
    }
    else
    {
-       INT_INFO("CompositeInput::Register impl is null\n");
+       INT_INFO("CompositeInput::UnRegister impl is null\n");
    }
    return retStatus;
 }

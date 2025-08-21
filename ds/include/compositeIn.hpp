@@ -113,7 +113,7 @@ public:
             // @text OnCompositeInVideoModeUpdate
             // @param activePort: Active port
             // @param videoResolution: See DisplayVideoPortResolution
-            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) = 0;
+            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) { };
 	    };
 
     virtual uint32_t Register(IEvent *listener);
@@ -128,11 +128,9 @@ public:
     bool    isPortConnected          (int8_t Port) const;
     void    selectPort               (int8_t Port) const;
     void    scaleVideo               (int32_t x, int32_t y, int32_t width, int32_t height) const;
-
-protected:
-    CompositeInput ();           /* default constructor */
-    virtual ~CompositeInput ();  /* destructor */
 private:
+    CompositeInput ();
+    ~CompositeInput ();
     std::unique_ptr<DefaultImpl> implComposite;
 };
 

@@ -53,7 +53,7 @@
 
 // Static data definitions
 std::mutex IarmCompositeInput::s_mutex;
-std::vector<IarmCompositeInput::IEvent*> IarmCompositeInput::compInListener;
+std::vector<device::CompositeInput::IEvent*> IarmCompositeInput::compInListener;
 
 constexpr IarmCompositeInput::EventHandlerMapping IarmCompositeInput::eventHandlers[] = {
     { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG,           IarmCompositeInput::OnCompositeInHotPlugHandler },
@@ -68,7 +68,7 @@ IarmCompositeInput::IarmCompositeInput() {}
 IarmCompositeInput::~IarmCompositeInput() {}
 
 
-uint32_t IarmCompositeInput::Register(IEvent* listener) {
+uint32_t IarmCompositeInput::Register(device::CompositeInput::IEvent* listener) {
     std::lock_guard<std::mutex> lock(s_mutex);
 
     // First listener, register all handlers
@@ -87,7 +87,7 @@ uint32_t IarmCompositeInput::Register(IEvent* listener) {
 }
 
 // Unregister a listener and remove IARM handlers if last listener
-uint32_t IarmCompositeInput::UnRegister(IEvent* listener) {
+uint32_t IarmCompositeInput::UnRegister(device::CompositeInput::IEvent* listener) {
     std::lock_guard<std::mutex> lock(s_mutex);
 
     auto it = std::remove(compInListener.begin(), compInListener.end(), listener);
@@ -126,7 +126,7 @@ void IarmCompositeInput::OnCompositeInHotPlugHandler(const char* owner, IARM_Eve
     CompositeInPort compPort = static_cast<CompositeInPort>(dsPort);
     bool isConnected = eventData->data.composite_in_connect.isPortConnected;
 
-    Dispatch([&](IEvent* l) { l->OnCompositeInHotPlug(compPort, isConnected); });
+    Dispatch([&](device::CompositeInput::IEvent* l) { l->OnCompositeInHotPlug(compPort, isConnected); });
 }
 
 void IarmCompositeInput::OnCompositeInSignalStatusHandler(const char* owner, IARM_EventId_t, void* data, size_t) {
