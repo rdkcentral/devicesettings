@@ -96,7 +96,7 @@ public:
             // @text OnCompositeInVideoModeUpdate
             // @param activePort: Active port
             // @param videoResolution: See DisplayVideoPortResolution
-            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) = 0;
+            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) { };
 	    };
 
     uint32_t Register(IEvent *listener);
