@@ -46,6 +46,8 @@
 
 #include "safec_lib.h"
 
+#include "iarm/VideoDevicePriv.h"
+
 /**
  * @file videoDevice.cpp
  * @brief Video Device is also called "Decoder".
@@ -298,62 +300,52 @@ int VideoDevice::forceDisableHDRSupport(bool disable)
 
 int VideoDevice::setFRFMode(int frfmode) const
 {
-        dsError_t ret;
-        ret = dsSetFRFMode(_handle, frfmode);
+        dsSetFRFMode(_handle, frfmode);
         return 0;
 }
 
 int VideoDevice::getFRFMode(int *frfmode) const
 {
-        dsError_t ret;
         int frfmode1;
-        ret = dsGetFRFMode(_handle, &frfmode1);
+        dsGetFRFMode(_handle, &frfmode1);
         *frfmode = frfmode1;
         return 0;
 }
 
 int VideoDevice::setDisplayframerate(const char *framerate) const
 {
-        dsError_t ret;
         char buf[20] = {0};
 	    strncpy(buf, framerate, sizeof(buf)-1);
 
-        ret = dsSetDisplayframerate(_handle, buf);
+        dsSetDisplayframerate(_handle, buf);
         return 0;
 }
 
 int VideoDevice::getCurrentDisframerate(char *framerate) const
 {
-        dsError_t ret;
         char getframerate[20];
-        ret = dsGetCurrentDisplayframerate(_handle, getframerate);
-	    strncpy(framerate, getframerate, 20);
+        dsGetCurrentDisplayframerate(_handle, getframerate);
+        strncpy(framerate, getframerate, 20);
 
-     	return 0;
+        return 0;
 }
 
+VideoDevicePriv& VideoDevice::impl()
+{
+	if (!_impl) {
+		_impl = std::unique_ptr<VideoDevicePriv>(new VideoDevicePriv());
+	}
+	return *_impl;
+}
 
-/**
- * @fn void  VideoDevice::Register(IEvent *listener)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
 uint32_t VideoDevice::Register(IEvent *listener) 
 {
-  return 0;
+  return impl().Register(listener);
 }
 
-
-/**
- * @fn void  VideoDevice::UnRegister(IEvent *listener)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
 uint32_t VideoDevice::UnRegister(IEvent *listener) 
 {
-  return 0;
+  return impl().UnRegister(listener);
 }
 
 }

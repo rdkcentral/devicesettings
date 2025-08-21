@@ -29,14 +29,18 @@
 #ifndef _DS_VIDEODEVICE_HPP_
 #define _DS_VIDEODEVICE_HPP_
 
+#include <string>
+#include <memory>
+#include <list>
+
 #include "dsConstant.hpp"
 #include "videoDFC.hpp"
 #include "videoResolution.hpp"
 #include "list.hpp"
-#include <string>
-#include <list>
 #include "dsMgrNtf.h"
 
+namespace iarm { class VideoDevicePriv; }
+using VideoDevicePriv = iarm::VideoDevicePriv;
 
 /**
  * @file videoDevice.hpp
@@ -51,13 +55,16 @@ namespace device {
  * @ingroup devicesettingsclass
  */
 class VideoDevice : public DSConstant {
+	std::unique_ptr<VideoDevicePriv> _impl;
 	intptr_t _handle;
 	int _dfc; //!< Decoder format converter variable.
 	List<VideoDFC> _supportedDFCs; //!< List of supported dfc's.
+
 	void setDFC(const VideoDFC & dfc);
 	void setDFC();
 
 	static const char * kPropertyDFC;
+	VideoDevicePriv& impl();
 
 public:
 
@@ -65,14 +72,14 @@ public:
             // @brief Display Framerate Pre-change
             // @text OnDisplayFrameratePreChange
             // @param frameRate: PreChange framerate
-            virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
+            virtual void OnDisplayFrameratePreChange(const std::string& frameRate) = 0;
 
             // @brief Display Framerate Post-change
             // @text OnDisplayFrameratePostChange
             // @param frameRate:  framerate post change
-            virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+            virtual void OnDisplayFrameratePostChange(const std::string& frameRate) = 0;
         };
-        
+
         uint32_t Register(IEvent *listener);
         uint32_t UnRegister(IEvent *listener);
 	
