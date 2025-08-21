@@ -72,7 +72,7 @@ IARM_Result_t _dsSetAllmEnabled(void *arg);
 IARM_Result_t _dsSetAVIContentType(void *arg);
 IARM_Result_t _dsSetAVIScanInformation(void *arg);
 IARM_Result_t _dsDisplayTerm(void *arg);
-void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *eventData);
+void _dsDisplayEventCallback(int handle, dsDisplayEvent_t event, void *eventData);
 static void  filterEDIDResolution(intptr_t Shandle, dsDisplayEDID_t *edid);
 static void  dumpEDIDInformation( dsDisplayEDID_t *edid);
 static dsVideoPortType_t _GetDisplayPortType(intptr_t handle);

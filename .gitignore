@@ -47,3 +47,6 @@ sample/setSurroundVirtualizer
 sample/setVolumeLeveller
 sample/setZoomSettings
 sample/testFrontPanel
+
+.cache
+compile_commands.json
