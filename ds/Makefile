@@ -33,8 +33,8 @@ INCLUDE     := -I$(PWD)                                 \
     		   -I$(PWD)/hal/src                \
     		   -I$(PWD)/ds                              \
     		   -I$(PWD)/rpc/include            \
-               -I$(PWD)/ds/include                 \                  
-               -I$(PWD)/ds/include/iarm  
+    		   -I$(PWD)/ds/include            \
+    		   -I$(PWD)/ds/include/iarm
 else
 INCLUDE     := -I$(PWD)                                 \
                -I$(LOG4C_INSTALL_DIR)/include           \
@@ -42,8 +42,8 @@ INCLUDE     := -I$(PWD)                                 \
     		   -I$(PWD)/hal/include                     \
     		   -I$(PWD)/ds                              \
     		   -I$(PWD)/rpc/include            \
-               -I$(PWD)/ds/include                 \ 
-               -I$(PWD)/ds/include/iarm  
+    		   -I$(PWD)/ds/include            \
+    		   -I$(PWD)/ds/include/iarm
 endif
               
 
