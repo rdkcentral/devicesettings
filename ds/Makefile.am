@@ -25,6 +25,7 @@ DIST_SUBDIRS =
 lib_LTLIBRARIES = libds.la
 
 libds_la_CPPFLAGS = -I ./include \
+                    -I ./include/iarm \
                     -I=$(includedir)/rdk/ds-hal \
                     -I=$(includedir)/rdk/iarmbus \
                     -I=$(includedir)/rdk/halif/ds-hal
