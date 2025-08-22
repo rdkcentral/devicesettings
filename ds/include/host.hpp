@@ -30,6 +30,7 @@
 #include <string>
 
 #include "audioOutputPort.hpp"
+#include "dsAVDTypes.h"
 #include "list.hpp"
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
@@ -105,6 +106,62 @@ public:
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
     uint32_t UnRegister(IVideoPortEvents* listener);
+
+    struct IAudioPortEvents {
+
+        // @brief Associated Audio mixing changed
+        // @param mixing: true or false
+        virtual void OnAssociatedAudioMixingChanged(bool mixing) { };
+
+        // @brief Audio Fader balance changed
+        // @param mixerBalance: applied mixer balance value
+        virtual void OnAudioFaderControlChanged(int mixerBalance) { };
+
+        // @brief Primary language for Audio changed
+        // @param primaryLanguage: current primary language for audio
+        virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage) { };
+
+        // @brief Secondary language for Audio changed
+        // @param secondaryLanguage: current secondary language for audio
+        virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage) { };
+
+        // @brief Audio output hot plug event
+        // @param portType: Type of audio port see AudioPortType
+        // @param uiPortNumber: The port number assigned by UI
+        // @param isPortConnected: true (connected) or false (not connected)
+        virtual void OnAudioOutHotPlug(dsAudioPortType_t portType, int uiPortNumber, bool isPortConnected) { };
+
+        // @brief Dolby Atmos capabilities changed
+        // @param atmosCapability: the Dolby Atmos capability
+        // @param status: true (available) or false (not available)
+        virtual void OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status) { };
+
+        // @brief Audio port state changed
+        // @param audioPortState: audio port state
+        // TODO: requires dsMgr.h header include ??
+        // virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { };
+
+        // @brief Audio mode for the respective audio port - raised for every type of port
+        // @param audioPortType: audio port type see dsAudioPortType_t
+        // @param audioStereoMode: audio stereo mode - see dsAudioStereoMode_t
+        virtual void OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode) { };
+
+        // @brief Audio level changed
+        // @param audioiLevel: audio level value
+        virtual void OnAudioLevelChangedEvent(int audioLevel) { };
+
+        // @brief Audio Output format changed
+        // @param audioFormat: Type of audio format see AudioFormat
+        virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
+    };
+
+    // @brief Register a listener for audio port events
+    // @param listener: class object implementing the listener
+    uint32_t Register(IAudioPortEvents* listener);
+
+    // @brief UnRegister a listener for audio port events
+    // @param listener: class object implementing the listener
+    uint32_t UnRegister(IAudioPortEvents* listener);
 
     bool setPowerMode(int mode);
     int getPowerMode();

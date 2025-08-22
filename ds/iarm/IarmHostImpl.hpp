@@ -30,6 +30,7 @@ namespace device {
 // Forward declaration for IARM Implementation Groups
 class IARMGroupVideoDevice;
 class IARMGroupVideoPort;
+class IARMGroupAudioPort;
 
 class IarmHostImpl {
 
@@ -124,6 +125,7 @@ class IarmHostImpl {
 public:
     using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
     using IVideoPortEvents = device::Host::IVideoPortEvents;
+    using IAudioPortEvents = device::Host::IAudioPortEvents;
 
     IarmHostImpl();
     ~IarmHostImpl();
@@ -144,6 +146,14 @@ public:
     // @param listener: class object implementing the listener
     uint32_t UnRegister(IVideoPortEvents* listener);
 
+    // @brief Register a listener for audio port events
+    // @param listener: class object implementing the listener
+    uint32_t Register(IAudioPortEvents* listener);
+
+    // @brief UnRegister a listener for audio port events
+    // @param listener: class object implementing the listener
+    uint32_t UnRegister(IAudioPortEvents* listener);
+
     // TODO: avoid public
     template <typename F>
     static void Dispatch(F&& fn);
@@ -153,11 +163,13 @@ private:
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
+    static CallbackList<IAudioPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
     friend class IarmHostPriv;
     friend class IARMGroupVideoDevice;
+    friend class IARMGroupVideoPort;
 };
 } // namespace device

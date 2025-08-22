@@ -806,6 +806,16 @@ uint32_t Host::UnRegister(IVideoPortEvents* listener)
     return impl().UnRegister(listener);
 }
 
+uint32_t Host::Register(IAudioPortEvents* listener)
+{
+    return impl().Register(listener);
+}
+
+uint32_t Host::UnRegister(IAudioPortEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
 /** @} */
 
 } // namespace device

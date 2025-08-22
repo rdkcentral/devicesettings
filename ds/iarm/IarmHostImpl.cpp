@@ -12,6 +12,7 @@
 
 using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
 using IVideoPortEvents = device::Host::IVideoPortEvents;
+using IAudioPortEvents = device::Host::IAudioPortEvents;
 
 namespace device {
 
@@ -199,10 +200,213 @@ private:
     };
 };
 
+class IARMGroupAudioPort {
+public:
+    static bool Register()
+    {
+        return RegisterIarmEvents(handlers);
+    }
+
+    static bool UnRegister()
+    {
+        return UnregisterIarmEvents(handlers);
+    }
+
+private:
+    static void iarmAssociatedAudioMixingChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            bool isEnabled = eventData->data.AssociatedAudioMixingInfo.mixing;
+
+            IarmHostImpl::Dispatch([isEnabled](IAudioPortEvents* listener) {
+                listener->OnAssociatedAudioMixingChanged(isEnabled);
+            });
+        } else {
+            INT_ERROR("Invalid data received for associated audio mixing change");
+        }
+    };
+
+    static void iarmAudioFaderControlChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            int mixerBalance = eventData->data.FaderControlInfo.mixerbalance;
+
+            IarmHostImpl::Dispatch([mixerBalance](IAudioPortEvents* listener) {
+                listener->OnAudioFaderControlChanged(mixerBalance);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio fader control change");
+        }
+    };
+
+    static void iarmAudioPrimaryLanguageChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage, sizeof(eventData->data.AudioLanguageInfo.audioLanguage));
+
+            IarmHostImpl::Dispatch([&primaryLanguage](IAudioPortEvents* listener) {
+                listener->OnAudioPrimaryLanguageChanged(primaryLanguage);
+            });
+        } else {
+            INT_ERROR("Invalid data received for primary language change");
+        }
+    };
+
+    static void iarmAudioSecondaryLanguageChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage, sizeof(eventData->data.AudioLanguageInfo.audioLanguage));
+
+            IarmHostImpl::Dispatch([&secondaryLanguage](IAudioPortEvents* listener) {
+                listener->OnAudioSecondaryLanguageChanged(secondaryLanguage);
+            });
+        } else {
+            INT_ERROR("Invalid data received for secondary language change");
+        }
+    };
+
+    static void iarmAudioOutHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG received, eventId=%d", eventId);
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsAudioPortType_t portType = eventData->data.audio_out_connect.portType;
+            int uiPortNumber = eventData->data.audio_out_connect.uiPortNo;
+            bool isPortConnected = eventData->data.audio_out_connect.isPortConnected;
+
+            IarmHostImpl::Dispatch([portType, uiPortNumber, isPortConnected](IAudioPortEvents* listener) {
+                listener->OnAudioOutHotPlug(portType, uiPortNumber, isPortConnected);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio out hot plug change");
+        }
+    };
+
+    static void iarmDolbyAtmosCapabilitiesChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED received, eventId=%d", eventId);
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsATMOSCapability_t atmosCapability = eventData->data.AtmosCapsChange.caps;
+            bool status = eventData->data.AtmosCapsChange.status;
+
+            IarmHostImpl::Dispatch([atmosCapability, status](IAudioPortEvents* listener) {
+                listener->OnDolbyAtmosCapabilitiesChanged(atmosCapability, status);
+            });
+
+        } else {
+            INT_ERROR("Invalid data received for Dolby Atmos capabilities change");
+        }
+    };
+
+    // TODO: requires dsMgr.h header for dsAudioPortState_t ?
+    static void iarmAudioPortStateChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsAudioPortState_t audioPortState = eventData->data.AudioPortStateInfo.audioPortState;
+
+            IarmHostImpl::Dispatch([audioPortState](IAudioPortEvents* listener) {
+                // TODO:
+                // listener->OnAudioPortStateChanged(audioPortState);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio port state change");
+        }
+    };
+
+    static void iarmAudioModeEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_MODE received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            // TODO: recheck as using static_cast here
+            dsAudioPortType_t audioPortType = static_cast<dsAudioPortType_t>(eventData->data.Audioport.type);
+            dsAudioStereoMode_t audioStereoMode = static_cast<dsAudioStereoMode_t>(eventData->data.Audioport.mode);
+
+            IarmHostImpl::Dispatch([audioPortType, audioStereoMode](IAudioPortEvents* listener) {
+                listener->OnAudioModeEvent(audioPortType, audioStereoMode);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio mode change");
+        }
+    };
+
+    static void iarmAudioLevelChangedEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            int audioLevel = eventData->data.AudioLevelInfo.level;
+
+            IarmHostImpl::Dispatch([audioLevel](IAudioPortEvents* listener) {
+                listener->OnAudioLevelChangedEvent(audioLevel);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio level change");
+        }
+    };
+
+    static void iarmAudioFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsAudioFormat_t audioFormat = eventData->data.AudioFormatInfo.audioFormat;
+
+            IarmHostImpl::Dispatch([audioFormat](IAudioPortEvents* listener) {
+                listener->OnAudioFormatUpdate(audioFormat);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio format update");
+        }
+    };
+
+private:
+    static constexpr EventHandlerMapping handlers[] = {
+        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioPort::iarmAssociatedAudioMixingChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED, &IARMGroupAudioPort::iarmAudioFaderControlChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED, &IARMGroupAudioPort::iarmAudioPrimaryLanguageChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED, &IARMGroupAudioPort::iarmAudioSecondaryLanguageChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG, &IARMGroupAudioPort::iarmAudioOutHotPlugHandler },
+        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED, &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE, &IARMGroupAudioPort::iarmAudioPortStateChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE, &IARMGroupAudioPort::iarmAudioModeEventHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED, &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE, &IARMGroupAudioPort::iarmAudioFormatUpdateHandler },
+    };
+};
+
 // static data
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
+IarmHostImpl::CallbackList<IAudioPortEvents*, IARMGroupAudioPort> IarmHostImpl::s_audioPortListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
@@ -210,6 +414,7 @@ IarmHostImpl::~IarmHostImpl()
 
     s_videoDeviceListeners.Release();
     s_videoPortListeners.Release();
+    s_audioPortListeners.Release();
 }
 
 template <typename T, typename F>
@@ -276,6 +481,25 @@ template <>
 void IarmHostImpl::Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn)
 {
     Dispatch(s_videoPortListeners, std::move(fn));
+}
+
+uint32_t IarmHostImpl::Register(IAudioPortEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_audioPortListeners.Register(listener);
+}
+
+uint32_t IarmHostImpl::UnRegister(IAudioPortEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_audioPortListeners.UnRegister(listener);
+}
+
+// Specialization for IAudioPortEvents
+template <>
+void IarmHostImpl::Dispatch(std::function<void(IAudioPortEvents* listener)>&& fn)
+{
+    Dispatch(s_audioPortListeners, std::move(fn));
 }
 
 } // namespace device
