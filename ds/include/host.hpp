@@ -55,17 +55,6 @@ namespace device {
  */
 class Host {
 public:
-    struct IEvent {
-
-        // @brief Sleep mode changed
-        // @text onSleepModeChanged
-        // @param sleepMode: see SleepMode
-        virtual void OnSleepModeChanged(SleepMode sleepMode) { };
-    };
-
-    uint32_t Register(IEvent* listener);
-    uint32_t UnRegister(IEvent* listener);
-
     static const int kPowerOn;
     static const int kPowerOff;
     static const int kPowerStandby;

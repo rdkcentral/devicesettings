@@ -775,28 +775,6 @@ namespace device
    }
 
 /**
- * @fn void  Host::Register(IEvent *listener)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IEvent *listener) 
-{
-  return 0;
-}
-
-/**
- * @fn void  Host::UnRegister(IEvent *listener)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IEvent *listener) 
-{
-  return 0;
-}
-
-/**
  * @fn void  DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
  * @brief This API is used to register the Events
  *
