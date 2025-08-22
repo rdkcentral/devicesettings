@@ -22,40 +22,40 @@ struct EventHandlerMapping {
 };
 
 // UnregisterIarmEvents can be called by RegisterIarmEvents in case of failure.
-// Nence defined before RegisterIarmEvents
+// Hence defined before RegisterIarmEvents
 template <size_t N>
 static bool unregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
-    bool unsubscribed = true;
+    bool registered = true;
 
     for (const auto& eh : handlers) {
         if (IARM_RESULT_SUCCESS != IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId)) {
             INT_ERROR("Failed to unregister IARM event handler for %d", eh.eventId);
-            unsubscribed = false;
+            registered = false;
         }
     }
-    return unsubscribed;
+    return registered;
 }
 
 template <size_t N>
 static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
-    bool subscribed = true;
+    bool unregistered = true;
 
     for (const auto& eh : handlers) {
         if (IARM_RESULT_SUCCESS != IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId, eh.handler)) {
             INT_ERROR("Failed to register IARM event handler for %d", eh.eventId);
-            subscribed = false;
+            unregistered = false;
         }
     }
 
-    if (!subscribed) {
+    if (!unregistered) {
         // in case of failure / partial failure
         // we should unregister any handlers that were registered
         unregisterIarmEvents(handlers);
     }
 
-    return subscribed;
+    return unregistered;
 }
 
 // IARMGroupXYZ are c to c++ shim (all methods are static)
