@@ -28,22 +28,17 @@
 
 
 #include <iostream>
-#include <string.h>
-#include "iarmProxy.hpp"
+#include <string>
+
 #include "audioOutputPortConfig.hpp"
 #include "videoOutputPortConfig.hpp"
 #include "list.hpp"
 #include "host.hpp"
 #include "videoDeviceConfig.hpp"
-#include "dsVideoPort.h"
-#include "dsVideoDevice.h"
 #include "dsAudio.h"
-#include "dsDisplay.h"
-#include "dslogger.h"
 #include "dsHost.h"
-#include "dsTypes.h"
 #include "unsupportedOperationException.hpp"
-#include "hostEDID.hpp"
+/*#include "hostEDID.hpp"*/
 #include "dsInternal.h"
 
 #include "iarm/IarmHostImpl.hpp"
@@ -69,13 +64,7 @@ Host::Host()
 
 Host::~Host()
 {
-    if (m_impl) {
-        m_impl.reset();
-    }
-
-    if (true) {
-        IARMProxy::getInstance().UnRegisterPowerEventHandler();
-    }
+    m_impl = nullptr;
 }
 
 /**

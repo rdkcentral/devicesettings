@@ -24,7 +24,7 @@ struct EventHandlerMapping {
 // UnregisterIarmEvents can be called by RegisterIarmEvents in case of failure.
 // Nence defined before RegisterIarmEvents
 template <size_t N>
-static bool UnregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
+static bool unregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
     bool unsubscribed = true;
 
@@ -38,7 +38,7 @@ static bool UnregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
 }
 
 template <size_t N>
-static bool RegisterIarmEvents(const EventHandlerMapping (&handlers)[N])
+static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
     bool subscribed = true;
 
@@ -52,7 +52,7 @@ static bool RegisterIarmEvents(const EventHandlerMapping (&handlers)[N])
     if (!subscribed) {
         // in case of failure / partial failure
         // we should unregister any handlers that were registered
-        UnregisterIarmEvents(handlers);
+        unregisterIarmEvents(handlers);
     }
 
     return subscribed;
@@ -62,14 +62,14 @@ static bool RegisterIarmEvents(const EventHandlerMapping (&handlers)[N])
 // Thread safety to be ensured by the caller
 class IARMGroupVideoDevice {
 public:
-    static bool Register()
+    static bool RegisterIarmEvents()
     {
-        return RegisterIarmEvents(handlers);
+        return registerIarmEvents(handlers);
     }
 
-    static bool UnRegister()
+    static bool UnRegisterIarmEvents()
     {
-        return UnregisterIarmEvents(handlers);
+        return unregisterIarmEvents(handlers);
     }
 
 private:
@@ -115,14 +115,14 @@ private:
 
 class IARMGroupVideoPort {
 public:
-    static bool Register()
+    static bool RegisterIarmEvents()
     {
-        return RegisterIarmEvents(handlers);
+        return registerIarmEvents(handlers);
     }
 
-    static bool UnRegister()
+    static bool UnRegisterIarmEvents()
     {
-        return UnregisterIarmEvents(handlers);
+        return unregisterIarmEvents(handlers);
     }
 
 private:
@@ -202,14 +202,14 @@ private:
 
 class IARMGroupAudioPort {
 public:
-    static bool Register()
+    static bool RegisterIarmEvents()
     {
-        return RegisterIarmEvents(handlers);
+        return registerIarmEvents(handlers);
     }
 
-    static bool UnRegister()
+    static bool UnRegisterIarmEvents()
     {
-        return UnregisterIarmEvents(handlers);
+        return unregisterIarmEvents(handlers);
     }
 
 private:

@@ -58,7 +58,7 @@ class IarmHostImpl {
             }
 
             if (!m_registered) {
-                m_registered = IARMGroup::Register();
+                m_registered = IARMGroup::RegisterIarmEvents();
             }
 
             if (!m_registered) {
@@ -100,7 +100,7 @@ class IarmHostImpl {
 
             if (this->empty() && m_registered) {
                 m_registered = false;
-                IARMGroup::UnRegister();
+                IARMGroup::UnRegisterIarmEvents();
             }
 
             return 0;
@@ -110,7 +110,7 @@ class IarmHostImpl {
         {
             if (m_registered) {
                 m_registered = false;
-                IARMGroup::UnRegister();
+                IARMGroup::UnRegisterIarmEvents();
             }
 
             this->clear();
