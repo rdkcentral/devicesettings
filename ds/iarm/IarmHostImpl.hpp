@@ -59,11 +59,11 @@ class IarmHostImpl {
 
             if (!m_registered) {
                 m_registered = IARMGroup::RegisterIarmEvents();
-            }
 
-            if (!m_registered) {
-                INT_ERROR("Failed to register IARMGroup %s", typeid(IARMGroup).name());
-                return 1; // Error: Failed to register IARM group
+                if (!m_registered) {
+                    INT_ERROR("Failed to register IARMGroup %s", typeid(IARMGroup).name());
+                    return 1; // Error: Failed to register IARM group
+                }
             }
 
             auto it = std::find(this->begin(), this->end(), listener);

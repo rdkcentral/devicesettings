@@ -21,41 +21,44 @@ struct EventHandlerMapping {
     IARM_EventHandler_t handler;
 };
 
-// UnregisterIarmEvents can be called by RegisterIarmEvents in case of failure.
-// Hence defined before RegisterIarmEvents
+// unregisterIarmEvents can be called by registerIarmEvents in case of failure.
+// Hence defined before registerIarmEvents
 template <size_t N>
 static bool unregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
-    bool registered = true;
+    bool unregistered = true;
 
     for (const auto& eh : handlers) {
         if (IARM_RESULT_SUCCESS != IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId)) {
             INT_ERROR("Failed to unregister IARM event handler for %d", eh.eventId);
-            registered = false;
+            unregistered = false;
+            // don't break here, try to unregister all handlers
         }
     }
-    return registered;
+    return unregistered;
 }
 
 template <size_t N>
 static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
-    bool unregistered = true;
+    bool registered = true;
 
     for (const auto& eh : handlers) {
         if (IARM_RESULT_SUCCESS != IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId, eh.handler)) {
             INT_ERROR("Failed to register IARM event handler for %d", eh.eventId);
-            unregistered = false;
+            registered = false;
+            // no point in continuing as we will attempt to unregister anyway
+            break;
         }
     }
 
-    if (!unregistered) {
+    if (!registered) {
         // in case of failure / partial failure
         // we should unregister any handlers that were registered
         unregisterIarmEvents(handlers);
     }
 
-    return unregistered;
+    return registered;
 }
 
 // IARMGroupXYZ are c to c++ shim (all methods are static)
@@ -220,10 +223,10 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            bool isEnabled = eventData->data.AssociatedAudioMixingInfo.mixing;
+            bool mixing = eventData->data.AssociatedAudioMixingInfo.mixing;
 
-            IarmHostImpl::Dispatch([isEnabled](IAudioPortEvents* listener) {
-                listener->OnAssociatedAudioMixingChanged(isEnabled);
+            IarmHostImpl::Dispatch([mixing](IAudioPortEvents* listener) {
+                listener->OnAssociatedAudioMixingChanged(mixing);
             });
         } else {
             INT_ERROR("Invalid data received for associated audio mixing change");
