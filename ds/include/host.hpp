@@ -26,27 +26,27 @@
 
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
+#include <memory>
+#include <string>
 
 #include "audioOutputPort.hpp"
-#include "displayConnectionChangeListener.hpp"
-#include "dsMgrNtf.h"
 #include "list.hpp"
-#include "powerModeChangeListener.hpp"
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
-#include <iostream>
-
-#include <list>
-#include <string>
 
 /**
  * @file host.hpp
- * @brief It contains class,structures referenced by host.cpp file.
+ * @brief It contains class, structures referenced by host.cpp file.
  */
 using namespace std;
 
 namespace device {
+
+// Forward declaration of the implementation class
+class IarmHostImpl;
+// In future add a conditional to choose implementation class based on build configuration
+using DefaultImpl = IarmHostImpl;
 
 /**
  * @class Host
@@ -58,6 +58,56 @@ public:
     static const int kPowerOn;
     static const int kPowerOff;
     static const int kPowerStandby;
+
+    struct IVideoDeviceEvents {
+        // @brief Display Frame rate Pre-change notification
+        // @param frameRate: new framerate
+        virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
+
+        // @brief Display Frame rate Post-change notification
+        // @param frameRate: new framerate
+        virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+    };
+
+    // @brief Register a listener for video device events
+    // @param listener: class object implementing the listener
+    uint32_t Register(IVideoDeviceEvents* listener);
+
+    // @brief UnRegister a listener for video device events
+    // @param listener: class object implementing the listener
+    uint32_t UnRegister(IVideoDeviceEvents* listener);
+
+    struct IVideoPortEvents {
+
+        // @brief On Resolution Pre changed
+        // @param width: width of the resolution
+        // @param height: height of the resolution
+        virtual void OnResolutionPreChange(int width, int height) { };
+
+        // @brief On Resolution Post change
+        // @param width: width of the resolution
+        // @param height: height of the resolution
+        virtual void OnResolutionPostChange(int width, int height) { };
+
+        // @brief On HDCP Status change
+        // @param hdcpStatus: HDCP Status
+        virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
+
+        // @brief On Video Format update
+        // @param videoFormatHDR: Video format HDR standard
+        virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+
+        // @brief HDCP Protocol version change
+        virtual void OnHDCPProtocolChangeStatus() { };
+    };
+
+    // @brief Register a listener for video port events
+    // @param listener: class object implementing the listener
+    uint32_t Register(IVideoPortEvents* listener);
+
+    // @brief UnRegister a listener for video port events
+    // @param listener: class object implementing the listener
+    uint32_t UnRegister(IVideoPortEvents* listener);
 
     bool setPowerMode(int mode);
     int getPowerMode();
@@ -97,11 +147,14 @@ public:
     void setAudioMixerLevels(dsAudioInput_t aInput, int volume);
 
 private:
+    std::unique_ptr<DefaultImpl> m_impl;
     Host();
     virtual ~Host();
     // Avoid copies
     Host(const Host&) = delete;
     Host& operator=(const Host&) = delete;
+
+    DefaultImpl& impl();
 };
 
 }

@@ -28,7 +28,6 @@
 
 
 #include <iostream>
-#include <algorithm>
 #include <string.h>
 #include "iarmProxy.hpp"
 #include "audioOutputPortConfig.hpp"
@@ -47,6 +46,8 @@
 #include "hostEDID.hpp"
 #include "dsInternal.h"
 
+#include "iarm/IarmHostImpl.hpp"
+
 /**
  * @file host.cpp
  * @brief The host module is the central module of the Device Settings module.
@@ -56,24 +57,23 @@ using namespace std;
 
 namespace device 
 {
-   	
-	const int Host::kPowerOn = dsPOWER_ON;
-    const int Host::kPowerOff = dsPOWER_OFF;
-    const int Host::kPowerStandby = dsPOWER_STANDBY;
- 
-	
-	Host::Host() 
-	{
-		// TODO Auto-generated destructor stub
-	}
 
-    Host::~Host() {
-    	if (true)
-		{
-			IARMProxy::getInstance().UnRegisterPowerEventHandler();
-		}
+const int Host::kPowerOn = dsPOWER_ON;
+const int Host::kPowerOff = dsPOWER_OFF;
+const int Host::kPowerStandby = dsPOWER_STANDBY;
+
+Host::Host()
+    : m_impl(nullptr)
+{
+    // TODO Auto-generated destructor stub
+}
+
+Host::~Host()
+{
+    if (true) {
+        IARMProxy::getInstance().UnRegisterPowerEventHandler();
     }
-
+}
 
 /**
  * @addtogroup dssettingshostapi
@@ -774,55 +774,37 @@ namespace device
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
 
-/**
- * @fn void  DisplayConnectionChangeListener::Register(IEvent *Evtnotification)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t DisplayConnectionChangeListener::Register(IEvent *listener)
+DefaultImpl& Host::impl()
 {
-  return 0;
+    if (!m_impl) {
+        m_impl = std::make_unique<DefaultImpl>();
+    }
+    return *m_impl;
 }
 
-/**
- * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t DisplayConnectionChangeListener::UnRegister(IEvent *listener)
+uint32_t Host::Register(IVideoDeviceEvents* listener)
 {
-  return 0;
+    return impl().Register(listener);
 }
 
-/**
- * @fn void  DisplayConnectionChangeListener::UnRegister(IDisplayHDMIHotPlugEvent *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t DisplayConnectionChangeListener::Register(IDisplayHDMIHotPlugEvent *listener)
+uint32_t Host::UnRegister(IVideoDeviceEvents* listener)
 {
-  return 0;
+    return impl().UnRegister(listener);
 }
 
-
-/**
- * @fn void  DisplayConnectionChangeListener::UnRegister(IEvent *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t DisplayConnectionChangeListener::UnRegister(IDisplayHDMIHotPlugEvent *listener)
+uint32_t Host::Register(IVideoPortEvents* listener)
 {
-  return 0;
+    return impl().Register(listener);
 }
 
+uint32_t Host::UnRegister(IVideoPortEvents* listener)
+{
+    return impl().UnRegister(listener);
 }
-
 
 /** @} */
 
+} // namespace device
 /** @} */
+
 /** @} */
