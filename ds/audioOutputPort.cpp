@@ -27,7 +27,6 @@
 **/
 
 
-
 #include "audioEncoding.hpp"
 #include "audioCompression.hpp"
 #include "audioStereoMode.hpp"
@@ -2002,30 +2001,9 @@ void AudioOutputPort::getHdmiArcPortId(int *portId)
 }
 
 
-/**
- * @fn void  AudioOutputPort::Register(IEvent *listener)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t AudioOutputPort::Register(IEvent *listener) 
-{
-  return 0;
-}
-
-
-/**
- * @fn void  AudioOutputPort::UnRegister(IEvent *listener)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t AudioOutputPort::UnRegister(IEvent *listener) 
-{
-  return 0;
-}
 
 }
+
 /** @} */
 
 /** @} */
