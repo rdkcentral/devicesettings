@@ -65,7 +65,6 @@ const int Host::kPowerStandby = dsPOWER_STANDBY;
 Host::Host()
     : m_impl(nullptr)
 {
-    // TODO Auto-generated destructor stub
 }
 
 Host::~Host()

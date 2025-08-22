@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <chrono>
 #include <mutex>
+#include <sstream>
 
 #include "IarmHostImpl.hpp"
 
@@ -19,28 +21,58 @@ struct EventHandlerMapping {
     IARM_EventHandler_t handler;
 };
 
-// IARM c to c++ shim (all methods are static)
+// UnregisterIarmEvents can be called by RegisterIarmEvents in case of failure.
+// Nence defined before RegisterIarmEvents
+template <size_t N>
+static bool UnregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
+{
+    bool unsubscribed = true;
+
+    for (const auto& eh : handlers) {
+        if (IARM_RESULT_SUCCESS != IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId)) {
+            INT_ERROR("Failed to unregister IARM event handler for %d", eh.eventId);
+            unsubscribed = false;
+        }
+    }
+    return unsubscribed;
+}
+
+template <size_t N>
+static bool RegisterIarmEvents(const EventHandlerMapping (&handlers)[N])
+{
+    bool subscribed = true;
+
+    for (const auto& eh : handlers) {
+        if (IARM_RESULT_SUCCESS != IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId, eh.handler)) {
+            INT_ERROR("Failed to register IARM event handler for %d", eh.eventId);
+            subscribed = false;
+        }
+    }
+
+    if (!subscribed) {
+        // in case of failure / partial failure
+        // we should unregister any handlers that were registered
+        UnregisterIarmEvents(handlers);
+    }
+
+    return subscribed;
+}
+
+// IARMGroupXYZ are c to c++ shim (all methods are static)
 // Thread safety to be ensured by the caller
-class IarmHostPriv {
-
+class IARMGroupVideoDevice {
 public:
-    // ------------------------------------- video device events -----------------------------------
-    static bool RegisterVideoDeviceEvents()
+    static bool Register()
     {
-        s_isVideoDeviceEventsRegistered = RegisterIarmEvents(s_videoDeviceHandlers);
-
-        return s_isVideoDeviceEventsRegistered;
+        return RegisterIarmEvents(handlers);
     }
 
-    static bool UnRegisterVideoDeviceEvents()
+    static bool UnRegister()
     {
-        s_isVideoDeviceEventsRegistered = !UnregisterIarmEvents(s_videoDeviceHandlers);
-
-        return !s_isVideoDeviceEventsRegistered;
+        return UnregisterIarmEvents(handlers);
     }
 
-    static bool isVideoDeviceEventsRegistered() { return s_isVideoDeviceEventsRegistered; }
-
+private:
     static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received %s %d", owner, eventId);
@@ -50,7 +82,7 @@ public:
         if (eventData) {
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate, sizeof(eventData->data.DisplayFrameRateChange.framerate));
 
-            IarmHostImpl::DispatchVideoDeviceEvents([&framerate](IVideoDeviceEvents* listener) {
+            IarmHostImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePreChange(framerate);
             });
         } else {
@@ -67,7 +99,7 @@ public:
         if (eventData) {
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate, sizeof(eventData->data.DisplayFrameRateChange.framerate));
 
-            IarmHostImpl::DispatchVideoDeviceEvents([&framerate](IVideoDeviceEvents* listener) {
+            IarmHostImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePostChange(framerate);
             });
         } else {
@@ -75,21 +107,25 @@ public:
         }
     }
 
-    // ------------------------ video port events ------------------------------
-    static bool RegisterVideoPortEvents()
+    static constexpr EventHandlerMapping handlers[] = {
+        { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE, &IARMGroupVideoDevice::iarmDisplayFrameratePreChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE, &IARMGroupVideoDevice::iarmDisplayFrameratePostChangeHandler },
+    };
+};
+
+class IARMGroupVideoPort {
+public:
+    static bool Register()
     {
-        s_isVideoPortEventsRegistered = RegisterIarmEvents(s_videoPortHandlers);
-        return s_isVideoPortEventsRegistered;
+        return RegisterIarmEvents(handlers);
     }
 
-    static bool UnRegisterVideoPortEvents()
+    static bool UnRegister()
     {
-        s_isVideoPortEventsRegistered = !UnregisterIarmEvents(s_videoPortHandlers);
-        return !s_isVideoPortEventsRegistered;
+        return UnregisterIarmEvents(handlers);
     }
 
-    static bool isVideoPortEventsRegistered() { return s_isVideoPortEventsRegistered; }
-
+private:
     static void iarmResolutionPreChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_RES_PRECHANGE received, eventId = %d", eventId);
@@ -100,7 +136,7 @@ public:
             int width = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
-            IarmHostImpl::DispatchVideoPortEvents([width, height](IVideoPortEvents* listener) {
+            IarmHostImpl::Dispatch([width, height](IVideoPortEvents* listener) {
                 listener->OnResolutionPreChange(width, height);
             });
         } else {
@@ -118,13 +154,14 @@ public:
             int width = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
-            IarmHostImpl::DispatchVideoPortEvents([width, height](IVideoPortEvents* listener) {
+            IarmHostImpl::Dispatch([width, height](IVideoPortEvents* listener) {
                 listener->OnResolutionPostChange(width, height);
             });
         } else {
             INT_ERROR("Invalid data received for resolution post-change");
         }
     }
+
     static void iarmHDCPStatusChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received, eventId=%d", eventId);
@@ -147,185 +184,104 @@ public:
         if (eventData) {
             dsHDRStandard_t videoFormat = eventData->data.VideoFormatInfo.videoFormat;
 
-            IarmHostImpl::DispatchVideoPortEvents([videoFormat](IVideoPortEvents* listener) {
+            IarmHostImpl::Dispatch([videoFormat](IVideoPortEvents* listener) {
                 listener->OnVideoFormatUpdate(videoFormat);
             });
         } else {
             INT_ERROR("Invalid data received for video format update");
         }
     }
-    static void iarmHDCPProtocolChangeStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len) { }
 
-private:
-    static bool s_isVideoDeviceEventsRegistered;
-    static bool s_isVideoPortEventsRegistered;
+    static void iarmHDCPProtocolChangeStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        // TODO: some confusion related to IARM event enum
+    }
 
-    static constexpr EventHandlerMapping s_videoDeviceHandlers[] = {
-        { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE, &IarmHostPriv::iarmDisplayFrameratePreChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE, &IarmHostPriv::iarmDisplayFrameratePostChangeHandler },
-    };
-
-    static constexpr EventHandlerMapping s_videoPortHandlers[] = {
-        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE, &IarmHostPriv::iarmResolutionPreChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE, &IarmHostPriv::iarmResolutionPostChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS, &IarmHostPriv::iarmHDCPStatusChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IarmHostPriv::iarmVideoFormatUpdateHandler },
+    static constexpr EventHandlerMapping handlers[] = {
+        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE, &IARMGroupVideoPort::iarmResolutionPreChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE, &IARMGroupVideoPort::iarmResolutionPostChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS, &IARMGroupVideoPort::iarmHDCPStatusChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoPort::iarmVideoFormatUpdateHandler },
         // {TODO: ?? , &IarmHostPriv::iarmHDCPProtocolChangeStatusHandler},
     };
-
-    template <size_t N>
-    static bool RegisterIarmEvents(const EventHandlerMapping (&handlers)[N])
-    {
-        bool subscribed = true;
-
-        for (const auto& eh : handlers) {
-            if (IARM_RESULT_SUCCESS != IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId, eh.handler)) {
-                INT_ERROR("Failed to register IARM event handler for %d", eh.eventId);
-                subscribed = false;
-            }
-        }
-
-        if (!subscribed) {
-            // in case of failure / partial failure
-            // we should unregister any handlers that were registered
-            UnregisterIarmEvents(handlers);
-        }
-
-        return subscribed;
-    }
-
-    template <size_t N>
-    static bool UnregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
-    {
-        bool unsubscribed = true;
-
-        for (const auto& eh : handlers) {
-            if (IARM_RESULT_SUCCESS != IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId)) {
-                INT_ERROR("Failed to unregister IARM event handler for %d", eh.eventId);
-                unsubscribed = false;
-            }
-        }
-        return unsubscribed;
-    }
 };
 
 // static data
-bool IarmHostPriv::s_isVideoDeviceEventsRegistered { false };
-bool IarmHostPriv::s_isVideoPortEventsRegistered { false };
-
 std::mutex IarmHostImpl::s_mutex;
-std::list<IVideoDeviceEvents*> IarmHostImpl::s_videoDeviceListeners;
-std::list<IVideoPortEvents*> IarmHostImpl::s_videoPortListeners;
+IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceHandlers;
+IarmHostImpl::CallbackList<IVideoPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortHandlers;
 
 IarmHostImpl::~IarmHostImpl()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
 
-    IarmHostPriv::UnRegisterVideoPortEvents();
-    IarmHostPriv::UnRegisterVideoDeviceEvents();
-
-    s_videoPortListeners.clear();
-    s_videoDeviceListeners.clear();
+    s_videoDeviceHandlers.clear();
+    s_videoPortHandlers.clear();
 }
 
 uint32_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-
-    // NULL check is already handled by the caller
-
-    // Check if listener is already registered
-    if (!IarmHostPriv::isVideoDeviceEventsRegistered()) {
-        if (!IarmHostPriv::RegisterVideoDeviceEvents()) {
-            INT_ERROR("Failed to subscribe to IARM Video device events");
-            return 1; // Error: Failed to register video device events
-        }
-    }
-
-    auto it = std::find(s_videoDeviceListeners.begin(), s_videoDeviceListeners.end(), listener);
-    if (it != s_videoDeviceListeners.end()) {
-        // Listener already registered
-        INT_ERROR("IVideoDeviceEvent %p is already registered", listener);
-        return 0;
-    }
-
-    s_videoDeviceListeners.push_back(listener);
-    INT_INFO("IVideoDeviceEvent %p registered", listener);
-    return 0;
-}
-
-template <typename T>
-uint32_t IarmHostImpl::Register(std::list<T*>& listeners, T* listener)
-{
-    std::lock_guard<std::mutex> lock(s_mutex);
-
-    // NULL check is already handled by the caller
-
-    // Check if listener is already registered
-    auto it = std::find(listeners.begin(), listeners.end(), listener);
-    if (it != listeners.end()) {
-        // Listener already registered
-        INT_ERROR("%p is already registered", listener);
-        return 0;
-    }
-
-    listeners.push_back(listener);
-    INT_INFO("%p registered", listener);
-    return 0;
+    return s_videoDeviceHandlers.Register(listener);
 }
 
 uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoDeviceHandlers.UnRegister(listener);
+}
 
-    auto it = std::find(s_videoDeviceListeners.begin(), s_videoDeviceListeners.end(), listener);
+template <typename T, typename F>
+void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
+{
+    std::stringstream ss;
+    std::lock_guard<std::mutex> lock(s_mutex);
 
-    if (it == s_videoDeviceListeners.end()) {
-        // Listener not found
-        INT_ERROR("IVideoDeviceEvent %p is not registered", listener);
-        return 1; // Error: Listener not found
+    for (auto* listener : listeners) {
+        auto start = std::chrono::steady_clock::now();
+
+        fn(listener);
+
+        auto end = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        ss << "\t" << listener << ", elapsed: " << elapsed.count() << " ms\n";
     }
 
-    s_videoDeviceListeners.erase(it);
-    INT_INFO("IVideoDeviceEvent %p unregistered", listener);
-
-    if (s_videoDeviceListeners.empty()) {
-        // No more listeners, unregister from IARM
-        if (!IarmHostPriv::UnRegisterVideoDeviceEvents()) {
-            INT_ERROR("Failed to unsubscribe from IARM Video device events");
-        }
-    }
-
-    return 0;
+    INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
 template <typename F>
-void IarmHostImpl::DispatchVideoDeviceEvents(F&& fn)
+void IarmHostImpl::Dispatch(F&& fn)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
-
-    for (auto* listener : s_videoDeviceListeners) {
-        fn(listener);
-    }
+    // Always expect template specialization
+    // static_assert(sizeof(F) == 0, "Dispatch should be specialized for specific event types");
+    // TODO: make this compile time error
+    INT_ERROR("FATAL: Dispatch should be specialized for specific event types, but was called with a generic function");
 }
 
-template <typename F>
-void IarmHostImpl::DispatchVideoPortEvents(F&& fn)
+// Specialization for IVideoDeviceEvents
+template <>
+void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
+    Dispatch(s_videoDeviceHandlers, std::move(fn));
+}
 
-    for (auto* listener : s_videoPortListeners) {
-        fn(listener);
-    }
+// Specialization for IVideoPortEvents
+template <>
+void IarmHostImpl::Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn)
+{
+    Dispatch(s_videoPortHandlers, std::move(fn));
 }
 
 uint32_t IarmHostImpl::Register(IVideoPortEvents* listener)
 {
-    return 0;
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoPortHandlers.Register(listener);
 }
 
 uint32_t IarmHostImpl::UnRegister(IVideoPortEvents* listener)
 {
-    return 0;
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoPortHandlers.UnRegister(listener);
 }
 } // namespace device
