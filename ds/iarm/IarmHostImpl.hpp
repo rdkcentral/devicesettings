@@ -154,10 +154,6 @@ public:
     // @param listener: class object implementing the listener
     uint32_t UnRegister(IAudioPortEvents* listener);
 
-    // TODO: avoid public
-    template <typename F>
-    static void Dispatch(F&& fn);
-
 private:
     static std::mutex s_mutex;
 
@@ -168,8 +164,11 @@ private:
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
-    friend class IarmHostPriv;
+    template <typename F>
+    static void Dispatch(F&& fn);
+
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoPort;
+    friend class IARMGroupAudioPort;
 };
 } // namespace device
