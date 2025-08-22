@@ -202,27 +202,15 @@ private:
 
 // static data
 std::mutex IarmHostImpl::s_mutex;
-IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceHandlers;
-IarmHostImpl::CallbackList<IVideoPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortHandlers;
+IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
+IarmHostImpl::CallbackList<IVideoPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
 
-    s_videoDeviceHandlers.clear();
-    s_videoPortHandlers.clear();
-}
-
-uint32_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
-{
-    std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoDeviceHandlers.Register(listener);
-}
-
-uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
-{
-    std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoDeviceHandlers.UnRegister(listener);
+    s_videoDeviceListeners.Release();
+    s_videoPortListeners.Release();
 }
 
 template <typename T, typename F>
@@ -253,29 +241,42 @@ void IarmHostImpl::Dispatch(F&& fn)
     INT_ERROR("FATAL: Dispatch should be specialized for specific event types, but was called with a generic function");
 }
 
+uint32_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoDeviceListeners.Register(listener);
+}
+
+uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoDeviceListeners.UnRegister(listener);
+}
+
 // Specialization for IVideoDeviceEvents
 template <>
 void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
 {
-    Dispatch(s_videoDeviceHandlers, std::move(fn));
+    Dispatch(s_videoDeviceListeners, std::move(fn));
+}
+
+uint32_t IarmHostImpl::Register(IVideoPortEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoPortListeners.Register(listener);
+}
+
+uint32_t IarmHostImpl::UnRegister(IVideoPortEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_videoPortListeners.UnRegister(listener);
 }
 
 // Specialization for IVideoPortEvents
 template <>
 void IarmHostImpl::Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn)
 {
-    Dispatch(s_videoPortHandlers, std::move(fn));
+    Dispatch(s_videoPortListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IVideoPortEvents* listener)
-{
-    std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoPortHandlers.Register(listener);
-}
-
-uint32_t IarmHostImpl::UnRegister(IVideoPortEvents* listener)
-{
-    std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoPortHandlers.UnRegister(listener);
-}
 } // namespace device

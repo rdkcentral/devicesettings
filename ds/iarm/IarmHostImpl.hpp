@@ -36,6 +36,19 @@ class IarmHostImpl {
     template <typename T, typename IARMGroup>
     class CallbackList : public std::list<T> {
     public:
+        CallbackList() = default;
+
+        ~CallbackList()
+        {
+            Release();
+        }
+
+        // disable copy and move semantics
+        CallbackList(const CallbackList&) = delete;
+        CallbackList& operator=(const CallbackList&) = delete;
+        CallbackList(CallbackList&&) = delete;
+        CallbackList& operator=(CallbackList&&) = delete;
+
         uint32_t Register(T listener)
         {
             if (listener == nullptr) {
@@ -92,6 +105,18 @@ class IarmHostImpl {
             return 0;
         }
 
+        uint32_t Release()
+        {
+            if (m_registered) {
+                m_registered = false;
+                IARMGroup::UnRegister();
+            }
+
+            this->clear();
+            INT_INFO("%s released", typeid(T).name());
+            return 0; // Success
+        }
+
     private:
         bool m_registered = false; // really required ?
     };
@@ -126,8 +151,8 @@ public:
 private:
     static std::mutex s_mutex;
 
-    static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceHandlers;
-    static CallbackList<IVideoPortEvents*, IARMGroupVideoPort> s_videoPortHandlers;
+    static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
+    static CallbackList<IVideoPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
