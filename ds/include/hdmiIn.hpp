@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-/*
- * If not stated otherwise in this file or this component's LICENSE file the
- * following copyright and licenses apply:
- *
- * Copyright ARRIS Enterprises, Inc. 2015.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under
 */
 
 
@@ -52,7 +33,13 @@
 #include <vector>
 
 #include "dsTypes.h"
+#include "dsHdmiInTypes.h"
 
+#ifdef DS_ENABLE_IARM_PATH
+class IarmHdmiInput; //Forward Declaration
+#else
+//include the plugin file
+#endif
 
 /**
  * @file hdmiIn.hpp
@@ -61,6 +48,9 @@
  */
 
 static const int8_t HDMI_IN_PORT_NONE = -1;
+
+#define SUCCESS (0)
+#define FAIL    (1)
 
 namespace device 
 {
@@ -73,7 +63,72 @@ namespace device
 class HdmiInput  
 {
 
+#ifdef DS_ENABLE_IARM_PATH
+    using DefaultImpl = IarmHdmiInput;
+#else
+    //include the plugin file class as the DefaultImpl
+#endif
+
 public:
+
+    struct IEvent {
+            // @brief HDMI Event Hot Plug
+            // @text onHDMIInEventHotPlug
+            // @param port: port 0 or 1 et al
+            // @param isConnected: is it connected (true) or not (false)
+            virtual void OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected) { };
+ 
+            // @brief HDMI Event Signal status
+            // @text OnHDMIInEventSignalStatus
+            // @param port: port 0 or 1 et al
+            // @param signalStatus: Signal Status
+            virtual void OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus) { };
+ 
+            // @brief HDMI Event Signal status
+            // @text onHDMIInEventStatus
+            // @param activePort: port 0 or 1 et al
+            // @param isPresented: is it presented or not
+            virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
+ 
+            // @brief HDMI Video Mode update
+            // @text onHDMInVideoModeUpdate
+            // @param port: port 0 or 1 et al
+            // @param videoPortResolution: Video port resolution
+            virtual void OnHDMInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
+ 
+            // @brief HDMI ALLM (Auto Low Latency Mode) status
+            // @text onHDMInAllmStatus
+            // @param port: port 0 or 1 et al
+            // @param allmStatus: allm status
+            virtual void OnHDMInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
+ 
+            // @brief HDMI Event AVI content type
+            // @text OnHDMInAVIContentType
+            // @param port: port 0 or 1 et al
+            // @param aviContentType: AVI content type
+            virtual void OnHDMInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
+ 
+            // @brief HDMI Event AV Latency
+            // @text OnHDMInAVLatency
+            // @param audioDelay: audio delay (in millisecs)
+            // @param videoDelay: video delay (in millisecs)
+            virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
+ 
+            // @brief HDMI VRR status
+            // @text OnHDMInVRRStatus
+            // @param port: port 0 or 1 et al
+            // @param vrrType: VRR type
+            virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
+
+            // @brief Zoom settings changed
+            // @text OnZoomSettingsChanged
+            // @param zoomSetting: Currently applied zoom setting
+            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
+    };
+
+    uint32_t Register(IEvent *listener);
+    uint32_t UnRegister(IEvent *listener);
+    
     static HdmiInput & getInstance();
 
     uint8_t getNumberOfInputs        () const;
@@ -104,6 +159,7 @@ public:
 private:
     HdmiInput ();           /* default constructor */
     virtual ~HdmiInput ();  /* destructor */
+    std::unique_ptr<DefaultImpl> implHdmiIn;
 };
 
 

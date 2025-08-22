@@ -82,6 +82,7 @@ namespace device
  * @callergraph
  */
 HdmiInput::HdmiInput() 
+      : implHdmiIn(std::unique_ptr<IarmHdmiInput>(new IarmHdmiInput())) 
 {
     dsHdmiInInit();
 }
@@ -98,6 +99,7 @@ HdmiInput::HdmiInput()
 HdmiInput::~HdmiInput() 
 {
     dsHdmiInTerm();
+    implHdmiIn.reset();
 }
 
 /**
@@ -676,6 +678,38 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
     }
 
     printf ("%s:%d - HDMI Compatibility Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *capversion);
+}
+
+uint32_t HdmiInput::Register(IEvent *listener)
+{
+   uint32_t retStatus=FAIL;
+
+   INT_INFO("HdmiInput::Register Entry \n");
+   if(implHdmiIn) 
+   {
+        retStatus = implHdmiIn->Register(listener);
+   }
+   else
+   {
+       INT_INFO("HdmiInput::Register impl is null\n");
+   }
+   return retStatus;
+}
+
+uint32_t HdmiInput::UnRegister(IEvent *listener)
+{
+   uint32_t retStatus=FAIL;
+
+   INT_INFO("HdmiInput::UnRegister Entry \n");
+   if(implHdmiIn) 
+   {
+        retStatus = implHdmiIn->UnRegister(listener);
+   }
+   else
+   {
+       INT_INFO("HdmiInput::UnRegister impl is null\n");
+   }
+   return retStatus;
 }
 
 }
