@@ -28,8 +28,8 @@
 namespace device {
 
 // Forward declaration for IARM Implementation Groups
-struct IARMGroupVideoDevice;
-struct IARMGroupVideoPort;
+class IARMGroupVideoDevice;
+class IARMGroupVideoPort;
 
 class IarmHostImpl {
 
