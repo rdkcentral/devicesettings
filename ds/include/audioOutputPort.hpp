@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2025 RDK Management
+ * Copyright 2016 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,9 @@
 #include "list.hpp"
 #include "enumerable.hpp"
 #include "dsTypes.h"
+
 #include "dsError.h"
-#include "dsMgrNtf.h"
+
 #include <string>
 #include <stdint.h>
 
@@ -49,9 +50,6 @@ namespace device {
 
 class AudioOutputPortType;
 class AudioOutputPortConfig;
-
-
-
 
 
 /**
@@ -84,72 +82,7 @@ class AudioOutputPort  : public Enumerable {
 	bool  _muted; //!< Method variable to check whether audio is muted or not.
 
 
-
-
-
 public:
-
-	 struct IEvent{
-
-            // @brief Associated Audio mixing changed
-            // @text onAssociatedAudioMixingChanged
-            // @param mixing: true or false
-            virtual void OnAssociatedAudioMixingChanged(bool mixing) { };
-    
-            // @brief Audio Fader balance changed
-            // @text onAudioFaderControlChanged
-            // @param mixerBalance: applied mixer balance value
-            virtual void OnAudioFaderControlChanged(int mixerBalance) { };
-    
-            // @brief Primary language for Audio changed
-            // @text onAudioPrimaryLanguageChanged
-            // @param primaryLanguage: current primary language for audio
-            virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage) { };
-
-            // @brief Secondary language for Audio changed
-            // @text onAudioSecondaryLanguageChanged
-            // @param secondaryLanguage: current secondary language for audio
-            virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage) { };
-    
-            // @brief Audio output hot plug event
-            // @text onAudioOutHotPlug
-            // @param portType: Type of audio port see AudioPortType
-            // @param uiPortNumber: The port number assigned by UI
-            // @param isPortConnected: true (connected) or false (not connected)
-            virtual void OnAudioOutHotPlug(AudioPortType portType, int uiPortNumber, bool isPortConnected) { };
-
-
-            // @brief Dolby Atmos capabilities changed
-            // @text onDolbyAtmosCapabilitiesChanged
-            // @param atmosCapability: the dolby atmos capability
-            // @param status: true (available) or false (not available)
-            virtual void OnDolbyAtmosCapabilitiesChanged(DolbyAtmosCapability atmosCapability, bool status) { };
-
-            // @brief Audio port state changed
-            // @text onAudioPortStateChanged
-            // @param audioPortState: audio port state
-            virtual void OnAudioPortStateChanged(AudioPortState audioPortState) { };
-
-            // @brief Audio mode for the respective audio port - raised for every type of port
-            // @text onAudioModeEvent
-            // @param audioPortType: audio port type see AudioPortType
-            // @param audioMode: audio mode - see audioStereoMode
-            virtual void OnAudioModeEvent(AudioPortType  audioPortType, AudioStereoMode audioStereoMode) { };
-
-            // @brief Audio level changed
-            // @text OnAudioLevelChangedEvent
-            // @param audioiLevel: audio level value
-            virtual void OnAudioLevelChangedEvent(int audioLevel) { };
-
-            // @brief Audio Output format changed
-            // @text onAudioFormatUpdate
-            // @param audioFormat: Type of audio format see AudioFormat
-            virtual void OnAudioFormatUpdate(AudioFormat audioFormat) { };
-
-        };
-
-        uint32_t Register(IEvent *listener);
-        uint32_t UnRegister(IEvent *listener);
 
 	static AudioOutputPort & getInstance(int id);
 	static AudioOutputPort & getInstance(const std::string &name);
