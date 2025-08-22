@@ -31,8 +31,7 @@
 
 #include <stdint.h>
 #include <memory>
-#include "dsMgrNtf.h"
-
+#include "dsHdmiInTypes.h"
 
 #ifdef DS_ENABLE_IARM_PATH
 class IarmHdmiInput; //Forward Declaration
