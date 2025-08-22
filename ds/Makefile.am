@@ -29,7 +29,7 @@ libds_la_CPPFLAGS = -I ./include \
                     -I=$(includedir)/rdk/iarmbus \
                     -I=$(includedir)/rdk/halif/ds-hal
 
-libds_la_CXXFLAGS = -g -fPIC -D_REENTRANT -Wall -std=c++0x -DS_ENABLE_IARM_PATH
+libds_la_CXXFLAGS = -g -fPIC -D_REENTRANT -Wall -std=c++0x
 
 libds_la_LDFLAGS = -L../rpc/cli/.libs/ $(DS_LDFLAG)
 
