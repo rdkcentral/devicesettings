@@ -104,72 +104,6 @@ namespace device
     }
 
 /**
- * @fn void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
- * @brief This API is used to register listeners for Display connection change event.
- * The listener will be notified if Display device is connected/disconnected from the video output port.
- * The notification only carries the state change of the connection.
- * It does not carry any other system state change that may have been triggered by the connection.
- * The application is responsible to query the various parts of system to detect any such change.
- * For example, when a TV device is replaced, the application shall query the video output port again upon the connection
- * for the new resolution supported by the TV.
- * The listener object is created by application and should be released by the application once the listener is removed.
- *
- * @param[in] DisplayConnectionChangeListener Pointer to Display connection change listener
- *
- * @return None
- */
-    void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        
-        it = find (dispEvntListeners.begin(), dispEvntListeners.end(), l);
-        if (it == dispEvntListeners.end())
-        {
-            dispEvntListeners.push_back (l);
-            cout << "Added Display listener...!\n";
-        }
-        else
-        {
-            cout << "Already registered to the Display listener\n";
-        }
-        return ;
-    }
-
-/**
- * @fn void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
- * @brief This API is used to remove listeners from the Display connection change event list.
- *
- * @param[in] DisplayConnectionChangeListener The listener to remove
- *
- * @return None
- */
-    void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it ;
-        it = find (dispEvntListeners.begin(), dispEvntListeners.end(), l);
-        if (it == dispEvntListeners.end())
-        {
-            cout << "Not Registered to Display Listener yet...!\n";
-        }
-        else
-        {
-            dispEvntListeners.erase (it);
-            cout << "Removed from the Display listener...!\n";
-        }
-        return;
-    }
-
-    void Host::notifyDisplayConnectionChange (int portHandle, bool newConnectionStatus)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        for ( it = dispEvntListeners.begin() ; it != dispEvntListeners.end(); it++ )
-        {
-            (*it)->displayConnectionChanged(getVideoOutputPort(portHandle), newConnectionStatus);
-            getVideoOutputPort(portHandle).setDisplayConnected(newConnectionStatus);
-        }
-    }
-
-/**
  * @fn bool Host::setPowerMode(int mode)
  * @brief This API is used to change the power mode of the device.
  * This function will set the power mode to active or standby and turn off all the ouput ports.
@@ -850,7 +784,6 @@ uint32_t Host::Register(IEvent *listener)
 {
   return 0;
 }
-
 
 /**
  * @fn void  Host::UnRegister(IEvent *listener)

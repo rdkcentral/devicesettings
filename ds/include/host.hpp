@@ -75,10 +75,6 @@ public:
     SleepMode getPreferredSleepMode();
     int setPreferredSleepMode(const SleepMode);
     List<SleepMode> getAvailableSleepModes();
-    void addPowerModeListener(PowerModeChangeListener* l);
-    void removePowerModeChangeListener(PowerModeChangeListener* l);
-    void addDisplayConnectionListener(DisplayConnectionChangeListener* l);
-    void removeDisplayConnectionListener(DisplayConnectionChangeListener* l);
 
     static Host& getInstance(void);
 
@@ -114,12 +110,9 @@ public:
 private:
     Host();
     virtual ~Host();
-    // To Make the instance as thread-safe, using = delete, the result is, automatically generated methods (constructor, for example) from the compiler will not be created and, therefore, can not be called
+    // Avoid copies
     Host(const Host&) = delete;
     Host& operator=(const Host&) = delete;
-
-    std::list<DisplayConnectionChangeListener*> dispEvntListeners;
-    void notifyDisplayConnectionChange(int portHandle, bool newConnectionStatus);
 };
 
 }
