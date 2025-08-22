@@ -15,32 +15,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /**
-* @defgroup devicesettings
-* @{
-* @defgroup ds
-* @{
-**/
-
+ * @defgroup devicesettings
+ * @{
+ * @defgroup ds
+ * @{
+ **/
 
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
 
-#include <iostream>
-#include "powerModeChangeListener.hpp"
-#include "displayConnectionChangeListener.hpp"
 #include "audioOutputPort.hpp"
-#include "videoOutputPort.hpp"
-#include "videoDevice.hpp"
-#include "sleepMode.hpp"
-#include  "list.hpp"
+#include "displayConnectionChangeListener.hpp"
 #include "dsMgrNtf.h"
+#include "list.hpp"
+#include "powerModeChangeListener.hpp"
+#include "sleepMode.hpp"
+#include "videoDevice.hpp"
+#include "videoOutputPort.hpp"
+#include <iostream>
 
-#include  <list>
+#include <list>
 #include <string>
-
 
 /**
  * @file host.hpp
@@ -50,7 +48,6 @@ using namespace std;
 
 namespace device {
 
-
 /**
  * @class Host
  * @brief Class to implement the Host interface.
@@ -58,81 +55,76 @@ namespace device {
  */
 class Host {
 public:
-       
-    struct IEvent{
-            
-	    // @brief Sleep mode changed
-            // @text onSleepModeChanged
-            // @param sleepMode: see SleepMode
-            virtual void OnSleepModeChanged(SleepMode sleepMode) { };
-    
-    
+    struct IEvent {
+
+        // @brief Sleep mode changed
+        // @text onSleepModeChanged
+        // @param sleepMode: see SleepMode
+        virtual void OnSleepModeChanged(SleepMode sleepMode) { };
     };
-    
-    uint32_t Register(IEvent *listener);
-    uint32_t UnRegister(IEvent *listener);
+
+    uint32_t Register(IEvent* listener);
+    uint32_t UnRegister(IEvent* listener);
 
     static const int kPowerOn;
     static const int kPowerOff;
     static const int kPowerStandby;
 
-	bool setPowerMode(int mode);
-	int getPowerMode();
+    bool setPowerMode(int mode);
+    int getPowerMode();
     SleepMode getPreferredSleepMode();
     int setPreferredSleepMode(const SleepMode);
-    List <SleepMode> getAvailableSleepModes();
-	void addPowerModeListener(PowerModeChangeListener *l);
-    void removePowerModeChangeListener(PowerModeChangeListener *l);
-    void addDisplayConnectionListener(DisplayConnectionChangeListener *l);
-    void removeDisplayConnectionListener(DisplayConnectionChangeListener *l);
+    List<SleepMode> getAvailableSleepModes();
+    void addPowerModeListener(PowerModeChangeListener* l);
+    void removePowerModeChangeListener(PowerModeChangeListener* l);
+    void addDisplayConnectionListener(DisplayConnectionChangeListener* l);
+    void removeDisplayConnectionListener(DisplayConnectionChangeListener* l);
 
-	static Host& getInstance(void);
+    static Host& getInstance(void);
 
     List<VideoOutputPort> getVideoOutputPorts();
     List<AudioOutputPort> getAudioOutputPorts();
     List<VideoDevice> getVideoDevices();
-    VideoOutputPort &getVideoOutputPort(const std::string &name);
-    VideoOutputPort &getVideoOutputPort(int id);
-    AudioOutputPort &getAudioOutputPort(const std::string &name);
-    AudioOutputPort &getAudioOutputPort(int id);
-    void notifyPowerChange(const  int mode);
+    VideoOutputPort& getVideoOutputPort(const std::string& name);
+    VideoOutputPort& getVideoOutputPort(int id);
+    AudioOutputPort& getAudioOutputPort(const std::string& name);
+    AudioOutputPort& getAudioOutputPort(int id);
     float getCPUTemperature();
-    uint32_t  getVersion(void);
+    uint32_t getVersion(void);
     void setVersion(uint32_t versionNumber);
-    void getHostEDID(std::vector<uint8_t> &edid) const;
+    void getHostEDID(std::vector<uint8_t>& edid) const;
     std::string getSocIDFromSDK();
-    void getSinkDeviceAtmosCapability(dsATMOSCapability_t & atmosCapability);
+    void getSinkDeviceAtmosCapability(dsATMOSCapability_t& atmosCapability);
     void setAudioAtmosOutputMode(bool enable);
     void setAssociatedAudioMixing(const bool mixing);
-    void getAssociatedAudioMixing(bool *mixing);
+    void getAssociatedAudioMixing(bool* mixing);
     void setFaderControl(const int mixerbalance);
-    void getFaderControl(int *mixerBalance);
+    void getFaderControl(int* mixerBalance);
     void setPrimaryLanguage(const std::string pLang);
-    void getPrimaryLanguage(std::string &pLang);
+    void getPrimaryLanguage(std::string& pLang);
     void setSecondaryLanguage(const std::string sLang);
-    void getSecondaryLanguage(std::string &sLang);
+    void getSecondaryLanguage(std::string& sLang);
     bool isHDMIOutPortPresent();
     std::string getDefaultVideoPortName();
     std::string getDefaultAudioPortName();
-    void getCurrentAudioFormat(dsAudioFormat_t &audioFormat);
-    void getMS12ConfigDetails(std::string &configType);
-    void setAudioMixerLevels (dsAudioInput_t aInput, int volume);
-private:
-	Host();
-	virtual ~Host();
-    //To Make the instance as thread-safe, using = delete, the result is, automatically generated methods (constructor, for example) from the compiler will not be created and, therefore, can not be called
-    Host (const Host&)= delete;
-    Host& operator=(const Host&)= delete;
+    void getCurrentAudioFormat(dsAudioFormat_t& audioFormat);
+    void getMS12ConfigDetails(std::string& configType);
+    void setAudioMixerLevels(dsAudioInput_t aInput, int volume);
 
-    std::list < PowerModeChangeListener* > powerEvntListeners;
-    std::list < DisplayConnectionChangeListener* > dispEvntListeners;
+private:
+    Host();
+    virtual ~Host();
+    // To Make the instance as thread-safe, using = delete, the result is, automatically generated methods (constructor, for example) from the compiler will not be created and, therefore, can not be called
+    Host(const Host&) = delete;
+    Host& operator=(const Host&) = delete;
+
+    std::list<DisplayConnectionChangeListener*> dispEvntListeners;
     void notifyDisplayConnectionChange(int portHandle, bool newConnectionStatus);
 };
 
 }
 
 #endif /* _DS_HOST_HPP_ */
-
 
 /** @} */
 /** @} */

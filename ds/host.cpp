@@ -103,60 +103,6 @@ namespace device
         return instance;
     }
 
-
-/**
- * @fn void Host::addPowerModeListener(PowerModeChangeListener *l)
- * @brief This API is used to register listeners for Power Mode change event.
- * The listener object is created by application and should be released by the application once the listener is removed.
- * Listeners will be notified with the new mode via the listener's powerModeChanged() callback.
- *
- * @param[in] PowerModeChangeListener Pointer to Power Mode change listener
- *
- * @return None
- */
-    void Host::addPowerModeListener(PowerModeChangeListener *l)
-    {
-        std::list < PowerModeChangeListener* > ::iterator it;
-        
-        it = find (powerEvntListeners.begin(),powerEvntListeners.end(), l);
-        if (it == powerEvntListeners.end())
-        {
-            powerEvntListeners.push_back (l);
-            cout << "Added Power Mode listener...!\n";
-        }
-        else
-        {
-            cout << "Already register for Power Mode Change\n";
-        }
-        return ;
-    }
-
-
-/**
- * @fn void Host::removePowerModeChangeListener(PowerModeChangeListener *l)
- * @brief This API is used to remove a listener from Power Mode change listener list.
- *
- * @param[in]PowerModeChangeListener The listener to remove.
- *
- * @return None
- */
-    void Host::removePowerModeChangeListener(PowerModeChangeListener *l)
-    {
-        std::list < PowerModeChangeListener* > ::iterator it ;
-        it = find (powerEvntListeners.begin(),powerEvntListeners.end(), l);
-        if (it == powerEvntListeners.end())
-        {
-            cout << "Not Registered for Power Mode change yet...!\n";
-        }
-        else
-        {
-            powerEvntListeners.erase (it);
-            cout << "Removed from Power Mode listener group..!\n";
-        }
-        return;
-    }
-
-
 /**
  * @fn void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
  * @brief This API is used to register listeners for Display connection change event.
@@ -189,7 +135,6 @@ namespace device
         return ;
     }
 
-
 /**
  * @fn void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
  * @brief This API is used to remove listeners from the Display connection change event list.
@@ -212,23 +157,6 @@ namespace device
             cout << "Removed from the Display listener...!\n";
         }
         return;
-    }
-
-
-/**
- * @fn void Host::notifyPowerChange (const  int mode)
- * @brief This function is used to get the current power state.
- *
- * @param[in] mode Power mode of the decoder.
- * @return None.
- */
-    void Host::notifyPowerChange (const  int mode)
-    {
-    	std::list < PowerModeChangeListener* > ::iterator it;
-        for ( it = powerEvntListeners.begin() ; it != powerEvntListeners.end(); it++ )
-        {
-            (*it)->powerModeChanged (mode);
-        }
     }
 
     void Host::notifyDisplayConnectionChange (int portHandle, bool newConnectionStatus)
