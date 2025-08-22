@@ -30,10 +30,9 @@
 #define _DS_HDMIIN_HPP_
 
 #include <stdint.h>
-#include <vector>
+#include <memory>
+#include "dsMgrNtf.h"
 
-#include "dsTypes.h"
-#include "dsHdmiInTypes.h"
 
 #ifdef DS_ENABLE_IARM_PATH
 class IarmHdmiInput; //Forward Declaration
