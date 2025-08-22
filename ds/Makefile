@@ -23,7 +23,7 @@ LIBNAMEFULL := lib$(LIBNAME).so
 LIBNAMECLI  := lib$(LIBNAME)-cli.so
 INSTALL     := $(PWD)/install
 OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
-# In furure add a conditional to choose implementation class based on build configuration
+# In future add a conditional to choose implementation class based on build configuration
 OBJS        += iarm/IarmHostImpl.o
 #$(PWD)/config should be first include path
 # to override generic configs

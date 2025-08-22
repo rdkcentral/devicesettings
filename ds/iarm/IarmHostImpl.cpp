@@ -175,9 +175,9 @@ private:
         }
     }
 
-    static void iarmVideoFormatUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmVideoFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE received, eventId=%d", owner, eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE received, eventId=%d", eventId);
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
