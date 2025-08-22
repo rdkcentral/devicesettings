@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2025 RDK Management
+ * Copyright 2016 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,30 +330,6 @@ int VideoDevice::getCurrentDisframerate(char *framerate) const
 	    strncpy(framerate, getframerate, 20);
 
      	return 0;
-}
-
-
-/**
- * @fn void  VideoDevice::Register(IEvent *listener)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t VideoDevice::Register(IEvent *listener) 
-{
-  return 0;
-}
-
-
-/**
- * @fn void  VideoDevice::UnRegister(IEvent *listener)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t VideoDevice::UnRegister(IEvent *listener) 
-{
-  return 0;
 }
 
 }

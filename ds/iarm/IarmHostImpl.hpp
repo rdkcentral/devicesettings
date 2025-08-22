@@ -125,17 +125,12 @@ public:
 
 private:
     static std::mutex s_mutex;
-    static std::list<IVideoPortEvents*> s_videoPortListeners;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceHandlers;
     static CallbackList<IVideoPortEvents*, IARMGroupVideoPort> s_videoPortHandlers;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
-
-
-    template <typename T>
-    uint32_t Register(std::list<T*>& listeners, T* listener);
 
     friend class IarmHostPriv;
     friend class IARMGroupVideoDevice;

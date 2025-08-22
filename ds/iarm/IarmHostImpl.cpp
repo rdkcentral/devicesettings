@@ -192,17 +192,11 @@ private:
         }
     }
 
-    static void iarmHDCPProtocolChangeStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
-    {
-        // TODO: some confusion related to IARM event enum
-    }
-
     static constexpr EventHandlerMapping handlers[] = {
         { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE, &IARMGroupVideoPort::iarmResolutionPreChangeHandler },
         { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE, &IARMGroupVideoPort::iarmResolutionPostChangeHandler },
         { IARM_BUS_DSMGR_EVENT_HDCP_STATUS, &IARMGroupVideoPort::iarmHDCPStatusChangeHandler },
         { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoPort::iarmVideoFormatUpdateHandler },
-        // {TODO: ?? , &IarmHostPriv::iarmHDCPProtocolChangeStatusHandler},
     };
 };
 

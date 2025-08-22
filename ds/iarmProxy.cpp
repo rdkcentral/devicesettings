@@ -15,48 +15,55 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
+ 
+
 
 /**
- * @defgroup devicesettings
- * @{
- * @defgroup ds
- * @{
- **/
+* @defgroup devicesettings
+* @{
+* @defgroup ds
+* @{
+**/
 
+
+#include <iostream>
 #include "iarmProxy.hpp"
-#include "dslogger.h"
 #include "libIBus.h"
 #include "libIBusDaemon.h"
-#include <iostream>
+#include "dslogger.h"
+
 
 using namespace std;
 namespace device {
-IARMProxy::IARMProxy()
-{
+    IARMProxy::IARMProxy()
+    {
+    }
+
+    IARMProxy::~IARMProxy()
+    {
+    }
+
+    IARMProxy& IARMProxy::getInstance()
+    {
+        static IARMProxy instance;
+        return instance;
+    }
+
+    void IARMProxy::registerPowerEventHandler(IARM_EventHandler_t _eventHandler)
+    {
+          ;
+	}
+
+	 void IARMProxy::UnRegisterPowerEventHandler()
+    {
+        ;
+	}
+	
+	
+    
 }
 
-IARMProxy::~IARMProxy()
-{
-}
-
-IARMProxy& IARMProxy::getInstance()
-{
-    static IARMProxy instance;
-    return instance;
-}
-
-void IARMProxy::registerPowerEventHandler(IARM_EventHandler_t _eventHandler)
-{
-    ;
-}
-
-void IARMProxy::UnRegisterPowerEventHandler()
-{
-    ;
-}
-
-}
 
 /** @} */
 /** @} */

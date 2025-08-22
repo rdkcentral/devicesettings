@@ -96,9 +96,6 @@ public:
         // @brief On Video Format update
         // @param videoFormatHDR: Video format HDR standard
         virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
-
-        // @brief HDCP Protocol version change
-        virtual void OnHDCPProtocolChangeStatus() { };
     };
 
     // @brief Register a listener for video port events

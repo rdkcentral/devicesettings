@@ -69,6 +69,10 @@ Host::Host()
 
 Host::~Host()
 {
+    if (m_impl) {
+        m_impl.reset();
+    }
+
     if (true) {
         IARMProxy::getInstance().UnRegisterPowerEventHandler();
     }
@@ -775,6 +779,7 @@ Host::~Host()
 
 DefaultImpl& Host::impl()
 {
+    // lazy instantiation
     if (!m_impl) {
         m_impl = std::make_unique<DefaultImpl>();
     }
