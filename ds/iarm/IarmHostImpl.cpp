@@ -11,8 +11,8 @@
 #include "libIBus.h"
 
 using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-using IVideoPortEvents = device::Host::IVideoPortEvents;
-using IAudioPortEvents = device::Host::IAudioPortEvents;
+using IVideoPortEvents   = device::Host::IVideoPortEvents;
+using IAudioPortEvents   = device::Host::IAudioPortEvents;
 
 namespace device {
 
@@ -112,7 +112,7 @@ private:
     }
 
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE, &IARMGroupVideoDevice::iarmDisplayFrameratePreChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE,  &IARMGroupVideoDevice::iarmDisplayFrameratePreChangeHandler  },
         { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE, &IARMGroupVideoDevice::iarmDisplayFrameratePostChangeHandler },
     };
 };
@@ -137,7 +137,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            int width = eventData->data.resn.width;
+            int width  = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
             IarmHostImpl::Dispatch([width, height](IVideoPortEvents* listener) {
@@ -155,7 +155,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            int width = eventData->data.resn.width;
+            int width  = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
             IarmHostImpl::Dispatch([width, height](IVideoPortEvents* listener) {
@@ -197,10 +197,10 @@ private:
     }
 
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE, &IARMGroupVideoPort::iarmResolutionPreChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE, &IARMGroupVideoPort::iarmResolutionPostChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS, &IARMGroupVideoPort::iarmHDCPStatusChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoPort::iarmVideoFormatUpdateHandler },
+        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,       &IARMGroupVideoPort::iarmResolutionPreChangeHandler  },
+        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,      &IARMGroupVideoPort::iarmResolutionPostChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS,         &IARMGroupVideoPort::iarmHDCPStatusChangeHandler     },
+        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoPort::iarmVideoFormatUpdateHandler    },
     };
 };
 
@@ -291,8 +291,8 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsAudioPortType_t portType = eventData->data.audio_out_connect.portType;
-            int uiPortNumber = eventData->data.audio_out_connect.uiPortNo;
-            bool isPortConnected = eventData->data.audio_out_connect.isPortConnected;
+            int uiPortNumber           = eventData->data.audio_out_connect.uiPortNo;
+            bool isPortConnected       = eventData->data.audio_out_connect.isPortConnected;
 
             IarmHostImpl::Dispatch([portType, uiPortNumber, isPortConnected](IAudioPortEvents* listener) {
                 listener->OnAudioOutHotPlug(portType, uiPortNumber, isPortConnected);
@@ -308,7 +308,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsATMOSCapability_t atmosCapability = eventData->data.AtmosCapsChange.caps;
-            bool status = eventData->data.AtmosCapsChange.status;
+            bool status                         = eventData->data.AtmosCapsChange.status;
 
             IarmHostImpl::Dispatch([atmosCapability, status](IAudioPortEvents* listener) {
                 listener->OnDolbyAtmosCapabilitiesChanged(atmosCapability, status);
@@ -346,7 +346,7 @@ private:
 
         if (eventData) {
             // TODO: recheck as using static_cast here
-            dsAudioPortType_t audioPortType = static_cast<dsAudioPortType_t>(eventData->data.Audioport.type);
+            dsAudioPortType_t audioPortType     = static_cast<dsAudioPortType_t>(eventData->data.Audioport.type);
             dsAudioStereoMode_t audioStereoMode = static_cast<dsAudioStereoMode_t>(eventData->data.Audioport.mode);
 
             IarmHostImpl::Dispatch([audioPortType, audioStereoMode](IAudioPortEvents* listener) {
@@ -393,16 +393,16 @@ private:
 
 private:
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioPort::iarmAssociatedAudioMixingChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED, &IARMGroupAudioPort::iarmAudioFaderControlChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED, &IARMGroupAudioPort::iarmAudioPrimaryLanguageChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED, &IARMGroupAudioPort::iarmAudioSecondaryLanguageChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG, &IARMGroupAudioPort::iarmAudioOutHotPlugHandler },
-        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED, &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE, &IARMGroupAudioPort::iarmAudioPortStateChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE, &IARMGroupAudioPort::iarmAudioModeEventHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED, &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE, &IARMGroupAudioPort::iarmAudioFormatUpdateHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioPort::iarmAssociatedAudioMixingChangedHandler  },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED,           &IARMGroupAudioPort::iarmAudioFaderControlChangedHandler      },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED,        &IARMGroupAudioPort::iarmAudioPrimaryLanguageChangedHandler   },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,      &IARMGroupAudioPort::iarmAudioSecondaryLanguageChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,                     &IARMGroupAudioPort::iarmAudioOutHotPlugHandler               },
+        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioPort::iarmAudioPortStateChangedHandler         },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioPort::iarmAudioModeEventHandler                },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler        },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioPort::iarmAudioFormatUpdateHandler             },
     };
 };
 
@@ -432,7 +432,7 @@ template <typename T, typename F>
 
         fn(listener);
 
-        auto end = std::chrono::steady_clock::now();
+        auto end     = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         ss << "\t client =" << listener << ", elapsed = " << elapsed.count() << " ms\n";
     }

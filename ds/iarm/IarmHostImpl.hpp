@@ -46,10 +46,10 @@ class IarmHostImpl {
         }
 
         // disable copy and move semantics
-        CallbackList(const CallbackList&) = delete;
+        CallbackList(const CallbackList&)            = delete;
         CallbackList& operator=(const CallbackList&) = delete;
-        CallbackList(CallbackList&&) = delete;
-        CallbackList& operator=(CallbackList&&) = delete;
+        CallbackList(CallbackList&&)                 = delete;
+        CallbackList& operator=(CallbackList&&)      = delete;
 
         uint32_t Register(T listener)
         {
@@ -125,8 +125,8 @@ class IarmHostImpl {
 
 public:
     using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-    using IVideoPortEvents = device::Host::IVideoPortEvents;
-    using IAudioPortEvents = device::Host::IAudioPortEvents;
+    using IVideoPortEvents   = device::Host::IVideoPortEvents;
+    using IAudioPortEvents   = device::Host::IAudioPortEvents;
 
     IarmHostImpl();
     ~IarmHostImpl();

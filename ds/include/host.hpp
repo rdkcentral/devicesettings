@@ -205,7 +205,7 @@ private:
     Host();
     virtual ~Host();
     // Avoid copies
-    Host(const Host&) = delete;
+    Host(const Host&)            = delete;
     Host& operator=(const Host&) = delete;
 
     DefaultImpl& impl();
