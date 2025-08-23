@@ -34,6 +34,7 @@ class IARMGroupAudioPort;
 
 class IarmHostImpl {
 
+    // Manages a list of listeners and corresponding IARM registration (for event group).
     template <typename T, typename IARMGroup>
     class CallbackList : public std::list<T> {
     public:
@@ -119,7 +120,7 @@ class IarmHostImpl {
         }
 
     private:
-        bool m_registered = false; // really required ?
+        bool m_registered = false; // really required?
     };
 
 public:

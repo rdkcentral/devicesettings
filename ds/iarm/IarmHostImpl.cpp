@@ -83,7 +83,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            std::string framerate(eventData->data.DisplayFrameRateChange.framerate, sizeof(eventData->data.DisplayFrameRateChange.framerate));
+            std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmHostImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePreChange(framerate);
@@ -100,7 +100,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            std::string framerate(eventData->data.DisplayFrameRateChange.framerate, sizeof(eventData->data.DisplayFrameRateChange.framerate));
+            std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmHostImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePostChange(framerate);
@@ -257,7 +257,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage, sizeof(eventData->data.AudioLanguageInfo.audioLanguage));
+            std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
             IarmHostImpl::Dispatch([&primaryLanguage](IAudioPortEvents* listener) {
                 listener->OnAudioPrimaryLanguageChanged(primaryLanguage);
@@ -274,7 +274,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage, sizeof(eventData->data.AudioLanguageInfo.audioLanguage));
+            std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
             IarmHostImpl::Dispatch([&secondaryLanguage](IAudioPortEvents* listener) {
                 listener->OnAudioSecondaryLanguageChanged(secondaryLanguage);
@@ -433,7 +433,7 @@ void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
 
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        ss << "\t" << listener << ", elapsed: " << elapsed.count() << " ms\n";
+        ss << "\t client =" << listener << ", elapsed = " << elapsed.count() << " ms\n";
     }
 
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
