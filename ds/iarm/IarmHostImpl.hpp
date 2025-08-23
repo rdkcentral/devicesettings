@@ -165,9 +165,11 @@ private:
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
-    template <typename F>
-    static void Dispatch(F&& fn);
+    static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IAudioPortEvents* listener)>&& fn);
 
+    // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoPort;
     friend class IARMGroupAudioPort;

@@ -62,6 +62,7 @@ static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
 }
 
 // IARMGroupXYZ are c to c++ shim (all methods are static)
+// Required to perform group event register and unregister with IARM
 // Thread safety to be ensured by the caller
 class IARMGroupVideoDevice {
 public:
@@ -421,7 +422,7 @@ IarmHostImpl::~IarmHostImpl()
 }
 
 template <typename T, typename F>
-void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
+/* static */ void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
 {
     std::stringstream ss;
     std::lock_guard<std::mutex> lock(s_mutex);
@@ -439,15 +440,6 @@ void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
-template <typename F>
-void IarmHostImpl::Dispatch(F&& fn)
-{
-    // Always expect template specialization
-    // static_assert(sizeof(F) == 0, "Dispatch should be specialized for specific event types");
-    // TODO: make this compile time error
-    INT_ERROR("FATAL: Dispatch should be specialized for specific event types, but was called with a generic function");
-}
-
 uint32_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
@@ -460,9 +452,8 @@ uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
     return s_videoDeviceListeners.UnRegister(listener);
 }
 
-// Specialization for IVideoDeviceEvents
-template <>
-void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
+// Dispatcher for IARMGroupVideoDevice
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
 {
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
@@ -479,9 +470,8 @@ uint32_t IarmHostImpl::UnRegister(IVideoPortEvents* listener)
     return s_videoPortListeners.UnRegister(listener);
 }
 
-// Specialization for IVideoPortEvents
-template <>
-void IarmHostImpl::Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn)
+// Dispatcher for IARMGroupVideoPort
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn)
 {
     Dispatch(s_videoPortListeners, std::move(fn));
 }
@@ -498,9 +488,8 @@ uint32_t IarmHostImpl::UnRegister(IAudioPortEvents* listener)
     return s_audioPortListeners.UnRegister(listener);
 }
 
-// Specialization for IAudioPortEvents
-template <>
-void IarmHostImpl::Dispatch(std::function<void(IAudioPortEvents* listener)>&& fn)
+// Dispatcher for IARMGroupAudioPort
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioPortEvents* listener)>&& fn)
 {
     Dispatch(s_audioPortListeners, std::move(fn));
 }
