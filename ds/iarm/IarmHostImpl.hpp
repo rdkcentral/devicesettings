@@ -35,13 +35,19 @@ class IARMGroupAudioPort;
 class IarmHostImpl {
 
     // Manages a list of listeners and corresponding IARM Event Group operations.
+    // Private internal class, not to be used directly by clients.
     template <typename T, typename IARMGroup>
     class CallbackList : public std::list<T> {
     public:
-        CallbackList() = default;
+        CallbackList()
+            : m_registered(false)
+        {
+        }
 
         ~CallbackList()
         {
+            // As best practise caller is supposed to call Release() explicitly
+            // this is just for safety (see IarmHostImpl destructor)
             Release();
         }
 
@@ -125,7 +131,7 @@ class IarmHostImpl {
         }
 
     private:
-        bool m_registered = false; // really required?
+        bool m_registered = false; // To track if IARM events are registered
     };
 
 public:
