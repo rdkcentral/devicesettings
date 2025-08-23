@@ -34,7 +34,7 @@ class IARMGroupAudioPort;
 
 class IarmHostImpl {
 
-    // Manages a list of listeners and corresponding IARM registration (for event group).
+    // Manages a list of listeners and corresponding IARM Event Group operations.
     template <typename T, typename IARMGroup>
     class CallbackList : public std::list<T> {
     public:
@@ -51,6 +51,9 @@ class IarmHostImpl {
         CallbackList(CallbackList&&)                 = delete;
         CallbackList& operator=(CallbackList&&)      = delete;
 
+        // @brief Register a listener, also register IARM events if not already registered
+        // if the listener is already registered, listener will not be added again
+        // if IARM event registration fails, listener will not be added
         uint32_t Register(T listener)
         {
             if (listener == nullptr) {
@@ -81,6 +84,8 @@ class IarmHostImpl {
             return 0;
         }
 
+        // @brief UnRegister a listener, also unregister IARM events if no listeners are left
+        // if the listener is not registered, it will not be removed
         uint32_t UnRegister(T listener)
         {
             if (listener == nullptr) {
@@ -100,22 +105,22 @@ class IarmHostImpl {
             INT_INFO("%s %p unregistered", typeid(T).name(), listener);
 
             if (this->empty() && m_registered) {
-                m_registered = false;
-                IARMGroup::UnRegisterIarmEvents();
+                m_registered = !IARMGroup::UnRegisterIarmEvents();
             }
 
             return 0;
         }
 
+        // @brief Release all listeners and unregister IARM events
+        // This will clear the list and unregister IARM events if no listeners are left
         uint32_t Release()
         {
             if (m_registered) {
-                m_registered = false;
-                IARMGroup::UnRegisterIarmEvents();
+                m_registered = !IARMGroup::UnRegisterIarmEvents();
             }
 
             this->clear();
-            INT_INFO("%s released", typeid(T).name());
+            INT_INFO("CallbackList[T=%s] released, status: %d", typeid(T).name(), m_registered);
             return 0; // Success
         }
 

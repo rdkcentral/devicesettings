@@ -345,7 +345,6 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            // TODO: recheck as using static_cast here
             dsAudioPortType_t audioPortType     = static_cast<dsAudioPortType_t>(eventData->data.Audioport.type);
             dsAudioStereoMode_t audioStereoMode = static_cast<dsAudioStereoMode_t>(eventData->data.Audioport.mode);
 
