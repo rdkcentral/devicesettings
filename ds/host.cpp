@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,6 @@ namespace device
             getVideoOutputPort(portHandle).setDisplayConnected(newConnectionStatus);
         }
     }
-
 
 /**
  * @fn bool Host::setPowerMode(int mode)
@@ -912,6 +911,145 @@ namespace device
     }
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
+
+/**
+ * @fn void  Host::Register(IHDMIInEvent *listener)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IHDMIInEvent *listener) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IHDMIInEvent *listener)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IHDMIInEvent *listener) 
+{
+  return 0;
+}
+
+/**
+ * @fn void  Host::Register(ICompositeInEvent *Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(ICompositeInEvent *listener)
+{
+  return 0;
+}
+
+/**
+ * @fn void  Host::UnRegister(ICompositeInEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(ICompositeInEvent *listener)
+{
+  return 0;
+}
+
+/**
+ * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvent *Evtnotification)
+ * @brief This API is used to Register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IDisplayHDMIHotPlugEvent *listener)
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IDisplayHDMIHotPlugEvent *listener)
+{
+  return 0;
+}
+
+/**
+ * @fn void  Host::UnRegister(IDisplayEvent *Evtnotification)
+ * @brief This API is used to Register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IDisplayEvent *listener)
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IDisplayEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IDisplayEvent *listener)
+{
+  return 0;
+}
+
+/**
+ * @fn void  Host::Register(IAudioOutputPortEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IAudioOutputPortEvent *listener)
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IAudioOutputPortEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IAudioOutputPortEvent *listener)
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::Register(IVideoDeviceEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IVideoDeviceEvent *listener)
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IVideoDeviceEvent *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IVideoDeviceEvent *listener)
+{
+  return 0;
+}
+
 
 
 }
