@@ -37,6 +37,7 @@
 #include "sleepMode.hpp"
 #include  "list.hpp"
 #include "dsTypes.h"
+#include "dsDisplay.h"
 
 #include  <list>
 #include <string>
