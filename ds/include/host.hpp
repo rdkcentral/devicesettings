@@ -254,12 +254,12 @@ public:
 	    // @brief On Resolution Pre changed
             // @text OnResolutionPreChange
             // @param resolution: resolution
-            virtual void OnResolutionPreChange(const ResolutionChange& resolution) { };
+            virtual void OnResolutionPreChange(const int width, const int height) { };
  
             // @brief On Resolution Post change
             // @text onResolutionPostChange
             // @param resolution: resolution
-            virtual void OnResolutionPostChange(const ResolutionChange& resolution) { };
+            virtual void OnResolutionPostChange(const int width, const int height) { };
  
             // @brief On HDCP Status change
             // @text OnHDCPStatusChange
