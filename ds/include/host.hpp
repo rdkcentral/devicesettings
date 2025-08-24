@@ -36,6 +36,7 @@
 #include "videoDevice.hpp"
 #include "sleepMode.hpp"
 #include  "list.hpp"
+#include "dsMgr.h"
 #include "dsTypes.h"
 #include "dsDisplay.h"
 
