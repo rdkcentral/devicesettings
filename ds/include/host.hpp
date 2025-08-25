@@ -105,10 +105,6 @@ public:
             // @param vrrType: VRR type
             virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
 
-	    // @brief Zoom settings changed
-            // @text OnZoomSettingsChanged
-            // @param zoomSetting: Currently applied zoom setting
-            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
     };
 
     uint32_t Register(IHDMIInEvent *listener);
@@ -243,6 +239,11 @@ public:
             // @text OnDisplayFrameratePostChange
             // @param frameRate:  framerate post change
             virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+	    
+	    // @brief Zoom settings changed
+            // @text OnZoomSettingsChanged
+            // @param zoomSetting: Currently applied zoom setting
+            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
      };
         
      uint32_t Register(IVideoDeviceEvent *listener);
