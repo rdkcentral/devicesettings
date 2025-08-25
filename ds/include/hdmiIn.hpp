@@ -30,6 +30,10 @@
 #define _DS_HDMIIN_HPP_
 
 #include <stdint.h>
+#include <vector>
+
+#include "dsTypes.h"
+
 #include <memory>
 #include "dsHdmiInTypes.h"
 #include "dsAVDTypes.h"
@@ -159,7 +163,7 @@ public:
     void getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion);
 private:
     HdmiInput ();           /* default constructor */
-    virtual ~HdmiInput ();  /* destructor */
+    ~HdmiInput ();  /* destructor */
     std::unique_ptr<DefaultImpl> implHdmiIn;
 };
 
