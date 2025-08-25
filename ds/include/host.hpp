@@ -36,6 +36,9 @@
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
+#include "dsMgr.h"
+#include "dsTypes.h"
+#include "dsDisplay.h"
 
 /**
  * @file host.hpp
