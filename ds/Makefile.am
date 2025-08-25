@@ -66,7 +66,7 @@ libds_la_SOURCES = aspectRatio.cpp \
 
 # DS_ENABLE_IARM_PATH  to be defined from the config.ac file
 if DS_ENABLE_IARM_PATH
-libds_la_SOURCES += iarm/iarmCompositeIn.cpp 
+libds_la_SOURCES += iarm/IarmHostImpl.cpp 
 else
 # plugin files of future
 endif
