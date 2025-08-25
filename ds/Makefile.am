@@ -65,9 +65,9 @@ libds_la_SOURCES = aspectRatio.cpp \
                    videoDFC.cpp
 
 # DS_ENABLE_IARM_PATH  to be defined from the config.ac file
-if DS_ENABLE_IARM_PATH
+#if DS_ENABLE_IARM_PATH
 libds_la_SOURCES += iarm/IarmHostImpl.cpp 
-else
+#else
 # plugin files of future
-endif
+#endif
 
