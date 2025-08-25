@@ -23,6 +23,7 @@ LIBNAMEFULL := lib$(LIBNAME).so
 LIBNAMECLI := lib$(LIBNAME)-cli.so
 INSTALL     := $(PWD)/install
 OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+OBJS        += iarm/IarmHostImpl.o
 #$(PWD)/config should be first include path
 # to override generic configs
 ifneq ($(STANDALONE_BUILD_ENABLED),y)
