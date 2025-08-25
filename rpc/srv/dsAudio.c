@@ -2499,13 +2499,14 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 {
     _DEBUG_ENTER();
     IARM_Bus_DSMgr_EventData_t eventData;
-
+ INT_INFO("predebug entering _dsSetStereo");
     IARM_BUS_Lock(lock);
-
+ INT_INFO("predebug lock received");
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsError_t ret = dsERR_NONE;
     dsAudioSetStereoModeParam_t *param = (dsAudioSetStereoModeParam_t *)arg;
     if (NULL != param->handle) {
+		INT_INFO("param handle is null");
         ret = dsSetStereoMode(param->handle, param->mode);
         param->rpcResult = ret;
     }
@@ -2516,6 +2517,7 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
     if (ret == dsERR_NONE)
     {
+		INT_INFO(" predebug entering try catch...");
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         try
         {
@@ -2587,11 +2589,12 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 {
                     if (param->toPersist)
                     device::HostPersistence::getInstance().persistHostProperty("HDMI0.AudioMode","DOLBYDIGITAL");
-
+                    INT_INFO("set audio mode to dd");
                     _srv_HDMI_Audiomode = dsAUDIO_STEREO_DD;
                 }
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_DD;
                 eventData.data.Audioport.type = _APortType;
+				INT_INFO("broadcast");
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
             }
             else if(param->mode == dsAUDIO_STEREO_DDPLUS)
@@ -2600,13 +2603,15 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
                 if (_APortType == dsAUDIOPORT_TYPE_HDMI)
                 {
-                    if (param->toPersist)
+                    if (param->toPersist) {}
                     device::HostPersistence::getInstance().persistHostProperty("HDMI0.AudioMode","DOLBYDIGITALPLUS");
-
+                    INT_INFO("get persist value");
+                     }
                     _srv_HDMI_Audiomode = dsAUDIO_STEREO_DDPLUS;
                 }
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_DDPLUS;
                 eventData.data.Audioport.type = _APortType;
+			INT_INFO("broadcast event");
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
             }
             else if(param->mode == dsAUDIO_STEREO_PASSTHRU)
