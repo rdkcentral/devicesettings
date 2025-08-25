@@ -7038,7 +7038,7 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
-	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = -FLT_MAX, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
+	float prev_audioLevel_spdif = -FLT_MAX, prev_audioLevel_speaker = -FLT_MAX, prev_audioLevel_hdmi = -FLT_MAX, prev_audioLevel_headphone = -FLT_MAX;
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
 	    while(1){
               // wait for 3 sec, then update the latest audio level from cache variable
