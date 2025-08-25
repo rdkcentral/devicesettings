@@ -366,7 +366,7 @@ private:
             int audioLevel = eventData->data.AudioLevelInfo.level;
 
             IarmHostImpl::Dispatch([audioLevel](IAudioOutputPortEvents* listener) {
-                listener->OnAudioLevelChangedEvent(audioLevel);
+                //listener->OnAudioLevelChangedEvent(audioLevel);
             });
         } else {
             INT_ERROR("Invalid data received for audio level change");
