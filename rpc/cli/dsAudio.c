@@ -408,6 +408,7 @@ dsError_t dsSetStereoMode(intptr_t handle, dsAudioStereoMode_t mode,bool isPersi
 dsError_t dsSetStereoMode(intptr_t handle, dsAudioStereoMode_t mode,bool isPersist)
 {
     _DEBUG_ENTER();
+	INT_INFO("predebug dsSetStereoMode IN");
     _RETURN_IF_ERROR(dsAudioStereoMode_isValid(mode), dsERR_INVALID_PARAM);
 
     dsAudioSetStereoModeParam_t param;
@@ -416,7 +417,7 @@ dsError_t dsSetStereoMode(intptr_t handle, dsAudioStereoMode_t mode,bool isPersi
     param.mode = mode;
     param.rpcResult = dsERR_NONE;
     param.toPersist = isPersist;
-
+    INT_INFO("predebug before IARM call mode is %d", mode);
     IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                  (char *)IARM_BUS_DSMGR_API_dsSetStereoMode,
                  (void *)&param,
@@ -424,6 +425,7 @@ dsError_t dsSetStereoMode(intptr_t handle, dsAudioStereoMode_t mode,bool isPersi
 
     if (dsERR_NONE == param.rpcResult)
     {
+		INT_INFO("predebug IARM returns error none");
         return dsERR_NONE;
     }
 
