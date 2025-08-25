@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,6 +263,29 @@ FrontPanelTextDisplay &FrontPanelConfig::getTextDisplay(const string &name)
 
 }
 
+
+/**
+ * @fn void  FrontPanelTextDisplay::Register(IEvent *listener)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t FrontPanelTextDisplay::Register(IEvent *listener) 
+{
+  return 0;
+}
+
+
+/**
+ * @fn void  FrontPanelTextDisplay::UnRegister(IEvent *listener)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t FrontPanelTextDisplay::UnRegister(IEvent *listener) 
+{
+  return 0;
+}
 
 /**
  * @fn FrontPanelConfig::getColors()
