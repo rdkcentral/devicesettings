@@ -15,7 +15,7 @@ export NM=nm
 export RANLIB=ranlib
 export STRIP=strip
 
-sudo apt-get update && sudo apt-get install -y libsoup-3.0 libcjson-dev libdbus-1-dev git wget autoconf automake libtool libcurl4-openssl-dev
+apt-get update && apt-get install -y libsoup-3.0 libcjson-dev libdbus-1-dev
 
 mkdir -p /usr/local/include/wdmp-c
 cp $WORKDIR/stubs/wdmp-c.h /usr/local/include/wdmp-c/
@@ -48,7 +48,7 @@ autoreconf -i
 ./configure --enable-rfctool=yes --enable-tr181set=yes
 cd rfcapi
 make CXXFLAGS="-DUSE_IARMBUS" librfcapi_la_CPPFLAGS="-I/usr/include/cjson"
-sudo make install
+make install
 export RFC_PATH=$ROOT/rfc
 
 cd $ROOT
