@@ -277,7 +277,8 @@ IARM_Result_t _dsVideoPortInit(void *arg)
                    if (dsERR_NONE != eReturn) {
                         eReturn = dsGetVideoPort(dsVIDEOPORT_TYPE_INTERNAL,0,&handle);
                    }
-                   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",handle);
+                   /* coverity[print_args] */
+		   INT_INFO("calling dsRegisterHdcpStatusCallback with handle:%p \n",(void *)handle);
 		   dsRegisterHdcpStatusCallback(handle,_dsHdcpCallback);
 		#endif
 		
@@ -923,7 +924,7 @@ IARM_Result_t _dsSetResolution(void *arg)
 		//IsIgnoreEdid is true platform will take care of current resolution cache.
 		if (!IsIgnoreEdid) {
 			dsVideoPortResolution_t platresolution;
-			memset(platresolution.name,'\0',sizeof(platresolution.name));
+			memset(&platresolution,'\0',sizeof(platresolution));
 			dsGetResolution(param->handle,&platresolution);
 			INT_INFO("Resolution Requested ..%s Platform Resolution - %s\r\n",resolution.name,platresolution.name);
 			if ((strcmp(resolution.name,platresolution.name) == 0 ))
@@ -1771,7 +1772,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
 			}
 
 			INT_DEBUG("Set Resolution on Component/Composite Ports!!!!!!..\r\n");
-			_dsCompResolution = resolutionName;
+			_dsCompResolution = std::move(resolutionName);
 			if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsHDMIResolution)))
 			{
 				INT_INFO("HDMI Resolution is not Compatible with Analog ports..\r\n");
@@ -1799,7 +1800,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
                         }
 
                         INT_DEBUG("Set Resolution on Composite Ports!!!!!!..\r\n");
-                        _dsBBResolution = resolutionName;
+                        _dsBBResolution = std::move(resolutionName);
                         if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsHDMIResolution)))
                         {
                                 INT_INFO("HDMI Resolution is not Compatible with Analog ports..\r\n");
@@ -1823,7 +1824,7 @@ static void persistResolution(dsVideoPortSetResolutionParam_t *param)
                         }
 
                         INT_DEBUG("Set Resolution on RF Ports!!!!!!..\r\n");
-                        _dsRFResolution = resolutionName;
+                        _dsRFResolution = std::move(resolutionName);
                         if (false == IsCompatibleResolution(resolution.pixelResolution,getPixelResolution(_dsHDMIResolution)))
                         {
                                 INT_INFO("HDMI Resolution is not Compatible with Analog ports..\r\n");
@@ -2356,7 +2357,7 @@ void _dsSyncHdmiStatus(const std::string& key, int val) {
 	} else if (0 == strncmp (key.c_str(), DS_HDMI_TAG_HDCPVERSION, strlen(DS_HDMI_TAG_HDCPVERSION))){
 		value = getHdcpVersionName (val);
 	} else {
-		INT_INFO("dsSRV: %s: unknown key is passed %s\r\n", __FUNCTION__, key);
+		INT_INFO("dsSRV: %s: unknown key is passed %s\r\n", __FUNCTION__, key.c_str());
 	}
     // Read existing lines and remove the target line if it exists
     while (std::getline(statusFile, line)) {
