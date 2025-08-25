@@ -777,92 +777,92 @@ DefaultImpl& Host::impl()
 
 
 /**
- * @fn void  Host::Register(IHDMIInEvent *listener)
+ * @fn void  Host::Register(IHDMIInEvents *listener)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IHDMIInEvent *listener) 
+uint32_t Host::Register(IHDMIInEvents *listener) 
 {
   return 0;
 }
 
 
 /**
- * @fn void  Host::UnRegister(IHDMIInEvent *listener)
+ * @fn void  Host::UnRegister(IHDMIInEvents *listener)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IHDMIInEvent *listener) 
+uint32_t Host::UnRegister(IHDMIInEvents *listener) 
 {
   return 0;
 }
 
 /**
- * @fn void  Host::Register(ICompositeInEvent *Evtnotification)
+ * @fn void  Host::Register(ICompositeInEvents *Evtnotification)
  * @brief This API is used to register the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(ICompositeInEvent *listener)
+uint32_t Host::Register(ICompositeInEvents *listener)
 {
     return 0; //impl().Register(listener);
 }
 
 /**
- * @fn void  Host::UnRegister(ICompositeInEvent *Evtnotification)
+ * @fn void  Host::UnRegister(ICompositeInEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(ICompositeInEvent *listener)
+uint32_t Host::UnRegister(ICompositeInEvents *listener)
 {
     return 0; //impl().UnRegister(listener);
 }
 
 /**
- * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvent *Evtnotification)
+ * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvents *Evtnotification)
  * @brief This API is used to Register the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IDisplayHDMIHotPlugEvent *listener)
+uint32_t Host::Register(IDisplayHDMIHotPlugEvents *listener)
 {
   return 0;
 }
 
 
 /**
- * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvent *Evtnotification)
+ * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IDisplayHDMIHotPlugEvent *listener)
+uint32_t Host::UnRegister(IDisplayHDMIHotPlugEvents *listener)
 {
   return 0;
 }
 
 /**
- * @fn void  Host::UnRegister(IDisplayEvent *Evtnotification)
+ * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
  * @brief This API is used to Register the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IDisplayEvent *listener)
+uint32_t Host::Register(IDisplayEvents *listener)
 {
   return 0;
 }
 
 
 /**
- * @fn void  Host::UnRegister(IDisplayEvent *Evtnotification)
+ * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IDisplayEvent *listener)
+uint32_t Host::UnRegister(IDisplayEvents *listener)
 {
   return 0;
 }
