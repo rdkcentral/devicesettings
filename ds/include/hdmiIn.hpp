@@ -32,6 +32,9 @@
 #include <stdint.h>
 #include <memory>
 #include "dsHdmiInTypes.h"
+#include "dsAVDTypes.h"
+#include "dsVideoDeviceTypes.h"
+
 
 #ifdef DS_ENABLE_IARM_PATH
 class IarmHdmiInput; //Forward Declaration
