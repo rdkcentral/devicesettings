@@ -805,6 +805,9 @@ uint32_t Host::UnRegister(IAudioPortEvents* listener)
     return impl().UnRegister(listener);
 }
 
+
+
+
 /** @} */
 
 } // namespace device
