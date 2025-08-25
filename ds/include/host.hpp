@@ -27,22 +27,15 @@
 
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
-
-#include <iostream>
-#include "powerModeChangeListener.hpp"
-#include "displayConnectionChangeListener.hpp"
-#include "audioOutputPort.hpp"
-#include "videoOutputPort.hpp"
-#include "videoDevice.hpp"
-#include "sleepMode.hpp"
-#include  "list.hpp"
-#include "dsMgr.h"
-#include "dsTypes.h"
-#include "dsDisplay.h"
-
-#include  <list>
+#include <memory>
 #include <string>
 
+#include "audioOutputPort.hpp"
+#include "dsAVDTypes.h"
+#include "list.hpp"
+#include "sleepMode.hpp"
+#include "videoDevice.hpp"
+#include "videoOutputPort.hpp"
 
 /**
  * @file host.hpp
@@ -52,6 +45,10 @@ using namespace std;
 
 namespace device {
 
+// Forward declaration of the implementation class
+class IarmHostImpl;
+// In future add a conditional to choose implementation class based on build configuration
+using DefaultImpl = IarmHostImpl;
 
 /**
  * @class Host
@@ -61,7 +58,7 @@ namespace device {
 class Host {
 public:
        
-    struct IHDMIInEvent {
+    struct IHDMIInEvents {
             
 	    // @brief HDMI Event Hot Plug
             // @text onHDMIInEventHotPlug
@@ -107,11 +104,11 @@ public:
 
     };
 
-    uint32_t Register(IHDMIInEvent *listener);
-    uint32_t UnRegister(IHDMIInEvent *listener);
+    uint32_t Register(IHDMIInEvents *listener);
+    uint32_t UnRegister(IHDMIInEvents *listener);
 
 
-    struct ICompositeInEvent {
+    struct ICompositeInEvents {
             // @brief Composite In Hotplug event
             // @text onCompositeInHotPlug
             // @param port: Port of the hotplug
@@ -138,11 +135,11 @@ public:
             virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
     };
 
-    uint32_t Register(ICompositeInEvent *listener);
-    uint32_t UnRegister(ICompositeInEvent *listener);
+    uint32_t Register(ICompositeInEvents *listener);
+    uint32_t UnRegister(ICompositeInEvents *listener);
     
 
-    struct IDisplayHDMIHotPlugEvent{
+    struct IDisplayHDMIHotPlugEvents{
 
             // @brief Display HDMI Hot plug event
             // @text onDisplayHDMIHotPlug
@@ -150,12 +147,12 @@ public:
             virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
     };
     
-    uint32_t Register(IDisplayHDMIHotPlugEvent*listener);
-    uint32_t UnRegister(IDisplayHDMIHotPlugEvent *listener);
+    uint32_t Register(IDisplayHDMIHotPlugEvents *listener);
+    uint32_t UnRegister(IDisplayHDMIHotPlugEvents *listener);
 
 
 
-    struct IDisplayEvent{
+    struct IDisplayEvents{
 
             // @brief Display RX Sense event
             // @text onDisplayRxSense
@@ -167,11 +164,11 @@ public:
             virtual void OnDisplayHDCPStatus() { };
     };
     
-    uint32_t Register(IDisplayEvent *listener);
-    uint32_t UnRegister(IDisplayEvent *listener);
+    uint32_t Register(IDisplayEvents *listener);
+    uint32_t UnRegister(IDisplayEvents *listener);
 
 
-    struct IAudioOutputPortEvent{
+    struct IAudioOutputPortEvents{
 
             // @brief Associated Audio mixing changed
             // @text onAssociatedAudioMixingChanged
@@ -225,11 +222,11 @@ public:
 
     };
 
-    uint32_t Register(IAudioOutputPortEvent *listener);
-    uint32_t UnRegister(IAudioOutputPortEvent *listener);
+    uint32_t Register(IAudioOutputPortEvents *listener);
+    uint32_t UnRegister(IAudioOutputPortEvents *listener);
 
 
-    struct IVideoDeviceEvent {
+    struct IVideoDeviceEvents {
             // @brief Display Framerate Pre-change
             // @text OnDisplayFrameratePreChange
             // @param frameRate: PreChange framerate
@@ -246,11 +243,11 @@ public:
             virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
      };
         
-     uint32_t Register(IVideoDeviceEvent *listener);
-     uint32_t UnRegister(IVideoDeviceEvent *listener);
+     uint32_t Register(IVideoDeviceEvents *listener);
+     uint32_t UnRegister(IVideoDeviceEvents *listener);
 	
 
-     struct IVideoOutputPortEvent {
+     struct IVideoOutputPortEvents {
             
 	    // @brief On Resolution Pre changed
             // @text OnResolutionPreChange
@@ -273,8 +270,8 @@ public:
             virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
     };
 
-    uint32_t Register(IVideoOutputPortEvent *listener);
-    uint32_t UnRegister(IVideoOutputPortEvent *listener);
+    uint32_t Register(IVideoOutputPortEvents *listener);
+    uint32_t UnRegister(IVideoOutputPortEvents *listener);
 
 
     static const int kPowerOn;
@@ -286,10 +283,6 @@ public:
     SleepMode getPreferredSleepMode();
     int setPreferredSleepMode(const SleepMode);
     List <SleepMode> getAvailableSleepModes();
-	void addPowerModeListener(PowerModeChangeListener *l);
-    void removePowerModeChangeListener(PowerModeChangeListener *l);
-    void addDisplayConnectionListener(DisplayConnectionChangeListener *l);
-    void removeDisplayConnectionListener(DisplayConnectionChangeListener *l);
 
 	static Host& getInstance(void);
 
@@ -300,7 +293,6 @@ public:
     VideoOutputPort &getVideoOutputPort(int id);
     AudioOutputPort &getAudioOutputPort(const std::string &name);
     AudioOutputPort &getAudioOutputPort(int id);
-    void notifyPowerChange(const  int mode);
     float getCPUTemperature();
     uint32_t  getVersion(void);
     void setVersion(uint32_t versionNumber);
@@ -323,15 +315,14 @@ public:
     void getMS12ConfigDetails(std::string &configType);
     void setAudioMixerLevels (dsAudioInput_t aInput, int volume);
 private:
+    std::unique_ptr<DefaultImpl> m_impl;
 	Host();
 	virtual ~Host();
     //To Make the instance as thread-safe, using = delete, the result is, automatically generated methods (constructor, for example) from the compiler will not be created and, therefore, can not be called
     Host (const Host&)= delete;
     Host& operator=(const Host&)= delete;
 
-    std::list < PowerModeChangeListener* > powerEvntListeners;
-    std::list < DisplayConnectionChangeListener* > dispEvntListeners;
-    void notifyDisplayConnectionChange(int portHandle, bool newConnectionStatus);
+    DefaultImpl& impl();
 };
 
 }

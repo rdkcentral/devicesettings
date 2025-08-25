@@ -28,24 +28,20 @@
 
 
 #include <iostream>
-#include <algorithm>
-#include <string.h>
-#include "iarmProxy.hpp"
+#include <string>
+
 #include "audioOutputPortConfig.hpp"
 #include "videoOutputPortConfig.hpp"
 #include "list.hpp"
 #include "host.hpp"
 #include "videoDeviceConfig.hpp"
-#include "dsVideoPort.h"
-#include "dsVideoDevice.h"
 #include "dsAudio.h"
-#include "dsDisplay.h"
-#include "dslogger.h"
 #include "dsHost.h"
-#include "dsTypes.h"
 #include "unsupportedOperationException.hpp"
-#include "hostEDID.hpp"
+/*#include "hostEDID.hpp"*/
 #include "dsInternal.h"
+
+#include "iarm/IarmHostImpl.hpp"
 
 /**
  * @file host.cpp
@@ -60,20 +56,16 @@ namespace device
 	const int Host::kPowerOn = dsPOWER_ON;
     const int Host::kPowerOff = dsPOWER_OFF;
     const int Host::kPowerStandby = dsPOWER_STANDBY;
- 
-	
-	Host::Host() 
-	{
-		// TODO Auto-generated destructor stub
-	}
 
-    Host::~Host() {
-    	if (true)
-		{
-			IARMProxy::getInstance().UnRegisterPowerEventHandler();
-		}
-    }
+Host::Host()
+    : m_impl(nullptr)
+{
+}
 
+Host::~Host()
+{
+    m_impl = nullptr;
+}
 
 /**
  * @addtogroup dssettingshostapi
@@ -101,144 +93,6 @@ namespace device
     		cout << "Host Exception Thrown ...!\n";
         }
         return instance;
-    }
-
-
-/**
- * @fn void Host::addPowerModeListener(PowerModeChangeListener *l)
- * @brief This API is used to register listeners for Power Mode change event.
- * The listener object is created by application and should be released by the application once the listener is removed.
- * Listeners will be notified with the new mode via the listener's powerModeChanged() callback.
- *
- * @param[in] PowerModeChangeListener Pointer to Power Mode change listener
- *
- * @return None
- */
-    void Host::addPowerModeListener(PowerModeChangeListener *l)
-    {
-        std::list < PowerModeChangeListener* > ::iterator it;
-        
-        it = find (powerEvntListeners.begin(),powerEvntListeners.end(), l);
-        if (it == powerEvntListeners.end())
-        {
-            powerEvntListeners.push_back (l);
-            cout << "Added Power Mode listener...!\n";
-        }
-        else
-        {
-            cout << "Already register for Power Mode Change\n";
-        }
-        return ;
-    }
-
-
-/**
- * @fn void Host::removePowerModeChangeListener(PowerModeChangeListener *l)
- * @brief This API is used to remove a listener from Power Mode change listener list.
- *
- * @param[in]PowerModeChangeListener The listener to remove.
- *
- * @return None
- */
-    void Host::removePowerModeChangeListener(PowerModeChangeListener *l)
-    {
-        std::list < PowerModeChangeListener* > ::iterator it ;
-        it = find (powerEvntListeners.begin(),powerEvntListeners.end(), l);
-        if (it == powerEvntListeners.end())
-        {
-            cout << "Not Registered for Power Mode change yet...!\n";
-        }
-        else
-        {
-            powerEvntListeners.erase (it);
-            cout << "Removed from Power Mode listener group..!\n";
-        }
-        return;
-    }
-
-
-/**
- * @fn void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
- * @brief This API is used to register listeners for Display connection change event.
- * The listener will be notified if Display device is connected/disconnected from the video output port.
- * The notification only carries the state change of the connection.
- * It does not carry any other system state change that may have been triggered by the connection.
- * The application is responsible to query the various parts of system to detect any such change.
- * For example, when a TV device is replaced, the application shall query the video output port again upon the connection
- * for the new resolution supported by the TV.
- * The listener object is created by application and should be released by the application once the listener is removed.
- *
- * @param[in] DisplayConnectionChangeListener Pointer to Display connection change listener
- *
- * @return None
- */
-    void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        
-        it = find (dispEvntListeners.begin(), dispEvntListeners.end(), l);
-        if (it == dispEvntListeners.end())
-        {
-            dispEvntListeners.push_back (l);
-            cout << "Added Display listener...!\n";
-        }
-        else
-        {
-            cout << "Already registered to the Display listener\n";
-        }
-        return ;
-    }
-
-
-/**
- * @fn void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
- * @brief This API is used to remove listeners from the Display connection change event list.
- *
- * @param[in] DisplayConnectionChangeListener The listener to remove
- *
- * @return None
- */
-    void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it ;
-        it = find (dispEvntListeners.begin(), dispEvntListeners.end(), l);
-        if (it == dispEvntListeners.end())
-        {
-            cout << "Not Registered to Display Listener yet...!\n";
-        }
-        else
-        {
-            dispEvntListeners.erase (it);
-            cout << "Removed from the Display listener...!\n";
-        }
-        return;
-    }
-
-
-/**
- * @fn void Host::notifyPowerChange (const  int mode)
- * @brief This function is used to get the current power state.
- *
- * @param[in] mode Power mode of the decoder.
- * @return None.
- */
-    void Host::notifyPowerChange (const  int mode)
-    {
-    	std::list < PowerModeChangeListener* > ::iterator it;
-        for ( it = powerEvntListeners.begin() ; it != powerEvntListeners.end(); it++ )
-        {
-            (*it)->powerModeChanged (mode);
-        }
-    }
-
-    void Host::notifyDisplayConnectionChange (int portHandle, bool newConnectionStatus)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        for ( it = dispEvntListeners.begin() ; it != dispEvntListeners.end(); it++ )
-        {
-            (*it)->displayConnectionChanged(getVideoOutputPort(portHandle), newConnectionStatus);
-            getVideoOutputPort(portHandle).setDisplayConnected(newConnectionStatus);
-        }
     }
 
 /**
@@ -911,6 +765,16 @@ namespace device
     }
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
+   
+DefaultImpl& Host::impl()
+{
+    // lazy instantiation
+    if (!m_impl) {
+        m_impl = std::make_unique<DefaultImpl>();
+    }
+    return *m_impl;
+}
+
 
 /**
  * @fn void  Host::Register(IHDMIInEvent *listener)
@@ -943,7 +807,7 @@ uint32_t Host::UnRegister(IHDMIInEvent *listener)
  */
 uint32_t Host::Register(ICompositeInEvent *listener)
 {
-  return 0;
+    return 0; //impl().Register(listener);
 }
 
 /**
@@ -954,7 +818,7 @@ uint32_t Host::Register(ICompositeInEvent *listener)
  */
 uint32_t Host::UnRegister(ICompositeInEvent *listener)
 {
-  return 0;
+    return 0; //impl().UnRegister(listener);
 }
 
 /**
@@ -1004,50 +868,73 @@ uint32_t Host::UnRegister(IDisplayEvent *listener)
 }
 
 /**
- * @fn void  Host::Register(IAudioOutputPortEvent *Evtnotification)
+ * @fn void  Host::Register(IAudioOutputPortEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IAudioOutputPortEvent *listener)
+uint32_t Host::Register(IAudioOutputPortEvents *listener)
 {
-  return 0;
+	return impl().Register(listener);
 }
 
 
 /**
- * @fn void  Host::UnRegister(IAudioOutputPortEvent *Evtnotification)
+ * @fn void  Host::UnRegister(IAudioOutputPortEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IAudioOutputPortEvent *listener)
+uint32_t Host::UnRegister(IAudioOutputPortEvents *listener)
 {
-  return 0;
+  return impl().UnRegister(listener);
 }
 
 
 /**
- * @fn void  Host::Register(IVideoDeviceEvent *Evtnotification)
+ * @fn void  Host::Register(IVideoOutputPortEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IVideoDeviceEvent *listener)
+uint32_t Host::Register(IVideoOutputPortEvents *listener)
 {
-  return 0;
+	return impl().Register(listener);
 }
 
 
 /**
- * @fn void  Host::UnRegister(IVideoDeviceEvent *Evtnotification)
+ * @fn void  Host::UnRegister(IVideoOutputPortEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IVideoDeviceEvent *listener)
+uint32_t Host::UnRegister(IVideoOutputPortEvents *listener)
 {
-  return 0;
+  return impl().UnRegister(listener);
+}
+
+/**
+ * @fn void  Host::Register(IVideoDeviceEvents *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::Register(IVideoDeviceEvents *listener)
+{
+  return impl().Register(listener);
+}
+
+
+/**
+ * @fn void  Host::UnRegister(IVideoDeviceEvents *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t Host::UnRegister(IVideoDeviceEvents *listener)
+{
+  return impl().UnRegister(listener);
 }
 
 
