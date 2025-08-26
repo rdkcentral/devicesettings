@@ -105,6 +105,12 @@ public:
             // @param vrrType: VRR type
             virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
 
+            // @brief HDMI Event AV Latency
+            // @text OnHDMInAVLatency
+            // @param audioDelay: audio delay (in millisecs)
+            // @param videoDelay: video delay (in millisecs)
+            virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
+
     };
 
     uint32_t Register(IHDMIInEvents *listener);
@@ -138,8 +144,8 @@ public:
             virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
     };
 
-    uint32_t Register(ICompositeInEvents *listener);
-    uint32_t UnRegister(ICompositeInEvents *listener);
+    dsError_t  Register(ICompositeInEvents *listener);
+    dsError_t  UnRegister(ICompositeInEvents *listener);
     
 
     struct IDisplayHDMIHotPlugEvents{
@@ -223,6 +229,10 @@ public:
             // @param audioFormat: Type of audio format see AudioFormat
             virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
 
+            // @brief Audio level changed
+            // @text OnAudioLevelChangedEvent
+            // @param audioiLevel: audio level value
+            virtual void OnAudioLevelChangedEvent(int audioLevel) { };
     };
 
     uint32_t Register(IAudioOutputPortEvents *listener);
@@ -239,8 +249,8 @@ public:
             // @text OnDisplayFrameratePostChange
             // @param frameRate:  framerate post change
             virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
-	    
-	    // @brief Zoom settings changed
+
+            // @brief Zoom settings changed
             // @text OnZoomSettingsChanged
             // @param zoomSetting: Currently applied zoom setting
             virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };

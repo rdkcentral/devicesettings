@@ -170,11 +170,11 @@ public:
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    uint32_t Register(ICompositeInEvents* listener);
+    dsError_t  Register(ICompositeInEvents* listener);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(ICompositeInEvents* listener);
+    dsError_t  UnRegister(ICompositeInEvents* listener);
 
 private:
     static std::mutex s_mutex;

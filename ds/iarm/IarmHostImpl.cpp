@@ -595,13 +595,13 @@ uint32_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
     Dispatch(s_audioPortListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(ICompositeInEvents* listener)
+dsError_t  IarmHostImpl::Register(ICompositeInEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_compositeListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
+dsError_t  IarmHostImpl::UnRegister(ICompositeInEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_compositeListeners.UnRegister(listener);

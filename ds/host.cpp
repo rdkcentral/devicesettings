@@ -803,22 +803,22 @@ uint32_t Host::UnRegister(IHDMIInEvents *listener)
  * @fn void  Host::Register(ICompositeInEvents *Evtnotification)
  * @brief This API is used to register the Events
  *
- * @return unint32_t
+ * @return dsError_t 
  */
-uint32_t Host::Register(ICompositeInEvents *listener)
+dsError_t  Host::Register(ICompositeInEvents *listener)
 {
-    return 0; //impl().Register(listener);
+    return impl().Register(listener);
 }
 
 /**
  * @fn void  Host::UnRegister(ICompositeInEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
- * @return unint32_t
+ * @return dsError_t 
  */
-uint32_t Host::UnRegister(ICompositeInEvents *listener)
+dsError_t  Host::UnRegister(ICompositeInEvents *listener)
 {
-    return 0; //impl().UnRegister(listener);
+    return impl().UnRegister(listener);
 }
 
 /**
@@ -869,7 +869,7 @@ uint32_t Host::UnRegister(IDisplayEvents *listener)
 
 /**
  * @fn void  Host::Register(IAudioOutputPortEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
+ * @brief This API is used to Register the Events
  *
  * @return unint32_t
  */
@@ -880,7 +880,7 @@ uint32_t Host::Register(IAudioOutputPortEvents *listener)
 
 
 /**
- * @fn void  Host::UnRegister(IAudioOutputPortEvents *Evtnotification)
+ * @fn void  Host::UnRegister(IAudioOutputPortEvent *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
@@ -893,7 +893,7 @@ uint32_t Host::UnRegister(IAudioOutputPortEvents *listener)
 
 /**
  * @fn void  Host::Register(IVideoOutputPortEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
+ * @brief This API is used to Register the Events
  *
  * @return unint32_t
  */
@@ -916,7 +916,7 @@ uint32_t Host::UnRegister(IVideoOutputPortEvents *listener)
 
 /**
  * @fn void  Host::Register(IVideoDeviceEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
+ * @brief This API is used to Register the Events
  *
  * @return unint32_t
  */
