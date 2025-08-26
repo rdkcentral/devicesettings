@@ -104,8 +104,8 @@ public:
             // @text OnDisplayHDCPStatus
             virtual void OnDisplayHDCPStatus() { };
     };
-    uint32_t Register(IDisplayEvents *listener);
-    uint32_t UnRegister(IDisplayEvents *listener);
+    dsError_t Register(IDisplayEvents *listener);
+    dsError_t UnRegister(IDisplayEvents *listener);
 
 
     struct IVideoDeviceEvents {
