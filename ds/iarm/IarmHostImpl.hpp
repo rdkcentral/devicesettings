@@ -19,6 +19,7 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <list>
 #include <mutex>
 
@@ -30,8 +31,8 @@ namespace device {
 
 // Forward declaration for IARM Implementation Groups
 class IARMGroupVideoDevice;
-class IARMGroupVideoPort;
-class IARMGroupAudioPort;
+class IARMGroupVideoOutputPort;
+class IARMGroupAudioOutputPort;
 
 class IarmHostImpl {
 
@@ -63,7 +64,7 @@ class IarmHostImpl {
         // if IARM event registration fails, listener will not be added
         dsError_t Register(T listener)
         {
-            if (listener == nullptr) {
+            if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
                 return dsERR_INVALID_PARAM; // Error: Listener is null
             }
@@ -95,7 +96,7 @@ class IarmHostImpl {
         // if the listener is not registered, it will not be removed
         dsError_t UnRegister(T listener)
         {
-            if (listener == nullptr) {
+            if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
                 return dsERR_INVALID_PARAM; // Error: Listener is null
             }
@@ -140,7 +141,7 @@ public:
     using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
     using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
 
-    IarmHostImpl();
+    IarmHostImpl() = default;
     ~IarmHostImpl();
 
     // @brief Register a listener for video device events
@@ -171,8 +172,8 @@ private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
-    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
-    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
+    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
+    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
@@ -183,7 +184,7 @@ private:
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
-    friend class IARMGroupVideoPort;
-    friend class IARMGroupAudioPort;
+    friend class IARMGroupVideoOutputPort;
+    friend class IARMGroupAudioOutputPort;
 };
 } // namespace device
