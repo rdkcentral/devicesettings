@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@
 #include "dsTypes.h"
 #include "dsCompositeIn.h"
 #include "dsUtl.h"
-
+//#include "iarmCompositeIn.hpp"
 
 namespace device
 {
@@ -78,6 +78,7 @@ namespace device
  * @callergraph
  */
 CompositeInput::CompositeInput()
+        : implComposite(std::unique_ptr<IarmCompositeInput>(new IarmCompositeInput()))
 {
     dsCompositeInInit();
 }
@@ -94,6 +95,7 @@ CompositeInput::CompositeInput()
 CompositeInput::~CompositeInput()
 {
     dsCompositeInTerm();
+    implComposite.reset();
 }
 
 /**
@@ -269,6 +271,56 @@ void CompositeInput::scaleVideo (int32_t x, int32_t y, int32_t width, int32_t he
 		throw Exception(eError);
 	}
 }
+
+
+/**
+ * @fn void  CompositeInput::Register(IEvent *listener)
+ * @brief This API is used to register the Events
+ *
+ * @return unint32_t
+ */
+uint32_t CompositeInput::Register(IEvent *listener)
+{
+   uint32_t retStatus=FAIL;
+
+   INT_INFO("CompositeInput::Register Entry \n");
+   if(implComposite) 
+   {
+	retStatus = implComposite->Register(listener);
+   }
+   else
+   {
+       INT_INFO("CompositeInput::Register impl is null\n");
+   }
+   return retStatus;
+}
+
+
+/**
+ * @fn void  CompositeInput::UnRegister(IEvent *listener)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return unint32_t
+ */
+uint32_t CompositeInput::UnRegister(IEvent *listener)
+{
+   uint32_t retStatus=FAIL;
+
+   INT_INFO("CompositeInput::UnRegister Entry \n");
+   if(implComposite) 
+   {
+	retStatus = implComposite->UnRegister(listener);
+   }
+   else
+   {
+       INT_INFO("CompositeInput::UnRegister impl is null\n");
+   }
+   return retStatus;
+}
+
+
+
+
 
 }
 

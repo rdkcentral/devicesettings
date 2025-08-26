@@ -1,8 +1,9 @@
+
 /*
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +50,14 @@
 #define _DS_COMPOSITEIN_HPP_
 
 #include <stdint.h>
+#include <memory>
+#include "dsMgrNtf.h"
+#ifdef DS_ENABLE_IARM_PATH
+class IarmCompositeInput; //Forward Declaration
+#else
+//include the plugin class
+#endif    
+
 
 /**
  * @file compositeIn.hpp
@@ -57,6 +66,9 @@
  */
 
 static const int8_t COMPOSITE_IN_PORT_NONE = -1;
+
+#define SUCCESS (0)
+#define FAIL    (1)
 
 namespace device
 {
@@ -69,7 +81,44 @@ namespace device
 class CompositeInput
 {
 
+#ifdef DS_ENABLE_IARM_PATH
+    using DefaultImpl = IarmCompositeInput;
+#else
+    //include the plugin file class as the DefaultImpl
+#endif
+
+
 public:
+    struct IEvent {
+            // @brief Composite In Hotplug event
+            // @text onCompositeInHotPlug
+            // @param port: Port of the hotplug
+            // @param isConnected: Is it connected (true) or not(false)
+            virtual void OnCompositeInHotPlug(CompositeInPort port, bool isConnected) { };
+ 
+            // @brief Composite In Signal status
+            // @text onCompositeInSignalStatus
+            // @param port: Port of the hotplug
+            // @param signalStatus: Signal status
+            virtual void OnCompositeInSignalStatus(CompositeInPort port, CompositeInSignalStatus signalStatus) { };
+ 
+            // @brief Composite In status
+            // @text onCompositeInStatus
+            // @param activePort: Active port
+            // @param isPresented: is it presented to user
+            virtual void OnCompositeInStatus(CompositeInPort activePort, bool isPresented) { };
+
+
+            // @brief Composite In Video Mode Update
+            // @text OnCompositeInVideoModeUpdate
+            // @param activePort: Active port
+            // @param videoResolution: See DisplayVideoPortResolution
+            virtual void OnCompositeInVideoModeUpdate(CompositeInPort activePort, DisplayVideoPortResolution videoResolution) { };
+	    };
+
+    virtual uint32_t Register(IEvent *listener);
+    virtual uint32_t UnRegister(IEvent *listener);
+    
     static CompositeInput & getInstance();
 
     uint8_t getNumberOfInputs        () const;
@@ -79,10 +128,10 @@ public:
     bool    isPortConnected          (int8_t Port) const;
     void    selectPort               (int8_t Port) const;
     void    scaleVideo               (int32_t x, int32_t y, int32_t width, int32_t height) const;
-
 private:
-    CompositeInput ();           /* default constructor */
-    virtual ~CompositeInput ();  /* destructor */
+    CompositeInput ();
+    ~CompositeInput ();
+    std::unique_ptr<DefaultImpl> implComposite;
 };
 
 

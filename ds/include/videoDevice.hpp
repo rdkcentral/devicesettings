@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
 
 
 /**
@@ -36,6 +35,7 @@
 #include "list.hpp"
 #include <string>
 #include <list>
+#include "dsMgrNtf.h"
 
 
 /**
@@ -60,6 +60,22 @@ class VideoDevice : public DSConstant {
 	static const char * kPropertyDFC;
 
 public:
+
+       struct IEvent {
+            // @brief Display Framerate Pre-change
+            // @text OnDisplayFrameratePreChange
+            // @param frameRate: PreChange framerate
+            virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
+
+            // @brief Display Framerate Post-change
+            // @text OnDisplayFrameratePostChange
+            // @param frameRate:  framerate post change
+            virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+        };
+        
+        uint32_t Register(IEvent *listener);
+        uint32_t UnRegister(IEvent *listener);
+	
 	static VideoDevice & getInstance(int id);
 	static VideoDevice & getInstance(const std::string &name);
 
