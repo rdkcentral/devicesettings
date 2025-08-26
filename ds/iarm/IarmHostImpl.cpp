@@ -1,6 +1,7 @@
 #include <chrono>
 #include <mutex>
 #include <sstream>
+#include <cstring>
 
 #include "IarmHostImpl.hpp"
 
@@ -581,11 +582,11 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_video_mode.port;
-			dsVideoPortResolution_t videoResolution;
-			videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
-			videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
-			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
-			videoResolution.name = nullptr;
+                        dsVideoPortResolution_t videoResolution{};
+                        memset(videoResolution.name, 0, sizeof(videoResolution.name));
+                        videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
+                        videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
+                        videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
                         IarmHostImpl::Dispatch([compositePort,videoResolution](ICompositeInEvents* listener) {
                              listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
             });
