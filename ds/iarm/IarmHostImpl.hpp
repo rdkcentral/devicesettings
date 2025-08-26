@@ -34,6 +34,7 @@ class IARMGroupVideoDevice;
 class IARMGroupVideoOutputPort;
 class IARMGroupAudioOutputPort;
 class IARMGroupComposite;
+class IARMGroupDisplay;
 
 class IarmHostImpl {
 
@@ -141,8 +142,9 @@ public:
     using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
     using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
     using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
-	using ICompositeInEvents       = device::Host::ICompositeInEvents;
-
+    using ICompositeInEvents     = device::Host::ICompositeInEvents;
+    using IDisplayEvents         = device::Host::IDisplayEvents;
+	
     IarmHostImpl() = default;
     ~IarmHostImpl();
 
@@ -178,6 +180,14 @@ public:
     // @param listener: class object implementing the listener
     dsError_t  UnRegister(ICompositeInEvents* listener);
 
+    // @brief Register a listener for Composite events
+    // @param listener: class object implementing the listener
+    dsError_t  Register(IDisplayEvents* listener);
+
+    // @brief UnRegister a listener for Composite events
+    // @param listener: class object implementing the listener
+    dsError_t  UnRegister(IDisplayEvents* listener);
+	
 private:
     static std::mutex s_mutex;
 
@@ -185,19 +195,20 @@ private:
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
     static CallbackList<ICompositeInEvents*, IARMGroupComposite> s_compositeListeners;
-
+    static CallbackList<IDisplayEvents*, IARMGroupDisplay> s_displayListeners;
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
-
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn);
-
+    static void Dispatch(std::function<void(IDisplayEvents* listener)>&& fn);
     // Dispatch is private, so all IARMGroup implementations will need to be friends
+ 
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoOutputPort;
     friend class IARMGroupAudioOutputPort;
     friend class IARMGroupComposite;
+    friend class IARMGroupDisplay;
 };
 } // namespace device

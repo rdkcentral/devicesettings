@@ -797,6 +797,28 @@ dsError_t  Host::UnRegister(ICompositeInEvents *listener)
     return impl().UnRegister(listener);
 }
 
+/**
+ * @fn void  Host::Register(IDisplayEvents *Evtnotification)
+ * @brief This API is used to register the Events
+ *
+ * @return dsError_t 
+ */
+dsError_t  Host::Register(IDisplayEvents *listener)
+{
+    return impl().Register(listener);
+}
+
+/**
+ * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
+ * @brief This API is used to UnRegister the Events
+ *
+ * @return dsError_t 
+ */
+dsError_t  Host::UnRegister(IDisplayEvents *listener)
+{
+    return impl().UnRegister(listener);
+}
+
 dsError_t Host::Register(IVideoDeviceEvents* listener)
 {
     return impl().Register(listener);

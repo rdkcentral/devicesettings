@@ -12,7 +12,8 @@
 using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
-using ICompositeInEvents   = device::Host::ICompositeInEvents;
+using ICompositeInEvents     = device::Host::ICompositeInEvents;
+using IDisplayEvents         = device::Host::IDisplayEvents;
 
 namespace device {
 
@@ -607,16 +608,77 @@ private:
 };
 
 
+// static data
+
+class IARMGroupDisplay {
+public:
+    static bool RegisterIarmEvents()
+    {
+        return registerIarmEvents(handlers);
+    }
+
+    static bool UnRegisterIarmEvents()
+    {
+        return unregisterIarmEvents(handlers);
+    }
+
+private:
+    static void iarmDisplayDisplayRxSense(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_RX_SENSE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsDisplayEvent_t displayStatusEvent = eventData->data.hdmi_rxsense.status;
+            IarmHostImpl::Dispatch([displayStatusEvent](IDisplayEvents* listener) {
+            listener->OnDisplayRxSense(displayStatusEvent);
+            });
+        } else {
+            INT_ERROR("Invalid data received for Composite Status Handler in iarmDisplayDisplayRxSense");
+        }
+    }
+
+    static void iarmDisplayHDCPStatusChange(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received owner = %s, eventId = %d", owner, eventId);
+        if (!isValidOwner(owner)) {
+            return;
+        }
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+			dsHdcpStatus_t hdcpStatus = eventData->data.hdmi_hdcp.hdcpStatus;
+            IarmHostImpl::Dispatch([hdcpStatus](IDisplayEvents* listener) {
+                /* To check Parameter Required or Not*/
+				listener->OnHDCPStatusChange();
+            });
+        } else {
+            INT_ERROR("Invalid data received for Composite Video Mode Update in iarmDisplayHDCPStatusChange");
+        }
+     }
+
+private:
+    static constexpr EventHandlerMapping handlers[] = {
+        { IARM_BUS_DSMGR_EVENT_RX_SENSE,                  &IARMGroupDisplay::iarmDisplayDisplayRxSense       },
+        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS,               &IARMGroupDisplay::iarmDisplayHDCPStatusChange     },
+    };
+};
+
+
 constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupComposite::handlers[];
+constexpr EventHandlerMapping IARMGroupDisplay::handlers[];
 
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
 IarmHostImpl::CallbackList<ICompositeInEvents*, IARMGroupComposite> IarmHostImpl::s_compositeListeners;
+IarmHostImpl::CallbackList<IDisplayEvents*, IARMGroupDisplay> IarmHostImpl::s_displayListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
@@ -626,6 +688,7 @@ IarmHostImpl::~IarmHostImpl()
     s_videoOutputPortListeners.Release();
     s_audioOutputPortListeners.Release();
 	s_compositeListeners.Release();
+    s_displayListeners.Release();
 }
 
 template <typename T, typename F>
@@ -717,6 +780,24 @@ dsError_t  IarmHostImpl::UnRegister(ICompositeInEvents* listener)
 /* static */ void IarmHostImpl::Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn)
 {
     Dispatch(s_compositeListeners, std::move(fn));
+}
+
+dsError_t  IarmHostImpl::Register(IDisplayEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_displayListeners.Register(listener);
+}
+
+dsError_t  IarmHostImpl::UnRegister(IDisplayEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_displayListeners.UnRegister(listener);
+}
+
+// Dispatcher for IARMGroupComposite
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayEvents* listener)>&& fn)
+{
+    Dispatch(s_displayListeners, std::move(fn));
 }
 
 } // namespace device

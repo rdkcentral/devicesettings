@@ -92,6 +92,20 @@ public:
     dsError_t  Register(ICompositeInEvents *listener);
     dsError_t  UnRegister(ICompositeInEvents *listener);
     
+    struct IDisplayEvents{
+
+            // @brief Display RX Sense event
+            // @text onDisplayRxSense
+            // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
+            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
+ 
+            // @brief Display HDCP Status
+            // @text OnDisplayHDCPStatus
+            virtual void OnDisplayHDCPStatus() { };
+    };
+    uint32_t Register(IDisplayEvents *listener);
+    uint32_t UnRegister(IDisplayEvents *listener);
+
 
     struct IVideoDeviceEvents {
         // @brief Display Frame rate Pre-change notification
