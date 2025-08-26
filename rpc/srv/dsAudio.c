@@ -52,7 +52,7 @@
 #include "dsAudioSettings.h"
 
 #include "safec_lib.h"
-
+#include <float.h>
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
 
@@ -7050,7 +7050,7 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
-	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = 0.0, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
+	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = -FLT_MAX, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
 	struct timespec ts;
 	    while(1){
