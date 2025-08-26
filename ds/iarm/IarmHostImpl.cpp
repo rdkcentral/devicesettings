@@ -632,7 +632,7 @@ private:
         }
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
-            dsDisplayEvent_t displayStatusEvent = static_cast<dsDisplayEvent_t> eventData->data.hdmi_rxsense.status;
+            dsDisplayEvent_t displayStatusEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_rxsense.status);
             IarmHostImpl::Dispatch([displayStatusEvent](IDisplayEvents* listener) {
             listener->OnDisplayRxSense(displayStatusEvent);
             });
