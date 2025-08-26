@@ -582,11 +582,11 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_video_mode.port;
-			dsVideoPortResolution_t videoResolution;
+                        dsVideoPortResolution_t videoResolution{};
+                        memset(videoResolution.name, 0, sizeof(videoResolution.name));
 			videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
 			videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
 			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
-                        memset(videoResolution.name, 0, sizeof(videoResolution.name));
                         IarmHostImpl::Dispatch([compositePort,videoResolution](ICompositeInEvents* listener) {
                         listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
             });
