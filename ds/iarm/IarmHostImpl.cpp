@@ -585,9 +585,9 @@ private:
 			videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
 			videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
 			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
-			videoResolution.name = nullptr;
+                        memset(videoResolution.name, 0, sizeof(videoResolution.name));
                         IarmHostImpl::Dispatch([compositePort,videoResolution](ICompositeInEvents* listener) {
-                             listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
+                        listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Video Mode Update in iarmCompositeInVideoModeUpdateHandler");
