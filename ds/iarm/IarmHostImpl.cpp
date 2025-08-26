@@ -529,14 +529,13 @@ private:
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_connect.port;
             bool isConnected = eventData->data.composite_in_connect.isPortConnected;
-            IarmHostImpl::Dispatch([compositePort][isConnected](ICompositeInEvents* listener) {
+            IarmHostImpl::Dispatch([compositePort, isConnected](ICompositeInEvents* listener) {
                  listener->OnCompositeInHotPlug(compositePort,isConnected);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInHotPlugHandler");
         }
     }
-
 
     static void iarmCompositeInSignalStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
@@ -549,7 +548,7 @@ private:
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_sig_status.port;
             dsCompInSignalStatus_t compositeSigStatus = eventData->data.composite_in_sig_status.status;
-            IarmHostImpl::Dispatch([compositePort][compositeSigStatus](ICompositeInEvents* listener) {
+            IarmHostImpl::Dispatch([compositePort,compositeSigStatus](ICompositeInEvents* listener) {
                 listener->OnCompositeInSignalStatus(compositePort,compositeSigStatus);
             });
         } else {
@@ -568,7 +567,7 @@ private:
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_status.port;
             bool isPresented = eventData->data.composite_in_status.isPresented;
-	    IarmHostImpl::Dispatch([compositePort][isPresented](ICompositeInEvents* listener) {
+	    IarmHostImpl::Dispatch([compositePort,isPresented](ICompositeInEvents* listener) {
             listener->OnCompositeInStatus(compositePort,isPresented);
             });
         } else {
@@ -590,7 +589,7 @@ private:
 			videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
 			videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
 			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
-            IarmHostImpl::Dispatch([compositePort][videoResolution](ICompositeInEvents* listener) {
+            IarmHostImpl::Dispatch([compositePort,videoResolution](ICompositeInEvents* listener) {
                 listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
             });
         } else {
