@@ -38,7 +38,6 @@
 #include "dsAudio.h"
 #include "dsHost.h"
 #include "unsupportedOperationException.hpp"
-/*#include "hostEDID.hpp"*/
 #include "dsInternal.h"
 
 #include "iarm/IarmHostImpl.hpp"
