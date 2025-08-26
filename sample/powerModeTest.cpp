@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 			printf("SetPreferredSleepMode - 's'\n");
 			printf("All Sleep Modes - 'l' \n");
 			printf("Exit - 'x'\n");
-			c = getchar();
+			std::cin >> c;
 			switch(c)
 			{
 			case 'g':
