@@ -155,7 +155,7 @@ private:
     };
 };
 
-class IARMGroupVideoPort {
+class IARMGroupVideoOutputPort {
 public:
     static bool RegisterIarmEvents()
     {
@@ -251,14 +251,14 @@ private:
     }
 
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,       &IARMGroupVideoPort::iarmResolutionPreChangeHandler  },
-        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,      &IARMGroupVideoPort::iarmResolutionPostChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS,         &IARMGroupVideoPort::iarmHDCPStatusChangeHandler     },
-        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoPort::iarmVideoFormatUpdateHandler    },
+        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,       &IARMGroupVideoOutputPort::iarmResolutionPreChangeHandler  },
+        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,      &IARMGroupVideoOutputPort::iarmResolutionPostChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS,         &IARMGroupVideoOutputPort::iarmHDCPStatusChangeHandler     },
+        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoOutputPort::iarmVideoFormatUpdateHandler    },
     };
 };
 
-class IARMGroupAudioPort {
+class IARMGroupAudioOutputPort {
 public:
     static bool RegisterIarmEvents()
     {
@@ -488,28 +488,28 @@ private:
 
 private:
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioPort::iarmAssociatedAudioMixingChangedHandler  },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED,           &IARMGroupAudioPort::iarmAudioFaderControlChangedHandler      },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED,        &IARMGroupAudioPort::iarmAudioPrimaryLanguageChangedHandler   },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,      &IARMGroupAudioPort::iarmAudioSecondaryLanguageChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,                     &IARMGroupAudioPort::iarmAudioOutHotPlugHandler               },
-        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioPort::iarmAudioPortStateChangedHandler         },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioPort::iarmAudioModeEventHandler                },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler        },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioPort::iarmAudioFormatUpdateHandler             },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioOutputPort::iarmAssociatedAudioMixingChangedHandler  },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED,           &IARMGroupAudioOutputPort::iarmAudioFaderControlChangedHandler      },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED,        &IARMGroupAudioOutputPort::iarmAudioPrimaryLanguageChangedHandler   },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,      &IARMGroupAudioOutputPort::iarmAudioSecondaryLanguageChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,                     &IARMGroupAudioOutputPort::iarmAudioOutHotPlugHandler               },
+        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioOutputPort::iarmDolbyAtmosCapabilitiesChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioOutputPort::iarmAudioPortStateChangedHandler         },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioOutputPort::iarmAudioModeEventHandler                },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioOutputPort::iarmAudioLevelChangedEventHandler        },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioOutputPort::iarmAudioFormatUpdateHandler             },
     };
 };
 
 // static data
 constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
-constexpr EventHandlerMapping IARMGroupVideoPort::handlers[];
-constexpr EventHandlerMapping IARMGroupAudioPort::handlers[];
+constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
+constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
-IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
-IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> IarmHostImpl::s_audioPortListeners;
+IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoPortListeners;
+IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioPortListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
