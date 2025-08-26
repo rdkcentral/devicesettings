@@ -172,8 +172,8 @@ private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
-    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoPortListeners;
-    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioPortListeners;
+    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
+    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);

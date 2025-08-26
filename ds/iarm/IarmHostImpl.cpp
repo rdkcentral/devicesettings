@@ -508,16 +508,16 @@ constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
-IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoPortListeners;
-IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioPortListeners;
+IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
+IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
 
     s_videoDeviceListeners.Release();
-    s_videoPortListeners.Release();
-    s_audioPortListeners.Release();
+    s_videoOutputPortListeners.Release();
+    s_audioOutputPortListeners.Release();
 }
 
 template <typename T, typename F>
@@ -560,37 +560,37 @@ dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
 dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoPortListeners.Register(listener);
+    return s_videoOutputPortListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoPortListeners.UnRegister(listener);
+    return s_videoOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupVideoPort
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
-    Dispatch(s_videoPortListeners, std::move(fn));
+    Dispatch(s_videoOutputPortListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_audioPortListeners.Register(listener);
+    return s_audioOutputPortListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_audioPortListeners.UnRegister(listener);
+    return s_audioOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupAudioPort
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
-    Dispatch(s_audioPortListeners, std::move(fn));
+    Dispatch(s_audioOutputPortListeners, std::move(fn));
 }
 
 } // namespace device
