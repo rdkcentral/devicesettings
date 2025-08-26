@@ -10,9 +10,9 @@
 
 #include "libIBus.h"
 
-using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-using IVideoOutputPortEvents   = device::Host::IVideoOutputPortEvents;
-using IAudioOutputPortEvents   = device::Host::IAudioOutputPortEvents;
+using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
+using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
+using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
 
 namespace device {
 
@@ -111,9 +111,27 @@ private:
         }
     }
 
+    static void iarmZoomSettingsChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS received %s %d", owner, eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsVideoZoom_t zoomSetting = static_cast<dsVideoZoom_t>(eventData->data.dfc.zoomsettings);
+
+            IarmHostImpl::Dispatch([zoomSetting](IVideoDeviceEvents* listener) {
+                listener->OnZoomSettingsChanged(zoomSetting);
+            });
+        } else {
+            INT_ERROR("Invalid data received for zoom settings change");
+        }
+    };
+
     static constexpr EventHandlerMapping handlers[] = {
         { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE,  &IARMGroupVideoDevice::iarmDisplayFrameratePreChangeHandler  },
         { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE, &IARMGroupVideoDevice::iarmDisplayFrameratePostChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS,               &IARMGroupVideoDevice::iarmZoomSettingsChangedHandler        },
     };
 };
 
@@ -356,6 +374,23 @@ private:
         }
     };
 
+    static void iarmAudioLevelChangedEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            int audioLevel = eventData->data.AudioLevelInfo.level;
+
+            IarmHostImpl::Dispatch([audioLevel](IAudioOutputPortEvents* listener) {
+                listener->OnAudioLevelChangedEvent(audioLevel);
+            });
+        } else {
+            INT_ERROR("Invalid data received for audio level change");
+        }
+    };
+
     static void iarmAudioFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE received, eventId=%d", eventId);
@@ -383,6 +418,7 @@ private:
         { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
         { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioPort::iarmAudioPortStateChangedHandler         },
         { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioPort::iarmAudioModeEventHandler                },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler        },
         { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioPort::iarmAudioFormatUpdateHandler             },
     };
 };

@@ -151,6 +151,10 @@ public:
         // @param audioStereoMode: audio stereo mode - see dsAudioStereoMode_t
         virtual void OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode) { };
 
+        // @brief Audio level changed
+        // @param audioiLevel: audio level value
+        virtual void OnAudioLevelChangedEvent(int audioLevel) { };
+
         // @brief Audio Output format changed
         // @param audioFormat: Type of audio format see AudioFormat
         virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
