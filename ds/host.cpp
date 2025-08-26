@@ -785,22 +785,22 @@ uint32_t Host::UnRegister(IVideoDeviceEvents* listener)
     return impl().UnRegister(listener);
 }
 
-uint32_t Host::Register(IVideoPortEvents* listener)
+uint32_t Host::Register(IVideoOutputPortEvents* listener)
 {
     return impl().Register(listener);
 }
 
-uint32_t Host::UnRegister(IVideoPortEvents* listener)
+uint32_t Host::UnRegister(IVideoOutputPortEvents* listener)
 {
     return impl().UnRegister(listener);
 }
 
-uint32_t Host::Register(IAudioPortEvents* listener)
+uint32_t Host::Register(IAudioOutputPortEvents* listener)
 {
     return impl().Register(listener);
 }
 
-uint32_t Host::UnRegister(IAudioPortEvents* listener)
+uint32_t Host::UnRegister(IAudioOutputPortEvents* listener)
 {
     return impl().UnRegister(listener);
 }

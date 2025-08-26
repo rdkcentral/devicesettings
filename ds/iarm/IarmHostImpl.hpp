@@ -135,9 +135,9 @@ class IarmHostImpl {
     };
 
 public:
-    using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-    using IVideoPortEvents   = device::Host::IVideoPortEvents;
-    using IAudioPortEvents   = device::Host::IAudioPortEvents;
+    using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
+    using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
+    using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
 
     IarmHostImpl();
     ~IarmHostImpl();
@@ -152,33 +152,33 @@ public:
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IVideoPortEvents* listener);
+    uint32_t Register(IVideoOutputPortEvents* listener);
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IVideoPortEvents* listener);
+    uint32_t UnRegister(IVideoOutputPortEvents* listener);
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IAudioPortEvents* listener);
+    uint32_t Register(IAudioOutputPortEvents* listener);
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IAudioPortEvents* listener);
+    uint32_t UnRegister(IAudioOutputPortEvents* listener);
 
 private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
-    static CallbackList<IVideoPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
-    static CallbackList<IAudioPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
+    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
+    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
-    static void Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn);
-    static void Dispatch(std::function<void(IAudioPortEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;

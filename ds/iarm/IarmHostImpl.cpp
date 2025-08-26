@@ -11,8 +11,8 @@
 #include "libIBus.h"
 
 using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-using IVideoPortEvents   = device::Host::IVideoPortEvents;
-using IAudioPortEvents   = device::Host::IAudioPortEvents;
+using IVideoOutputPortEvents   = device::Host::IVideoOutputPortEvents;
+using IAudioOutputPortEvents   = device::Host::IAudioOutputPortEvents;
 
 namespace device {
 
@@ -140,7 +140,7 @@ private:
             int width  = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
-            IarmHostImpl::Dispatch([width, height](IVideoPortEvents* listener) {
+            IarmHostImpl::Dispatch([width, height](IVideoOutputPortEvents* listener) {
                 listener->OnResolutionPreChange(width, height);
             });
         } else {
@@ -158,7 +158,7 @@ private:
             int width  = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
-            IarmHostImpl::Dispatch([width, height](IVideoPortEvents* listener) {
+            IarmHostImpl::Dispatch([width, height](IVideoOutputPortEvents* listener) {
                 listener->OnResolutionPostChange(width, height);
             });
         } else {
@@ -188,7 +188,7 @@ private:
         if (eventData) {
             dsHDRStandard_t videoFormat = eventData->data.VideoFormatInfo.videoFormat;
 
-            IarmHostImpl::Dispatch([videoFormat](IVideoPortEvents* listener) {
+            IarmHostImpl::Dispatch([videoFormat](IVideoOutputPortEvents* listener) {
                 listener->OnVideoFormatUpdate(videoFormat);
             });
         } else {
@@ -226,7 +226,7 @@ private:
         if (eventData) {
             bool mixing = eventData->data.AssociatedAudioMixingInfo.mixing;
 
-            IarmHostImpl::Dispatch([mixing](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([mixing](IAudioOutputPortEvents* listener) {
                 listener->OnAssociatedAudioMixingChanged(mixing);
             });
         } else {
@@ -243,7 +243,7 @@ private:
         if (eventData) {
             int mixerBalance = eventData->data.FaderControlInfo.mixerbalance;
 
-            IarmHostImpl::Dispatch([mixerBalance](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([mixerBalance](IAudioOutputPortEvents* listener) {
                 listener->OnAudioFaderControlChanged(mixerBalance);
             });
         } else {
@@ -260,7 +260,7 @@ private:
         if (eventData) {
             std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
-            IarmHostImpl::Dispatch([&primaryLanguage](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([&primaryLanguage](IAudioOutputPortEvents* listener) {
                 listener->OnAudioPrimaryLanguageChanged(primaryLanguage);
             });
         } else {
@@ -277,7 +277,7 @@ private:
         if (eventData) {
             std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
-            IarmHostImpl::Dispatch([&secondaryLanguage](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([&secondaryLanguage](IAudioOutputPortEvents* listener) {
                 listener->OnAudioSecondaryLanguageChanged(secondaryLanguage);
             });
         } else {
@@ -294,7 +294,7 @@ private:
             int uiPortNumber           = eventData->data.audio_out_connect.uiPortNo;
             bool isPortConnected       = eventData->data.audio_out_connect.isPortConnected;
 
-            IarmHostImpl::Dispatch([portType, uiPortNumber, isPortConnected](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([portType, uiPortNumber, isPortConnected](IAudioOutputPortEvents* listener) {
                 listener->OnAudioOutHotPlug(portType, uiPortNumber, isPortConnected);
             });
         } else {
@@ -310,7 +310,7 @@ private:
             dsATMOSCapability_t atmosCapability = eventData->data.AtmosCapsChange.caps;
             bool status                         = eventData->data.AtmosCapsChange.status;
 
-            IarmHostImpl::Dispatch([atmosCapability, status](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([atmosCapability, status](IAudioOutputPortEvents* listener) {
                 listener->OnDolbyAtmosCapabilitiesChanged(atmosCapability, status);
             });
 
@@ -329,7 +329,7 @@ private:
         if (eventData) {
             dsAudioPortState_t audioPortState = eventData->data.AudioPortStateInfo.audioPortState;
 
-            IarmHostImpl::Dispatch([audioPortState](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([audioPortState](IAudioOutputPortEvents* listener) {
                 // TODO:
                 // listener->OnAudioPortStateChanged(audioPortState);
             });
@@ -348,28 +348,11 @@ private:
             dsAudioPortType_t audioPortType     = static_cast<dsAudioPortType_t>(eventData->data.Audioport.type);
             dsAudioStereoMode_t audioStereoMode = static_cast<dsAudioStereoMode_t>(eventData->data.Audioport.mode);
 
-            IarmHostImpl::Dispatch([audioPortType, audioStereoMode](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([audioPortType, audioStereoMode](IAudioOutputPortEvents* listener) {
                 listener->OnAudioModeEvent(audioPortType, audioStereoMode);
             });
         } else {
             INT_ERROR("Invalid data received for audio mode change");
-        }
-    };
-
-    static void iarmAudioLevelChangedEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
-    {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received, eventId=%d", eventId);
-
-        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
-
-        if (eventData) {
-            int audioLevel = eventData->data.AudioLevelInfo.level;
-
-            IarmHostImpl::Dispatch([audioLevel](IAudioPortEvents* listener) {
-                listener->OnAudioLevelChangedEvent(audioLevel);
-            });
-        } else {
-            INT_ERROR("Invalid data received for audio level change");
         }
     };
 
@@ -382,7 +365,7 @@ private:
         if (eventData) {
             dsAudioFormat_t audioFormat = eventData->data.AudioFormatInfo.audioFormat;
 
-            IarmHostImpl::Dispatch([audioFormat](IAudioPortEvents* listener) {
+            IarmHostImpl::Dispatch([audioFormat](IAudioOutputPortEvents* listener) {
                 listener->OnAudioFormatUpdate(audioFormat);
             });
         } else {
@@ -400,7 +383,6 @@ private:
         { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
         { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioPort::iarmAudioPortStateChangedHandler         },
         { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioPort::iarmAudioModeEventHandler                },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler        },
         { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioPort::iarmAudioFormatUpdateHandler             },
     };
 };
@@ -408,8 +390,8 @@ private:
 // static data
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
-IarmHostImpl::CallbackList<IVideoPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
-IarmHostImpl::CallbackList<IAudioPortEvents*, IARMGroupAudioPort> IarmHostImpl::s_audioPortListeners;
+IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
+IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> IarmHostImpl::s_audioPortListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
@@ -457,38 +439,38 @@ uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IVideoPortEvents* listener)
+uint32_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoPortListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IVideoPortEvents* listener)
+uint32_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupVideoPort
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoPortEvents* listener)>&& fn)
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_videoPortListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IAudioPortEvents* listener)
+uint32_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_audioPortListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IAudioPortEvents* listener)
+uint32_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_audioPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupAudioPort
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioPortEvents* listener)>&& fn)
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_audioPortListeners, std::move(fn));
 }

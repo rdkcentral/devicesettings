@@ -68,6 +68,11 @@ public:
         // @brief Display Frame rate Post-change notification
         // @param frameRate: new framerate
         virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+
+        // @brief Zoom settings changed
+        // @text OnZoomSettingsChanged
+        // @param zoomSetting: Currently applied zoom setting
+        virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
     };
 
     // @brief Register a listener for video device events
@@ -78,7 +83,7 @@ public:
     // @param listener: class object implementing the listener
     uint32_t UnRegister(IVideoDeviceEvents* listener);
 
-    struct IVideoPortEvents {
+    struct IVideoOutputPortEvents {
 
         // @brief On Resolution Pre changed
         // @param width: width of the resolution
@@ -101,13 +106,13 @@ public:
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IVideoPortEvents* listener);
+    uint32_t Register(IVideoOutputPortEvents* listener);
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IVideoPortEvents* listener);
+    uint32_t UnRegister(IVideoOutputPortEvents* listener);
 
-    struct IAudioPortEvents {
+    struct IAudioOutputPortEvents {
 
         // @brief Associated Audio mixing changed
         // @param mixing: true or false
@@ -146,10 +151,6 @@ public:
         // @param audioStereoMode: audio stereo mode - see dsAudioStereoMode_t
         virtual void OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode) { };
 
-        // @brief Audio level changed
-        // @param audioiLevel: audio level value
-        virtual void OnAudioLevelChangedEvent(int audioLevel) { };
-
         // @brief Audio Output format changed
         // @param audioFormat: Type of audio format see AudioFormat
         virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
@@ -157,11 +158,11 @@ public:
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IAudioPortEvents* listener);
+    uint32_t Register(IAudioOutputPortEvents* listener);
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IAudioPortEvents* listener);
+    uint32_t UnRegister(IAudioOutputPortEvents* listener);
 
     bool setPowerMode(int mode);
     int getPowerMode();
