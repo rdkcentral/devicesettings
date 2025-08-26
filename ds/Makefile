@@ -20,9 +20,10 @@ RM          := rm -rf
 CFLAGS      += -std=c++0x  -g -fPIC -D_REENTRANT -Wall
 LIBNAME     := ds
 LIBNAMEFULL := lib$(LIBNAME).so
-LIBNAMECLI := lib$(LIBNAME)-cli.so
+LIBNAMECLI  := lib$(LIBNAME)-cli.so
 INSTALL     := $(PWD)/install
 OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+# In future add a conditional to choose implementation class based on build configuration
 OBJS        += iarm/IarmHostImpl.o
 #$(PWD)/config should be first include path
 # to override generic configs
@@ -34,8 +35,7 @@ INCLUDE     := -I$(PWD)                                 \
     		   -I$(PWD)/hal/src                \
     		   -I$(PWD)/ds                              \
     		   -I$(PWD)/rpc/include            \
-               -I$(PWD)/ds/include \                     
-               -I$(PWD)/ds/iarm                      
+               -I$(PWD)/ds/include                      
 else
 INCLUDE     := -I$(PWD)                                 \
                -I$(LOG4C_INSTALL_DIR)/include           \
@@ -43,8 +43,7 @@ INCLUDE     := -I$(PWD)                                 \
     		   -I$(PWD)/hal/include                     \
     		   -I$(PWD)/ds                              \
     		   -I$(PWD)/rpc/include            \
-               -I$(PWD)/ds/include \
-               -I$(PWD)/ds/iarm  
+               -I$(PWD)/ds/include  
 endif
               
 

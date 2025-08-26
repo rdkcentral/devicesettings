@@ -15,15 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /**
-* @defgroup devicesettings
-* @{
-* @defgroup ds
-* @{
-**/
-
+ * @defgroup devicesettings
+ * @{
+ * @defgroup ds
+ * @{
+ **/
 
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
@@ -32,17 +31,15 @@
 
 #include "audioOutputPort.hpp"
 #include "dsAVDTypes.h"
+#include "dsError.h"
 #include "list.hpp"
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
-#include "dsMgr.h"
-#include "dsTypes.h"
-#include "dsDisplay.h"
 
 /**
  * @file host.hpp
- * @brief It contains class,structures referenced by host.cpp file.
+ * @brief It contains class, structures referenced by host.cpp file.
  */
 using namespace std;
 
@@ -60,61 +57,9 @@ using DefaultImpl = IarmHostImpl;
  */
 class Host {
 public:
-       
-    struct IHDMIInEvents {
-            
-	    // @brief HDMI Event Hot Plug
-            // @text onHDMIInEventHotPlug
-            // @param port: port 0 or 1 et al
-            // @param isConnected: is it connected (true) or not (false)
-            virtual void OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected) { };
- 
-            // @brief HDMI Event Signal status
-            // @text OnHDMIInEventSignalStatus
-            // @param port: port 0 or 1 et al
-            // @param signalStatus: Signal Status
-            virtual void OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus) { };
- 
-            // @brief HDMI Event Signal status
-            // @text onHDMIInEventStatus
-            // @param activePort: port 0 or 1 et al
-            // @param isPresented: is it presented or not
-            virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
- 
-            // @brief HDMI Video Mode update
-            // @text onHDMInVideoModeUpdate
-            // @param port: port 0 or 1 et al
-            // @param videoPortResolution: Video port resolution
-            virtual void OnHDMInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
- 
-            // @brief HDMI ALLM (Auto Low Latency Mode) status
-            // @text onHDMInAllmStatus
-            // @param port: port 0 or 1 et al
-            // @param allmStatus: allm status
-            virtual void OnHDMInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
- 
-            // @brief HDMI Event AVI content type
-            // @text OnHDMInAVIContentType
-            // @param port: port 0 or 1 et al
-            // @param aviContentType: AVI content type
-            virtual void OnHDMInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
- 
-            // @brief HDMI VRR status
-            // @text OnHDMInVRRStatus
-            // @param port: port 0 or 1 et al
-            // @param vrrType: VRR type
-            virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
-
-            // @brief HDMI Event AV Latency
-            // @text OnHDMInAVLatency
-            // @param audioDelay: audio delay (in millisecs)
-            // @param videoDelay: video delay (in millisecs)
-            virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
-
-    };
-
-    uint32_t Register(IHDMIInEvents *listener);
-    uint32_t UnRegister(IHDMIInEvents *listener);
+    static const int kPowerOn;
+    static const int kPowerOff;
+    static const int kPowerStandby;
 
 
     struct ICompositeInEvents {
@@ -148,192 +93,158 @@ public:
     dsError_t  UnRegister(ICompositeInEvents *listener);
     
 
-    struct IDisplayHDMIHotPlugEvents{
-
-            // @brief Display HDMI Hot plug event
-            // @text onDisplayHDMIHotPlug
-            // @param displayEvent: DS_DISPLAY_EVENT_CONNECTED or DS_DISPLAY_EVENT_DISCONNECTED
-            virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
-    };
-    
-    uint32_t Register(IDisplayHDMIHotPlugEvents *listener);
-    uint32_t UnRegister(IDisplayHDMIHotPlugEvents *listener);
-
-
-
-    struct IDisplayEvents{
-
-            // @brief Display RX Sense event
-            // @text onDisplayRxSense
-            // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
-            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
- 
-            // @brief Display HDCP Status
-            // @text OnDisplayHDCPStatus
-            virtual void OnDisplayHDCPStatus() { };
-    };
-    
-    uint32_t Register(IDisplayEvents *listener);
-    uint32_t UnRegister(IDisplayEvents *listener);
-
-
-    struct IAudioOutputPortEvents{
-
-            // @brief Associated Audio mixing changed
-            // @text onAssociatedAudioMixingChanged
-            // @param mixing: true or false
-            virtual void OnAssociatedAudioMixingChanged(bool mixing) { };
-    
-            // @brief Audio Fader balance changed
-            // @text onAudioFaderControlChanged
-            // @param mixerBalance: applied mixer balance value
-            virtual void OnAudioFaderControlChanged(int mixerBalance) { };
-    
-            // @brief Primary language for Audio changed
-            // @text onAudioPrimaryLanguageChanged
-            // @param primaryLanguage: current primary language for audio
-            virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage) { };
-
-            // @brief Secondary language for Audio changed
-            // @text onAudioSecondaryLanguageChanged
-            // @param secondaryLanguage: current secondary language for audio
-            virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage) { };
-    
-            // @brief Audio output hot plug event
-            // @text onAudioOutHotPlug
-            // @param portType: Type of audio port see AudioPortType
-            // @param uiPortNumber: The port number assigned by UI
-            // @param isPortConnected: true (connected) or false (not connected)
-            virtual void OnAudioOutHotPlug(dsAudioPortType_t  audioPortType, int uiPortNumber, bool isPortConnected) { };
-
-
-            // @brief Dolby Atmos capabilities changed
-            // @text onDolbyAtmosCapabilitiesChanged
-            // @param atmosCapability: the dolby atmos capability
-            // @param status: true (available) or false (not available)
-            virtual void OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status) { };
-
-            // @brief Audio port state changed
-            // @text onAudioPortStateChanged
-            // @param audioPortState: audio port state
-            virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { };
-
-            // @brief Audio mode for the respective audio port - raised for every type of port
-            // @text onAudioModeEvent
-            // @param audioPortType: audio port type see AudioPortType
-            // @param audioMode: audio mode - see audioStereoMode
-            virtual void OnAudioModeEvent(dsAudioPortType_t  audioPortType, dsAudioStereoMode_t audioMode) { };
-
-            // @brief Audio Output format changed
-            // @text onAudioFormatUpdate
-            // @param audioFormat: Type of audio format see AudioFormat
-            virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
-
-            // @brief Audio level changed
-            // @text OnAudioLevelChangedEvent
-            // @param audioiLevel: audio level value
-            virtual void OnAudioLevelChangedEvent(int audioLevel) { };
-    };
-
-    uint32_t Register(IAudioOutputPortEvents *listener);
-    uint32_t UnRegister(IAudioOutputPortEvents *listener);
-
-
     struct IVideoDeviceEvents {
-            // @brief Display Framerate Pre-change
-            // @text OnDisplayFrameratePreChange
-            // @param frameRate: PreChange framerate
-            virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
+        // @brief Display Frame rate Pre-change notification
+        // @param frameRate: new framerate
+        virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
 
-            // @brief Display Framerate Post-change
-            // @text OnDisplayFrameratePostChange
-            // @param frameRate:  framerate post change
-            virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+        // @brief Display Frame rate Post-change notification
+        // @param frameRate: new framerate
+        virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
 
-            // @brief Zoom settings changed
-            // @text OnZoomSettingsChanged
-            // @param zoomSetting: Currently applied zoom setting
-            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
-     };
-        
-     uint32_t Register(IVideoDeviceEvents *listener);
-     uint32_t UnRegister(IVideoDeviceEvents *listener);
-	
-
-     struct IVideoOutputPortEvents {
-            
-	    // @brief On Resolution Pre changed
-            // @text OnResolutionPreChange
-            // @param resolution: resolution
-            virtual void OnResolutionPreChange(const int width, const int height) { };
- 
-            // @brief On Resolution Post change
-            // @text onResolutionPostChange
-            // @param resolution: resolution
-            virtual void OnResolutionPostChange(const int width, const int height) { };
- 
-            // @brief On HDCP Status change
-            // @text OnHDCPStatusChange
-            // @param hdcpStatus: HDCP Status
-            virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
- 
-            // @brief On Video Format update
-            // @text OnVideoFormatUpdate
-            // @param videoFormatHDR: Video format HDR standard
-            virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+        // @brief Zoom settings changed
+        // @text OnZoomSettingsChanged
+        // @param zoomSetting: Currently applied zoom setting
+        virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
     };
 
-    uint32_t Register(IVideoOutputPortEvents *listener);
-    uint32_t UnRegister(IVideoOutputPortEvents *listener);
+    // @brief Register a listener for video device events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IVideoDeviceEvents* listener);
 
+    // @brief UnRegister a listener for video device events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IVideoDeviceEvents* listener);
 
-    static const int kPowerOn;
-    static const int kPowerOff;
-    static const int kPowerStandby;
+    struct IVideoOutputPortEvents {
 
-	bool setPowerMode(int mode);
-	int getPowerMode();
+        // @brief On Resolution Pre changed
+        // @param width: width of the resolution
+        // @param height: height of the resolution
+        virtual void OnResolutionPreChange(int width, int height) { };
+
+        // @brief On Resolution Post change
+        // @param width: width of the resolution
+        // @param height: height of the resolution
+        virtual void OnResolutionPostChange(int width, int height) { };
+
+        // @brief On HDCP Status change
+        // @param hdcpStatus: HDCP Status
+        virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
+
+        // @brief On Video Format update
+        // @param videoFormatHDR: Video format HDR standard
+        virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+    };
+
+    // @brief Register a listener for video port events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IVideoOutputPortEvents* listener);
+
+    // @brief UnRegister a listener for video port events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IVideoOutputPortEvents* listener);
+
+    struct IAudioOutputPortEvents {
+
+        // @brief Associated Audio mixing changed
+        // @param mixing: true or false
+        virtual void OnAssociatedAudioMixingChanged(bool mixing) { };
+
+        // @brief Audio Fader balance changed
+        // @param mixerBalance: applied mixer balance value
+        virtual void OnAudioFaderControlChanged(int mixerBalance) { };
+
+        // @brief Primary language for Audio changed
+        // @param primaryLanguage: current primary language for audio
+        virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage) { };
+
+        // @brief Secondary language for Audio changed
+        // @param secondaryLanguage: current secondary language for audio
+        virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage) { };
+
+        // @brief Audio output hot plug event
+        // @param portType: Type of audio port see AudioPortType
+        // @param uiPortNumber: The port number assigned by UI
+        // @param isPortConnected: true (connected) or false (not connected)
+        virtual void OnAudioOutHotPlug(dsAudioPortType_t portType, int uiPortNumber, bool isPortConnected) { };
+
+        // @brief Dolby Atmos capabilities changed
+        // @param atmosCapability: the Dolby Atmos capability
+        // @param status: true (available) or false (not available)
+        virtual void OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status) { };
+
+        // @brief Audio port state changed
+        // @param audioPortState: audio port state
+        // TODO: requires dsMgr.h header include ??
+        // virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { };
+
+        // @brief Audio mode for the respective audio port - raised for every type of port
+        // @param audioPortType: audio port type see dsAudioPortType_t
+        // @param audioStereoMode: audio stereo mode - see dsAudioStereoMode_t
+        virtual void OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode) { };
+
+        // @brief Audio level changed
+        // @param audioiLevel: audio level value
+        virtual void OnAudioLevelChangedEvent(int audioLevel) { };
+
+        // @brief Audio Output format changed
+        // @param audioFormat: Type of audio format see AudioFormat
+        virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
+    };
+
+    // @brief Register a listener for audio port events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IAudioOutputPortEvents* listener);
+
+    // @brief UnRegister a listener for audio port events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IAudioOutputPortEvents* listener);
+
+    bool setPowerMode(int mode);
+    int getPowerMode();
     SleepMode getPreferredSleepMode();
     int setPreferredSleepMode(const SleepMode);
-    List <SleepMode> getAvailableSleepModes();
+    List<SleepMode> getAvailableSleepModes();
 
-	static Host& getInstance(void);
+    static Host& getInstance(void);
 
     List<VideoOutputPort> getVideoOutputPorts();
     List<AudioOutputPort> getAudioOutputPorts();
     List<VideoDevice> getVideoDevices();
-    VideoOutputPort &getVideoOutputPort(const std::string &name);
-    VideoOutputPort &getVideoOutputPort(int id);
-    AudioOutputPort &getAudioOutputPort(const std::string &name);
-    AudioOutputPort &getAudioOutputPort(int id);
+    VideoOutputPort& getVideoOutputPort(const std::string& name);
+    VideoOutputPort& getVideoOutputPort(int id);
+    AudioOutputPort& getAudioOutputPort(const std::string& name);
+    AudioOutputPort& getAudioOutputPort(int id);
     float getCPUTemperature();
-    uint32_t  getVersion(void);
+    uint32_t getVersion(void);
     void setVersion(uint32_t versionNumber);
-    void getHostEDID(std::vector<uint8_t> &edid) const;
+    void getHostEDID(std::vector<uint8_t>& edid) const;
     std::string getSocIDFromSDK();
-    void getSinkDeviceAtmosCapability(dsATMOSCapability_t & atmosCapability);
+    void getSinkDeviceAtmosCapability(dsATMOSCapability_t& atmosCapability);
     void setAudioAtmosOutputMode(bool enable);
     void setAssociatedAudioMixing(const bool mixing);
-    void getAssociatedAudioMixing(bool *mixing);
+    void getAssociatedAudioMixing(bool* mixing);
     void setFaderControl(const int mixerbalance);
-    void getFaderControl(int *mixerBalance);
+    void getFaderControl(int* mixerBalance);
     void setPrimaryLanguage(const std::string pLang);
-    void getPrimaryLanguage(std::string &pLang);
+    void getPrimaryLanguage(std::string& pLang);
     void setSecondaryLanguage(const std::string sLang);
-    void getSecondaryLanguage(std::string &sLang);
+    void getSecondaryLanguage(std::string& sLang);
     bool isHDMIOutPortPresent();
     std::string getDefaultVideoPortName();
     std::string getDefaultAudioPortName();
-    void getCurrentAudioFormat(dsAudioFormat_t &audioFormat);
-    void getMS12ConfigDetails(std::string &configType);
-    void setAudioMixerLevels (dsAudioInput_t aInput, int volume);
+    void getCurrentAudioFormat(dsAudioFormat_t& audioFormat);
+    void getMS12ConfigDetails(std::string& configType);
+    void setAudioMixerLevels(dsAudioInput_t aInput, int volume);
+
 private:
     std::unique_ptr<DefaultImpl> m_impl;
-	Host();
-	virtual ~Host();
-    //To Make the instance as thread-safe, using = delete, the result is, automatically generated methods (constructor, for example) from the compiler will not be created and, therefore, can not be called
-    Host (const Host&)= delete;
-    Host& operator=(const Host&)= delete;
+    Host();
+    virtual ~Host();
+    // Avoid copies
+    Host(const Host&)            = delete;
+    Host& operator=(const Host&) = delete;
 
     DefaultImpl& impl();
 };
@@ -341,7 +252,6 @@ private:
 }
 
 #endif /* _DS_HOST_HPP_ */
-
 
 /** @} */
 /** @} */

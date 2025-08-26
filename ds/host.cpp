@@ -38,7 +38,6 @@
 #include "dsAudio.h"
 #include "dsHost.h"
 #include "unsupportedOperationException.hpp"
-/*#include "hostEDID.hpp"*/
 #include "dsInternal.h"
 
 #include "iarm/IarmHostImpl.hpp"
@@ -52,10 +51,10 @@ using namespace std;
 
 namespace device 
 {
-   	
-	const int Host::kPowerOn = dsPOWER_ON;
-    const int Host::kPowerOff = dsPOWER_OFF;
-    const int Host::kPowerStandby = dsPOWER_STANDBY;
+
+const int Host::kPowerOn = dsPOWER_ON;
+const int Host::kPowerOff = dsPOWER_OFF;
+const int Host::kPowerStandby = dsPOWER_STANDBY;
 
 Host::Host()
     : m_impl(nullptr)
@@ -765,39 +764,16 @@ Host::~Host()
     }
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
-   
+
 DefaultImpl& Host::impl()
 {
     // lazy instantiation
     if (!m_impl) {
-        m_impl = std::make_unique<DefaultImpl>();
+        m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
     }
     return *m_impl;
 }
 
-
-/**
- * @fn void  Host::Register(IHDMIInEvents *listener)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IHDMIInEvents *listener) 
-{
-  return 0;
-}
-
-
-/**
- * @fn void  Host::UnRegister(IHDMIInEvents *listener)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IHDMIInEvents *listener) 
-{
-  return 0;
-}
 
 /**
  * @fn void  Host::Register(ICompositeInEvents *Evtnotification)
@@ -821,128 +797,39 @@ dsError_t  Host::UnRegister(ICompositeInEvents *listener)
     return impl().UnRegister(listener);
 }
 
-/**
- * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IDisplayHDMIHotPlugEvents *listener)
+dsError_t Host::Register(IVideoDeviceEvents* listener)
 {
-  return 0;
+    return impl().Register(listener);
 }
 
-
-/**
- * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IDisplayHDMIHotPlugEvents *listener)
+dsError_t Host::UnRegister(IVideoDeviceEvents* listener)
 {
-  return 0;
+    return impl().UnRegister(listener);
 }
 
-/**
- * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IDisplayEvents *listener)
+dsError_t Host::Register(IVideoOutputPortEvents* listener)
 {
-  return 0;
+    return impl().Register(listener);
 }
 
-
-/**
- * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IDisplayEvents *listener)
+dsError_t Host::UnRegister(IVideoOutputPortEvents* listener)
 {
-  return 0;
+    return impl().UnRegister(listener);
 }
 
-/**
- * @fn void  Host::Register(IAudioOutputPortEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IAudioOutputPortEvents *listener)
+dsError_t Host::Register(IAudioOutputPortEvents* listener)
 {
-	return impl().Register(listener);
+    return impl().Register(listener);
 }
 
-
-/**
- * @fn void  Host::UnRegister(IAudioOutputPortEvent *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IAudioOutputPortEvents *listener)
+dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
 {
-  return impl().UnRegister(listener);
+    return impl().UnRegister(listener);
 }
-
-
-/**
- * @fn void  Host::Register(IVideoOutputPortEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IVideoOutputPortEvents *listener)
-{
-	return impl().Register(listener);
-}
-
-
-/**
- * @fn void  Host::UnRegister(IVideoOutputPortEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IVideoOutputPortEvents *listener)
-{
-  return impl().UnRegister(listener);
-}
-
-/**
- * @fn void  Host::Register(IVideoDeviceEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IVideoDeviceEvents *listener)
-{
-  return impl().Register(listener);
-}
-
-
-/**
- * @fn void  Host::UnRegister(IVideoDeviceEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IVideoDeviceEvents *listener)
-{
-  return impl().UnRegister(listener);
-}
-
-
-
-}
-
 
 /** @} */
 
+} // namespace device
 /** @} */
+
 /** @} */

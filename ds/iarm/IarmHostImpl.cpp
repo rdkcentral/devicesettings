@@ -5,14 +5,13 @@
 #include "IarmHostImpl.hpp"
 
 #include "dsMgr.h"
-/*#include "dsTypes.h"*/
 #include "dslogger.h"
 
 #include "libIBus.h"
 
-using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-using IVideoOutputPortEvents   = device::Host::IVideoOutputPortEvents;
-using IAudioOutputPortEvents   = device::Host::IAudioOutputPortEvents;
+using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
+using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
+using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
 using ICompositeInEvents   = device::Host::ICompositeInEvents;
 
 namespace device {
@@ -62,6 +61,15 @@ static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
     return registered;
 }
 
+inline bool isValidOwner(const char* owner)
+{
+    if (std::string(IARM_BUS_DSMGR_NAME) != std::string(owner)) {
+        INT_ERROR("Invalid owner %s, expected %s", owner, IARM_BUS_DSMGR_NAME);
+        return false;
+    }
+    return true;
+}
+
 // IARMGroupXYZ are c to c++ shim (all methods are static)
 // Required to perform group event register and unregister with IARM
 // Thread safety to be ensured by the caller
@@ -80,7 +88,11 @@ public:
 private:
     static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received %s %d", owner, eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -97,7 +109,11 @@ private:
 
     static void iarmDisplayFrameratePostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE received %s %d", owner, eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -112,13 +128,35 @@ private:
         }
     }
 
+    static void iarmZoomSettingsChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsVideoZoom_t zoomSetting = static_cast<dsVideoZoom_t>(eventData->data.dfc.zoomsettings);
+
+            IarmHostImpl::Dispatch([zoomSetting](IVideoDeviceEvents* listener) {
+                listener->OnZoomSettingsChanged(zoomSetting);
+            });
+        } else {
+            INT_ERROR("Invalid data received for zoom settings change");
+        }
+    };
+
     static constexpr EventHandlerMapping handlers[] = {
         { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE,  &IARMGroupVideoDevice::iarmDisplayFrameratePreChangeHandler  },
         { IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE, &IARMGroupVideoDevice::iarmDisplayFrameratePostChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS,               &IARMGroupVideoDevice::iarmZoomSettingsChangedHandler        },
     };
 };
 
-class IARMGroupVideoPort {
+class IARMGroupVideoOutputPort {
 public:
     static bool RegisterIarmEvents()
     {
@@ -131,9 +169,13 @@ public:
     }
 
 private:
-    static void iarmResolutionPreChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmResolutionPreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_PRECHANGE received, eventId = %d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_PRECHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -149,9 +191,13 @@ private:
         }
     }
 
-    static void iarmResolutionPostChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmResolutionPostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE received, eventId = %d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -167,9 +213,13 @@ private:
         }
     }
 
-    static void iarmHDCPStatusChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmHDCPStatusChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -180,9 +230,13 @@ private:
         }
     }
 
-    static void iarmVideoFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmVideoFormatUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -198,14 +252,14 @@ private:
     }
 
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,       &IARMGroupVideoPort::iarmResolutionPreChangeHandler  },
-        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,      &IARMGroupVideoPort::iarmResolutionPostChangeHandler },
-        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS,         &IARMGroupVideoPort::iarmHDCPStatusChangeHandler     },
-        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoPort::iarmVideoFormatUpdateHandler    },
+        { IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,       &IARMGroupVideoOutputPort::iarmResolutionPreChangeHandler  },
+        { IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,      &IARMGroupVideoOutputPort::iarmResolutionPostChangeHandler },
+        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS,         &IARMGroupVideoOutputPort::iarmHDCPStatusChangeHandler     },
+        { IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE, &IARMGroupVideoOutputPort::iarmVideoFormatUpdateHandler    },
     };
 };
 
-class IARMGroupAudioPort {
+class IARMGroupAudioOutputPort {
 public:
     static bool RegisterIarmEvents()
     {
@@ -218,9 +272,13 @@ public:
     }
 
 private:
-    static void iarmAssociatedAudioMixingChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAssociatedAudioMixingChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -235,9 +293,13 @@ private:
         }
     };
 
-    static void iarmAudioFaderControlChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioFaderControlChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -252,9 +314,13 @@ private:
         }
     };
 
-    static void iarmAudioPrimaryLanguageChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioPrimaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -269,9 +335,13 @@ private:
         }
     };
 
-    static void iarmAudioSecondaryLanguageChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioSecondaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -286,9 +356,14 @@ private:
         }
     };
 
-    static void iarmAudioOutHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioOutHotPlugHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsAudioPortType_t portType = eventData->data.audio_out_connect.portType;
@@ -303,9 +378,14 @@ private:
         }
     };
 
-    static void iarmDolbyAtmosCapabilitiesChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmDolbyAtmosCapabilitiesChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsATMOSCapability_t atmosCapability = eventData->data.AtmosCapsChange.caps;
@@ -321,9 +401,13 @@ private:
     };
 
     // TODO: requires dsMgr.h header for dsAudioPortState_t ?
-    static void iarmAudioPortStateChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioPortStateChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -339,9 +423,13 @@ private:
         }
     };
 
-    static void iarmAudioModeEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioModeEventHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_MODE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_MODE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -357,9 +445,13 @@ private:
         }
     };
 
-    static void iarmAudioLevelChangedEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioLevelChangedEventHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -367,16 +459,20 @@ private:
             int audioLevel = eventData->data.AudioLevelInfo.level;
 
             IarmHostImpl::Dispatch([audioLevel](IAudioOutputPortEvents* listener) {
-                //listener->OnAudioLevelChangedEvent(audioLevel);
+                listener->OnAudioLevelChangedEvent(audioLevel);
             });
         } else {
             INT_ERROR("Invalid data received for audio level change");
         }
     };
 
-    static void iarmAudioFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioFormatUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -393,20 +489,20 @@ private:
 
 private:
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioPort::iarmAssociatedAudioMixingChangedHandler  },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED,           &IARMGroupAudioPort::iarmAudioFaderControlChangedHandler      },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED,        &IARMGroupAudioPort::iarmAudioPrimaryLanguageChangedHandler   },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,      &IARMGroupAudioPort::iarmAudioSecondaryLanguageChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,                     &IARMGroupAudioPort::iarmAudioOutHotPlugHandler               },
-        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioPort::iarmDolbyAtmosCapabilitiesChangedHandler },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioPort::iarmAudioPortStateChangedHandler         },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioPort::iarmAudioModeEventHandler                },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioPort::iarmAudioLevelChangedEventHandler        },
-        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioPort::iarmAudioFormatUpdateHandler             },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED, &IARMGroupAudioOutputPort::iarmAssociatedAudioMixingChangedHandler  },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED,           &IARMGroupAudioOutputPort::iarmAudioFaderControlChangedHandler      },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED,        &IARMGroupAudioOutputPort::iarmAudioPrimaryLanguageChangedHandler   },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,      &IARMGroupAudioOutputPort::iarmAudioSecondaryLanguageChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,                     &IARMGroupAudioOutputPort::iarmAudioOutHotPlugHandler               },
+        { IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,                    &IARMGroupAudioOutputPort::iarmDolbyAtmosCapabilitiesChangedHandler },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,                      &IARMGroupAudioOutputPort::iarmAudioPortStateChangedHandler         },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_MODE,                            &IARMGroupAudioOutputPort::iarmAudioModeEventHandler                },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,                   &IARMGroupAudioOutputPort::iarmAudioLevelChangedEventHandler        },
+        { IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,                   &IARMGroupAudioOutputPort::iarmAudioFormatUpdateHandler             },
     };
 };
 
-
+// static data
 
 class IARMGroupComposite {
 public:
@@ -421,79 +517,86 @@ public:
     }
 
 private:
-	static void iarmCompositeInHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
-	{
-		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG received, eventId=%d", eventId);		
-		
-		IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+    static void iarmCompositeInHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    { 
+        INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_connect.port;
-			bool isConnected = eventData->data.composite_in_connect.isPortConnected;
-            
-			IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
-                listener->OnCompositeInHotPlug(compositePort,isConnected);
+            bool isConnected = eventData->data.composite_in_connect.isPortConnected;
+            IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+                 listener->OnCompositeInHotPlug(compositePort,isConnected);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInHotPlugHandler");
-        }		
-	}
+        }
+    }
 
 
-	static void iarmCompositeInSignalStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
-	{
-		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS received, eventId=%d", eventId);		
-		
-		IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+    static void iarmCompositeInSignalStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_sig_status.port;
-			dsCompInSignalStatus_t compositeSigStatus = eventData->data.composite_in_sig_status.status;
-            
-			IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+            dsCompInSignalStatus_t compositeSigStatus = eventData->data.composite_in_sig_status.status;
+            IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
                 listener->OnCompositeInSignalStatus(compositePort,compositeSigStatus);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInSignalStatusHandler");
-        }		
-	}
+        }
+    }
 
-	static void iarmCompositeInStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
-	{
-		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS received, eventId=%d", eventId);		
-		
-		IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+    static void iarmCompositeInStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+	IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_status.port;
-			bool isPresented = eventData->data.composite_in_status.isPresented;
-            
-			IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
-                listener->OnCompositeInStatus(compositePort,isPresented);
+            bool isPresented = eventData->data.composite_in_status.isPresented;
+	    IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+            listener->OnCompositeInStatus(compositePort,isPresented);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInStatusHandler");
-        }		
-	}
+        }
+    }
 
 
-	static void iarmCompositeInVideoModeUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len) 
-	{
-        INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE received, eventId=%d", eventId);
-
+    static void iarmCompositeInVideoModeUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE received owner = %s, eventId = %d", owner, eventId);
+        if (!isValidOwner(owner)) {
+            return;
+        }
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
-
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_video_mode.port;
 			dsVideoPortResolution_t videoResolution;
 			videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
 			videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
-			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;		
+			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
             IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
                 listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Video Mode Update in iarmCompositeInVideoModeUpdateHandler");
         }
-    );
-}
+     }
 
 private:
     static constexpr EventHandlerMapping handlers[] = {
@@ -505,11 +608,15 @@ private:
 };
 
 
-// static data
+constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
+constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
+constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
+constexpr EventHandlerMapping IARMGroupComposite::handlers[];
+
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
-IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
-IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> IarmHostImpl::s_audioPortListeners;
+IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
+IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
 IarmHostImpl::CallbackList<ICompositeInEvents*, IARMGroupComposite> IarmHostImpl::s_compositeListeners;
 
 IarmHostImpl::~IarmHostImpl()
@@ -517,8 +624,8 @@ IarmHostImpl::~IarmHostImpl()
     std::lock_guard<std::mutex> lock(s_mutex);
 
     s_videoDeviceListeners.Release();
-    s_videoPortListeners.Release();
-    s_audioPortListeners.Release();
+    s_videoOutputPortListeners.Release();
+    s_audioOutputPortListeners.Release();
 	s_compositeListeners.Release();
 }
 
@@ -541,13 +648,13 @@ template <typename T, typename F>
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
-uint32_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
+dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoDeviceListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
+dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoDeviceListeners.UnRegister(listener);
@@ -559,40 +666,40 @@ uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
+dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoPortListeners.Register(listener);
+    return s_videoOutputPortListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
+dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_videoPortListeners.UnRegister(listener);
+    return s_videoOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupVideoPort
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
-    Dispatch(s_videoPortListeners, std::move(fn));
+    Dispatch(s_videoOutputPortListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
+dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_audioPortListeners.Register(listener);
+    return s_audioOutputPortListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
+dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    return s_audioPortListeners.UnRegister(listener);
+    return s_audioOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupAudioPort
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
-    Dispatch(s_audioPortListeners, std::move(fn));
+    Dispatch(s_audioOutputPortListeners, std::move(fn));
 }
 
 dsError_t  IarmHostImpl::Register(ICompositeInEvents* listener)

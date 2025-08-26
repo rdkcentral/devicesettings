@@ -19,9 +19,11 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <list>
 #include <mutex>
 
+#include "dsError.h"
 #include "dslogger.h"
 #include "host.hpp"
 
@@ -29,8 +31,8 @@ namespace device {
 
 // Forward declaration for IARM Implementation Groups
 class IARMGroupVideoDevice;
-class IARMGroupVideoPort;
-class IARMGroupAudioPort;
+class IARMGroupVideoOutputPort;
+class IARMGroupAudioOutputPort;
 class IARMGroupComposite;
 
 class IarmHostImpl {
@@ -61,11 +63,11 @@ class IarmHostImpl {
         // @brief Register a listener, also register IARM events if not already registered
         // if the listener is already registered, listener will not be added again
         // if IARM event registration fails, listener will not be added
-        uint32_t Register(T listener)
+        dsError_t Register(T listener)
         {
-            if (listener == nullptr) {
+            if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
-                return 1; // Error: Listener is null
+                return dsERR_INVALID_PARAM; // Error: Listener is null
             }
 
             if (!m_registered) {
@@ -73,7 +75,7 @@ class IarmHostImpl {
 
                 if (!m_registered) {
                     INT_ERROR("Failed to register IARMGroup %s", typeid(IARMGroup).name());
-                    return 1; // Error: Failed to register IARM group
+                    return dsERR_OPERATION_FAILED; // Error: Failed to register IARM group
                 }
             }
 
@@ -81,30 +83,30 @@ class IarmHostImpl {
             if (it != this->end()) {
                 // Listener already registered
                 INT_ERROR("%s %p is already registered", typeid(T).name(), listener);
-                return 0;
+                return dsERR_NONE; // Success: Listener already registered
             }
 
             this->push_back(listener);
 
             INT_INFO("%s %p registered", typeid(T).name(), listener);
 
-            return 0;
+            return dsERR_NONE;
         }
 
         // @brief UnRegister a listener, also unregister IARM events if no listeners are left
         // if the listener is not registered, it will not be removed
-        uint32_t UnRegister(T listener)
+        dsError_t UnRegister(T listener)
         {
-            if (listener == nullptr) {
+            if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
-                return 1; // Error: Listener is null
+                return dsERR_INVALID_PARAM; // Error: Listener is null
             }
 
             auto it = std::find(this->begin(), this->end(), listener);
             if (it == this->end()) {
                 // Listener not found
                 INT_ERROR("%s %p is not registered", typeid(T).name(), listener);
-                return 1; // Error: Listener not found
+                return dsERR_RESOURCE_NOT_AVAILABLE; // Error: Listener not found
             }
 
             this->erase(it);
@@ -115,12 +117,12 @@ class IarmHostImpl {
                 m_registered = !IARMGroup::UnRegisterIarmEvents();
             }
 
-            return 0;
+            return dsERR_NONE; // Success
         }
 
         // @brief Release all listeners and unregister IARM events
         // This will clear the list and unregister IARM events if no listeners are left
-        uint32_t Release()
+        dsError_t Release()
         {
             if (m_registered) {
                 m_registered = !IARMGroup::UnRegisterIarmEvents();
@@ -128,7 +130,7 @@ class IarmHostImpl {
 
             this->clear();
             INT_INFO("CallbackList[T=%s] released, status: %d", typeid(T).name(), m_registered);
-            return 0; // Success
+            return dsERR_NONE; // Success
         }
 
     private:
@@ -136,37 +138,37 @@ class IarmHostImpl {
     };
 
 public:
-    using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
-    using IVideoOutputPortEvents   = device::Host::IVideoOutputPortEvents;
-    using IAudioOutputPortEvents   = device::Host::IAudioOutputPortEvents;
+    using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
+    using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
+    using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
 	using ICompositeInEvents       = device::Host::ICompositeInEvents;
-	
-    IarmHostImpl();
+
+    IarmHostImpl() = default;
     ~IarmHostImpl();
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
-    uint32_t Register(IVideoDeviceEvents* listener);
+    dsError_t Register(IVideoDeviceEvents* listener);
 
     // @brief UnRegister a listener for video device events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IVideoDeviceEvents* listener);
+    dsError_t UnRegister(IVideoDeviceEvents* listener);
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IVideoOutputPortEvents* listener);
+    dsError_t Register(IVideoOutputPortEvents* listener);
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IVideoOutputPortEvents* listener);
+    dsError_t UnRegister(IVideoOutputPortEvents* listener);
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IAudioOutputPortEvents* listener);
+    dsError_t Register(IAudioOutputPortEvents* listener);
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IAudioOutputPortEvents* listener);
+    dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
@@ -180,10 +182,10 @@ private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
-    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
-    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
+    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
+    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
     static CallbackList<ICompositeInEvents*, IARMGroupComposite> s_compositeListeners;
-	
+
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
@@ -194,9 +196,8 @@ private:
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
-    friend class IARMGroupVideoPort;
-    friend class IARMGroupAudioPort;
+    friend class IARMGroupVideoOutputPort;
+    friend class IARMGroupAudioOutputPort;
     friend class IARMGroupComposite;
-	
 };
 } // namespace device
