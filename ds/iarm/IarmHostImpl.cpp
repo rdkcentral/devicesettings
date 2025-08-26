@@ -421,7 +421,7 @@ public:
     }
 
 private:
-	static void iarmCompositeInHotPlugHandler(const char*, IARM_EventId_t, void* data, size_t len)
+	static void iarmCompositeInHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
 	{
 		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG received, eventId=%d", eventId);		
 		
@@ -439,7 +439,7 @@ private:
 	}
 
 
-	static void iarmCompositeInSignalStatusHandler(const char*, IARM_EventId_t, void* data, size_t len)
+	static void iarmCompositeInSignalStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
 	{
 		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS received, eventId=%d", eventId);		
 		
@@ -456,7 +456,7 @@ private:
         }		
 	}
 
-	static void iarmCompositeInStatusHandler(const char*, IARM_EventId_t, void* data, size_t len)
+	static void iarmCompositeInStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
 	{
 		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS received, eventId=%d", eventId);		
 		
