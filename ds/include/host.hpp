@@ -62,6 +62,52 @@ public:
     static const int kPowerOff;
     static const int kPowerStandby;
 
+
+    struct ICompositeInEvents {
+            // @brief Composite In Hotplug event
+            // @text onCompositeInHotPlug
+            // @param port: Port of the hotplug
+            // @param isConnected: Is it connected (true) or not(false)
+            virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
+
+            // @brief Composite In Signal status
+            // @text onCompositeInSignalStatus
+            // @param port: Port of the hotplug
+            // @param signalStatus: Signal status
+            virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
+
+            // @brief Composite In status
+            // @text onCompositeInStatus
+            // @param activePort: Active port
+            // @param isPresented: is it presented to user
+            virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
+
+
+            // @brief Composite In Video Mode Update
+            // @text OnCompositeInVideoModeUpdate
+            // @param activePort: Active port
+            // @param videoResolution: See DisplayVideoPortResolution
+            virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
+    };
+
+    dsError_t  Register(ICompositeInEvents *listener);
+    dsError_t  UnRegister(ICompositeInEvents *listener);
+
+    struct IDisplayEvents{
+
+            // @brief Display RX Sense event
+            // @text onDisplayRxSense
+            // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
+            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
+
+            // @brief Display HDCP Status
+            // @text OnDisplayHDCPStatus
+            virtual void OnDisplayHDCPStatus() { };
+    };
+    dsError_t Register(IDisplayEvents *listener);
+    dsError_t UnRegister(IDisplayEvents *listener);
+
+
     struct IVideoDeviceEvents {
         // @brief Display Frame rate Pre-change notification
         // @param frameRate: new framerate
