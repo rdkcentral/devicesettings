@@ -2612,7 +2612,6 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
                     _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
                 }
-                }
                 else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
                 {
                     if (param->toPersist){
