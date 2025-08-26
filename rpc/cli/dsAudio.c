@@ -411,18 +411,19 @@ dsError_t dsSetStereoMode(intptr_t handle, dsAudioStereoMode_t mode,bool isPersi
     _RETURN_IF_ERROR(dsAudioStereoMode_isValid(mode), dsERR_INVALID_PARAM);
 
     dsAudioSetStereoModeParam_t param;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
     param.handle = handle;
     param.mode = mode;
     param.rpcResult = dsERR_NONE;
     param.toPersist = isPersist;
 
-    IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+    rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                  (char *)IARM_BUS_DSMGR_API_dsSetStereoMode,
                  (void *)&param,
                  sizeof(param));
 
-    if (dsERR_NONE == param.rpcResult)
+    if ((rpcRet == IARM_RESULT_SUCCESS) && (dsERR_NONE == param.rpcResult))
     {
         return dsERR_NONE;
     }
