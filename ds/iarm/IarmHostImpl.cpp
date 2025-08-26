@@ -5,7 +5,6 @@
 #include "IarmHostImpl.hpp"
 
 #include "dsMgr.h"
-/*#include "dsTypes.h"*/
 #include "dslogger.h"
 
 #include "libIBus.h"
@@ -61,6 +60,15 @@ static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
     return registered;
 }
 
+inline bool isValidOwner(const char* owner)
+{
+    if (std::string(IARM_BUS_DSMGR_NAME) != std::string(owner)) {
+        INT_ERROR("Invalid owner %s, expected %s", owner, IARM_BUS_DSMGR_NAME);
+        return false;
+    }
+    return true;
+}
+
 // IARMGroupXYZ are c to c++ shim (all methods are static)
 // Required to perform group event register and unregister with IARM
 // Thread safety to be ensured by the caller
@@ -79,7 +87,11 @@ public:
 private:
     static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received %s %d", owner, eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -96,7 +108,11 @@ private:
 
     static void iarmDisplayFrameratePostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE received %s %d", owner, eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -113,7 +129,11 @@ private:
 
     static void iarmZoomSettingsChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS received %s %d", owner, eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -148,9 +168,13 @@ public:
     }
 
 private:
-    static void iarmResolutionPreChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmResolutionPreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_PRECHANGE received, eventId = %d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_PRECHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -166,9 +190,13 @@ private:
         }
     }
 
-    static void iarmResolutionPostChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmResolutionPostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE received, eventId = %d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -184,9 +212,13 @@ private:
         }
     }
 
-    static void iarmHDCPStatusChangeHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmHDCPStatusChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -197,9 +229,13 @@ private:
         }
     }
 
-    static void iarmVideoFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmVideoFormatUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -235,9 +271,13 @@ public:
     }
 
 private:
-    static void iarmAssociatedAudioMixingChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAssociatedAudioMixingChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -252,9 +292,13 @@ private:
         }
     };
 
-    static void iarmAudioFaderControlChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioFaderControlChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -269,9 +313,13 @@ private:
         }
     };
 
-    static void iarmAudioPrimaryLanguageChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioPrimaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -286,9 +334,13 @@ private:
         }
     };
 
-    static void iarmAudioSecondaryLanguageChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioSecondaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -303,9 +355,14 @@ private:
         }
     };
 
-    static void iarmAudioOutHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioOutHotPlugHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsAudioPortType_t portType = eventData->data.audio_out_connect.portType;
@@ -320,9 +377,14 @@ private:
         }
     };
 
-    static void iarmDolbyAtmosCapabilitiesChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmDolbyAtmosCapabilitiesChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsATMOSCapability_t atmosCapability = eventData->data.AtmosCapsChange.caps;
@@ -338,9 +400,13 @@ private:
     };
 
     // TODO: requires dsMgr.h header for dsAudioPortState_t ?
-    static void iarmAudioPortStateChangedHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioPortStateChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -356,9 +422,13 @@ private:
         }
     };
 
-    static void iarmAudioModeEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioModeEventHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_MODE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_MODE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -374,9 +444,13 @@ private:
         }
     };
 
-    static void iarmAudioLevelChangedEventHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioLevelChangedEventHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -391,9 +465,13 @@ private:
         }
     };
 
-    static void iarmAudioFormatUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmAudioFormatUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE received, eventId=%d", eventId);
+        INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
@@ -457,13 +535,13 @@ template <typename T, typename F>
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
-uint32_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
+dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoDeviceListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
+dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoDeviceListeners.UnRegister(listener);
@@ -475,13 +553,13 @@ uint32_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
+dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoPortListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
+dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoPortListeners.UnRegister(listener);
@@ -493,13 +571,13 @@ uint32_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
     Dispatch(s_videoPortListeners, std::move(fn));
 }
 
-uint32_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
+dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_audioPortListeners.Register(listener);
 }
 
-uint32_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
+dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     return s_audioPortListeners.UnRegister(listener);

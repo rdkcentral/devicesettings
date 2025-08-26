@@ -31,6 +31,7 @@
 
 #include "audioOutputPort.hpp"
 #include "dsAVDTypes.h"
+#include "dsError.h"
 #include "list.hpp"
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
@@ -77,11 +78,11 @@ public:
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
-    uint32_t Register(IVideoDeviceEvents* listener);
+    dsError_t Register(IVideoDeviceEvents* listener);
 
     // @brief UnRegister a listener for video device events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IVideoDeviceEvents* listener);
+    dsError_t UnRegister(IVideoDeviceEvents* listener);
 
     struct IVideoOutputPortEvents {
 
@@ -106,11 +107,11 @@ public:
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IVideoOutputPortEvents* listener);
+    dsError_t Register(IVideoOutputPortEvents* listener);
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IVideoOutputPortEvents* listener);
+    dsError_t UnRegister(IVideoOutputPortEvents* listener);
 
     struct IAudioOutputPortEvents {
 
@@ -162,11 +163,11 @@ public:
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t Register(IAudioOutputPortEvents* listener);
+    dsError_t Register(IAudioOutputPortEvents* listener);
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
-    uint32_t UnRegister(IAudioOutputPortEvents* listener);
+    dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
     bool setPowerMode(int mode);
     int getPowerMode();
