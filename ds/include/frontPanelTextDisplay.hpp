@@ -1,9 +1,8 @@
-
 /*
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2025 RDK Management
+ * Copyright 2016 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +32,6 @@
 #include "dsConstant.hpp"
 #include "list"
 #include "frontPanelIndicator.hpp"
-#include "dsMgrNtf.h"
 
 
 /**
@@ -133,18 +131,6 @@ private:
     static const char * kPropertyBrightness;
 
 public:
-    
-    struct IEvent {
- 
-            // @brief On Front Panel display time format changed
-            // @text OnFPDTimeFormatChanged
-            // @param timeFormat: current time format 12 or 24 hour
-            virtual void OnFPDTimeFormatChanged(FPDTimeFormat timeFormat) { };
-    };
-
-    uint32_t Register(IEvent *listener);
-    uint32_t UnRegister(IEvent *listener);
-    
     static const int kModeClock12Hr;  //!< Indicates 12 hour time format.
     static const int kModeClock24Hr;  //!< Indicates 24 hour time format.
     static const int kModeString;     //!< Indicates text string.
