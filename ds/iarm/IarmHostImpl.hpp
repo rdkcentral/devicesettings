@@ -64,7 +64,7 @@ class IarmHostImpl {
         // if IARM event registration fails, listener will not be added
         dsError_t Register(T listener)
         {
-            if (listener == nullptr) {
+            if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
                 return dsERR_INVALID_PARAM; // Error: Listener is null
             }
@@ -96,7 +96,7 @@ class IarmHostImpl {
         // if the listener is not registered, it will not be removed
         dsError_t UnRegister(T listener)
         {
-            if (listener == nullptr) {
+            if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
                 return dsERR_INVALID_PARAM; // Error: Listener is null
             }
