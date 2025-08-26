@@ -9,11 +9,6 @@
 
 #include "libIBus.h"
 
-using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
-using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
-using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
-using IDisplayDeviceEvents   = device::Host::IDisplayDeviceEvents;
-
 namespace device {
 
 struct EventHandlerMapping {
@@ -660,4 +655,5 @@ dsError_t IarmHostImpl::UnRegister(IDisplayDeviceEvents* listener)
 {
     Dispatch(s_displayDeviceListeners, std::move(fn));
 }
+
 } // namespace device

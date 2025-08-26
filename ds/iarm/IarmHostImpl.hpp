@@ -35,6 +35,11 @@ class IARMGroupVideoOutputPort;
 class IARMGroupAudioOutputPort;
 class IARMGroupDisplayDevice;
 
+using IVideoDeviceEvents     = Host::IVideoDeviceEvents;
+using IVideoOutputPortEvents = Host::IVideoOutputPortEvents;
+using IAudioOutputPortEvents = Host::IAudioOutputPortEvents;
+using IDisplayDeviceEvents   = Host::IDisplayDeviceEvents;
+
 class IarmHostImpl {
 
     // Manages a list of listeners and corresponding IARM Event Group operations.
@@ -138,11 +143,6 @@ class IarmHostImpl {
     };
 
 public:
-    using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
-    using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
-    using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
-    using IDisplayDeviceEvents   = device::Host::IDisplayDeviceEvents;
-
     IarmHostImpl() = default;
     ~IarmHostImpl();
 
