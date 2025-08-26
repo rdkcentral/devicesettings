@@ -13,6 +13,7 @@
 using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents   = device::Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents   = device::Host::IAudioOutputPortEvents;
+using ICompositeInEvents   = device::Host::ICompositeInEvents;
 
 namespace device {
 
