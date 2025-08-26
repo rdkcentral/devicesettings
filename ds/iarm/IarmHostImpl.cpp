@@ -517,7 +517,7 @@ public:
     }
 
 private:
-    static void iarmCompositeInHotPlugHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmCompositeInHotPlugHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     { 
         INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG received owner = %s, eventId = %d", owner, eventId);
 
@@ -538,7 +538,7 @@ private:
     }
 
 
-    static void iarmCompositeInSignalStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmCompositeInSignalStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS received owner = %s, eventId = %d", owner, eventId);
 
@@ -557,7 +557,7 @@ private:
         }
     }
 
-    static void iarmCompositeInStatusHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmCompositeInStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS received owner = %s, eventId = %d", owner, eventId);
 
@@ -577,7 +577,7 @@ private:
     }
 
 
-    static void iarmCompositeInVideoModeUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len)
+    static void iarmCompositeInVideoModeUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE received owner = %s, eventId = %d", owner, eventId);
         if (!isValidOwner(owner)) {
