@@ -531,9 +531,11 @@ private:
             return;
         }
 
-        dsDisplayEvent_t displayEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
+            dsDisplayEvent_t displayEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
+
             IarmHostImpl::Dispatch([displayEvent](IDisplayDeviceEvents* listener) {
                 listener->OnDisplayHDMIHotPlug(displayEvent);
             });
