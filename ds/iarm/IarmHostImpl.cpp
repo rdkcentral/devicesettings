@@ -632,7 +632,7 @@ private:
         }
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
-            dsDisplayEvent_t displayStatusEvent = eventData->data.hdmi_rxsense.status;
+            dsDisplayEvent_t displayStatusEvent = static_cast<dsDisplayEvent_t> eventData->data.hdmi_rxsense.status;
             IarmHostImpl::Dispatch([displayStatusEvent](IDisplayEvents* listener) {
             listener->OnDisplayRxSense(displayStatusEvent);
             });
@@ -652,7 +652,7 @@ private:
 			dsHdcpStatus_t hdcpStatus = eventData->data.hdmi_hdcp.hdcpStatus;
             IarmHostImpl::Dispatch([hdcpStatus](IDisplayEvents* listener) {
                 /* To check Parameter Required or Not*/
-				listener->OnHDCPStatusChange();
+		listener->OnHDCPStatusChange();
             });
         } else {
             INT_ERROR("Invalid data received for Composite Video Mode Update in iarmDisplayHDCPStatusChange");
@@ -687,7 +687,7 @@ IarmHostImpl::~IarmHostImpl()
     s_videoDeviceListeners.Release();
     s_videoOutputPortListeners.Release();
     s_audioOutputPortListeners.Release();
-	s_compositeListeners.Release();
+    s_compositeListeners.Release();
     s_displayListeners.Release();
 }
 
