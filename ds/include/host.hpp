@@ -27,7 +27,8 @@
 
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
-
+#include <memory>
+#include <string>
 #include <iostream>
 #include "powerModeChangeListener.hpp"
 #include "displayConnectionChangeListener.hpp"
@@ -36,11 +37,10 @@
 #include "videoDevice.hpp"
 #include "sleepMode.hpp"
 #include  "list.hpp"
+#include "dsMgr.h"
 #include "dsTypes.h"
 #include "dsDisplay.h"
 
-#include  <list>
-#include <string>
 
 
 /**
@@ -60,7 +60,7 @@ namespace device {
 class Host {
 public:
        
-    struct IHDMIInEvent {
+    struct IHDMIInEvents {
             
 	    // @brief HDMI Event Hot Plug
             // @text onHDMIInEventHotPlug
@@ -104,17 +104,19 @@ public:
             // @param vrrType: VRR type
             virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
 
-	    // @brief Zoom settings changed
-            // @text OnZoomSettingsChanged
-            // @param zoomSetting: Currently applied zoom setting
-            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
+            // @brief HDMI Event AV Latency
+            // @text OnHDMInAVLatency
+            // @param audioDelay: audio delay (in millisecs)
+            // @param videoDelay: video delay (in millisecs)
+            virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
+
     };
 
-    uint32_t Register(IHDMIInEvent *listener);
-    uint32_t UnRegister(IHDMIInEvent *listener);
+    uint32_t Register(IHDMIInEvents *listener);
+    uint32_t UnRegister(IHDMIInEvents *listener);
 
 
-    struct ICompositeInEvent {
+    struct ICompositeInEvents {
             // @brief Composite In Hotplug event
             // @text onCompositeInHotPlug
             // @param port: Port of the hotplug
@@ -141,11 +143,11 @@ public:
             virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
     };
 
-    uint32_t Register(ICompositeInEvent *listener);
-    uint32_t UnRegister(ICompositeInEvent *listener);
+    uint32_t Register(ICompositeInEvents *listener);
+    uint32_t UnRegister(ICompositeInEvents *listener);
     
 
-    struct IDisplayHDMIHotPlugEvent{
+    struct IDisplayHDMIHotPlugEvents{
 
             // @brief Display HDMI Hot plug event
             // @text onDisplayHDMIHotPlug
@@ -153,12 +155,12 @@ public:
             virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
     };
     
-    uint32_t Register(IDisplayHDMIHotPlugEvent*listener);
-    uint32_t UnRegister(IDisplayHDMIHotPlugEvent *listener);
+    uint32_t Register(IDisplayHDMIHotPlugEvents *listener);
+    uint32_t UnRegister(IDisplayHDMIHotPlugEvents *listener);
 
 
 
-    struct IDisplayEvent{
+    struct IDisplayEvents{
 
             // @brief Display RX Sense event
             // @text onDisplayRxSense
@@ -170,11 +172,11 @@ public:
             virtual void OnDisplayHDCPStatus() { };
     };
     
-    uint32_t Register(IDisplayEvent *listener);
-    uint32_t UnRegister(IDisplayEvent *listener);
+    uint32_t Register(IDisplayEvents *listener);
+    uint32_t UnRegister(IDisplayEvents *listener);
 
 
-    struct IAudioOutputPortEvent{
+    struct IAudioOutputPortEvents{
 
             // @brief Associated Audio mixing changed
             // @text onAssociatedAudioMixingChanged
@@ -226,13 +228,17 @@ public:
             // @param audioFormat: Type of audio format see AudioFormat
             virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
 
+            // @brief Audio level changed
+            // @text OnAudioLevelChangedEvent
+            // @param audioiLevel: audio level value
+            virtual void OnAudioLevelChangedEvent(int audioLevel) { };
     };
 
-    uint32_t Register(IAudioOutputPortEvent *listener);
-    uint32_t UnRegister(IAudioOutputPortEvent *listener);
+    uint32_t Register(IAudioOutputPortEvents *listener);
+    uint32_t UnRegister(IAudioOutputPortEvents *listener);
 
 
-    struct IVideoDeviceEvent {
+    struct IVideoDeviceEvents {
             // @brief Display Framerate Pre-change
             // @text OnDisplayFrameratePreChange
             // @param frameRate: PreChange framerate
@@ -242,13 +248,18 @@ public:
             // @text OnDisplayFrameratePostChange
             // @param frameRate:  framerate post change
             virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+
+            // @brief Zoom settings changed
+            // @text OnZoomSettingsChanged
+            // @param zoomSetting: Currently applied zoom setting
+            virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
      };
         
-     uint32_t Register(IVideoDeviceEvent *listener);
-     uint32_t UnRegister(IVideoDeviceEvent *listener);
+     uint32_t Register(IVideoDeviceEvents *listener);
+     uint32_t UnRegister(IVideoDeviceEvents *listener);
 	
 
-     struct IVideoOutputPortEvent {
+     struct IVideoOutputPortEvents {
             
 	    // @brief On Resolution Pre changed
             // @text OnResolutionPreChange
@@ -271,8 +282,8 @@ public:
             virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
     };
 
-    uint32_t Register(IVideoOutputPortEvent *listener);
-    uint32_t UnRegister(IVideoOutputPortEvent *listener);
+    uint32_t Register(IVideoOutputPortEvents *listener);
+    uint32_t UnRegister(IVideoOutputPortEvents *listener);
 
 
     static const int kPowerOn;
