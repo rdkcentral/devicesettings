@@ -1,6 +1,7 @@
 #include <chrono>
 #include <mutex>
 #include <sstream>
+#include <cstring>
 
 #include "IarmHostImpl.hpp"
 
