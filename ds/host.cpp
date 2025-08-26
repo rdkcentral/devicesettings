@@ -769,7 +769,7 @@ DefaultImpl& Host::impl()
 {
     // lazy instantiation
     if (!m_impl) {
-        m_impl = std::make_unique<DefaultImpl>();
+        m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
     }
     return *m_impl;
 }

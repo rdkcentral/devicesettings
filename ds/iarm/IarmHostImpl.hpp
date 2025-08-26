@@ -19,6 +19,7 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <list>
 #include <mutex>
 
@@ -140,7 +141,7 @@ public:
     using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
     using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
 
-    IarmHostImpl();
+    IarmHostImpl() = default;
     ~IarmHostImpl();
 
     // @brief Register a listener for video device events

@@ -502,6 +502,10 @@ private:
 };
 
 // static data
+constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
+constexpr EventHandlerMapping IARMGroupVideoPort::handlers[];
+constexpr EventHandlerMapping IARMGroupAudioPort::handlers[];
+
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
