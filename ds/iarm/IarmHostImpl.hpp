@@ -33,6 +33,7 @@ namespace device {
 class IARMGroupVideoDevice;
 class IARMGroupVideoOutputPort;
 class IARMGroupAudioOutputPort;
+class IARMGroupDisplayDevice;
 
 class IarmHostImpl {
 
@@ -140,6 +141,7 @@ public:
     using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
     using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
     using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
+    using IDisplayDeviceEvents   = device::Host::IDisplayDeviceEvents;
 
     IarmHostImpl() = default;
     ~IarmHostImpl();
@@ -168,12 +170,21 @@ public:
     // @param listener: class object implementing the listener
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
+    // @brief Register a listener for display device events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IDisplayDeviceEvents* listener);
+
+    // @brief UnRegister a listener for display device events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IDisplayDeviceEvents* listener);
+
 private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
+    static CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> s_displayDeviceListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
@@ -181,10 +192,12 @@ private:
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn);
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoOutputPort;
     friend class IARMGroupAudioOutputPort;
+    friend class IARMGroupDisplayDevice;
 };
 } // namespace device

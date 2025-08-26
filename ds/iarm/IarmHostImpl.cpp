@@ -12,6 +12,7 @@
 using IVideoDeviceEvents     = device::Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents = device::Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents = device::Host::IAudioOutputPortEvents;
+using IDisplayDeviceEvents   = device::Host::IDisplayDeviceEvents;
 
 namespace device {
 
@@ -501,6 +502,50 @@ private:
     };
 };
 
+class IARMGroupDisplayDevice {
+public:
+    static bool RegisterIarmEvents()
+    {
+        IARM_Result_t result = IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME, IARM_BUS_DSMGR_EVENT_HDMI_HOTPLUG,
+            &IARMGroupDisplayDevice::iarmDisplayHDMIHotPlugHandler);
+
+        if (result != IARM_RESULT_SUCCESS) {
+            INT_ERROR("Failed to register IARM event handler for IARM_BUS_DSMGR_EVENT_HDMI_HOTPLUG");
+        }
+        return (result == IARM_RESULT_SUCCESS);
+    }
+
+    static bool UnRegisterIarmEvents()
+    {
+        IARM_Result_t result = IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME, IARM_BUS_DSMGR_EVENT_HDMI_HOTPLUG);
+        if (result != IARM_RESULT_SUCCESS) {
+            INT_ERROR("Failed to unregister IARM event handler for IARM_BUS_DSMGR_EVENT_HDMI_HOTPLUG");
+        }
+        return (result == IARM_RESULT_SUCCESS);
+    }
+
+private:
+    static void iarmDisplayHDMIHotPlugHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_HOTPLUG received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsDisplayEvent_t dd = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
+
+            IarmHostImpl::Dispatch([dd](IDisplayDeviceEvents* listener) {
+                listener->OnDisplayHDMIHotPlug(dd);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HDMI hot plug change");
+        }
+    };
+};
+
 // static data
 constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
@@ -510,6 +555,7 @@ std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
+IarmHostImpl::CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> IarmHostImpl::s_displayDeviceListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
@@ -518,6 +564,7 @@ IarmHostImpl::~IarmHostImpl()
     s_videoDeviceListeners.Release();
     s_videoOutputPortListeners.Release();
     s_audioOutputPortListeners.Release();
+    s_displayDeviceListeners.Release();
 }
 
 template <typename T, typename F>
@@ -593,4 +640,21 @@ dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
     Dispatch(s_audioOutputPortListeners, std::move(fn));
 }
 
+dsError_t IarmHostImpl::Register(IDisplayDeviceEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_displayDeviceListeners.Register(listener);
+}
+
+dsError_t IarmHostImpl::UnRegister(IDisplayDeviceEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_displayDeviceListeners.UnRegister(listener);
+}
+
+// Dispatcher for IDisplayDeviceEvents
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn)
+{
+    Dispatch(s_displayDeviceListeners, std::move(fn));
+}
 } // namespace device
