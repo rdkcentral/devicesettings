@@ -34,11 +34,15 @@ class IARMGroupVideoDevice;
 class IARMGroupVideoOutputPort;
 class IARMGroupAudioOutputPort;
 class IARMGroupDisplayDevice;
+class IARMGroupComposite;
+class IARMGroupDisplay;
 
 using IVideoDeviceEvents     = Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents = Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents = Host::IAudioOutputPortEvents;
 using IDisplayDeviceEvents   = Host::IDisplayDeviceEvents;
+using ICompositeInEvents     = device::Host::ICompositeInEvents;
+using IDisplayEvents         = device::Host::IDisplayEvents;
 
 class IarmHostImpl {
 
@@ -170,6 +174,22 @@ public:
     // @param listener: class object implementing the listener
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
+    // @brief Register a listener for Composite events
+    // @param listener: class object implementing the listener
+    dsError_t  Register(ICompositeInEvents* listener);
+
+    // @brief UnRegister a listener for Composite events
+    // @param listener: class object implementing the listener
+    dsError_t  UnRegister(ICompositeInEvents* listener);
+
+    // @brief Register a listener for Composite events
+    // @param listener: class object implementing the listener
+    dsError_t  Register(IDisplayEvents* listener);
+
+    // @brief UnRegister a listener for Composite events
+    // @param listener: class object implementing the listener
+    dsError_t  UnRegister(IDisplayEvents* listener);
+
     // @brief Register a listener for display device events
     // @param listener: class object implementing the listener
     dsError_t Register(IDisplayDeviceEvents* listener);
@@ -184,6 +204,8 @@ private:
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
+    static CallbackList<ICompositeInEvents*, IARMGroupComposite> s_compositeListeners;
+    static CallbackList<IDisplayEvents*, IARMGroupDisplay> s_displayListeners;
     static CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> s_displayDeviceListeners;
 
     template <typename T, typename F>
@@ -192,12 +214,16 @@ private:
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IDisplayEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn);
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoOutputPort;
     friend class IARMGroupAudioOutputPort;
+    friend class IARMGroupComposite;
+    friend class IARMGroupDisplay;
     friend class IARMGroupDisplayDevice;
 };
 } // namespace device
