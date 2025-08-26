@@ -535,10 +535,10 @@ private:
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
-            dsDisplayEvent_t dd = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
+            dsDisplayEvent_t displayEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
 
-            IarmHostImpl::Dispatch([dd](IDisplayDeviceEvents* listener) {
-                listener->OnDisplayHDMIHotPlug(dd);
+            IarmHostImpl::Dispatch([displayEvent](IDisplayDeviceEvents* listener) {
+                listener->OnDisplayHDMIHotPlug(displayEvent);
             });
         } else {
             INT_ERROR("Invalid data received for HDMI hot plug change");
