@@ -805,6 +805,14 @@ dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
     return impl().UnRegister(listener);
 }
 
+dsError_t Host::Register(IDisplayDeviceEvents* listener) {
+    return impl().Register(listener);
+}
+
+dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
+    return impl().Register(listener);
+}
+
 /** @} */
 
 } // namespace device

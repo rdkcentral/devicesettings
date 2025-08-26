@@ -31,6 +31,7 @@
 
 #include "audioOutputPort.hpp"
 #include "dsAVDTypes.h"
+#include "dsDisplay.h"
 #include "dsError.h"
 #include "list.hpp"
 #include "sleepMode.hpp"
@@ -168,6 +169,20 @@ public:
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
+
+    struct IDisplayDeviceEvents {
+        // @brief Display HDMI (out) Hot plug event
+        // @param displayEvent: display event type see dsDisplayEvent_t
+        virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
+    };
+
+    // @brief Register a listener for display device events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IDisplayDeviceEvents* listener);
+
+    // @brief UnRegister a listener for display device events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
     bool setPowerMode(int mode);
     int getPowerMode();
