@@ -810,7 +810,7 @@ dsError_t Host::Register(IDisplayDeviceEvents* listener) {
 }
 
 dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
-    return impl().Register(listener);
+    return impl().UnRegister(listener);
 }
 
 /** @} */
