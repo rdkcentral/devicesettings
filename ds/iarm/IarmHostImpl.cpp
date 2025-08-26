@@ -224,7 +224,10 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            // TODO
+            dsHdcpStatus_t hdcpStatus = static_cast<dsHdcpStatus_t>(eventData->data.hdmi_hdcp.hdcpStatus);
+            IarmHostImpl::Dispatch([hdcpStatus](IVideoOutputPortEvents* listener) {
+                listener->OnHDCPStatusChange(hdcpStatus);
+            });
         } else {
             INT_ERROR("Invalid data received for HDCP status change");
         }
@@ -616,7 +619,7 @@ dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
     return s_videoOutputPortListeners.UnRegister(listener);
 }
 
-// Dispatcher for IARMGroupVideoPort
+// Dispatcher for IVideoOutputPortEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_videoOutputPortListeners, std::move(fn));
@@ -634,7 +637,7 @@ dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
     return s_audioOutputPortListeners.UnRegister(listener);
 }
 
-// Dispatcher for IARMGroupAudioPort
+// Dispatcher for IAudioOutputPortEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_audioOutputPortListeners, std::move(fn));
