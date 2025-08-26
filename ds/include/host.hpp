@@ -81,34 +81,34 @@ public:
             virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
  
             // @brief HDMI Video Mode update
-            // @text onHDMInVideoModeUpdate
+            // @text onHDMIInVideoModeUpdate
             // @param port: port 0 or 1 et al
             // @param videoPortResolution: Video port resolution
-            virtual void OnHDMInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
+            virtual void OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
  
             // @brief HDMI ALLM (Auto Low Latency Mode) status
-            // @text onHDMInAllmStatus
+            // @text onHDMIInAllmStatus
             // @param port: port 0 or 1 et al
             // @param allmStatus: allm status
-            virtual void OnHDMInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
+            virtual void OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
  
             // @brief HDMI Event AVI content type
-            // @text OnHDMInAVIContentType
+            // @text OnHDMIInAVIContentType
             // @param port: port 0 or 1 et al
             // @param aviContentType: AVI content type
-            virtual void OnHDMInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
+            virtual void OnHDMIInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
  
             // @brief HDMI VRR status
-            // @text OnHDMInVRRStatus
+            // @text OnHDMIInVRRStatus
             // @param port: port 0 or 1 et al
             // @param vrrType: VRR type
-            virtual void OnHDMInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
+            virtual void OnHDMIInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
 
             // @brief HDMI Event AV Latency
-            // @text OnHDMInAVLatency
+            // @text OnHDMIInAVLatency
             // @param audioDelay: audio delay (in millisecs)
             // @param videoDelay: video delay (in millisecs)
-            virtual void OnHDMInAVLatency(int audioDelay, int videoDelay) { };
+            virtual void OnHDMIInAVLatency(int audioDelay, int videoDelay) { };
 
     };
 
@@ -147,7 +147,7 @@ public:
     uint32_t UnRegister(ICompositeInEvents *listener);
     
 
-    struct IDisplayHDMIHotPlugEvents{
+    struct IDisplayDeviceEvents{
 
             // @brief Display HDMI Hot plug event
             // @text onDisplayHDMIHotPlug
@@ -155,8 +155,8 @@ public:
             virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
     };
     
-    uint32_t Register(IDisplayHDMIHotPlugEvents *listener);
-    uint32_t UnRegister(IDisplayHDMIHotPlugEvents *listener);
+    uint32_t Register(IDisplayDeviceEvents *listener);
+    uint32_t UnRegister(IDisplayDeviceEvents *listener);
 
 
 

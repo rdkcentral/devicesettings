@@ -958,24 +958,24 @@ uint32_t Host::UnRegister(ICompositeInEvents *listener)
 }
 
 /**
- * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvents *Evtnotification)
+ * @fn void  Host::UnRegister(IDisplayDeviceEvents *Evtnotification)
  * @brief This API is used to Register the Events
  *
  * @return unint32_t
  */
-uint32_t Host::Register(IDisplayHDMIHotPlugEvents *listener)
+uint32_t Host::Register(IDisplayDeviceEvents *listener)
 {
   return 0;
 }
 
 
 /**
- * @fn void  Host::UnRegister(IDisplayHDMIHotPlugEvents *Evtnotification)
+ * @fn void  Host::UnRegister(IDisplayDeviceEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
  * @return unint32_t
  */
-uint32_t Host::UnRegister(IDisplayHDMIHotPlugEvents *listener)
+uint32_t Host::UnRegister(IDisplayDeviceEvents *listener)
 {
   return 0;
 }
