@@ -405,11 +405,111 @@ private:
     };
 };
 
+
+
+class IARMGroupComposite {
+public:
+    static bool RegisterIarmEvents()
+    {
+        return registerIarmEvents(handlers);
+    }
+
+    static bool UnRegisterIarmEvents()
+    {
+        return unregisterIarmEvents(handlers);
+    }
+
+private:
+	static void iarmCompositeInHotPlugHandler(const char*, IARM_EventId_t, void* data, size_t len)
+	{
+		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG received, eventId=%d", eventId);		
+		
+		IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsCompositeInPort_t compositePort = eventData->data.composite_in_connect.port;
+			bool isConnected = eventData->data.composite_in_connect.isPortConnected;
+            
+			IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+                listener->OnCompositeInHotPlug(compositePort,isConnected);
+            });
+        } else {
+            INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInHotPlugHandler");
+        }		
+	}
+
+
+	static void iarmCompositeInSignalStatusHandler(const char*, IARM_EventId_t, void* data, size_t len)
+	{
+		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS received, eventId=%d", eventId);		
+		
+		IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsCompositeInPort_t compositePort = eventData->data.composite_in_sig_status.port;
+			dsCompInSignalStatus_t compositeSigStatus = eventData->data.composite_in_sig_status.status;
+            
+			IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+                listener->OnCompositeInSignalStatus(compositePort,compositeSigStatus);
+            });
+        } else {
+            INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInSignalStatusHandler");
+        }		
+	}
+
+	static void iarmCompositeInStatusHandler(const char*, IARM_EventId_t, void* data, size_t len)
+	{
+		INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS received, eventId=%d", eventId);		
+		
+		IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsCompositeInPort_t compositePort = eventData->data.composite_in_status.port;
+			bool isPresented = eventData->data.composite_in_status.isPresented;
+            
+			IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+                listener->OnCompositeInStatus(compositePort,isPresented);
+            });
+        } else {
+            INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInStatusHandler");
+        }		
+	}
+
+
+	static void iarmCompositeInVideoModeUpdateHandler(const char*, IARM_EventId_t eventId, void* data, size_t len) 
+	{
+        INT_INFO("IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE received, eventId=%d", eventId);
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsCompositeInPort_t compositePort = eventData->data.composite_in_video_mode.port;
+			dsVideoPortResolution_t videoResolution;
+			videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
+			videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
+			videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;		
+            IarmHostImpl::Dispatch([compositePort](ICompositeInEvents* listener) {
+                listener->OnCompositeInVideoModeUpdate(compositePort,videoResolution);
+            });
+        } else {
+            INT_ERROR("Invalid data received for Composite Video Mode Update in iarmCompositeInVideoModeUpdateHandler");
+        }
+    );
+}
+
+private:
+    static constexpr EventHandlerMapping handlers[] = {
+        { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG,                  &IARMGroupComposite::iarmCompositeInHotPlugHandler          },
+        { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS,            &IARMGroupComposite::iarmCompositeInSignalStatusHandler     },
+        { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS,                   &IARMGroupComposite::iarmCompositeInStatusHandler           },
+        { IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE,        &IARMGroupComposite::iarmCompositeInVideoModeUpdateHandler  },
+    };
+};
+
+
 // static data
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> IarmHostImpl::s_videoPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> IarmHostImpl::s_audioPortListeners;
+IarmHostImpl::CallbackList<ICompositeInEvents*, IARMGroupComposite> IarmHostImpl::s_compositeListeners;
 
 IarmHostImpl::~IarmHostImpl()
 {
@@ -418,6 +518,7 @@ IarmHostImpl::~IarmHostImpl()
     s_videoDeviceListeners.Release();
     s_videoPortListeners.Release();
     s_audioPortListeners.Release();
+	s_compositeListeners.Release();
 }
 
 template <typename T, typename F>
@@ -491,6 +592,24 @@ uint32_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_audioPortListeners, std::move(fn));
+}
+
+uint32_t IarmHostImpl::Register(ICompositeInEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_compositeListeners.Register(listener);
+}
+
+uint32_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_compositeListeners.UnRegister(listener);
+}
+
+// Dispatcher for IARMGroupComposite
+/* static */ void IarmHostImpl::Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn)
+{
+    Dispatch(s_compositeListeners, std::move(fn));
 }
 
 } // namespace device

@@ -31,6 +31,7 @@ namespace device {
 class IARMGroupVideoDevice;
 class IARMGroupVideoPort;
 class IARMGroupAudioPort;
+class IARMGroupComposite;
 
 class IarmHostImpl {
 
@@ -138,7 +139,8 @@ public:
     using IVideoDeviceEvents = device::Host::IVideoDeviceEvents;
     using IVideoOutputPortEvents   = device::Host::IVideoOutputPortEvents;
     using IAudioOutputPortEvents   = device::Host::IAudioOutputPortEvents;
-
+	using ICompositeInEvents       = device::Host::ICompositeInEvents;
+	
     IarmHostImpl();
     ~IarmHostImpl();
 
@@ -166,23 +168,35 @@ public:
     // @param listener: class object implementing the listener
     uint32_t UnRegister(IAudioOutputPortEvents* listener);
 
+    // @brief Register a listener for Composite events
+    // @param listener: class object implementing the listener
+    uint32_t Register(ICompositeInEvents* listener);
+
+    // @brief UnRegister a listener for Composite events
+    // @param listener: class object implementing the listener
+    uint32_t UnRegister(ICompositeInEvents* listener);
+
 private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
-
+    static CallbackList<ICompositeInEvents*, IARMGroupComposite> s_compositeListeners;
+	
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn);
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoPort;
     friend class IARMGroupAudioPort;
+    friend class IARMGroupComposite;
+	
 };
 } // namespace device
