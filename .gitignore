@@ -50,5 +50,4 @@ sample/testFrontPanel
 
 .cache
 compile_commands.json
-
 .harper-dictionary.txt
