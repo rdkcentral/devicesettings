@@ -31,8 +31,8 @@ namespace device {
 
 // Forward declaration for IARM Implementation Groups
 class IARMGroupVideoDevice;
-class IARMGroupVideoPort;
-class IARMGroupAudioPort;
+class IARMGroupVideoOutputPort;
+class IARMGroupAudioOutputPort;
 
 class IarmHostImpl {
 
@@ -172,8 +172,8 @@ private:
     static std::mutex s_mutex;
 
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
-    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoPort> s_videoPortListeners;
-    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioPort> s_audioPortListeners;
+    static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoPortListeners;
+    static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioPortListeners;
 
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
@@ -184,7 +184,7 @@ private:
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
     friend class IARMGroupVideoDevice;
-    friend class IARMGroupVideoPort;
-    friend class IARMGroupAudioPort;
+    friend class IARMGroupVideoOutputPort;
+    friend class IARMGroupAudioOutputPort;
 };
 } // namespace device
