@@ -36,6 +36,7 @@
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
+#include "dsDisplay.h"
 
 /**
  * @file host.hpp
