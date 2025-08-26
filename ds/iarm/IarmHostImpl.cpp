@@ -649,10 +649,10 @@ private:
         }
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
-			dsHdcpStatus_t hdcpStatus = eventData->data.hdmi_hdcp.hdcpStatus;
+            dsHdcpStatus_t hdcpStatus = static_cast<dsHdcpStatus_t>(eventData->data.hdmi_hdcp.hdcpStatus);
             IarmHostImpl::Dispatch([hdcpStatus](IDisplayEvents* listener) {
                 /* To check Parameter Required or Not*/
-		listener->OnHDCPStatusChange();
+		listener->OnDisplayHDCPStatus();
             });
         } else {
             INT_ERROR("Invalid data received for Composite Video Mode Update in iarmDisplayHDCPStatusChange");
