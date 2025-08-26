@@ -779,7 +779,7 @@ DefaultImpl& Host::impl()
  * @fn void  Host::Register(ICompositeInEvents *Evtnotification)
  * @brief This API is used to register the Events
  *
- * @return dsError_t 
+ * @return dsError_t
  */
 dsError_t  Host::Register(ICompositeInEvents *listener)
 {
@@ -790,7 +790,7 @@ dsError_t  Host::Register(ICompositeInEvents *listener)
  * @fn void  Host::UnRegister(ICompositeInEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
- * @return dsError_t 
+ * @return dsError_t
  */
 dsError_t  Host::UnRegister(ICompositeInEvents *listener)
 {
@@ -801,7 +801,7 @@ dsError_t  Host::UnRegister(ICompositeInEvents *listener)
  * @fn void  Host::Register(IDisplayEvents *Evtnotification)
  * @brief This API is used to register the Events
  *
- * @return dsError_t 
+ * @return dsError_t
  */
 dsError_t  Host::Register(IDisplayEvents *listener)
 {
@@ -812,7 +812,7 @@ dsError_t  Host::Register(IDisplayEvents *listener)
  * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
  * @brief This API is used to UnRegister the Events
  *
- * @return dsError_t 
+ * @return dsError_t
  */
 dsError_t  Host::UnRegister(IDisplayEvents *listener)
 {
@@ -846,6 +846,14 @@ dsError_t Host::Register(IAudioOutputPortEvents* listener)
 
 dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
 {
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(IDisplayDeviceEvents* listener) {
+    return impl().Register(listener);
+}
+
+dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
     return impl().UnRegister(listener);
 }
 

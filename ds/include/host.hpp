@@ -31,12 +31,12 @@
 
 #include "audioOutputPort.hpp"
 #include "dsAVDTypes.h"
+#include "dsDisplay.h"
 #include "dsError.h"
 #include "list.hpp"
 #include "sleepMode.hpp"
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
-#include "dsDisplay.h"
 
 /**
  * @file host.hpp
@@ -69,13 +69,13 @@ public:
             // @param port: Port of the hotplug
             // @param isConnected: Is it connected (true) or not(false)
             virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
- 
+
             // @brief Composite In Signal status
             // @text onCompositeInSignalStatus
             // @param port: Port of the hotplug
             // @param signalStatus: Signal status
             virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
- 
+
             // @brief Composite In status
             // @text onCompositeInStatus
             // @param activePort: Active port
@@ -92,14 +92,14 @@ public:
 
     dsError_t  Register(ICompositeInEvents *listener);
     dsError_t  UnRegister(ICompositeInEvents *listener);
-    
+
     struct IDisplayEvents{
 
             // @brief Display RX Sense event
             // @text onDisplayRxSense
             // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
             virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
- 
+
             // @brief Display HDCP Status
             // @text OnDisplayHDCPStatus
             virtual void OnDisplayHDCPStatus() { };
@@ -215,6 +215,20 @@ public:
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
+
+    struct IDisplayDeviceEvents {
+        // @brief Display HDMI (out) Hot plug event
+        // @param displayEvent: display event type see dsDisplayEvent_t
+        virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
+    };
+
+    // @brief Register a listener for display device events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IDisplayDeviceEvents* listener);
+
+    // @brief UnRegister a listener for display device events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
     bool setPowerMode(int mode);
     int getPowerMode();
