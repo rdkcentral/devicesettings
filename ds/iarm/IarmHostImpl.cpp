@@ -17,10 +17,8 @@ struct EventHandlerMapping {
     IARM_EventHandler_t handler;
 };
 
-/* 
- * unregisterIarmEvents can be called by registerIarmEvents in case of failure.
- * Hence defined before registerIarmEvents
- */
+// unregisterIarmEvents can be called by registerIarmEvents in case of failure.
+// Hence defined before registerIarmEvents
 template <size_t N>
 static bool unregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
 {
@@ -30,7 +28,7 @@ static bool unregisterIarmEvents(const EventHandlerMapping (&handlers)[N])
         if (IARM_RESULT_SUCCESS != IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId)) {
             INT_ERROR("Failed to unregister IARM event handler for %d", eh.eventId);
             unregistered = false;
-            /* don't break here, try to unregister all handlers */
+            // don't break here, try to unregister all handlers
         }
     }
     return unregistered;
@@ -45,16 +43,14 @@ static bool registerIarmEvents(const EventHandlerMapping (&handlers)[N])
         if (IARM_RESULT_SUCCESS != IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME, eh.eventId, eh.handler)) {
             INT_ERROR("Failed to register IARM event handler for %d", eh.eventId);
             registered = false;
-            /* no point in continuing as we will attempt to unregister anyway */
+            // no point in continuing as we will attempt to unregister anyway
             break;
         }
     }
 
     if (!registered) {
-        /* 
-         * in case of failure / partial failure
-         * we should unregister any handlers that were registered 
-         */
+        // in case of failure / partial failure
+        // we should unregister any handlers that were registered
         unregisterIarmEvents(handlers);
     }
 
@@ -70,11 +66,9 @@ inline bool isValidOwner(const char* owner)
     return true;
 }
 
-/* 
- * IARMGroupXYZ are c to c++ shim (all methods are static)
- * Required to perform group event register and unregister with IARM
- * Thread safety to be ensured by the caller 
- */
+// IARMGroupXYZ are c to c++ shim (all methods are static)
+// Required to perform group event register and unregister with IARM
+// Thread safety to be ensured by the caller
 class IARMGroupVideoDevice {
 public:
     static bool RegisterIarmEvents()
@@ -534,9 +528,9 @@ private:
 
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_connect.port;
-            bool isConnected = eventData->data.composite_in_connect.isPortConnected;
+            bool isConnected                  = eventData->data.composite_in_connect.isPortConnected;
             IarmHostImpl::Dispatch([compositePort, isConnected](ICompositeInEvents* listener) {
-                listener->OnCompositeInHotPlug(compositePort,isConnected);
+                listener->OnCompositeInHotPlug(compositePort, isConnected);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInHotPlugHandler");
@@ -577,9 +571,9 @@ private:
 
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_status.port;
-            bool isPresented = eventData->data.composite_in_status.isPresented;
-            IarmHostImpl::Dispatch([compositePort,isPresented](ICompositeInEvents* listener) {
-                listener->OnCompositeInStatus(compositePort,isPresented);
+            bool isPresented                  = eventData->data.composite_in_status.isPresented;
+            IarmHostImpl::Dispatch([compositePort, isPresented](ICompositeInEvents* listener) {
+                listener->OnCompositeInStatus(compositePort, isPresented);
             });
         } else {
             INT_ERROR("Invalid data received for Composite Status Handler in iarmCompositeInStatusHandler");
@@ -597,13 +591,15 @@ private:
 
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_video_mode.port;
-            dsVideoPortResolution_t videoResolution={0};
-            videoResolution.name[0]='\0';
-            videoResolution.aspectRatio = dsVIDEO_ASPECT_RATIO_MAX;
+
+            dsVideoPortResolution_t videoResolution {};
+
+            videoResolution.name[0]          = '\0';
+            videoResolution.aspectRatio      = dsVIDEO_ASPECT_RATIO_MAX;
             videoResolution.stereoScopicMode = dsVIDEO_SSMODE_UNKNOWN;
-            videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
-            videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
-            videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
+            videoResolution.pixelResolution  = eventData->data.composite_in_video_mode.resolution.pixelResolution;
+            videoResolution.interlaced       = eventData->data.composite_in_video_mode.resolution.interlaced;
+            videoResolution.frameRate        = eventData->data.composite_in_video_mode.resolution.frameRate;
 
             IarmHostImpl::Dispatch([compositePort, videoResolution](ICompositeInEvents* listener) {
                 listener->OnCompositeInVideoModeUpdate(compositePort, videoResolution);
@@ -929,7 +925,7 @@ private:
         { IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,  &IARMGroupHdmiIn::iarmHDMIInAVIContentTypeHandler    },
         { IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,        &IARMGroupHdmiIn::iarmHDMIInAVLatencyHandler         }
     };
-}; /* IARMGroupHdmiIn */
+}; // IARMGroupHdmiIn
 
 /* static data */
 constexpr EventHandlerMapping IARMGroupHdmiIn::handlers[];
@@ -992,7 +988,7 @@ dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
     return s_hdmiInListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IHDMIInEvents */
+// Dispatcher for IHDMIInEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn)
 {
     Dispatch(s_hdmiInListeners, std::move(fn));
@@ -1010,7 +1006,7 @@ dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
     return s_videoDeviceListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IARMGroupVideoDevice */
+// Dispatcher for IARMGroupVideoDevice
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
 {
     Dispatch(s_videoDeviceListeners, std::move(fn));
@@ -1028,7 +1024,7 @@ dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
     return s_videoOutputPortListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IVideoOutputPortEvents */
+// Dispatcher for IVideoOutputPortEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_videoOutputPortListeners, std::move(fn));
@@ -1046,7 +1042,7 @@ dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
     return s_audioOutputPortListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IAudioOutputPortEvents */
+// Dispatcher for IAudioOutputPortEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
     Dispatch(s_audioOutputPortListeners, std::move(fn));
@@ -1064,7 +1060,7 @@ dsError_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
     return s_compositeListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IARMGroupComposite */
+// Dispatcher for IARMGroupComposite
 /* static */ void IarmHostImpl::Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn)
 {
     Dispatch(s_compositeListeners, std::move(fn));
@@ -1082,11 +1078,12 @@ dsError_t IarmHostImpl::UnRegister(IDisplayEvents* listener)
     return s_displayListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IARMGroupDisplay */
+// Dispatcher for IARMGroupDisplay
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayEvents* listener)>&& fn)
 {
     Dispatch(s_displayListeners, std::move(fn));
 }
+
 dsError_t IarmHostImpl::Register(IDisplayDeviceEvents* listener)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
@@ -1099,10 +1096,10 @@ dsError_t IarmHostImpl::UnRegister(IDisplayDeviceEvents* listener)
     return s_displayDeviceListeners.UnRegister(listener);
 }
 
-/* Dispatcher for IDisplayDeviceEvents */
+// Dispatcher for IDisplayDeviceEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn)
 {
     Dispatch(s_displayDeviceListeners, std::move(fn));
 }
 
-} /* namespace device */
+} // namespace device
