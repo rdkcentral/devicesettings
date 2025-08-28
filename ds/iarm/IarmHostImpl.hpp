@@ -186,19 +186,19 @@ public:
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  Register(ICompositeInEvents* listener);
+    dsError_t Register(ICompositeInEvents* listener);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  UnRegister(ICompositeInEvents* listener);
+    dsError_t UnRegister(ICompositeInEvents* listener);
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  Register(IDisplayEvents* listener);
+    dsError_t Register(IDisplayEvents* listener);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  UnRegister(IDisplayEvents* listener);
+    dsError_t UnRegister(IDisplayEvents* listener);
 
     // @brief Register a listener for display device events
     // @param listener: class object implementing the listener
