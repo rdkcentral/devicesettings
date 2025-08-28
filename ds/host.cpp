@@ -1157,7 +1157,7 @@ dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
   return 0;
 }
 
-dsError_t Host::Register(IDisplayDeviceEvents* listener) {
+dsError_t Host::Register(IDisplayDeviceEvents* listener)
 {
   return 0;
 }
@@ -1168,11 +1168,11 @@ dsError_t Host::UnRegister(IDisplayDeviceEvents* listener)
 }
 
 
+/** @} */
 
 }
 
 
-/** @} */
 
 /** @} */
 /** @} */
