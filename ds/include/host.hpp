@@ -40,7 +40,7 @@
 #include "dsMgr.h"
 #include "dsTypes.h"
 #include "dsDisplay.h"
-
+#include "dsError.h"
 
 
 /**

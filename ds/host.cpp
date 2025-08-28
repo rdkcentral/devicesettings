@@ -1099,72 +1099,72 @@ INT_WARN("Base impl of OnHDMIInEventHotPlug called. port: %d isConnected %d", po
 
 dsError_t Host::Register(IHDMIInEvents *listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::UnRegister(IHDMIInEvents *listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t  Host::Register(ICompositeInEvents *listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t  Host::UnRegister(ICompositeInEvents *listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t  Host::Register(IDisplayEvents *listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t  Host::UnRegister(IDisplayEvents *listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::Register(IVideoDeviceEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::UnRegister(IVideoDeviceEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::Register(IVideoOutputPortEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::UnRegister(IVideoOutputPortEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::Register(IAudioOutputPortEvents* listener)
 {
-	return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::Register(IDisplayDeviceEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 dsError_t Host::UnRegister(IDisplayDeviceEvents* listener)
 {
-  return 0;
+  return dsERR_NONE;
 }
 
 
