@@ -781,7 +781,7 @@ dsError_t Host::Register(IHDMIInEvents *listener)
 
 dsError_t Host::UnRegister(IHDMIInEvents *listener)
 {
-    return impl().Register(listener);
+    return impl().UnRegister(listener);
 }
   
 dsError_t  Host::Register(ICompositeInEvents *listener)

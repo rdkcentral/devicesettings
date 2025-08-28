@@ -729,7 +729,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            dsHdmiInPort_t port = eventData->data.hdmi_in_connect.port);
+            dsHdmiInPort_t port = eventData->data.hdmi_in_connect.port;
             bool isConnected = eventData->data.hdmi_in_connect.isPortConnected;
 
             IarmHostImpl::Dispatch([port, isConnected](IHDMIInEvents* listener) {
@@ -796,7 +796,7 @@ private:
 
         if (eventData) {
             dsHdmiInPort_t port = eventData->data.hdmi_in_video_mode.port;
-            dsVideoPortResolution_t& res;
+            dsVideoPortResolution_t res;
             res.pixelResolution = eventData->data.hdmi_in_video_mode.resolution.pixelResolution;
             res.interlaced = eventData->data.hdmi_in_video_mode.resolution.interlaced;
             res.frameRate = eventData->data.hdmi_in_video_mode.resolution.frameRate;
@@ -919,7 +919,6 @@ constexpr EventHandlerMapping IARMGroupDisplay::handlers[];
 
 std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
-IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
