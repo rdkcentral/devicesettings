@@ -767,7 +767,7 @@ Host::~Host()
 
 DefaultImpl& Host::impl()
 {
-    // lazy instantiation
+    /* lazy instantiation */
     if (!m_impl) {
         m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
     }
@@ -876,6 +876,40 @@ DefaultImpl& Host::impl()
     // If client needs to handle this event, they should override this method
     INT_WARN("Base impl of OnDisplayHDMIHotPlug called. displayEvent: %d", displayEvent);
 }
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port,isConnected);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port,signalStatus);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort,isPresented);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort,videoResolution.pixelResolution);
+}
+
+/* virtual */ void  Host::IDisplayEvents::OnDisplayRxSense(dsDisplayEvent_t displayEvent)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayRxSense called. displayEvent: %d ", displayEvent);
+}
+/* virtual */ void  Host::IDisplayEvents::OnDisplayHDCPStatus()
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
+}
+
 
 dsError_t Host::Register(IHDMIInEvents *listener)
 {
@@ -947,7 +981,7 @@ dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
 
 /** @} */
 
-} // namespace device
+} /* namespace device */
 /** @} */
 
 /** @} */
