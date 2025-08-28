@@ -935,7 +935,6 @@ constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupComposite::handlers[];
 constexpr EventHandlerMapping IARMGroupDisplay::handlers[];
 
-std::mutex IarmHostImpl::s_mutex;
 IarmHostImpl::CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
@@ -946,8 +945,6 @@ IarmHostImpl::CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> IarmHo
 
 IarmHostImpl::~IarmHostImpl()
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
-
     s_hdmiInListeners.Release();
     s_videoDeviceListeners.Release();
     s_videoOutputPortListeners.Release();
@@ -961,7 +958,6 @@ template <typename T, typename F>
 /* static */ void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
 {
     std::stringstream ss;
-    std::lock_guard<std::mutex> lock(s_mutex);
 
     for (auto* listener : listeners) {
         auto start = std::chrono::steady_clock::now();
@@ -978,127 +974,120 @@ template <typename T, typename F>
 
 dsError_t IarmHostImpl::Register(IHDMIInEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_hdmiInListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_hdmiInListeners.UnRegister(listener);
 }
 
 // Dispatcher for IHDMIInEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_hdmiInListeners.Mutex());
     Dispatch(s_hdmiInListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoDeviceListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoDeviceListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupVideoDevice
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_videoDeviceListeners.Mutex());
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoOutputPortListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_videoOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IVideoOutputPortEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_videoOutputPortListeners.Mutex());
     Dispatch(s_videoOutputPortListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_audioOutputPortListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_audioOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IAudioOutputPortEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_audioOutputPortListeners.Mutex());
     Dispatch(s_audioOutputPortListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(ICompositeInEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_compositeListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_compositeListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupComposite
 /* static */ void IarmHostImpl::Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_compositeListeners.Mutex());
     Dispatch(s_compositeListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IDisplayEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_displayListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IDisplayEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_displayListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupDisplay
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_displayListeners.Mutex());
     Dispatch(s_displayListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IDisplayDeviceEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_displayDeviceListeners.Register(listener);
 }
 
 dsError_t IarmHostImpl::UnRegister(IDisplayDeviceEvents* listener)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     return s_displayDeviceListeners.UnRegister(listener);
 }
 
 // Dispatcher for IDisplayDeviceEvents
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn)
 {
+    std::lock_guard<std::mutex> lock(s_displayDeviceListeners.Mutex());
     Dispatch(s_displayDeviceListeners, std::move(fn));
 }
 
