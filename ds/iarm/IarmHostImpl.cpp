@@ -693,6 +693,7 @@ private:
         }
 
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
         if (eventData) {
             dsDisplayEvent_t displayEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
 
@@ -700,12 +701,216 @@ private:
                 listener->OnDisplayHDMIHotPlug(displayEvent);
             });
         } else {
-            INT_ERROR("Invalid data received for HDMI hot plug change");
+            INT_ERROR("Invalid data received for HDMI (out) hot plug change");
+        }
+    }
+}; // IARMGroupDisplayDevice
+
+class IARMGroupHdmiIn {
+public:
+    static bool RegisterIarmEvents()
+    {
+        return registerIarmEvents(handlers);
+    }
+
+    static bool UnRegisterIarmEvents()
+    {
+        return unregisterIarmEvents(handlers);
+    }
+private:
+    static void iarmHDMIInEventHotPlugHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_HOTPLUG received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsHdmiInPort_t port = eventData->data.hdmi_in_connect.port;
+            bool isConnected = eventData->data.hdmi_in_connect.isPortConnected;
+
+            IarmHostImpl::Dispatch([port, isConnected](IHDMIInEvents* listener) {
+                listener->OnHDMIInEventHotPlug(port, isConnected);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn hot plug");
         }
     };
-};
+
+    static void iarmHDMIInEventSignalStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_SIGNAL_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsHdmiInPort_t port = eventData->data.hdmi_in_sig_status.port;
+            dsHdmiInSignalStatus_t sigStatus = eventData->data.hdmi_in_sig_status.status;
+
+            IarmHostImpl::Dispatch([port, sigStatus](IHDMIInEvents* listener) {
+                listener->OnHDMIInEventSignalStatus(port, sigStatus);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn signal status");
+        }
+    };
+
+    static void iarmHDMIInEventStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsHdmiInPort_t activePort = eventData->data.hdmi_in_status.port;
+            bool isPresented = eventData->data.hdmi_in_status.isPresented;
+
+            IarmHostImpl::Dispatch([activePort, isPresented](IHDMIInEvents* listener) {
+                listener->OnHDMIInEventStatus(activePort, isPresented);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn event status");
+        }
+    };
+
+    static void iarmHDMIInVideoModeUpdateHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_VIDEO_MODE_UPDATE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsHdmiInPort_t port = eventData->data.hdmi_in_video_mode.port;
+            dsVideoPortResolution_t res;
+            res.pixelResolution = eventData->data.hdmi_in_video_mode.resolution.pixelResolution;
+            res.interlaced = eventData->data.hdmi_in_video_mode.resolution.interlaced;
+            res.frameRate = eventData->data.hdmi_in_video_mode.resolution.frameRate;
+
+            IarmHostImpl::Dispatch([port, res](IHDMIInEvents* listener) {
+                listener->OnHDMIInVideoModeUpdate(port, res);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn video mode update");
+        }
+    };
+
+    static void iarmHDMIInAllmStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_ALLM_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsHdmiInPort_t port = eventData->data.hdmi_in_allm_mode.port;
+            bool allmStatus = eventData->data.hdmi_in_allm_mode.allm_mode;
+
+            IarmHostImpl::Dispatch([port, allmStatus](IHDMIInEvents* listener) {
+                listener->OnHDMIInAllmStatus(port, allmStatus);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn allm status");
+        }
+    };
+
+    static void iarmHDMIInVRRStatusHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_VRR_STATUS received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+        if (eventData) {
+            dsHdmiInPort_t port = eventData->data.hdmi_in_vrr_mode.port;
+            dsVRRType_t vrrType = eventData->data.hdmi_in_vrr_mode.vrr_type;
+
+            IarmHostImpl::Dispatch([port, vrrType](IHDMIInEvents* listener) {
+                listener->OnHDMIInVRRStatus(port, vrrType);
+            });
+
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn vrr status");
+        }
+    };
+
+    static void iarmHDMIInAVIContentTypeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            dsHdmiInPort_t port = eventData->data.hdmi_in_content_type.port;
+            dsAviContentType_t type = eventData->data.hdmi_in_content_type.aviContentType;
+
+            IarmHostImpl::Dispatch([port, type](IHDMIInEvents* listener) {
+                listener->OnHDMIInAVIContentType(port, type);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn avi content type");
+        }
+    };
+
+    static void iarmHDMIInAVLatencyHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
+    {
+        INT_INFO("IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY received owner = %s, eventId = %d", owner, eventId);
+
+        if (!isValidOwner(owner)) {
+            return;
+        }
+
+        IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
+
+        if (eventData) {
+            int audioDelay = eventData->data.hdmi_in_av_latency.audio_output_delay;
+            int videoDelay = eventData->data.hdmi_in_av_latency.video_latency;
+
+            IarmHostImpl::Dispatch([audioDelay, videoDelay](IHDMIInEvents* listener) {
+                listener->OnHDMIInAVLatency(audioDelay, videoDelay);
+            });
+        } else {
+            INT_ERROR("Invalid data received for HdmiIn av latency");
+        }
+    };
+
+private:
+    static constexpr EventHandlerMapping handlers[] = {
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_HOTPLUG,                 &IARMGroupHdmiIn::iarmHDMIInEventHotPlugHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_SIGNAL_STATUS,           &IARMGroupHdmiIn::iarmHDMIInEventSignalStatusHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS,                  &IARMGroupHdmiIn::iarmHDMIInEventStatusHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_VIDEO_MODE_UPDATE,       &IARMGroupHdmiIn::iarmHDMIInVideoModeUpdateHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_ALLM_STATUS,             &IARMGroupHdmiIn::iarmHDMIInAllmStatusHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_VRR_STATUS,              &IARMGroupHdmiIn::iarmHDMIInVRRStatusHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,        &IARMGroupHdmiIn::iarmHDMIInAVIContentTypeHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,              &IARMGroupHdmiIn::iarmHDMIInAVLatencyHandler }
+    };
+}; // IARMGroupHdmiIn
 
 // static data
+constexpr EventHandlerMapping IARMGroupHdmiIn::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
@@ -713,6 +918,7 @@ constexpr EventHandlerMapping IARMGroupComposite::handlers[];
 constexpr EventHandlerMapping IARMGroupDisplay::handlers[];
 
 std::mutex IarmHostImpl::s_mutex;
+IarmHostImpl::CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
@@ -724,6 +930,7 @@ IarmHostImpl::~IarmHostImpl()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
 
+    s_hdmiInListeners.Release();
     s_videoDeviceListeners.Release();
     s_videoOutputPortListeners.Release();
     s_audioOutputPortListeners.Release();
@@ -749,6 +956,24 @@ template <typename T, typename F>
     }
 
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
+}
+
+dsError_t IarmHostImpl::Register(IHDMIInEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_hdmiInListeners.Register(listener);
+}
+
+dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_hdmiInListeners.UnRegister(listener);
+}
+
+// Dispatcher for IHDMIInEvents
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn)
+{
+    Dispatch(s_hdmiInListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
