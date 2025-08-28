@@ -68,6 +68,9 @@ IARM_Result_t _dsGetDisplay(void *arg);
 IARM_Result_t _dsGetDisplayAspectRatio(void *arg);
 IARM_Result_t _dsGetEDID(void *arg);
 IARM_Result_t _dsGetEDIDBytes(void *arg);
+IARM_Result_t _dsSetAllmEnabled(void *arg);
+IARM_Result_t _dsSetAVIContentType(void *arg);
+IARM_Result_t _dsSetAVIScanInformation(void *arg);
 IARM_Result_t _dsDisplayTerm(void *arg);
 void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *eventData);
 static void  filterEDIDResolution(intptr_t Shandle, dsDisplayEDID_t *edid);
@@ -111,6 +114,7 @@ IARM_Result_t _dsDisplayInit(void *arg)
             eReturn = dsGetDisplay(dsVIDEOPORT_TYPE_INTERNAL, 0, &handle);
             if (dsERR_NONE != eReturn) {
                 INT_ERROR("dsGetDisplay for dsVIDEOPORT_TYPE_INTERNAL also failed.\r\n");
+                IARM_BUS_Unlock(lock);
                 return IARM_RESULT_INVALID_PARAM;
             }
         }
@@ -120,6 +124,9 @@ IARM_Result_t _dsDisplayInit(void *arg)
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetDisplayAspectRatio,_dsGetDisplayAspectRatio);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEDID,_dsGetEDID);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEDIDBytes,_dsGetEDIDBytes);
+		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAllmEnabled,_dsSetAllmEnabled);
+                IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAVIContentType,_dsSetAVIContentType);
+                IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAVIScanInformation,_dsSetAVIScanInformation);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsDisplayTerm,_dsDisplayTerm);
 
 		m_isInitialized = 1;
@@ -167,6 +174,9 @@ IARM_Result_t _dsGetDisplayAspectRatio(void *arg)
 IARM_Result_t _dsGetEDID(void *arg)
 {
     _DEBUG_ENTER();
+    if (!arg) {   //  coverity - FORWARD_NULL check
+       return IARM_RESULT_INVALID_PARAM;
+    }
     errno_t rc = -1;
     static dsDisplayEDID_t *edidInfo = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
     dsDisplayGetEDIDParam_t *param = (dsDisplayGetEDIDParam_t *)arg;
@@ -208,6 +218,10 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
 #endif
     errno_t rc = -1;
     _DEBUG_ENTER();
+    if (!arg) {   //  coverity - FORWARD_NULL check
+       return IARM_RESULT_INVALID_PARAM;
+    }
+
     static unsigned char edid[1024] = {0};
     static int length = 0;
    dsDisplayGetEDIDBytesParam_t *param = (dsDisplayGetEDIDBytesParam_t *)arg;
@@ -270,6 +284,207 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
     IARM_BUS_Unlock(lock);
 	
 	return IARM_RESULT_SUCCESS;
+}
+
+IARM_Result_t _dsSetAllmEnabled(void* arg)
+{
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+    dsError_t ret = dsERR_NONE;
+
+    typedef dsError_t (*dsSetAllmEnabled_t)(intptr_t handle, bool enabled);
+    typedef dsError_t (*dsGetAllmEnabled_t)(intptr_t handle, bool *enabled);
+    static dsSetAllmEnabled_t func_dsSetAllmEnabled = 0;
+    static dsGetAllmEnabled_t func_dsGetAllmEnabled = 0;
+    if (func_dsGetAllmEnabled == 0 &&  func_dsSetAllmEnabled  == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func_dsGetAllmEnabled = (dsGetAllmEnabled_t) dlsym(dllib, "dsGetAllmEnabled");
+            func_dsSetAllmEnabled = (dsSetAllmEnabled_t) dlsym(dllib, "dsSetAllmEnabled");
+            if (func_dsGetAllmEnabled && func_dsSetAllmEnabled) {
+                INT_DEBUG(" dsGetAllmEnabled (intptr_t  handle, bool *enabled) and dsSetAllmEnabled (intptr_t  handle, bool enabled) is defined and loaded\r\n");
+            }
+            else {
+                INT_INFO(" dsGetAllmEnabled (intptr_t  handle, bool *enabled) and dsSetAllmEnabled (intptr_t  handle, bool enabled) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+
+    dsDisplaySetAllmEnabledParam_t *param = (dsDisplaySetAllmEnabledParam_t *)arg;
+
+    if (func_dsGetAllmEnabled != 0 &&  func_dsSetAllmEnabled  != 0)
+    {
+	    bool currentALLMState = false;
+	    ret = func_dsGetAllmEnabled (param->handle, &currentALLMState);
+	    if (ret == dsERR_NONE)
+	    {
+		    if (currentALLMState == param->enabled)
+		    {
+			    INT_INFO("ALLM mode already %s for HDMI output video port \r\n",currentALLMState ? "Enabled" :"Disabled");
+		    }
+		    else{
+			    INT_INFO("Current ALLM state  %s Requested to %s\r\n", (currentALLMState ? "Enabled" :"Disabled") ,(param->enabled ? "Enabled" :"Disabled"));
+			    ret = func_dsSetAllmEnabled(param->handle, param->enabled);
+			    param->result = ret;
+			    INT_INFO("dsSetAllmEnabled ret: %d \r\n",ret);
+		    }
+	    }
+	    else
+	    {
+		    INT_INFO("dsGetAllmEnabled failed ret: %d \r\n",ret);
+		    param->result = dsERR_GENERAL;
+	    }
+
+    }
+    else {
+        param->result = dsERR_GENERAL;
+    }
+
+    IARM_BUS_Unlock(lock);
+
+    return IARM_RESULT_SUCCESS;
+}
+
+IARM_Result_t _dsSetAVIContentType(void* arg)
+{
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+    dsError_t ret = dsERR_NONE;
+
+    typedef dsError_t (*dsSetAVIContentType_t)(intptr_t handle, dsAviContentType_t contentType);
+    typedef dsError_t (*dsGetAVIContentType_t)(intptr_t handle, dsAviContentType_t* contentType);
+    static dsSetAVIContentType_t func_dsSetAVIContentType = 0;
+    static dsGetAVIContentType_t func_dsGetAVIContentType = 0;
+    if (func_dsGetAVIContentType == 0 &&  func_dsSetAVIContentType  == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func_dsSetAVIContentType = (dsSetAVIContentType_t) dlsym(dllib, "dsSetAVIContentType");
+			func_dsGetAVIContentType = (dsGetAVIContentType_t) dlsym(dllib, "dsGetAVIContentType");
+            if (func_dsGetAVIContentType && func_dsSetAVIContentType) {
+                INT_DEBUG(" dsGetAVIContentType (intptr_t, dsAviContentType_t*) and dsSetAVIContentType (intptr_t, dsAviContentType_t) is defined and loaded\r\n");
+            }
+            else {
+                INT_INFO(" dsGetAVIContentType (intptr_t , dsAviContentType_t*) and dsSetAVIContentType (intptr_t, dsAviContentType_t) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+
+    dsDisplaySetAVIContentTypeParam_t *param = (dsDisplaySetAVIContentTypeParam_t *)arg;
+
+    if (func_dsGetAVIContentType != 0 &&  func_dsSetAVIContentType  != 0)
+    {
+	    dsAviContentType_t contentType = dsAVICONTENT_TYPE_NOT_SIGNALLED;
+	    ret = func_dsGetAVIContentType (param->handle, &contentType);
+	    if (ret == dsERR_NONE)
+	    {
+		    if (contentType == param->contentType)
+		    {
+			    INT_INFO("HDMI AVI content type already set to %d\r\n",contentType);
+		    }
+		    else{
+			    INT_INFO("Current AVI content type %d, requested content type %d\r\n",contentType,param->contentType);
+			    ret = func_dsSetAVIContentType(param->handle, param->contentType);
+			    param->result = ret;
+			    INT_INFO("dsSetAVIContentType ret: %d \r\n",ret);
+		    }
+	    }
+	    else
+	    {
+		    INT_INFO("dsGetAVIContentType failed ret: %d \r\n",ret);
+		    param->result = dsERR_GENERAL;
+	    }
+
+    }
+    else {
+        param->result = dsERR_GENERAL;
+    }
+
+    IARM_BUS_Unlock(lock);
+
+    return IARM_RESULT_SUCCESS;
+}
+
+IARM_Result_t _dsSetAVIScanInformation(void* arg)
+{
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+    dsError_t ret = dsERR_NONE;
+
+    typedef dsError_t (*dsSetAVIScanInfo_t)(intptr_t handle, dsAVIScanInformation_t scanInfo);
+    typedef dsError_t (*dsGetAVIScanInfo_t)(intptr_t handle, dsAVIScanInformation_t* scanInfo);
+    static dsSetAVIScanInfo_t func_dsSetAVIScanInfo = 0;
+    static dsGetAVIScanInfo_t func_dsGetAVIScanInfo = 0;
+    if (func_dsGetAVIScanInfo == 0 &&  func_dsSetAVIScanInfo  == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func_dsSetAVIScanInfo = (dsSetAVIScanInfo_t) dlsym(dllib, "dsSetAVIScanInformation");
+			func_dsGetAVIScanInfo = (dsGetAVIScanInfo_t) dlsym(dllib, "dsGetAVIScanInformation");
+            if (func_dsGetAVIScanInfo && func_dsSetAVIScanInfo) {
+                INT_DEBUG(" dsGetAVIScanInformation(intptr_t, dsAVIScanInformation_t*) and dsSetAVIScanInformation(intptr_t, dsAVIScanInformation_t) is defined and loaded\r\n");
+            }
+            else {
+                INT_INFO(" dsGetAVIScanInformation(intptr_t , dsAVIScanInformation_t*) and dsSetAVIScanInformation(intptr_t, dsAVIScanInformation_t) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+
+    dsDisplaySetAVIScanInfoParam_t *param = (dsDisplaySetAVIScanInfoParam_t *)arg;
+
+    if (func_dsGetAVIScanInfo != 0 &&  func_dsSetAVIScanInfo  != 0)
+    {
+	    dsAVIScanInformation_t scanInfo = dsAVI_SCAN_TYPE_NO_DATA;
+	    ret = func_dsGetAVIScanInfo (param->handle, &scanInfo);
+	    if (ret == dsERR_NONE)
+	    {
+		    if (scanInfo == param->scanInfo)
+		    {
+			    INT_INFO("HDMI AVI scan Info already set to %d\r\n",scanInfo);
+		    }
+		    else{
+			    INT_INFO("Current AVI scan Info %d, requested scan Info %d\r\n",scanInfo,param->scanInfo);
+			    ret = func_dsSetAVIScanInfo(param->handle, param->scanInfo);
+			    param->result = ret;
+			    INT_INFO("dsSetAVIScanInformation ret: %d \r\n",ret);
+		    }
+	    }
+	    else
+	    {
+		    INT_INFO("dsGetAVIScanInformation failed ret: %d \r\n",ret);
+		    param->result = dsERR_GENERAL;
+	    }
+
+    }
+    else {
+        param->result = dsERR_GENERAL;
+    }
+
+    IARM_BUS_Unlock(lock);
+
+    return IARM_RESULT_SUCCESS;
 }
 
 IARM_Result_t _dsDisplayTerm(void *arg)
