@@ -912,164 +912,257 @@ namespace device
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
 
-/**
- * @fn void  Host::Register(IHDMIInEvents *listener)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IHDMIInEvents *listener) 
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+INT_WARN("Base impl of OnHDMIInEventHotPlug called. port: %d isConnected %d", port, isConnected);		
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInEventSignalStatus called. activePort: %d signalStatus %d", activePort, signalStatus);		
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInEventStatus called. activePort: %d isPresented %d", activePort, isPresented);		
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInVideoModeUpdate called. port: %d videoResolution:pixelresol %d", port, videoResolution.pixelResolution);	
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInAllmStatus called. port %d allmStatus: %d", port, allmStatus);
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInAVIContentType called. port %d aviContentType: %d", port, aviContentType);
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInVRRStatus called. port %d vrrType: %d", port, vrrType);
+}
+
+/* virtual */ void Host::IHDMIInEvents::OnHDMIInAVLatency(int audioDelay, int videoDelay)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDMIInAVLatency called. audioDelay: %d videoDelay %d", audioDelay, videoDelay);
+}
+
+/* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePreChange(const std::string& frameRate)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayFrameratePreChange called. frameRate: %s", frameRate.c_str());
+}
+
+/* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePostChange(const std::string& frameRate)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayFrameratePostChange called. frameRate: %s", frameRate.c_str());
+}
+
+/* virtual */ void Host::IVideoDeviceEvents::OnZoomSettingsChanged(dsVideoZoom_t zoomSetting)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnZoomSettingsChanged called. zoomSetting: %d", zoomSetting);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnResolutionPreChange(int width, int height)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnResolutionPreChange called. width: %d, height: %d", width, height);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnResolutionPostChange(int width, int height)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnResolutionPostChange called. width: %d, height: %d", width, height);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnHDCPStatusChange called. hdcpStatus: %d", hdcpStatus);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) 
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnVideoFormatUpdate called. videoFormatHDR: %d", videoFormatHDR);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAssociatedAudioMixingChanged(bool mixing)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAssociatedAudioMixingChanged called. mixing: %d", mixing);
+}
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioFaderControlChanged(int mixerBalance)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioFaderControlChanged called. mixerBalance: %d", mixerBalance);
+}
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioPrimaryLanguageChanged called. primaryLanguage: %s", primaryLanguage.c_str());
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioSecondaryLanguageChanged called. secondaryLanguage: %s", secondaryLanguage.c_str());
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioOutHotPlug(dsAudioPortType_t portType, uint32_t uiPortNumber, bool isPortConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioOutHotPlug called. portType: %d, uiPortNumber: %d, isPortConnected: %d", portType, uiPortNumber, isPortConnected);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDolbyAtmosCapabilitiesChanged called. atmosCapability: %d, status: %d", atmosCapability, status);
+}
+
+// TODO: requires dsMgr.h header include ??
+// void Host::IAudioOutputPortEvents::OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { }
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioModeEvent called. audioPortType: %d, audioStereoMode: %d", audioPortType, audioStereoMode);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioLevelChangedEvent(int audioLevel)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioLevelChangedEvent called. audioLevel: %d", audioLevel);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioFormatUpdate(dsAudioFormat_t audioFormat)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnAudioFormatUpdate called. audioFormat: %d", audioFormat);
+}
+
+/* virtual */ void Host::IDisplayDeviceEvents::OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayHDMIHotPlug called. displayEvent: %d", displayEvent);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port, isConnected);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port, signalStatus);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort, isPresented);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort, videoResolution.pixelResolution);
+}
+
+/* virtual */ void  Host::IDisplayEvents::OnDisplayRxSense(dsDisplayEvent_t displayEvent)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayRxSense called. displayEvent: %d ", displayEvent);
+}
+/* virtual */ void  Host::IDisplayEvents::OnDisplayHDCPStatus()
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
+}
+
+
+dsError_t Host::Register(IHDMIInEvents *listener)
 {
   return 0;
 }
 
-
-/**
- * @fn void  Host::UnRegister(IHDMIInEvents *listener)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IHDMIInEvents *listener) 
+dsError_t Host::UnRegister(IHDMIInEvents *listener)
 {
   return 0;
 }
 
-/**
- * @fn void  Host::Register(ICompositeInEvents *Evtnotification)
- * @brief This API is used to register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(ICompositeInEvents *listener)
+dsError_t  Host::Register(ICompositeInEvents *listener)
 {
   return 0;
 }
 
-/**
- * @fn void  Host::UnRegister(ICompositeInEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(ICompositeInEvents *listener)
+dsError_t  Host::UnRegister(ICompositeInEvents *listener)
 {
   return 0;
 }
 
-/**
- * @fn void  Host::UnRegister(IDisplayDeviceEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IDisplayDeviceEvents *listener)
+dsError_t  Host::Register(IDisplayEvents *listener)
 {
   return 0;
 }
 
-
-/**
- * @fn void  Host::UnRegister(IDisplayDeviceEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IDisplayDeviceEvents *listener)
+dsError_t  Host::UnRegister(IDisplayEvents *listener)
 {
   return 0;
 }
 
-/**
- * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IDisplayEvents *listener)
+dsError_t Host::Register(IVideoDeviceEvents* listener)
 {
   return 0;
 }
 
-
-/**
- * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IDisplayEvents *listener)
+dsError_t Host::UnRegister(IVideoDeviceEvents* listener)
 {
   return 0;
 }
 
-/**
- * @fn void  Host::Register(IAudioOutputPortEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IAudioOutputPortEvents *listener)
+dsError_t Host::Register(IVideoOutputPortEvents* listener)
 {
   return 0;
 }
 
-
-/**
- * @fn void  Host::UnRegister(IAudioOutputPortEvent *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IAudioOutputPortEvents *listener)
+dsError_t Host::UnRegister(IVideoOutputPortEvents* listener)
 {
   return 0;
 }
 
-/**
- * @fn void  Host::Register(IVideoOutputPortEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IVideoOutputPortEvents *listener)
+dsError_t Host::Register(IAudioOutputPortEvents* listener)
 {
 	return 0;
 }
 
-
-/**
- * @fn void  Host::UnRegister(IVideoOutputPortEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IVideoOutputPortEvents *listener)
+dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
 {
   return 0;
 }
 
-
-
-/**
- * @fn void  Host::Register(IVideoDeviceEvents *Evtnotification)
- * @brief This API is used to Register the Events
- *
- * @return unint32_t
- */
-uint32_t Host::Register(IVideoDeviceEvents *listener)
+dsError_t Host::Register(IDisplayDeviceEvents* listener) {
 {
   return 0;
 }
 
-
-/**
- * @fn void  Host::UnRegister(IVideoDeviceEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return unint32_t
- */
-uint32_t Host::UnRegister(IVideoDeviceEvents *listener)
+dsError_t Host::UnRegister(IDisplayDeviceEvents* listener)
 {
   return 0;
 }
