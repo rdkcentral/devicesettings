@@ -777,10 +777,29 @@ DefaultImpl& Host::impl()
 dsError_t Host::Register(IHDMIInEvents *listener)
 {
     return impl().Register(listener);
-
 }
 
 dsError_t Host::UnRegister(IHDMIInEvents *listener)
+{
+    return impl().Register(listener);
+}
+  
+dsError_t  Host::Register(ICompositeInEvents *listener)
+{
+    return impl().Register(listener);
+}
+
+dsError_t  Host::UnRegister(ICompositeInEvents *listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t  Host::Register(IDisplayEvents *listener)
+{
+    return impl().Register(listener);
+}
+
+dsError_t  Host::UnRegister(IDisplayEvents *listener)
 {
     return impl().UnRegister(listener);
 }
