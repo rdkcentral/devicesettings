@@ -731,6 +731,7 @@ public:
     {
         return unregisterIarmEvents(handlers);
     }
+
 private:
     static void iarmHDMIInEventHotPlugHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t len)
     {
@@ -744,7 +745,7 @@ private:
 
         if (eventData) {
             dsHdmiInPort_t port = eventData->data.hdmi_in_connect.port;
-            bool isConnected = eventData->data.hdmi_in_connect.isPortConnected;
+            bool isConnected    = eventData->data.hdmi_in_connect.isPortConnected;
 
             IarmHostImpl::Dispatch([port, isConnected](IHDMIInEvents* listener) {
                 listener->OnHDMIInEventHotPlug(port, isConnected);
@@ -765,7 +766,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            dsHdmiInPort_t port = eventData->data.hdmi_in_sig_status.port;
+            dsHdmiInPort_t port              = eventData->data.hdmi_in_sig_status.port;
             dsHdmiInSignalStatus_t sigStatus = eventData->data.hdmi_in_sig_status.status;
 
             IarmHostImpl::Dispatch([port, sigStatus](IHDMIInEvents* listener) {
@@ -788,7 +789,7 @@ private:
 
         if (eventData) {
             dsHdmiInPort_t activePort = eventData->data.hdmi_in_status.port;
-            bool isPresented = eventData->data.hdmi_in_status.isPresented;
+            bool isPresented          = eventData->data.hdmi_in_status.isPresented;
 
             IarmHostImpl::Dispatch([activePort, isPresented](IHDMIInEvents* listener) {
                 listener->OnHDMIInEventStatus(activePort, isPresented);
@@ -812,8 +813,8 @@ private:
             dsHdmiInPort_t port = eventData->data.hdmi_in_video_mode.port;
             dsVideoPortResolution_t res;
             res.pixelResolution = eventData->data.hdmi_in_video_mode.resolution.pixelResolution;
-            res.interlaced = eventData->data.hdmi_in_video_mode.resolution.interlaced;
-            res.frameRate = eventData->data.hdmi_in_video_mode.resolution.frameRate;
+            res.interlaced      = eventData->data.hdmi_in_video_mode.resolution.interlaced;
+            res.frameRate       = eventData->data.hdmi_in_video_mode.resolution.frameRate;
 
             IarmHostImpl::Dispatch([port, res](IHDMIInEvents* listener) {
                 listener->OnHDMIInVideoModeUpdate(port, res);
@@ -834,7 +835,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
         if (eventData) {
             dsHdmiInPort_t port = eventData->data.hdmi_in_allm_mode.port;
-            bool allmStatus = eventData->data.hdmi_in_allm_mode.allm_mode;
+            bool allmStatus     = eventData->data.hdmi_in_allm_mode.allm_mode;
 
             IarmHostImpl::Dispatch([port, allmStatus](IHDMIInEvents* listener) {
                 listener->OnHDMIInAllmStatus(port, allmStatus);
@@ -877,7 +878,7 @@ private:
         IARM_Bus_DSMgr_EventData_t* eventData = (IARM_Bus_DSMgr_EventData_t*)data;
 
         if (eventData) {
-            dsHdmiInPort_t port = eventData->data.hdmi_in_content_type.port;
+            dsHdmiInPort_t port     = eventData->data.hdmi_in_content_type.port;
             dsAviContentType_t type = eventData->data.hdmi_in_content_type.aviContentType;
 
             IarmHostImpl::Dispatch([port, type](IHDMIInEvents* listener) {
@@ -912,14 +913,14 @@ private:
 
 private:
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_HOTPLUG,                 &IARMGroupHdmiIn::iarmHDMIInEventHotPlugHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_SIGNAL_STATUS,           &IARMGroupHdmiIn::iarmHDMIInEventSignalStatusHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS,                  &IARMGroupHdmiIn::iarmHDMIInEventStatusHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_VIDEO_MODE_UPDATE,       &IARMGroupHdmiIn::iarmHDMIInVideoModeUpdateHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_ALLM_STATUS,             &IARMGroupHdmiIn::iarmHDMIInAllmStatusHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_VRR_STATUS,              &IARMGroupHdmiIn::iarmHDMIInVRRStatusHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,        &IARMGroupHdmiIn::iarmHDMIInAVIContentTypeHandler },
-        { IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,              &IARMGroupHdmiIn::iarmHDMIInAVLatencyHandler }
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_HOTPLUG,           &IARMGroupHdmiIn::iarmHDMIInEventHotPlugHandler      },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_SIGNAL_STATUS,     &IARMGroupHdmiIn::iarmHDMIInEventSignalStatusHandler },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS,            &IARMGroupHdmiIn::iarmHDMIInEventStatusHandler       },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_VIDEO_MODE_UPDATE, &IARMGroupHdmiIn::iarmHDMIInVideoModeUpdateHandler   },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_ALLM_STATUS,       &IARMGroupHdmiIn::iarmHDMIInAllmStatusHandler        },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_VRR_STATUS,        &IARMGroupHdmiIn::iarmHDMIInVRRStatusHandler         },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,  &IARMGroupHdmiIn::iarmHDMIInAVIContentTypeHandler    },
+        { IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,        &IARMGroupHdmiIn::iarmHDMIInAVLatencyHandler         }
     };
 }; // IARMGroupHdmiIn
 
