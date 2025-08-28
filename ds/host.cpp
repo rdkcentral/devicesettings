@@ -876,46 +876,66 @@ DefaultImpl& Host::impl()
     // If client needs to handle this event, they should override this method
     INT_WARN("Base impl of OnDisplayHDMIHotPlug called. displayEvent: %d", displayEvent);
 }
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port, isConnected);
+}
 
-/**
- * @fn void  Host::Register(ICompositeInEvents *Evtnotification)
- * @brief This API is used to register the Events
- *
- * @return dsError_t
- */
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port, signalStatus);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort, isPresented);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort, videoResolution.pixelResolution);
+}
+
+/* virtual */ void  Host::IDisplayEvents::OnDisplayRxSense(dsDisplayEvent_t displayEvent)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayRxSense called. displayEvent: %d ", displayEvent);
+}
+/* virtual */ void  Host::IDisplayEvents::OnDisplayHDCPStatus()
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
+}
+
+
+dsError_t Host::Register(IHDMIInEvents *listener)
+{
+    return impl().Register(listener);
+}
+
+dsError_t Host::UnRegister(IHDMIInEvents *listener)
+{
+    return impl().UnRegister(listener);
+}
+
 dsError_t  Host::Register(ICompositeInEvents *listener)
 {
     return impl().Register(listener);
 }
 
-/**
- * @fn void  Host::UnRegister(ICompositeInEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return dsError_t
- */
 dsError_t  Host::UnRegister(ICompositeInEvents *listener)
 {
     return impl().UnRegister(listener);
 }
 
-/**
- * @fn void  Host::Register(IDisplayEvents *Evtnotification)
- * @brief This API is used to register the Events
- *
- * @return dsError_t
- */
 dsError_t  Host::Register(IDisplayEvents *listener)
 {
     return impl().Register(listener);
 }
 
-/**
- * @fn void  Host::UnRegister(IDisplayEvents *Evtnotification)
- * @brief This API is used to UnRegister the Events
- *
- * @return dsError_t
- */
 dsError_t  Host::UnRegister(IDisplayEvents *listener)
 {
     return impl().UnRegister(listener);
@@ -961,7 +981,7 @@ dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
 
 /** @} */
 
-} // namespace device
+} /* namespace device */
 /** @} */
 
 /** @} */

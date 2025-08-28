@@ -30,6 +30,7 @@
 namespace device {
 
 // Forward declaration for IARM Implementation Groups
+class IARMGroupHdmiIn;
 class IARMGroupVideoDevice;
 class IARMGroupVideoOutputPort;
 class IARMGroupAudioOutputPort;
@@ -37,6 +38,7 @@ class IARMGroupDisplayDevice;
 class IARMGroupComposite;
 class IARMGroupDisplay;
 
+using IHDMIInEvents          = Host::IHDMIInEvents;
 using IVideoDeviceEvents     = Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents = Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents = Host::IAudioOutputPortEvents;
@@ -150,6 +152,14 @@ public:
     IarmHostImpl() = default;
     ~IarmHostImpl();
 
+    // @brief Register a listener for HDMI device events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IHDMIInEvents* listener);
+
+    // @brief UnRegister a listener for HDMI device events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IHDMIInEvents* listener);
+
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
     dsError_t Register(IVideoDeviceEvents* listener);
@@ -176,19 +186,19 @@ public:
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  Register(ICompositeInEvents* listener);
+    dsError_t Register(ICompositeInEvents* listener);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  UnRegister(ICompositeInEvents* listener);
+    dsError_t UnRegister(ICompositeInEvents* listener);
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  Register(IDisplayEvents* listener);
+    dsError_t Register(IDisplayEvents* listener);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t  UnRegister(IDisplayEvents* listener);
+    dsError_t UnRegister(IDisplayEvents* listener);
 
     // @brief Register a listener for display device events
     // @param listener: class object implementing the listener
@@ -201,6 +211,7 @@ public:
 private:
     static std::mutex s_mutex;
 
+    static CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> s_hdmiInListeners;
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
@@ -211,6 +222,7 @@ private:
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
+    static void Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
@@ -219,6 +231,7 @@ private:
     static void Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn);
 
     // Dispatch is private, so all IARMGroup implementations will need to be friends
+    friend class IARMGroupHdmiIn;
     friend class IARMGroupVideoDevice;
     friend class IARMGroupVideoOutputPort;
     friend class IARMGroupAudioOutputPort;
