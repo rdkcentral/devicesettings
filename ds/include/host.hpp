@@ -122,62 +122,66 @@ public:
     dsError_t UnRegister(IHDMIInEvents *listener);
 
     struct ICompositeInEvents {
-            // @brief Composite In Hotplug event
-            // @text onCompositeInHotPlug
-            // @param port: Port of the hotplug
-            // @param isConnected: Is it connected (true) or not(false)
-            virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
+        virtual ~ICompositeInEvents() = default;
+        // @brief Composite In Hotplug event
+        // @text onCompositeInHotPlug
+        // @param port: Port of the hotplug
+        // @param isConnected: Is it connected (true) or not(false)
+        virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
 
-            // @brief Composite In Signal status
-            // @text onCompositeInSignalStatus
-            // @param port: Port of the hotplug
-            // @param signalStatus: Signal status
-            virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
+        // @brief Composite In Signal status
+        // @text onCompositeInSignalStatus
+        // @param port: Port of the hotplug
+        // @param signalStatus: Signal status
+        virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
 
-            // @brief Composite In status
-            // @text onCompositeInStatus
-            // @param activePort: Active port
-            // @param isPresented: is it presented to user
-            virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
+        // @brief Composite In status
+        // @text onCompositeInStatus
+        // @param activePort: Active port
+        // @param isPresented: is it presented to user
+        virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
 
-
-            // @brief Composite In Video Mode Update
-            // @text OnCompositeInVideoModeUpdate
-            // @param activePort: Active port
-            // @param videoResolution: See DisplayVideoPortResolution
-            virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
+        // @brief Composite In Video Mode Update
+        // @text OnCompositeInVideoModeUpdate
+        // @param activePort: Active port
+        // @param videoResolution: See DisplayVideoPortResolution
+        virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
     };
 
-    dsError_t  Register(ICompositeInEvents *listener);
-    dsError_t  UnRegister(ICompositeInEvents *listener);
+    dsError_t Register(ICompositeInEvents* listener);
+    dsError_t UnRegister(ICompositeInEvents* listener);
 
-    struct IDisplayEvents{
+    struct IDisplayEvents {
+        virtual ~IDisplayEvents() = default;
 
-            // @brief Display RX Sense event
-            // @text onDisplayRxSense
-            // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
-            virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
+        // @brief Display RX Sense event
+        // @text onDisplayRxSense
+        // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
+        virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
 
-            // @brief Display HDCP Status
-            // @text OnDisplayHDCPStatus
-            virtual void OnDisplayHDCPStatus() { };
+        // @brief Display HDCP Status
+        // @text OnDisplayHDCPStatus
+        virtual void OnDisplayHDCPStatus() { };
     };
-    dsError_t Register(IDisplayEvents *listener);
-    dsError_t UnRegister(IDisplayEvents *listener);
+
+    dsError_t Register(IDisplayEvents* listener);
+    dsError_t UnRegister(IDisplayEvents* listener);
 
     struct IVideoDeviceEvents {
+        virtual ~IVideoDeviceEvents() = default;
+
         // @brief Display Frame rate Pre-change notification
         // @param frameRate: new framerate
-        virtual void OnDisplayFrameratePreChange(const std::string& frameRate) { };
+        virtual void OnDisplayFrameratePreChange(const std::string& frameRate);
 
         // @brief Display Frame rate Post-change notification
         // @param frameRate: new framerate
-        virtual void OnDisplayFrameratePostChange(const std::string& frameRate) { };
+        virtual void OnDisplayFrameratePostChange(const std::string& frameRate);
 
         // @brief Zoom settings changed
         // @text OnZoomSettingsChanged
         // @param zoomSetting: Currently applied zoom setting
-        virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting) { };
+        virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting);
     };
 
     // @brief Register a listener for video device events
@@ -189,24 +193,25 @@ public:
     dsError_t UnRegister(IVideoDeviceEvents* listener);
 
     struct IVideoOutputPortEvents {
+        virtual ~IVideoOutputPortEvents() = default;
 
         // @brief On Resolution Pre changed
         // @param width: width of the resolution
         // @param height: height of the resolution
-        virtual void OnResolutionPreChange(int width, int height) { };
+        virtual void OnResolutionPreChange(int width, int height);
 
         // @brief On Resolution Post change
         // @param width: width of the resolution
         // @param height: height of the resolution
-        virtual void OnResolutionPostChange(int width, int height) { };
+        virtual void OnResolutionPostChange(int width, int height);
 
         // @brief On HDCP Status change
         // @param hdcpStatus: HDCP Status
-        virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus) { };
+        virtual void OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus);
 
         // @brief On Video Format update
         // @param videoFormatHDR: Video format HDR standard
-        virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) { };
+        virtual void OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR);
     };
 
     // @brief Register a listener for video port events
@@ -218,51 +223,52 @@ public:
     dsError_t UnRegister(IVideoOutputPortEvents* listener);
 
     struct IAudioOutputPortEvents {
+        virtual ~IAudioOutputPortEvents() = default;
 
         // @brief Associated Audio mixing changed
         // @param mixing: true or false
-        virtual void OnAssociatedAudioMixingChanged(bool mixing) { };
+        virtual void OnAssociatedAudioMixingChanged(bool mixing);
 
         // @brief Audio Fader balance changed
         // @param mixerBalance: applied mixer balance value
-        virtual void OnAudioFaderControlChanged(int mixerBalance) { };
+        virtual void OnAudioFaderControlChanged(int mixerBalance);
 
         // @brief Primary language for Audio changed
         // @param primaryLanguage: current primary language for audio
-        virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage) { };
+        virtual void OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage);
 
         // @brief Secondary language for Audio changed
         // @param secondaryLanguage: current secondary language for audio
-        virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage) { };
+        virtual void OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage);
 
         // @brief Audio output hot plug event
         // @param portType: Type of audio port see AudioPortType
         // @param uiPortNumber: The port number assigned by UI
         // @param isPortConnected: true (connected) or false (not connected)
-        virtual void OnAudioOutHotPlug(dsAudioPortType_t portType, int uiPortNumber, bool isPortConnected) { };
+        virtual void OnAudioOutHotPlug(dsAudioPortType_t portType, uint32_t uiPortNumber, bool isPortConnected);
 
         // @brief Dolby Atmos capabilities changed
         // @param atmosCapability: the Dolby Atmos capability
         // @param status: true (available) or false (not available)
-        virtual void OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status) { };
+        virtual void OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status);
 
         // @brief Audio port state changed
         // @param audioPortState: audio port state
         // TODO: requires dsMgr.h header include ??
-        // virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { };
+        // virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState);
 
         // @brief Audio mode for the respective audio port - raised for every type of port
         // @param audioPortType: audio port type see dsAudioPortType_t
         // @param audioStereoMode: audio stereo mode - see dsAudioStereoMode_t
-        virtual void OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode) { };
+        virtual void OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode);
 
         // @brief Audio level changed
         // @param audioiLevel: audio level value
-        virtual void OnAudioLevelChangedEvent(int audioLevel) { };
+        virtual void OnAudioLevelChangedEvent(int audioLevel);
 
         // @brief Audio Output format changed
         // @param audioFormat: Type of audio format see AudioFormat
-        virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat) { };
+        virtual void OnAudioFormatUpdate(dsAudioFormat_t audioFormat);
     };
 
     // @brief Register a listener for audio port events
@@ -274,9 +280,11 @@ public:
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
     struct IDisplayDeviceEvents {
+        virtual ~IDisplayDeviceEvents() = default;
+
         // @brief Display HDMI (out) Hot plug event
         // @param displayEvent: display event type see dsDisplayEvent_t
-        virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent) { };
+        virtual void OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent);
     };
 
     // @brief Register a listener for display device events
