@@ -81,6 +81,8 @@ class IarmHostImpl {
                 return dsERR_INVALID_PARAM; // Error: Listener is null
             }
 
+            std::lock_guard<std::mutex> lock(m_mutex);
+
             if (!m_registered) {
                 m_registered = IARMGroup::RegisterIarmEvents();
 
@@ -113,6 +115,8 @@ class IarmHostImpl {
                 return dsERR_INVALID_PARAM; // Error: Listener is null
             }
 
+            std::lock_guard<std::mutex> lock(m_mutex);
+
             auto it = std::find(this->begin(), this->end(), listener);
             if (it == this->end()) {
                 // Listener not found
@@ -135,6 +139,8 @@ class IarmHostImpl {
         // This will clear the list and unregister IARM events if no listeners are left
         dsError_t Release()
         {
+            std::lock_guard<std::mutex> lock(m_mutex);
+
             if (m_registered) {
                 m_registered = !IARMGroup::UnRegisterIarmEvents();
             }
@@ -144,7 +150,13 @@ class IarmHostImpl {
             return dsERR_NONE; // Success
         }
 
+        std::mutex& Mutex()
+        {
+            return m_mutex;
+        }
+
     private:
+        std::mutex m_mutex; // To protect access to the list and callback notifications
         bool m_registered = false; // To track if IARM events are registered
     };
 
@@ -209,8 +221,6 @@ public:
     dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
 private:
-    static std::mutex s_mutex;
-
     static CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> s_hdmiInListeners;
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
