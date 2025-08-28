@@ -64,49 +64,41 @@ public:
 
     struct IHDMIInEvents {
             // @brief HDMI Event Hot Plug
-            // @text onHDMIInEventHotPlug
             // @param port: port 0 or 1 et al
             // @param isConnected: is it connected (true) or not (false)
             virtual void OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected) { };
 
             // @brief HDMI Event Signal status
-            // @text OnHDMIInEventSignalStatus
             // @param port: port 0 or 1 et al
             // @param signalStatus: Signal Status
             virtual void OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus) { };
 
             // @brief HDMI Event Signal status
-            // @text onHDMIInEventStatus
             // @param activePort: port 0 or 1 et al
             // @param isPresented: is it presented or not
             virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
 
             // @brief HDMI Video Mode update
-            // @text onHDMIInVideoModeUpdate
             // @param port: port 0 or 1 et al
             // @param videoPortResolution: Video port resolution
             virtual void OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
 
             // @brief HDMI ALLM (Auto Low Latency Mode) status
-            // @text onHDMIInAllmStatus
             // @param port: port 0 or 1 et al
             // @param allmStatus: allm status
             virtual void OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
 
             // @brief HDMI Event AVI content type
-            // @text OnHDMIInAVIContentType
             // @param port: port 0 or 1 et al
             // @param aviContentType: AVI content type
             virtual void OnHDMIInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
 
             // @brief HDMI VRR status
-            // @text OnHDMIInVRRStatus
             // @param port: port 0 or 1 et al
             // @param vrrType: VRR type
             virtual void OnHDMIInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
 
             // @brief HDMI Event AV Latency
-            // @text OnHDMIInAVLatency
             // @param audioDelay: audio delay (in millisecs)
             // @param videoDelay: video delay (in millisecs)
             virtual void OnHDMIInAVLatency(int audioDelay, int videoDelay) { };
@@ -124,48 +116,53 @@ public:
     struct ICompositeInEvents {
         virtual ~ICompositeInEvents() = default;
         // @brief Composite In Hotplug event
-        // @text onCompositeInHotPlug
         // @param port: Port of the hotplug
         // @param isConnected: Is it connected (true) or not(false)
-        virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected) { };
+        virtual void OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected);
 
         // @brief Composite In Signal status
-        // @text onCompositeInSignalStatus
         // @param port: Port of the hotplug
         // @param signalStatus: Signal status
-        virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus) { };
+        virtual void OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus);
 
         // @brief Composite In status
-        // @text onCompositeInStatus
         // @param activePort: Active port
         // @param isPresented: is it presented to user
-        virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented) { };
+        virtual void OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented);
 
         // @brief Composite In Video Mode Update
-        // @text OnCompositeInVideoModeUpdate
         // @param activePort: Active port
         // @param videoResolution: See DisplayVideoPortResolution
-        virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution) { };
+        virtual void OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution);
     };
 
-    dsError_t Register(ICompositeInEvents* listener);
-    dsError_t UnRegister(ICompositeInEvents* listener);
+    // @brief Register a listener for composite events
+    // @param listener: class object implementing the listener
+    dsError_t  Register(ICompositeInEvents *listener);
+    
+    // @brief UnRegister a listener for composite events
+    // @param listener: class object implementing the listener
+    dsError_t  UnRegister(ICompositeInEvents *listener);
 
     struct IDisplayEvents {
         virtual ~IDisplayEvents() = default;
 
         // @brief Display RX Sense event
-        // @text onDisplayRxSense
         // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
-        virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent) { };
+        virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent);
 
         // @brief Display HDCP Status
-        // @text OnDisplayHDCPStatus
-        virtual void OnDisplayHDCPStatus() { };
+        virtual void OnDisplayHDCPStatus();
     };
+    
+    // @brief Register a listener for display events
+    // @param listener: class object implementing the listener
+    dsError_t Register(IDisplayEvents *listener);
+    
+    // @brief UnRegister a listener for display events
+    // @param listener: class object implementing the listener
+    dsError_t UnRegister(IDisplayEvents *listener);
 
-    dsError_t Register(IDisplayEvents* listener);
-    dsError_t UnRegister(IDisplayEvents* listener);
 
     struct IVideoDeviceEvents {
         virtual ~IVideoDeviceEvents() = default;
@@ -179,7 +176,6 @@ public:
         virtual void OnDisplayFrameratePostChange(const std::string& frameRate);
 
         // @brief Zoom settings changed
-        // @text OnZoomSettingsChanged
         // @param zoomSetting: Currently applied zoom setting
         virtual void OnZoomSettingsChanged(dsVideoZoom_t zoomSetting);
     };

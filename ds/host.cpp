@@ -767,7 +767,7 @@ Host::~Host()
 
 DefaultImpl& Host::impl()
 {
-    // lazy instantiation
+    /* lazy instantiation */
     if (!m_impl) {
         m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
     }
@@ -776,77 +776,77 @@ DefaultImpl& Host::impl()
 
 /* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePreChange(const std::string& frameRate)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnDisplayFrameratePreChange called. frameRate: %s", frameRate.c_str());
 }
 
 /* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePostChange(const std::string& frameRate)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this methodi */
     INT_WARN("Base impl of OnDisplayFrameratePostChange called. frameRate: %s", frameRate.c_str());
 }
 
 /* virtual */ void Host::IVideoDeviceEvents::OnZoomSettingsChanged(dsVideoZoom_t zoomSetting)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnZoomSettingsChanged called. zoomSetting: %d", zoomSetting);
 }
 
 /* virtual */ void Host::IVideoOutputPortEvents::OnResolutionPreChange(int width, int height)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnResolutionPreChange called. width: %d, height: %d", width, height);
 }
 
 /* virtual */ void Host::IVideoOutputPortEvents::OnResolutionPostChange(int width, int height)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnResolutionPostChange called. width: %d, height: %d", width, height);
 }
 
 /* virtual */ void Host::IVideoOutputPortEvents::OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnHDCPStatusChange called. hdcpStatus: %d", hdcpStatus);
 }
 
 /* virtual */ void Host::IVideoOutputPortEvents::OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR) 
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnVideoFormatUpdate called. videoFormatHDR: %d", videoFormatHDR);
 }
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAssociatedAudioMixingChanged(bool mixing)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAssociatedAudioMixingChanged called. mixing: %d", mixing);
 }
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioFaderControlChanged(int mixerBalance)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioFaderControlChanged called. mixerBalance: %d", mixerBalance);
 }
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioPrimaryLanguageChanged called. primaryLanguage: %s", primaryLanguage.c_str());
 }
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioSecondaryLanguageChanged called. secondaryLanguage: %s", secondaryLanguage.c_str());
 }
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioOutHotPlug(dsAudioPortType_t portType, uint32_t uiPortNumber, bool isPortConnected)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioOutHotPlug called. portType: %d, uiPortNumber: %d, isPortConnected: %d", portType, uiPortNumber, isPortConnected);
 }
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnDolbyAtmosCapabilitiesChanged called. atmosCapability: %d, status: %d", atmosCapability, status);
 }
 
@@ -855,27 +855,61 @@ DefaultImpl& Host::impl()
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioModeEvent called. audioPortType: %d, audioStereoMode: %d", audioPortType, audioStereoMode);
 }
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioLevelChangedEvent(int audioLevel)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioLevelChangedEvent called. audioLevel: %d", audioLevel);
 }
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioFormatUpdate(dsAudioFormat_t audioFormat)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnAudioFormatUpdate called. audioFormat: %d", audioFormat);
 }
 
 /* virtual */ void Host::IDisplayDeviceEvents::OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent)
 {
-    // If client needs to handle this event, they should override this method
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnDisplayHDMIHotPlug called. displayEvent: %d", displayEvent);
 }
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port,isConnected);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port,signalStatus);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort,isPresented);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort,videoResolution.pixelResolution);
+}
+
+/* virtual */ void  Host::IDisplayEvents::OnDisplayRxSense(dsDisplayEvent_t displayEvent)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayRxSense called. displayEvent: %d ", displayEvent);
+}
+/* virtual */ void  Host::IDisplayEvents::OnDisplayHDCPStatus()
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
+}
+
 
 dsError_t Host::Register(IHDMIInEvents *listener)
 {
@@ -947,7 +981,7 @@ dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
 
 /** @} */
 
-} // namespace device
+} /* namespace device */
 /** @} */
 
 /** @} */
