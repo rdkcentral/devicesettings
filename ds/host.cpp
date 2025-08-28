@@ -933,7 +933,8 @@ INT_WARN("Base impl of OnHDMIInEventHotPlug called. port: %d isConnected %d", po
 /* virtual */ void Host::IHDMIInEvents::OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution)
 {
     /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnHDMIInVideoModeUpdate called. port: %d videoResolution:pixelresol %d", port, videoResolution.pixelResolution);	
+    INT_WARN("Base impl of OnHDMIInVideoModeUpdate called. port: %d videoPortResolution.pixelresolution %d", 
+        port, videoPortResolution.pixelResolution);	
 }
 
 /* virtual */ void Host::IHDMIInEvents::OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus)
