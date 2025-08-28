@@ -600,7 +600,7 @@ private:
             dsVideoPortResolution_t videoResolution={0};
             videoResolution.name[0]='\0';
             videoResolution.aspectRatio = dsVIDEO_ASPECT_RATIO_MAX;
-            videoResolution.stereoScopicMode = dsAUDIO_STEREO_UNKNOWN;
+            videoResolution.stereoScopicMode = dsVIDEO_SSMODE_UNKNOWN;
             videoResolution.pixelResolution = eventData->data.composite_in_video_mode.resolution.pixelResolution;
             videoResolution.interlaced = eventData->data.composite_in_video_mode.resolution.interlaced;
             videoResolution.frameRate = eventData->data.composite_in_video_mode.resolution.frameRate;
@@ -725,7 +725,7 @@ private:
             INT_ERROR("Invalid data received for HDMI (out) hot plug change");
         }
     }
-}; // IARMGroupDisplayDevice
+}; /* IARMGroupDisplayDevice */
 
 class IARMGroupHdmiIn {
 public:
@@ -929,9 +929,9 @@ private:
         { IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,  &IARMGroupHdmiIn::iarmHDMIInAVIContentTypeHandler    },
         { IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,        &IARMGroupHdmiIn::iarmHDMIInAVLatencyHandler         }
     };
-}; // IARMGroupHdmiIn
+}; /* IARMGroupHdmiIn */
 
-// static data
+/* static data */
 constexpr EventHandlerMapping IARMGroupHdmiIn::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
@@ -992,7 +992,7 @@ dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
     return s_hdmiInListeners.UnRegister(listener);
 }
 
-// Dispatcher for IHDMIInEvents
+/* Dispatcher for IHDMIInEvents */
 /* static */ void IarmHostImpl::Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn)
 {
     Dispatch(s_hdmiInListeners, std::move(fn));
