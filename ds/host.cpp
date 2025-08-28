@@ -782,7 +782,7 @@ DefaultImpl& Host::impl()
 
 /* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePostChange(const std::string& frameRate)
 {
-    /* If client needs to handle this event, they should override this methodi */
+    /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnDisplayFrameratePostChange called. frameRate: %s", frameRate.c_str());
 }
 
@@ -879,24 +879,24 @@ DefaultImpl& Host::impl()
 /* virtual */ void Host::ICompositeInEvents::OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected)
 {
     /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port,isConnected);
+    INT_WARN("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port, isConnected);
 }
 
 /* virtual */ void Host::ICompositeInEvents::OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus)
 {
     /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port,signalStatus);
+    INT_WARN("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port, signalStatus);
 }
 
 /* virtual */ void Host::ICompositeInEvents::OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented)
 {
     /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort,isPresented);
+    INT_WARN("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort, isPresented);
 }
 /* virtual */ void Host::ICompositeInEvents::OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution)
 {
     /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort,videoResolution.pixelResolution);
+    INT_WARN("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort, videoResolution.pixelResolution);
 }
 
 /* virtual */ void  Host::IDisplayEvents::OnDisplayRxSense(dsDisplayEvent_t displayEvent)
