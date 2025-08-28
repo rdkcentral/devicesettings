@@ -774,6 +774,17 @@ DefaultImpl& Host::impl()
     return *m_impl;
 }
 
+dsError_t Host::Register(IHDMIInEvents *listener)
+{
+    return impl().Register(listener);
+
+}
+
+dsError_t Host::UnRegister(IHDMIInEvents *listener)
+{
+    return impl().UnRegister(listener);
+}
+
 dsError_t Host::Register(IVideoDeviceEvents* listener)
 {
     return impl().Register(listener);

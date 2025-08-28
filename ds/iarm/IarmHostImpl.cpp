@@ -749,11 +749,14 @@ private:
 }; // IARMGroupHdmiIn
 
 // static data
+constexpr EventHandlerMapping IARMGroupHdmiIn::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoDevice::handlers[];
 constexpr EventHandlerMapping IARMGroupVideoOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 
 std::mutex IarmHostImpl::s_mutex;
+IarmHostImpl::CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
+IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
@@ -763,6 +766,7 @@ IarmHostImpl::~IarmHostImpl()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
 
+    s_hdmiInListeners.Release();
     s_videoDeviceListeners.Release();
     s_videoOutputPortListeners.Release();
     s_audioOutputPortListeners.Release();
@@ -786,6 +790,24 @@ template <typename T, typename F>
     }
 
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
+}
+
+dsError_t IarmHostImpl::Register(IHDMIInEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_hdmiInListeners.Register(listener);
+}
+
+dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
+{
+    std::lock_guard<std::mutex> lock(s_mutex);
+    return s_hdmiInListeners.UnRegister(listener);
+}
+
+// Dispatcher for IHDMIInEvents
+/* static */ void IarmHostImpl::Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn)
+{
+    Dispatch(s_hdmiInListeners, std::move(fn));
 }
 
 dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
