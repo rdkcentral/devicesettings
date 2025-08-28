@@ -921,7 +921,7 @@ INT_WARN("Base impl of OnHDMIInEventHotPlug called. port: %d isConnected %d", po
 /* virtual */ void Host::IHDMIInEvents::OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus)
 {
     /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnHDMIInEventSignalStatus called. activePort: %d signalStatus %d", activePort, signalStatus);		
+    INT_WARN("Base impl of OnHDMIInEventSignalStatus called. port: %d signalStatus %d", port, signalStatus);		
 }
 
 /* virtual */ void Host::IHDMIInEvents::OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented)
