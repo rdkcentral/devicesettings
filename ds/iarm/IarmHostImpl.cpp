@@ -816,6 +816,7 @@ private:
             res.interlaced      = eventData->data.hdmi_in_video_mode.resolution.interlaced;
             res.frameRate       = eventData->data.hdmi_in_video_mode.resolution.frameRate;
 
+
             IarmHostImpl::Dispatch([port, res](IHDMIInEvents* listener) {
                 listener->OnHDMIInVideoModeUpdate(port, res);
             });
