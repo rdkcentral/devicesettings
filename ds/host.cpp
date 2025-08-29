@@ -767,11 +767,11 @@ Host::~Host()
 
 DefaultImpl& Host::impl()
 {
-   // lazy instantiation
-   if (!m_impl) {
-       m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
-   }
-   return *m_impl;
+    // lazy instantiation
+    if (!m_impl) {
+        m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
+    }
+    return *m_impl;
 }
 
 /* virtual */ void Host::IHdmiInEvents::OnHdmiInEventHotPlug(dsHdmiInPort_t port, bool isConnected)
@@ -961,7 +961,7 @@ DefaultImpl& Host::impl()
     INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
 }
 
-dsError_t Host::Register(IHDMIInEvents* listener, const std::string& clientName)
+dsError_t Host::Register(IHdmiInEvents* listener, const std::string& clientName)
 {
     return impl().Register(listener, clientName);
 }
