@@ -63,6 +63,8 @@ public:
     static const int kPowerStandby;
 
     struct IHDMIInEvents {
+        virtual ~IHDMIInEvents() = default;
+
         // @brief HDMI Event Hot Plug
         // @param port: port 0 or 1 et al
         // @param isConnected: is it connected (true) or not (false)
@@ -106,14 +108,19 @@ public:
 
     // @brief Register a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IHDMIInEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IHDMIInEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for HDMI device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IHDMIInEvents* listener);
 
     struct ICompositeInEvents {
         virtual ~ICompositeInEvents() = default;
+
         // @brief Composite In Hotplug event
         // @param port: Port of the hotplug
         // @param isConnected: Is it connected (true) or not(false)
@@ -137,10 +144,14 @@ public:
 
     // @brief Register a listener for composite events
     // @param listener: class object implementing the listener
-    dsError_t Register(ICompositeInEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(ICompositeInEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for composite events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(ICompositeInEvents* listener);
 
     struct IDisplayEvents {
@@ -156,10 +167,14 @@ public:
 
     // @brief Register a listener for display events
     // @param listener: class object implementing the listener
-    dsError_t Register(IDisplayEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IDisplayEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for display events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IDisplayEvents* listener);
 
     struct IVideoDeviceEvents {
@@ -180,10 +195,14 @@ public:
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IVideoDeviceEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IVideoDeviceEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for video device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IVideoDeviceEvents* listener);
 
     struct IVideoOutputPortEvents {
@@ -210,10 +229,14 @@ public:
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    dsError_t Register(IVideoOutputPortEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IVideoOutputPortEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IVideoOutputPortEvents* listener);
 
     struct IAudioOutputPortEvents {
@@ -267,10 +290,14 @@ public:
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    dsError_t Register(IAudioOutputPortEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IAudioOutputPortEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
     struct IDisplayDeviceEvents {
@@ -283,10 +310,14 @@ public:
 
     // @brief Register a listener for display device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IDisplayDeviceEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IDisplayDeviceEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for display device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
     bool setPowerMode(int mode);
@@ -328,6 +359,7 @@ public:
 
 private:
     std::unique_ptr<DefaultImpl> m_impl;
+
     Host();
     virtual ~Host();
     // Avoid copies

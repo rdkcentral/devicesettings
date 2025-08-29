@@ -910,10 +910,9 @@ DefaultImpl& Host::impl()
     INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
 }
 
-
-dsError_t Host::Register(IHDMIInEvents *listener)
+dsError_t Host::Register(IHDMIInEvents *listener, const std::string& clientName)
 {
-    return impl().Register(listener);
+    return impl().Register(listener, clientName);
 }
 
 dsError_t Host::UnRegister(IHDMIInEvents *listener)
@@ -921,9 +920,9 @@ dsError_t Host::UnRegister(IHDMIInEvents *listener)
     return impl().UnRegister(listener);
 }
 
-dsError_t  Host::Register(ICompositeInEvents *listener)
+dsError_t  Host::Register(ICompositeInEvents *listener, const std::string& clientName)
 {
-    return impl().Register(listener);
+    return impl().Register(listener, clientName);
 }
 
 dsError_t  Host::UnRegister(ICompositeInEvents *listener)
@@ -931,9 +930,9 @@ dsError_t  Host::UnRegister(ICompositeInEvents *listener)
     return impl().UnRegister(listener);
 }
 
-dsError_t  Host::Register(IDisplayEvents *listener)
+dsError_t  Host::Register(IDisplayEvents *listener, const std::string& clientName)
 {
-    return impl().Register(listener);
+    return impl().Register(listener, clientName);
 }
 
 dsError_t  Host::UnRegister(IDisplayEvents *listener)
@@ -941,9 +940,9 @@ dsError_t  Host::UnRegister(IDisplayEvents *listener)
     return impl().UnRegister(listener);
 }
 
-dsError_t Host::Register(IVideoDeviceEvents* listener)
+dsError_t Host::Register(IVideoDeviceEvents* listener, const std::string& clientName)
 {
-    return impl().Register(listener);
+    return impl().Register(listener, clientName);
 }
 
 dsError_t Host::UnRegister(IVideoDeviceEvents* listener)
@@ -951,9 +950,9 @@ dsError_t Host::UnRegister(IVideoDeviceEvents* listener)
     return impl().UnRegister(listener);
 }
 
-dsError_t Host::Register(IVideoOutputPortEvents* listener)
+dsError_t Host::Register(IVideoOutputPortEvents* listener, const std::string& clientName)
 {
-    return impl().Register(listener);
+    return impl().Register(listener, clientName);
 }
 
 dsError_t Host::UnRegister(IVideoOutputPortEvents* listener)
@@ -961,9 +960,9 @@ dsError_t Host::UnRegister(IVideoOutputPortEvents* listener)
     return impl().UnRegister(listener);
 }
 
-dsError_t Host::Register(IAudioOutputPortEvents* listener)
+dsError_t Host::Register(IAudioOutputPortEvents* listener, const std::string& clientName)
 {
-    return impl().Register(listener);
+    return impl().Register(listener, clientName);
 }
 
 dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
@@ -971,8 +970,9 @@ dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
     return impl().UnRegister(listener);
 }
 
-dsError_t Host::Register(IDisplayDeviceEvents* listener) {
-    return impl().Register(listener);
+dsError_t Host::Register(IDisplayDeviceEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
 }
 
 dsError_t Host::UnRegister(IDisplayDeviceEvents* listener) {
