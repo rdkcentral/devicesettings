@@ -62,56 +62,58 @@ public:
     static const int kPowerOff;
     static const int kPowerStandby;
 
-    struct IHDMIInEvents {
+    struct IHdmiInEvents {
+            virtual ~IHdmiInEvents() = default;
+
             // @brief HDMI Event Hot Plug
             // @param port: port 0 or 1 et al
             // @param isConnected: is it connected (true) or not (false)
-            virtual void OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected) { };
+            virtual void OnHdmiInEventHotPlug(dsHdmiInPort_t port, bool isConnected);
 
             // @brief HDMI Event Signal status
             // @param port: port 0 or 1 et al
             // @param signalStatus: Signal Status
-            virtual void OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus) { };
+            virtual void OnHdmiInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus);
 
             // @brief HDMI Event Signal status
             // @param activePort: port 0 or 1 et al
             // @param isPresented: is it presented or not
-            virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
+            virtual void OnHdmiInEventStatus(dsHdmiInPort_t activePort, bool isPresented);
 
             // @brief HDMI Video Mode update
             // @param port: port 0 or 1 et al
             // @param videoPortResolution: Video port resolution
-            virtual void OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
+            virtual void OnHdmiInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution);
 
             // @brief HDMI ALLM (Auto Low Latency Mode) status
             // @param port: port 0 or 1 et al
             // @param allmStatus: allm status
-            virtual void OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
+            virtual void OnHdmiInAllmStatus(dsHdmiInPort_t port, bool allmStatus);
 
             // @brief HDMI Event AVI content type
             // @param port: port 0 or 1 et al
             // @param aviContentType: AVI content type
-            virtual void OnHDMIInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
+            virtual void OnHdmiInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType);
 
             // @brief HDMI VRR status
             // @param port: port 0 or 1 et al
             // @param vrrType: VRR type
-            virtual void OnHDMIInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
+            virtual void OnHdmiInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType);
 
             // @brief HDMI Event AV Latency
             // @param audioDelay: audio delay (in millisecs)
             // @param videoDelay: video delay (in millisecs)
-            virtual void OnHDMIInAVLatency(int audioDelay, int videoDelay) { };
+            virtual void OnHdmiInAVLatency(int audioDelay, int videoDelay);
 
     };
 
     // @brief Register a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IHDMIInEvents *listener);
+    dsError_t Register(IHdmiInEvents *listener);
 
     // @brief UnRegister a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t UnRegister(IHDMIInEvents *listener);
+    dsError_t UnRegister(IHdmiInEvents *listener);
 
     struct ICompositeInEvents {
         virtual ~ICompositeInEvents() = default;
