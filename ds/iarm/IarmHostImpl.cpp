@@ -955,26 +955,29 @@ IarmHostImpl::~IarmHostImpl()
 }
 
 template <typename T, typename F>
-/* static */ void IarmHostImpl::Dispatch(const std::list<T*>& listeners, F&& fn)
+/* static */ void Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn)
 {
     std::stringstream ss;
 
-    for (auto* listener : listeners) {
+    for (auto& pair : listeners) {
+        // pair.first is the listener
+        // pair.second is the clientName
+
         auto start = std::chrono::steady_clock::now();
 
-        fn(listener);
+        fn(pair.first);
 
         auto end     = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        ss << "\t client =" << listener << ", elapsed = " << elapsed.count() << " ms\n";
+        ss << "\t client= " << pair.second << pair << ", elapsed = " << elapsed.count() << " ms\n";
     }
 
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
-dsError_t IarmHostImpl::Register(IHDMIInEvents* listener)
+dsError_t IarmHostImpl::Register(IHDMIInEvents* listener, const std::string& clientName)
 {
-    return s_hdmiInListeners.Register(listener);
+    return s_hdmiInListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
@@ -989,9 +992,9 @@ dsError_t IarmHostImpl::UnRegister(IHDMIInEvents* listener)
     Dispatch(s_hdmiInListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener)
+dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener, const std::string& clientName)
 {
-    return s_videoDeviceListeners.Register(listener);
+    return s_videoDeviceListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
@@ -1006,9 +1009,9 @@ dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener)
+dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener, const std::string& clientName)
 {
-    return s_videoOutputPortListeners.Register(listener);
+    return s_videoOutputPortListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
@@ -1023,9 +1026,9 @@ dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
     Dispatch(s_videoOutputPortListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener)
+dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener, const std::string& clientName)
 {
-    return s_audioOutputPortListeners.Register(listener);
+    return s_audioOutputPortListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
@@ -1040,9 +1043,9 @@ dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
     Dispatch(s_audioOutputPortListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(ICompositeInEvents* listener)
+dsError_t IarmHostImpl::Register(ICompositeInEvents* listener, const std::string& clientName)
 {
-    return s_compositeListeners.Register(listener);
+    return s_compositeListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
@@ -1057,9 +1060,9 @@ dsError_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
     Dispatch(s_compositeListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IDisplayEvents* listener)
+dsError_t IarmHostImpl::Register(IDisplayEvents* listener, const std::string& clientName)
 {
-    return s_displayListeners.Register(listener);
+    return s_displayListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(IDisplayEvents* listener)
@@ -1074,9 +1077,9 @@ dsError_t IarmHostImpl::UnRegister(IDisplayEvents* listener)
     Dispatch(s_displayListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IDisplayDeviceEvents* listener)
+dsError_t IarmHostImpl::Register(IDisplayDeviceEvents* listener, const std::string& clientName)
 {
-    return s_displayDeviceListeners.Register(listener);
+    return s_displayDeviceListeners.Register(listener, clientName);
 }
 
 dsError_t IarmHostImpl::UnRegister(IDisplayDeviceEvents* listener)

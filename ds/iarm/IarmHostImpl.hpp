@@ -51,7 +51,7 @@ class IarmHostImpl {
     // Manages a list of listeners and corresponding IARM Event Group operations.
     // Private internal class, not to be used directly by clients.
     template <typename T, typename IARMGroup>
-    class CallbackList : public std::list<T> {
+    class CallbackList : public std::list<std::pair<T, std::string>> {
     public:
         CallbackList()
             : m_registered(false)
@@ -74,7 +74,8 @@ class IarmHostImpl {
         // @brief Register a listener, also register IARM events if not already registered
         // if the listener is already registered, listener will not be added again
         // if IARM event registration fails, listener will not be added
-        dsError_t Register(T listener)
+        // clientName is for logging purposes only, if not available, pass empty string
+        dsError_t Register(T listener, const std::string& clientName)
         {
             if (nullptr == listener) {
                 INT_ERROR("%s listener is null", typeid(T).name());
@@ -92,16 +93,19 @@ class IarmHostImpl {
                 }
             }
 
-            auto it = std::find(this->begin(), this->end(), listener);
+            auto it = std::find_if(this->begin(), this->end(), [listener](const std::pair<T, std::string>& pair) {
+                return pair.first == listener;
+            });
+
             if (it != this->end()) {
                 // Listener already registered
                 INT_ERROR("%s %p is already registered", typeid(T).name(), listener);
                 return dsERR_NONE; // Success: Listener already registered
             }
 
-            this->push_back(listener);
+            this->emplace_back(listener, clientName);
 
-            INT_INFO("%s %p registered", typeid(T).name(), listener);
+            INT_INFO("%s %s %p registered", clientName.c_str(), typeid(T).name(), listener);
 
             return dsERR_NONE;
         }
@@ -117,16 +121,22 @@ class IarmHostImpl {
 
             std::lock_guard<std::mutex> lock(m_mutex);
 
-            auto it = std::find(this->begin(), this->end(), listener);
+            // pair.first is the listener, pair.second is the clientName
+            auto it = std::find_if(this->begin(), this->end(), [listener](const auto& pair) {
+                return pair.first == listener;
+            });
+
             if (it == this->end()) {
                 // Listener not found
                 INT_ERROR("%s %p is not registered", typeid(T).name(), listener);
                 return dsERR_RESOURCE_NOT_AVAILABLE; // Error: Listener not found
             }
 
+            const std::string clientName = it->second;
+
             this->erase(it);
 
-            INT_INFO("%s %p unregistered", typeid(T).name(), listener);
+            INT_INFO("%s %s %p unregistered", clientName.c_str(), typeid(T).name(), listener);
 
             if (this->empty() && m_registered) {
                 m_registered = !IARMGroup::UnRegisterIarmEvents();
@@ -166,58 +176,79 @@ public:
 
     // @brief Register a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IHDMIInEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IHDMIInEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for HDMI device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IHDMIInEvents* listener);
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IVideoDeviceEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IVideoDeviceEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for video device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IVideoDeviceEvents* listener);
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    dsError_t Register(IVideoOutputPortEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IVideoOutputPortEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IVideoOutputPortEvents* listener);
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    dsError_t Register(IAudioOutputPortEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IAudioOutputPortEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t Register(ICompositeInEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(ICompositeInEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(ICompositeInEvents* listener);
 
     // @brief Register a listener for Composite events
     // @param listener: class object implementing the listener
-    dsError_t Register(IDisplayEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IDisplayEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for Composite events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IDisplayEvents* listener);
 
     // @brief Register a listener for display device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IDisplayDeviceEvents* listener);
+    // @param clientName: name of the client registering the listener, for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IDisplayDeviceEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for display device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
 private:
@@ -230,7 +261,7 @@ private:
     static CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> s_displayDeviceListeners;
 
     template <typename T, typename F>
-    static void Dispatch(const std::list<T*>& listeners, F&& fn);
+    static void Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn);
 
     static void Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
