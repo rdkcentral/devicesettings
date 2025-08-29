@@ -122,7 +122,7 @@ class IarmHostImpl {
             std::lock_guard<std::mutex> lock(m_mutex);
 
             // pair.first is the listener, pair.second is the clientName
-            auto it = std::find_if(this->begin(), this->end(), [listener](const auto& pair) {
+            auto it = std::find_if(this->begin(), this->end(), [listener](const std::pair<T, std::string>& pair) {
                 return pair.first == listener;
             });
 

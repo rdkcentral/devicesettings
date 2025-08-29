@@ -850,8 +850,11 @@ DefaultImpl& Host::impl()
     INT_WARN("Base impl of OnDolbyAtmosCapabilitiesChanged called. atmosCapability: %d, status: %d", atmosCapability, status);
 }
 
-// TODO: requires dsMgr.h header include ??
-// void Host::IAudioOutputPortEvents::OnAudioPortStateChanged(dsAudioPortState_t audioPortState) { }
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioPortStateChanged(dsAudioPortState_t audioPortState) 
+{
+    // If client needs to handle this event, they should override this method
+    INT_WARN("Base impl of OnAudioPortStateChanged called. audioPortState: %d", audioPortState);
+}
 
 /* virtual */ void Host::IAudioOutputPortEvents::OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode)
 {
