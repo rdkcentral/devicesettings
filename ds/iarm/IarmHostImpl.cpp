@@ -401,7 +401,6 @@ private:
         }
     };
 
-    // TODO: requires dsMgr.h header for dsAudioPortState_t ?
     static void iarmAudioPortStateChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received owner = %s, eventId = %d", owner, eventId);
@@ -416,8 +415,7 @@ private:
             dsAudioPortState_t audioPortState = eventData->data.AudioPortStateInfo.audioPortState;
 
             IarmHostImpl::Dispatch([audioPortState](IAudioOutputPortEvents* listener) {
-                // TODO:
-                // listener->OnAudioPortStateChanged(audioPortState);
+                listener->OnAudioPortStateChanged(audioPortState);
             });
         } else {
             INT_ERROR("Invalid data received for audio port state change");
