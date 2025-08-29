@@ -38,7 +38,7 @@ class IARMGroupDisplayDevice;
 class IARMGroupComposite;
 class IARMGroupDisplay;
 
-using IHDMIInEvents          = Host::IHDMIInEvents;
+using IHdmiInEvents          = Host::IHdmiInEvents;
 using IVideoDeviceEvents     = Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents = Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents = Host::IAudioOutputPortEvents;
@@ -178,12 +178,11 @@ public:
     // @param listener: class object implementing the listener
     // @param clientName: name of the client registering the listener, for logging purposes only
     // @return dsERR_NONE on success, appropriate dsError_t on failure
-    dsError_t Register(IHDMIInEvents* listener, const std::string& clientName);
+    dsError_t Register(IHdmiInEvents* listener, const std::string& clientName);
 
     // @brief UnRegister a listener for HDMI device events
     // @param listener: class object implementing the listener
-    // @return dsERR_NONE on success, appropriate dsError_t on failure
-    dsError_t UnRegister(IHDMIInEvents* listener);
+    dsError_t UnRegister(IHdmiInEvents* listener);
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
@@ -263,7 +262,7 @@ private:
     template <typename T, typename F>
     static void Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn);
 
-    static void Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IHdmiInEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);
