@@ -38,6 +38,25 @@
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
 
+// dsMgr.h cannot be exposed to clients as we plan to deprecate it
+// this is only temporary until dsAudioPortState_t is moved to ds halif headers
+#ifndef HAVE_DSAUDIOPORT_STATE_TYPE
+#define HAVE_DSAUDIOPORT_STATE_TYPE
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum _dsAudioPortState {
+    dsAUDIOPORT_STATE_UNINITIALIZED,
+    dsAUDIOPORT_STATE_INITIALIZED,
+    dsAUDIOPORT_STATE_MAX
+} dsAudioPortState_t;
+
+#ifdef __cplusplus
+}
+#endif
+#endif // HAVE_DSAUDIOPORT_STATE_TYPE
+
 /**
  * @file host.hpp
  * @brief It contains class, structures referenced by host.cpp file.
@@ -271,8 +290,7 @@ public:
 
         // @brief Audio port state changed
         // @param audioPortState: audio port state
-        // TODO: requires dsMgr.h header include ??
-        // virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState);
+        virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState);
 
         // @brief Audio mode for the respective audio port - raised for every type of port
         // @param audioPortType: audio port type see dsAudioPortType_t

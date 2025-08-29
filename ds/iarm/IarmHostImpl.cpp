@@ -401,7 +401,6 @@ private:
         }
     };
 
-    // TODO: requires dsMgr.h header for dsAudioPortState_t ?
     static void iarmAudioPortStateChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE received owner = %s, eventId = %d", owner, eventId);
@@ -416,8 +415,7 @@ private:
             dsAudioPortState_t audioPortState = eventData->data.AudioPortStateInfo.audioPortState;
 
             IarmHostImpl::Dispatch([audioPortState](IAudioOutputPortEvents* listener) {
-                // TODO:
-                // listener->OnAudioPortStateChanged(audioPortState);
+                listener->OnAudioPortStateChanged(audioPortState);
             });
         } else {
             INT_ERROR("Invalid data received for audio port state change");
@@ -969,7 +967,7 @@ template <typename T, typename F>
 
         auto end     = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        ss << "\t client= " << pair.second << pair << ", elapsed = " << elapsed.count() << " ms\n";
+        ss << "\t client= " << pair.second << " @ " << pair.first << ", elapsed = " << elapsed.count() << " ms\n";
     }
 
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
