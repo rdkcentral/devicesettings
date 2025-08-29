@@ -955,7 +955,7 @@ IarmHostImpl::~IarmHostImpl()
 }
 
 template <typename T, typename F>
-/* static */ void Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn)
+/* static */ void IarmHostImpl::Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn)
 {
     std::stringstream ss;
 
