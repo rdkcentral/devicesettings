@@ -38,7 +38,7 @@ class IARMGroupDisplayDevice;
 class IARMGroupComposite;
 class IARMGroupDisplay;
 
-using IHDMIInEvents          = Host::IHDMIInEvents;
+using IHdmiInEvents          = Host::IHdmiInEvents;
 using IVideoDeviceEvents     = Host::IVideoDeviceEvents;
 using IVideoOutputPortEvents = Host::IVideoOutputPortEvents;
 using IAudioOutputPortEvents = Host::IAudioOutputPortEvents;
@@ -154,11 +154,11 @@ public:
 
     // @brief Register a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IHDMIInEvents* listener);
+    dsError_t Register(IHdmiInEvents* listener);
 
     // @brief UnRegister a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t UnRegister(IHDMIInEvents* listener);
+    dsError_t UnRegister(IHdmiInEvents* listener);
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
@@ -211,7 +211,7 @@ public:
 private:
     static std::mutex s_mutex;
 
-    static CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> s_hdmiInListeners;
+    static CallbackList<IHdmiInEvents*, IARMGroupHdmiIn> s_hdmiInListeners;
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
@@ -222,7 +222,7 @@ private:
     template <typename T, typename F>
     static void Dispatch(const std::list<T*>& listeners, F&& fn);
 
-    static void Dispatch(std::function<void(IHDMIInEvents* listener)>&& fn);
+    static void Dispatch(std::function<void(IHdmiInEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn);
     static void Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn);

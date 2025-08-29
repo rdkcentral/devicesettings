@@ -774,52 +774,52 @@ DefaultImpl& Host::impl()
     return *m_impl;
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInEventHotPlug(dsHdmiInPort_t port, bool isConnected)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInEventHotPlug called. port: %d, isConnected: %d", port, isConnected);
+    INT_WARN("Base impl of OnHdmiInEventHotPlug called. port: %d, isConnected: %d", port, isConnected);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInEventSignalStatus called. port: %d, signalStatus: %d", port, signalStatus);
+    INT_WARN("Base impl of OnHdmiInEventSignalStatus called. port: %d, signalStatus: %d", port, signalStatus);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInEventStatus(dsHdmiInPort_t activePort, bool isPresented)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInEventStatus called. activePort: %d, isPresented: %d", activePort, isPresented);
+    INT_WARN("Base impl of OnHdmiInEventStatus called. activePort: %d, isPresented: %d", activePort, isPresented);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInVideoModeUpdate called. port: %d, interlaced: %d", port, videoPortResolution.interlaced);
+    INT_WARN("Base impl of OnHdmiInVideoModeUpdate called. port: %d, interlaced: %d", port, videoPortResolution.interlaced);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInAllmStatus(dsHdmiInPort_t port, bool allmStatus)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInAllmStatus called. port: %d, allmStatus: %d", port, allmStatus);
+    INT_WARN("Base impl of OnHdmiInAllmStatus called. port: %d, allmStatus: %d", port, allmStatus);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInAVIContentType called. port: %d, aviContentType: %d", port, aviContentType);
+    INT_WARN("Base impl of OnHdmiInAVIContentType called. port: %d, aviContentType: %d", port, aviContentType);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInVRRStatus called. port: %d, vrrType: %d", port, vrrType);
+    INT_WARN("Base impl of OnHdmiInVRRStatus called. port: %d, vrrType: %d", port, vrrType);
 }
 
-/* virtual */ void Host::IHDMIInEvents::OnHDMIInAVLatency(int audioDelay, int videoDelay)
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInAVLatency(int audioDelay, int videoDelay)
 {
     // If client needs to handle this event, they should override this method
-    INT_WARN("Base impl of OnHDMIInAVLatency called. audioDelay: %d, videoDelay: %d", audioDelay, videoDelay);
+    INT_WARN("Base impl of OnHdmiInAVLatency called. audioDelay: %d, videoDelay: %d", audioDelay, videoDelay);
 }
 
 /* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePreChange(const std::string& frameRate)
@@ -925,12 +925,12 @@ DefaultImpl& Host::impl()
     INT_WARN("Base impl of OnDisplayHDMIHotPlug called. displayEvent: %d", displayEvent);
 }
 
-dsError_t Host::Register(IHDMIInEvents *listener)
+dsError_t Host::Register(IHdmiInEvents *listener)
 {
     return impl().Register(listener);
 }
 
-dsError_t Host::UnRegister(IHDMIInEvents *listener)
+dsError_t Host::UnRegister(IHdmiInEvents *listener)
 {
     return impl().UnRegister(listener);
 }
