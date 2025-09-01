@@ -251,7 +251,7 @@ public:
     dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
 private:
-    static CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> s_hdmiInListeners;
+    static CallbackList<IHdmiInEvents*, IARMGroupHdmiIn> s_hdmiInListeners;
     static CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> s_videoDeviceListeners;
     static CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> s_videoOutputPortListeners;
     static CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> s_audioOutputPortListeners;
