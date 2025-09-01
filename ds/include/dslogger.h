@@ -29,21 +29,27 @@
 #ifndef _DS_LOGGER_H_
 #define _DS_LOGGER_H_
 
-#include "dsregisterlog.h"
-#include <stdio.h>
+#include <cstring>
 
-int ds_log(int priority,const char *format, ...);
+int ds_log(int priority, const char* fileName, int lineNum, const char *format, ...);
 
 #define INFO_LEVEL   0
 #define WARN_LEVEL   1
 #define ERROR_LEVEL  2
 #define DEBUG_LEVEL  3
 
+// Helper to extract filename from full path
+// E.g. "/path/to/file.cpp" -> "file.cpp"
+// IMPORTANT: This will work for Unix style paths only
+static inline const char* fileName(const char* path) {
+    const char* slash = strrchr(path, '/');
+    return slash ? slash + 1 : path;
+}
 
-#define INT_INFO(FORMAT, ...)           ds_log(INFO_LEVEL ,FORMAT,  ##__VA_ARGS__ )
-#define INT_WARN(FORMAT, ...)           ds_log(WARN_LEVEL ,FORMAT,  ##__VA_ARGS__ )
-#define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL ,FORMAT,  ##__VA_ARGS__ )
-#define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL ,FORMAT,  ##__VA_ARGS__ )
+#define INT_INFO(FORMAT, ...)       ds_log(INFO_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+#define INT_WARN(FORMAT, ...)       ds_log(WARN_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+#define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+#define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 
 #endif
 
