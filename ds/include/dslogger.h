@@ -31,6 +31,8 @@
 
 #include <cstring>
 
+#include "dsregisterlog.h"
+
 int ds_log(int priority, const char* fileName, int lineNum, const char *format, ...);
 
 #define INFO_LEVEL   0
