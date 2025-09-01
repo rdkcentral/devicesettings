@@ -25,11 +25,13 @@
 * @{
 **/
 
+#include <cstdio>
+#include <cstdarg>
 
 #include "dslogger.h"
-#include <stdarg.h>
 
-#define MAX_LOG_BUFF 500
+#define unlikely(x) (__builtin_expect(!!(x), 0))
+#define MAX_LOG_BUFF 512
 
 DS_LogCb logCb = NULL;
 
@@ -38,26 +40,30 @@ void DS_RegisterForLog(DS_LogCb cb)
     logCb = cb;
 }
 
-int ds_log(int priority,const char *format, ...)
+int ds_log(int priority, const char* fileName, int lineNum, const char *format, ...)
 {
-    char tmp_buff[MAX_LOG_BUFF];
+    char tmp_buff[MAX_LOG_BUFF] = {'\0'};
+
+    int offset = snprintf(tmp_buff, MAX_LOG_BUFF, "[%s:%d] ", fileName, lineNum);
+
+    // formatting error
+    if (unlikely(offset < 0)) {
+        offset = 0;
+    }
+
     va_list args;
     va_start(args, format);
-    vsnprintf(tmp_buff,MAX_LOG_BUFF-1,format, args);
+    vsnprintf(tmp_buff + offset, MAX_LOG_BUFF - 1 - offset, format, args);
     va_end(args);
-    if(logCb != NULL)
-    {
-        logCb(priority,tmp_buff);
+
+    if (nullptr != logCb) {
+        logCb(priority, tmp_buff);
+    } else {
+        return printf("%s\n", tmp_buff);
     }
-    else
-    {
-        return printf(tmp_buff);
-    }
+
     return 0;
 }
-
-
-
 
 /** @} */
 /** @} */
