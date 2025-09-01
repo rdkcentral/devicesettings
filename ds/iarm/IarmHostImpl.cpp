@@ -939,7 +939,7 @@ constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupComposite::handlers[];
 constexpr EventHandlerMapping IARMGroupDisplay::handlers[];
 
-IarmHostImpl::CallbackList<IHDMIInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
+IarmHostImpl::CallbackList<IHdmiInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
 IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
 IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
 IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
@@ -979,7 +979,7 @@ template <typename T, typename F>
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
-dsError_t IarmHostImpl::Register(IHDMIInEvents* listener, const std::string& clientName)
+dsError_t IarmHostImpl::Register(IHdmiInEvents* listener, const std::string& clientName)
 {
     return s_hdmiInListeners.Register(listener, clientName);
 }
