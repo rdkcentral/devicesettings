@@ -47,8 +47,8 @@ int ds_log(int priority, const char* fileName, int lineNum, const char *format, 
     int offset = snprintf(tmp_buff, MAX_LOG_BUFF, "[%s:%d] ", fileName, lineNum);
 
     // formatting error
-    if (unlikely(offset < 0)) {
         offset = 0;
+        tmp_buff[0] = '\0'; // Ensure buffer is null-terminated if snprintf fails
     }
 
     va_list args;
