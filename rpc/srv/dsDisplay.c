@@ -114,6 +114,7 @@ IARM_Result_t _dsDisplayInit(void *arg)
             eReturn = dsGetDisplay(dsVIDEOPORT_TYPE_INTERNAL, 0, &handle);
             if (dsERR_NONE != eReturn) {
                 INT_ERROR("dsGetDisplay for dsVIDEOPORT_TYPE_INTERNAL also failed.\r\n");
+                IARM_BUS_Unlock(lock);
                 return IARM_RESULT_INVALID_PARAM;
             }
         }
@@ -173,6 +174,9 @@ IARM_Result_t _dsGetDisplayAspectRatio(void *arg)
 IARM_Result_t _dsGetEDID(void *arg)
 {
     _DEBUG_ENTER();
+    if (!arg) {   //  coverity - FORWARD_NULL check
+       return IARM_RESULT_INVALID_PARAM;
+    }
     errno_t rc = -1;
     static dsDisplayEDID_t *edidInfo = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
     dsDisplayGetEDIDParam_t *param = (dsDisplayGetEDIDParam_t *)arg;
@@ -214,6 +218,10 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
 #endif
     errno_t rc = -1;
     _DEBUG_ENTER();
+    if (!arg) {   //  coverity - FORWARD_NULL check
+       return IARM_RESULT_INVALID_PARAM;
+    }
+
     static unsigned char edid[1024] = {0};
     static int length = 0;
    dsDisplayGetEDIDBytesParam_t *param = (dsDisplayGetEDIDBytesParam_t *)arg;

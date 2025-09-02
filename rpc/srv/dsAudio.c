@@ -332,6 +332,28 @@ void AudioConfigInit()
                 INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
                 std::string _AudioLevel("0");
                 float m_audioLevel = 0;
+//SPDIF init
+                handle = 0;
+                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                    try {
+                        _AudioLevel = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Level");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Level not found in persistence store. Try system default\n");
+                                _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Level");
+                            }
+                            catch(...) {
+                                _AudioLevel = "40";
+                            }
+                    }
+                    m_audioLevel = atof(_AudioLevel.c_str());
+                    audioLevel_cache_spdif = m_audioLevel;
+                    if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio level : %f\n","SPDIF0", m_audioLevel);
+                        m_volumeLevel = m_audioLevel;
+                    }
+                }
 //SPEAKER init
                 handle = 0;
                 if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
@@ -348,6 +370,7 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
+		    audioLevel_cache_speaker = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         m_volumeLevel = m_audioLevel;
                         INT_INFO("Port %s: Initialized audio level : %f\n","SPEAKER0", m_audioLevel);
@@ -369,6 +392,7 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
+		    audioLevel_cache_headphone = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
                     }
@@ -389,11 +413,13 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
+		    audioLevel_cache_hdmi = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                         m_volumeLevel = m_audioLevel;
                     }
                 }
+		
             }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
@@ -669,7 +695,9 @@ void AudioConfigInit()
                 if (dsSetMS12AudioProfileFunc) {
                     INT_DEBUG("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
                     handle = 0;
-                    dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
+                    if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+                        INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+                    }
 
                     try {
                         _AProfile = device::HostPersistence::getInstance().getProperty("audio.MS12Profile");
@@ -1268,10 +1296,11 @@ void AudioConfigInit()
                             }
                 //SPEAKER init
                             handle = 0;
-                            dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
-                            if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
-                                INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
-                            }
+                            if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                                if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
+                                    INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
+                                }
+			    }
                 //HDMI init
                             handle = 0;
                             if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
@@ -1320,8 +1349,11 @@ void AudioConfigInit()
                         std::string _GEQMode("0");
                         int m_GEQMode = 0;
                         handle = 0;
-                        dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
-                        try {
+                        if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+                            INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+                        }
+
+		        try {
                             _GEQMode = device::HostPersistence::getInstance().getProperty("audio.GraphicEQ");
                             m_GEQMode = atoi(_GEQMode.c_str());
                 //SPEAKER init
@@ -1521,7 +1553,9 @@ void AudioConfigInit()
                        std::string _IEQMode("0");
                        int m_IEQMode = 0;
                        handle = 0;
-                       dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
+                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+		           INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+		       }
                        try {
                            _IEQMode = device::HostPersistence::getInstance().getProperty("audio.IntelligentEQ");
                        }
@@ -1901,7 +1935,9 @@ void AudioConfigInit()
                        std::string _GEQMode("0");
                        int m_GEQMode = 0;
                        handle = 0;
-                       dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
+                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
+			       INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
+		       }
                        try {
                            _GEQMode = device::HostPersistence::getInstance().getProperty("audio.GraphicEQ");
                        }
@@ -2656,7 +2692,9 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 IARM_Result_t _dsGetStereoAuto(void *arg)
 {
     _DEBUG_ENTER();
-
+    if ( !arg ) {
+        return IARM_RESULT_INVALID_PARAM;
+    }
     IARM_BUS_Lock(lock);
 
     dsAudioSetStereoAutoParam_t *param = (dsAudioSetStereoAutoParam_t *)arg;
@@ -7038,43 +7076,52 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
-	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = 0.0, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
+	float prev_audioLevel_spdif = audioLevel_cache_spdif, prev_audioLevel_speaker = audioLevel_cache_speaker, prev_audioLevel_hdmi = audioLevel_cache_hdmi, prev_audioLevel_headphone = audioLevel_cache_headphone;
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
+	struct timespec ts;
 	    while(1){
-              // wait for 3 sec, then update the latest audio level from cache variable
+	      clock_gettime(CLOCK_REALTIME, &ts);
+              ts.tv_sec += 5;
 
               pthread_mutex_lock(&audioLevelMutex);
-              pthread_cond_wait(&audioLevelTimerCV, &audioLevelMutex);
+              while(!audioLevel_timer_set){
+                int rc = pthread_cond_timedwait(&audioLevelTimerCV, &audioLevelMutex, &ts);
+                if (rc == ETIMEDOUT)
+                        continue;
+              }
               if(!persist_audioLevel_timer_threadIsAlive){
+		pthread_mutex_unlock(&audioLevelMutex);
                 break;
               }
-              sleep(3);
+	      // wait for 3 sec, then update the latest audio level from cache variable
+	      if(audioLevel_timer_set){
+                sleep(3);
 
-              if(float(audioLevel_cache_spdif) != prev_audioLevel_spdif){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPDIF0.audio.Level",float(audioLevel_cache_spdif));
-                device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.Level",std::to_string(audioLevel_cache_spdif));
-                prev_audioLevel_spdif = float(audioLevel_cache_spdif);
-              }
-              if(float(audioLevel_cache_hdmi) != prev_audioLevel_hdmi){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HDMI0.audio.Level",float(audioLevel_cache_hdmi));
-                device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.Level",std::to_string(audioLevel_cache_hdmi));
-                prev_audioLevel_hdmi = float(audioLevel_cache_hdmi);
-              }
-              if(float(audioLevel_cache_speaker) != prev_audioLevel_speaker){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPEAKER0.audio.Level",float(audioLevel_cache_speaker));
-                device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.Level",std::to_string(audioLevel_cache_speaker));
-                prev_audioLevel_speaker = float(audioLevel_cache_speaker);
-              }
-              if(float(audioLevel_cache_headphone) != prev_audioLevel_headphone){
-                INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HEADPHONE0.audio.Level",float(audioLevel_cache_headphone));
-                device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.Level",std::to_string(audioLevel_cache_headphone));
-                prev_audioLevel_headphone = float(audioLevel_cache_headphone);
-              }
-              else{
-                INT_INFO("%s Audio level is same as last set value.Not updating persistence\n",__func__);
-              }
-
-              audioLevel_timer_set = false;
+                if(float(audioLevel_cache_spdif) != prev_audioLevel_spdif){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPDIF0.audio.Level",float(audioLevel_cache_spdif));
+                  device::HostPersistence::getInstance().persistHostProperty("SPDIF0.audio.Level",std::to_string(audioLevel_cache_spdif));
+                  prev_audioLevel_spdif = float(audioLevel_cache_spdif);
+                }
+                if(float(audioLevel_cache_hdmi) != prev_audioLevel_hdmi){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HDMI0.audio.Level",float(audioLevel_cache_hdmi));
+                  device::HostPersistence::getInstance().persistHostProperty("HDMI0.audio.Level",std::to_string(audioLevel_cache_hdmi));
+                  prev_audioLevel_hdmi = float(audioLevel_cache_hdmi);
+                }
+                if(float(audioLevel_cache_speaker) != prev_audioLevel_speaker){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"SPEAKER0.audio.Level",float(audioLevel_cache_speaker));
+                  device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.audio.Level",std::to_string(audioLevel_cache_speaker));
+                  prev_audioLevel_speaker = float(audioLevel_cache_speaker);
+                }
+                if(float(audioLevel_cache_headphone) != prev_audioLevel_headphone){
+                  INT_INFO("%s: port: %s ,persist audio level: %f\n",__func__,"HEADPHONE0.audio.Level",float(audioLevel_cache_headphone));
+                  device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.Level",std::to_string(audioLevel_cache_headphone));
+                  prev_audioLevel_headphone = float(audioLevel_cache_headphone);
+                }
+                else{
+                  INT_INFO("%s Audio level is same as last set value.Not updating persistence\n",__func__);
+                }
+                audioLevel_timer_set = false;
+	      }
               pthread_mutex_unlock(&audioLevelMutex);
             }
 

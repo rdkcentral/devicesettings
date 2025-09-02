@@ -123,11 +123,9 @@ IARM_Result_t dsCompositeInMgr_term()
 
 IARM_Result_t _dsCompositeInInit(void *arg)
 {
+    IARM_BUS_Lock(lock);
     INT_INFO("%s:%d ---> m_isInitialized=%d, m_isPlatInitialized=%d \n",
                    __PRETTY_FUNCTION__,__LINE__, m_isInitialized, m_isPlatInitialized);
-
-    IARM_BUS_Lock(lock);
-
 
     if (PROFILE_TV == profileType)
     {
@@ -266,9 +264,9 @@ IARM_Result_t _dsCompositeInInit(void *arg)
 IARM_Result_t _dsCompositeInTerm(void *arg)
 {
     _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
     INT_DEBUG("%s:%d ---> m_isPlatInitialized=%d\n", __PRETTY_FUNCTION__,__LINE__, m_isPlatInitialized);
 
-    IARM_BUS_Lock(lock);
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
