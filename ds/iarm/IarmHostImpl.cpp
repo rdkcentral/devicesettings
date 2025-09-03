@@ -649,30 +649,9 @@ private:
         }
     }
 
-    static void iarmDisplayHDCPStatusChange(const char* owner, IARM_EventId_t eventId, void* data, size_t)
-    {
-        INT_INFO("IARM_BUS_DSMGR_EVENT_HDCP_STATUS received owner = %s, eventId = %d", owner, eventId);
-        if (!isValidOwner(owner)) {
-            return;
-        }
-
-        auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
-
-        if (eventData) {
-            dsHdcpStatus_t hdcpStatus = static_cast<dsHdcpStatus_t>(eventData->data.hdmi_hdcp.hdcpStatus);
-            IarmHostImpl::Dispatch([hdcpStatus](IDisplayEvents* listener) {
-                /* To check Parameter Required or Not*/
-                listener->OnDisplayHDCPStatus();
-            });
-        } else {
-            INT_ERROR("Invalid data received for Composite Video Mode Update in iarmDisplayHDCPStatusChange");
-        }
-    }
-
 private:
     static constexpr EventHandlerMapping handlers[] = {
-        { IARM_BUS_DSMGR_EVENT_RX_SENSE,    &IARMGroupDisplay::iarmDisplayDisplayRxSense   },
-        { IARM_BUS_DSMGR_EVENT_HDCP_STATUS, &IARMGroupDisplay::iarmDisplayHDCPStatusChange },
+        { IARM_BUS_DSMGR_EVENT_RX_SENSE,    &IARMGroupDisplay::iarmDisplayDisplayRxSense   }
     };
 };
 

@@ -178,9 +178,6 @@ public:
         // @brief Display RX Sense event
         // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
         virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent);
-
-        // @brief Display HDCP Status
-        virtual void OnDisplayHDCPStatus();
     };
 
     // @brief Register a listener for display events
