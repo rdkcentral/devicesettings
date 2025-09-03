@@ -3,7 +3,7 @@
 #include <mutex>
 #include <sstream>
 
-#include "IarmHostImpl.hpp"
+#include "IarmImpl.hpp"
 
 #include "dsMgr.h"
 #include "dslogger.h"
@@ -95,7 +95,7 @@ private:
         if (eventData) {
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
-            IarmHostImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
+            IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePreChange(framerate);
             });
         } else {
@@ -116,7 +116,7 @@ private:
         if (eventData) {
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
-            IarmHostImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
+            IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePostChange(framerate);
             });
         } else {
@@ -137,7 +137,7 @@ private:
         if (eventData) {
             dsVideoZoom_t zoomSetting = static_cast<dsVideoZoom_t>(eventData->data.dfc.zoomsettings);
 
-            IarmHostImpl::Dispatch([zoomSetting](IVideoDeviceEvents* listener) {
+            IarmImpl::Dispatch([zoomSetting](IVideoDeviceEvents* listener) {
                 listener->OnZoomSettingsChanged(zoomSetting);
             });
         } else {
@@ -179,7 +179,7 @@ private:
             int width  = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
-            IarmHostImpl::Dispatch([width, height](IVideoOutputPortEvents* listener) {
+            IarmImpl::Dispatch([width, height](IVideoOutputPortEvents* listener) {
                 listener->OnResolutionPreChange(width, height);
             });
         } else {
@@ -201,7 +201,7 @@ private:
             int width  = eventData->data.resn.width;
             int height = eventData->data.resn.height;
 
-            IarmHostImpl::Dispatch([width, height](IVideoOutputPortEvents* listener) {
+            IarmImpl::Dispatch([width, height](IVideoOutputPortEvents* listener) {
                 listener->OnResolutionPostChange(width, height);
             });
         } else {
@@ -221,7 +221,7 @@ private:
 
         if (eventData) {
             dsHdcpStatus_t hdcpStatus = static_cast<dsHdcpStatus_t>(eventData->data.hdmi_hdcp.hdcpStatus);
-            IarmHostImpl::Dispatch([hdcpStatus](IVideoOutputPortEvents* listener) {
+            IarmImpl::Dispatch([hdcpStatus](IVideoOutputPortEvents* listener) {
                 listener->OnHDCPStatusChange(hdcpStatus);
             });
         } else {
@@ -242,7 +242,7 @@ private:
         if (eventData) {
             dsHDRStandard_t videoFormat = eventData->data.VideoFormatInfo.videoFormat;
 
-            IarmHostImpl::Dispatch([videoFormat](IVideoOutputPortEvents* listener) {
+            IarmImpl::Dispatch([videoFormat](IVideoOutputPortEvents* listener) {
                 listener->OnVideoFormatUpdate(videoFormat);
             });
         } else {
@@ -284,7 +284,7 @@ private:
         if (eventData) {
             bool mixing = eventData->data.AssociatedAudioMixingInfo.mixing;
 
-            IarmHostImpl::Dispatch([mixing](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([mixing](IAudioOutputPortEvents* listener) {
                 listener->OnAssociatedAudioMixingChanged(mixing);
             });
         } else {
@@ -305,7 +305,7 @@ private:
         if (eventData) {
             int mixerBalance = eventData->data.FaderControlInfo.mixerbalance;
 
-            IarmHostImpl::Dispatch([mixerBalance](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([mixerBalance](IAudioOutputPortEvents* listener) {
                 listener->OnAudioFaderControlChanged(mixerBalance);
             });
         } else {
@@ -326,7 +326,7 @@ private:
         if (eventData) {
             std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
-            IarmHostImpl::Dispatch([&primaryLanguage](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([&primaryLanguage](IAudioOutputPortEvents* listener) {
                 listener->OnAudioPrimaryLanguageChanged(primaryLanguage);
             });
         } else {
@@ -347,7 +347,7 @@ private:
         if (eventData) {
             std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
-            IarmHostImpl::Dispatch([&secondaryLanguage](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([&secondaryLanguage](IAudioOutputPortEvents* listener) {
                 listener->OnAudioSecondaryLanguageChanged(secondaryLanguage);
             });
         } else {
@@ -370,7 +370,7 @@ private:
             uint32_t uiPortNumber      = eventData->data.audio_out_connect.uiPortNo;
             bool isPortConnected       = eventData->data.audio_out_connect.isPortConnected;
 
-            IarmHostImpl::Dispatch([portType, uiPortNumber, isPortConnected](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([portType, uiPortNumber, isPortConnected](IAudioOutputPortEvents* listener) {
                 listener->OnAudioOutHotPlug(portType, uiPortNumber, isPortConnected);
             });
         } else {
@@ -392,7 +392,7 @@ private:
             dsATMOSCapability_t atmosCapability = eventData->data.AtmosCapsChange.caps;
             bool status                         = eventData->data.AtmosCapsChange.status;
 
-            IarmHostImpl::Dispatch([atmosCapability, status](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([atmosCapability, status](IAudioOutputPortEvents* listener) {
                 listener->OnDolbyAtmosCapabilitiesChanged(atmosCapability, status);
             });
 
@@ -414,7 +414,7 @@ private:
         if (eventData) {
             dsAudioPortState_t audioPortState = eventData->data.AudioPortStateInfo.audioPortState;
 
-            IarmHostImpl::Dispatch([audioPortState](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([audioPortState](IAudioOutputPortEvents* listener) {
                 listener->OnAudioPortStateChanged(audioPortState);
             });
         } else {
@@ -436,7 +436,7 @@ private:
             dsAudioPortType_t audioPortType     = static_cast<dsAudioPortType_t>(eventData->data.Audioport.type);
             dsAudioStereoMode_t audioStereoMode = static_cast<dsAudioStereoMode_t>(eventData->data.Audioport.mode);
 
-            IarmHostImpl::Dispatch([audioPortType, audioStereoMode](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([audioPortType, audioStereoMode](IAudioOutputPortEvents* listener) {
                 listener->OnAudioModeEvent(audioPortType, audioStereoMode);
             });
         } else {
@@ -457,7 +457,7 @@ private:
         if (eventData) {
             int audioLevel = eventData->data.AudioLevelInfo.level;
 
-            IarmHostImpl::Dispatch([audioLevel](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([audioLevel](IAudioOutputPortEvents* listener) {
                 listener->OnAudioLevelChangedEvent(audioLevel);
             });
         } else {
@@ -478,7 +478,7 @@ private:
         if (eventData) {
             dsAudioFormat_t audioFormat = eventData->data.AudioFormatInfo.audioFormat;
 
-            IarmHostImpl::Dispatch([audioFormat](IAudioOutputPortEvents* listener) {
+            IarmImpl::Dispatch([audioFormat](IAudioOutputPortEvents* listener) {
                 listener->OnAudioFormatUpdate(audioFormat);
             });
         } else {
@@ -527,7 +527,7 @@ private:
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_connect.port;
             bool isConnected                  = eventData->data.composite_in_connect.isPortConnected;
-            IarmHostImpl::Dispatch([compositePort, isConnected](ICompositeInEvents* listener) {
+            IarmImpl::Dispatch([compositePort, isConnected](ICompositeInEvents* listener) {
                 listener->OnCompositeInHotPlug(compositePort, isConnected);
             });
         } else {
@@ -549,7 +549,7 @@ private:
             dsCompositeInPort_t compositePort         = eventData->data.composite_in_sig_status.port;
             dsCompInSignalStatus_t compositeSigStatus = eventData->data.composite_in_sig_status.status;
 
-            IarmHostImpl::Dispatch([compositePort, compositeSigStatus](ICompositeInEvents* listener) {
+            IarmImpl::Dispatch([compositePort, compositeSigStatus](ICompositeInEvents* listener) {
                 listener->OnCompositeInSignalStatus(compositePort, compositeSigStatus);
             });
         } else {
@@ -570,7 +570,7 @@ private:
         if (eventData) {
             dsCompositeInPort_t compositePort = eventData->data.composite_in_status.port;
             bool isPresented                  = eventData->data.composite_in_status.isPresented;
-            IarmHostImpl::Dispatch([compositePort, isPresented](ICompositeInEvents* listener) {
+            IarmImpl::Dispatch([compositePort, isPresented](ICompositeInEvents* listener) {
                 listener->OnCompositeInStatus(compositePort, isPresented);
             });
         } else {
@@ -599,7 +599,7 @@ private:
             videoResolution.interlaced       = eventData->data.composite_in_video_mode.resolution.interlaced;
             videoResolution.frameRate        = eventData->data.composite_in_video_mode.resolution.frameRate;
 
-            IarmHostImpl::Dispatch([compositePort, videoResolution](ICompositeInEvents* listener) {
+            IarmImpl::Dispatch([compositePort, videoResolution](ICompositeInEvents* listener) {
                 listener->OnCompositeInVideoModeUpdate(compositePort, videoResolution);
             });
         } else {
@@ -641,7 +641,7 @@ private:
 
         if (eventData) {
             dsDisplayEvent_t displayStatusEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_rxsense.status);
-            IarmHostImpl::Dispatch([displayStatusEvent](IDisplayEvents* listener) {
+            IarmImpl::Dispatch([displayStatusEvent](IDisplayEvents* listener) {
                 listener->OnDisplayRxSense(displayStatusEvent);
             });
         } else {
@@ -691,7 +691,7 @@ private:
         if (eventData) {
             dsDisplayEvent_t displayEvent = static_cast<dsDisplayEvent_t>(eventData->data.hdmi_hpd.event);
 
-            IarmHostImpl::Dispatch([displayEvent](IDisplayDeviceEvents* listener) {
+            IarmImpl::Dispatch([displayEvent](IDisplayDeviceEvents* listener) {
                 listener->OnDisplayHDMIHotPlug(displayEvent);
             });
         } else {
@@ -727,7 +727,7 @@ private:
             dsHdmiInPort_t port = eventData->data.hdmi_in_connect.port;
             bool isConnected    = eventData->data.hdmi_in_connect.isPortConnected;
 
-            IarmHostImpl::Dispatch([port, isConnected](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([port, isConnected](IHdmiInEvents* listener) {
                 listener->OnHdmiInEventHotPlug(port, isConnected);
             });
         } else {
@@ -749,7 +749,7 @@ private:
             dsHdmiInPort_t port              = eventData->data.hdmi_in_sig_status.port;
             dsHdmiInSignalStatus_t sigStatus = eventData->data.hdmi_in_sig_status.status;
 
-            IarmHostImpl::Dispatch([port, sigStatus](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([port, sigStatus](IHdmiInEvents* listener) {
                 listener->OnHdmiInEventSignalStatus(port, sigStatus);
             });
         } else {
@@ -771,7 +771,7 @@ private:
             dsHdmiInPort_t activePort = eventData->data.hdmi_in_status.port;
             bool isPresented          = eventData->data.hdmi_in_status.isPresented;
 
-            IarmHostImpl::Dispatch([activePort, isPresented](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([activePort, isPresented](IHdmiInEvents* listener) {
                 listener->OnHdmiInEventStatus(activePort, isPresented);
             });
         } else {
@@ -800,7 +800,7 @@ private:
             res.interlaced       = eventData->data.hdmi_in_video_mode.resolution.interlaced;
             res.frameRate        = eventData->data.hdmi_in_video_mode.resolution.frameRate;
 
-            IarmHostImpl::Dispatch([port, res](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([port, res](IHdmiInEvents* listener) {
                 listener->OnHdmiInVideoModeUpdate(port, res);
             });
         } else {
@@ -822,7 +822,7 @@ private:
             dsHdmiInPort_t port = eventData->data.hdmi_in_allm_mode.port;
             bool allmStatus     = eventData->data.hdmi_in_allm_mode.allm_mode;
 
-            IarmHostImpl::Dispatch([port, allmStatus](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([port, allmStatus](IHdmiInEvents* listener) {
                 listener->OnHdmiInAllmStatus(port, allmStatus);
             });
         } else {
@@ -844,7 +844,7 @@ private:
             dsHdmiInPort_t port = eventData->data.hdmi_in_vrr_mode.port;
             dsVRRType_t vrrType = eventData->data.hdmi_in_vrr_mode.vrr_type;
 
-            IarmHostImpl::Dispatch([port, vrrType](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([port, vrrType](IHdmiInEvents* listener) {
                 listener->OnHdmiInVRRStatus(port, vrrType);
             });
 
@@ -867,7 +867,7 @@ private:
             dsHdmiInPort_t port     = eventData->data.hdmi_in_content_type.port;
             dsAviContentType_t type = eventData->data.hdmi_in_content_type.aviContentType;
 
-            IarmHostImpl::Dispatch([port, type](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([port, type](IHdmiInEvents* listener) {
                 listener->OnHdmiInAVIContentType(port, type);
             });
         } else {
@@ -889,7 +889,7 @@ private:
             int audioDelay = eventData->data.hdmi_in_av_latency.audio_output_delay;
             int videoDelay = eventData->data.hdmi_in_av_latency.video_latency;
 
-            IarmHostImpl::Dispatch([audioDelay, videoDelay](IHdmiInEvents* listener) {
+            IarmImpl::Dispatch([audioDelay, videoDelay](IHdmiInEvents* listener) {
                 listener->OnHdmiInAVLatency(audioDelay, videoDelay);
             });
         } else {
@@ -918,15 +918,15 @@ constexpr EventHandlerMapping IARMGroupAudioOutputPort::handlers[];
 constexpr EventHandlerMapping IARMGroupComposite::handlers[];
 constexpr EventHandlerMapping IARMGroupDisplay::handlers[];
 
-IarmHostImpl::CallbackList<IHdmiInEvents*, IARMGroupHdmiIn> IarmHostImpl::s_hdmiInListeners;
-IarmHostImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmHostImpl::s_videoDeviceListeners;
-IarmHostImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmHostImpl::s_videoOutputPortListeners;
-IarmHostImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmHostImpl::s_audioOutputPortListeners;
-IarmHostImpl::CallbackList<ICompositeInEvents*, IARMGroupComposite> IarmHostImpl::s_compositeListeners;
-IarmHostImpl::CallbackList<IDisplayEvents*, IARMGroupDisplay> IarmHostImpl::s_displayListeners;
-IarmHostImpl::CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> IarmHostImpl::s_displayDeviceListeners;
+IarmImpl::CallbackList<IHdmiInEvents*, IARMGroupHdmiIn> IarmImpl::s_hdmiInListeners;
+IarmImpl::CallbackList<IVideoDeviceEvents*, IARMGroupVideoDevice> IarmImpl::s_videoDeviceListeners;
+IarmImpl::CallbackList<IVideoOutputPortEvents*, IARMGroupVideoOutputPort> IarmImpl::s_videoOutputPortListeners;
+IarmImpl::CallbackList<IAudioOutputPortEvents*, IARMGroupAudioOutputPort> IarmImpl::s_audioOutputPortListeners;
+IarmImpl::CallbackList<ICompositeInEvents*, IARMGroupComposite> IarmImpl::s_compositeListeners;
+IarmImpl::CallbackList<IDisplayEvents*, IARMGroupDisplay> IarmImpl::s_displayListeners;
+IarmImpl::CallbackList<IDisplayDeviceEvents*, IARMGroupDisplayDevice> IarmImpl::s_displayDeviceListeners;
 
-IarmHostImpl::~IarmHostImpl()
+IarmImpl::~IarmImpl()
 {
     s_hdmiInListeners.Release();
     s_videoDeviceListeners.Release();
@@ -938,7 +938,7 @@ IarmHostImpl::~IarmHostImpl()
 }
 
 template <typename T, typename F>
-/* static */ void IarmHostImpl::Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn)
+/* static */ void IarmImpl::Dispatch(const std::list<std::pair<T*, std::string>>& listeners, F&& fn)
 {
     std::stringstream ss;
 
@@ -958,120 +958,120 @@ template <typename T, typename F>
     INT_INFO("%s Dispatch done to %zu listeners\n%s", typeid(T).name(), listeners.size(), ss.str().c_str());
 }
 
-dsError_t IarmHostImpl::Register(IHdmiInEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(IHdmiInEvents* listener, const std::string& clientName)
 {
     return s_hdmiInListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(IHdmiInEvents* listener)
+dsError_t IarmImpl::UnRegister(IHdmiInEvents* listener)
 {
     return s_hdmiInListeners.UnRegister(listener);
 }
 
 // Dispatcher for IHdmiInEvents
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IHdmiInEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(IHdmiInEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_hdmiInListeners.Mutex());
     Dispatch(s_hdmiInListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IVideoDeviceEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(IVideoDeviceEvents* listener, const std::string& clientName)
 {
     return s_videoDeviceListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(IVideoDeviceEvents* listener)
+dsError_t IarmImpl::UnRegister(IVideoDeviceEvents* listener)
 {
     return s_videoDeviceListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupVideoDevice
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(IVideoDeviceEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_videoDeviceListeners.Mutex());
     Dispatch(s_videoDeviceListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IVideoOutputPortEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(IVideoOutputPortEvents* listener, const std::string& clientName)
 {
     return s_videoOutputPortListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(IVideoOutputPortEvents* listener)
+dsError_t IarmImpl::UnRegister(IVideoOutputPortEvents* listener)
 {
     return s_videoOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IVideoOutputPortEvents
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(IVideoOutputPortEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_videoOutputPortListeners.Mutex());
     Dispatch(s_videoOutputPortListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IAudioOutputPortEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(IAudioOutputPortEvents* listener, const std::string& clientName)
 {
     return s_audioOutputPortListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(IAudioOutputPortEvents* listener)
+dsError_t IarmImpl::UnRegister(IAudioOutputPortEvents* listener)
 {
     return s_audioOutputPortListeners.UnRegister(listener);
 }
 
 // Dispatcher for IAudioOutputPortEvents
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(IAudioOutputPortEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_audioOutputPortListeners.Mutex());
     Dispatch(s_audioOutputPortListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(ICompositeInEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(ICompositeInEvents* listener, const std::string& clientName)
 {
     return s_compositeListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(ICompositeInEvents* listener)
+dsError_t IarmImpl::UnRegister(ICompositeInEvents* listener)
 {
     return s_compositeListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupComposite
-/* static */ void IarmHostImpl::Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(ICompositeInEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_compositeListeners.Mutex());
     Dispatch(s_compositeListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IDisplayEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(IDisplayEvents* listener, const std::string& clientName)
 {
     return s_displayListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(IDisplayEvents* listener)
+dsError_t IarmImpl::UnRegister(IDisplayEvents* listener)
 {
     return s_displayListeners.UnRegister(listener);
 }
 
 // Dispatcher for IARMGroupDisplay
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(IDisplayEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_displayListeners.Mutex());
     Dispatch(s_displayListeners, std::move(fn));
 }
 
-dsError_t IarmHostImpl::Register(IDisplayDeviceEvents* listener, const std::string& clientName)
+dsError_t IarmImpl::Register(IDisplayDeviceEvents* listener, const std::string& clientName)
 {
     return s_displayDeviceListeners.Register(listener, clientName);
 }
 
-dsError_t IarmHostImpl::UnRegister(IDisplayDeviceEvents* listener)
+dsError_t IarmImpl::UnRegister(IDisplayDeviceEvents* listener)
 {
     return s_displayDeviceListeners.UnRegister(listener);
 }
 
 // Dispatcher for IDisplayDeviceEvents
-/* static */ void IarmHostImpl::Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn)
+/* static */ void IarmImpl::Dispatch(std::function<void(IDisplayDeviceEvents* listener)>&& fn)
 {
     std::lock_guard<std::mutex> lock(s_displayDeviceListeners.Mutex());
     Dispatch(s_displayDeviceListeners, std::move(fn));

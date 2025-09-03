@@ -40,7 +40,7 @@
 #include "unsupportedOperationException.hpp"
 #include "dsInternal.h"
 
-#include "iarm/IarmHostImpl.hpp"
+#include "iarm/IarmImpl.hpp"
 
 /**
  * @file host.cpp

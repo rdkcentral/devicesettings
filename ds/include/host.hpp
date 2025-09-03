@@ -66,9 +66,9 @@ using namespace std;
 namespace device {
 
 // Forward declaration of the implementation class
-class IarmHostImpl;
+class IarmImpl;
 // In future add a conditional to choose implementation class based on build configuration
-using DefaultImpl = IarmHostImpl;
+using DefaultImpl = IarmImpl;
 
 /**
  * @class Host
