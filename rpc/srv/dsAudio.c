@@ -2258,10 +2258,10 @@ IARM_Result_t dsAudioMgr_init()
                 _srv_AudioSPEAKERAuto = 0;
            }
 
-        INT_DEBUG("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
-        INT_DEBUG("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
-        INT_DEBUG("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
-        INT_DEBUG("The SPEAKER Audio Auto Setting on startup  is %s \r\n",_SPEAKERAudioModeAuto.c_str());
+        INT_INFO("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
+        INT_INFO("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
+        INT_INFO("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
+        INT_INFO("The SPEAKER Audio Auto Setting on startup  is %s \r\n",_SPEAKERAudioModeAuto.c_str());
 		/* Get the AudioModesettings for SPDIF from Persistence */
 		std::string _SPDIFModeSettings("STEREO");
 		_SPDIFModeSettings = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode",_SPDIFModeSettings);
