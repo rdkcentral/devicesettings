@@ -27,22 +27,25 @@
 /**
  * This file provides all the devicesettings notifications for the usage of the various plugin clients.
  * The notifications are classified in to various blocks.
- * The Clients has to register for the respective required blocks like IHdmiInEvents, ICompositeInEvents, 
- * IVideoOutputPortEvents, IVideoDeviceEvents etc through the Register API Call
- * 
- * The Clients has to unregister for the respective required blocks like IHdmiInEvents, ICompositeInEvents, 
- * IVideoOutputPortEvents, IVideoDeviceEvents etc through the UnRegister API Call when the activity is completed.
+ *
+ * The Clients have to register for the respective required blocks like IHdmiInEvents, ICompositeInEvents, 
+ * IVideoOutputPortEvents, IVideoDeviceEvents etc through the Register API Call.
+ * The Clients have to unregister for the respective required blocks like IHdmiInEvents, 
+ * ICompositeInEvents, IVideoOutputPortEvents, IVideoDeviceEvents etc through the UnRegister API Call 
+ * when the activity is completed.
  * 
  * The clients need to implement the required notification handler functions for the respective blocks 
- * which they have registered. If clients don't need to handle some notifications in a block and they 
+ * which they have registered. If clients don't need to handle some notifications in a block, they 
  * need not implement those functions.
- * example: A client can choose to register for IHdmiInEvents block of events and implement only required notification 
- * function OnHdmiInEventHotPlug and can ignore other functions in the same event block like OnHdmiInEventSignalStatus
- * 
- * The Client will receive the event notification which it had registered and implemented notification. This will happen when the 
- * respective action has taken place in the device.
  *
- * IHdmiInEvents -> This will implement 
+ * Example: A client can choose to register for IHdmiInEvents block of events and implement only 
+ * required notification function OnHdmiInEventHotPlug and can ignore other functions in the same event 
+ * block like OnHdmiInEventSignalStatus.
+ * 
+ * The Client will receive the event notification for which it has registered and implemented the notification. 
+ * This will happen when the respective action has taken place in the device.
+ *
+ * IHdmiInEvents 
  *     OnHdmiInEventHotPlug : Will notify the HDMI Hot Plug IN/OUT Event
  *     OnHdmiInEventSignalStatus : Will notify the HDMI Signal Status
  *     OnHdmiInEventStatus : Will notify the port specific HDMI status 
