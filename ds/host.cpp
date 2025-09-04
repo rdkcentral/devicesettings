@@ -40,7 +40,7 @@
 #include "unsupportedOperationException.hpp"
 #include "dsInternal.h"
 
-#include "iarm/IarmHostImpl.hpp"
+#include "iarm/IarmImpl.hpp"
 
 /**
  * @file host.cpp
@@ -106,7 +106,7 @@ Host::~Host()
  *
  * @return None
  */
-    bool Host::setPowerMode(int mode)
+    bool Host::setPowerMode(int)
     {
         throw UnsupportedOperationException();
     }
@@ -455,7 +455,7 @@ Host::~Host()
    void Host::getMS12ConfigDetails(std::string &configType)
    {
        dsError_t ret = dsERR_NONE;
-       char type[MS12_CONFIG_BUF_SIZE];
+       char type[MS12_CONFIG_BUF_SIZE] = { 0 };
        ret = dsGetMS12ConfigType(type);
        if (ret == dsERR_NONE)
        {
@@ -954,11 +954,6 @@ DefaultImpl& Host::impl()
 {
     /* If client needs to handle this event, they should override this method */
     INT_WARN("Base impl of OnDisplayRxSense called. displayEvent: %d ", displayEvent);
-}
-/* virtual */ void Host::IDisplayEvents::OnDisplayHDCPStatus()
-{
-    /* If client needs to handle this event, they should override this method */
-    INT_WARN("Base impl of OnDisplayHDCPStatus called. ");
 }
 
 dsError_t Host::Register(IHdmiInEvents* listener, const std::string& clientName)

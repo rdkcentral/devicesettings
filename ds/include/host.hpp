@@ -24,6 +24,72 @@
  * @{
  **/
 
+/**
+ * This file provides all the devicesettings notifications for the usage of the various plugin clients.
+ * The notifications are classified in to various blocks.
+ *
+ * The Clients have to register for the respective required blocks like IHdmiInEvents, ICompositeInEvents, 
+ * IVideoOutputPortEvents, IVideoDeviceEvents etc through the Register API Call.
+ * The Clients have to unregister for the respective required blocks like IHdmiInEvents, 
+ * ICompositeInEvents, IVideoOutputPortEvents, IVideoDeviceEvents etc through the UnRegister API Call 
+ * when the activity is completed.
+ * 
+ * The clients need to implement the required notification handler functions for the respective blocks 
+ * which they have registered. If clients don't need to handle some notifications in a block, they 
+ * need not implement those functions.
+ *
+ * Example: A client can choose to register for IHdmiInEvents block of events and implement only 
+ * required notification function OnHdmiInEventHotPlug and can ignore other functions in the same event 
+ * block like OnHdmiInEventSignalStatus.
+ * 
+ * The Client will receive the event notification for which it has registered and implemented the notification. 
+ * This will happen when the respective action has taken place in the device.
+ *
+ * IHdmiInEvents 
+ *     OnHdmiInEventHotPlug : Will notify the HDMI Hot Plug IN/OUT Event
+ *     OnHdmiInEventSignalStatus : Will notify the HDMI Signal Status
+ *     OnHdmiInEventStatus : Will notify the port specific HDMI status 
+ *     OnHdmiInVideoModeUpdate : Will notify the HDMI video resolution changes
+ *     OnHdmiInAllmStatus : Will notify the HDMI Auto Low Latency Mode
+ *     OnHdmiInAVIContentType : Will notify the HDMI AVI info like Gaming, Cinema, Photo etc
+ *     OnHdmiInVRRStatus : Will notify the HDMI VRR info(Variable Refresh Rate)
+ *     OnHdmiInAVLatency : Will notify about the HDMI AV Latency info.
+ *
+ * ICompositeInEvents
+ *     OnCompositeInHotPlug : Will notify about the Hotplug in Composite Mode.
+ *     OnCompositeInSignalStatus : Will notify about the Signal Status in Composite Mode.
+ *     OnCompositeInStatus : Will notify about the Composite Status in Composite Mode.
+ *     OnCompositeInVideoModeUpdate : Will notify about the Update in video Mode in Composite Mode.
+ *
+ * IDisplayEvents
+ *     OnDisplayRxSense : Will notify about the RX Sense
+ *
+ * IVideoDeviceEvents
+ *     OnDisplayFrameratePreChange : Will notify about the Frame Rate Before Change.
+ *     OnDisplayFrameratePostChange : Will notify about the Frame rate After change.
+ *     OnZoomSettingsChanged : Will notify about the zoom settings changed
+ *     
+ * IVideoOutputPortEvents
+ *     OnResolutionPreChange : Will notify about the Resolution Pre Change
+ *     OnHDCPStatusChange : Will notify about the HDCP status Change
+ *     OnVideoFormatUpdate : Will notify about the Video Format Change.
+ * 
+ * IAudioOutputPortEvents
+ *     OnAssociatedAudioMixingChanged : Will notify about the Audio Mixer Change.
+ *     OnAudioFaderControlChanged :  Will notify about the Fader Control Change.
+ *     OnAudioPrimaryLanguageChanged : Will notify about the Primary Language Change.
+ *     OnAudioSecondaryLanguageChanged : Will notify about the Secondary Language Change.
+ *     OnAudioOutHotPlug : Will notify about the Audio Out Hot Plug Change.
+ *     OnDolbyAtmosCapabilitiesChanged : Will notify about the ATMOS capability Change.
+ *     OnAudioPortStateChanged : Will notify about the Audio Port State  Change.
+ *     OnAudioModeEvent : Will notify about the Audio Mode Event Change.
+ *     OnAudioLevelChangedEvent : Will notify about the Audio Level Change.
+ *     OnAudioFormatUpdate : Will notify about the Audio Format Change.
+ * 
+ * IDisplayDeviceEvents
+ *     OnDisplayHDMIHotPlug : Will notify about the HDMI Hot Plug Change
+ **/
+
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
 #include <memory>
@@ -66,9 +132,9 @@ using namespace std;
 namespace device {
 
 // Forward declaration of the implementation class
-class IarmHostImpl;
+class IarmImpl;
 // In future add a conditional to choose implementation class based on build configuration
-using DefaultImpl = IarmHostImpl;
+using DefaultImpl = IarmImpl;
 
 /**
  * @class Host
@@ -178,9 +244,6 @@ public:
         // @brief Display RX Sense event
         // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
         virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent);
-
-        // @brief Display HDCP Status
-        virtual void OnDisplayHDCPStatus();
     };
 
     // @brief Register a listener for display events

@@ -24,7 +24,7 @@ LIBNAMECLI  := lib$(LIBNAME)-cli.so
 INSTALL     := $(PWD)/install
 OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 # In future add a conditional to choose implementation class based on build configuration
-OBJS        += iarm/IarmHostImpl.o
+OBJS        += iarm/IarmImpl.o
 #$(PWD)/config should be first include path
 # to override generic configs
 ifneq ($(STANDALONE_BUILD_ENABLED),y)

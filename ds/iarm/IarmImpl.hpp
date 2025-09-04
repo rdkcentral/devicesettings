@@ -46,7 +46,7 @@ using IDisplayDeviceEvents   = Host::IDisplayDeviceEvents;
 using ICompositeInEvents     = device::Host::ICompositeInEvents;
 using IDisplayEvents         = device::Host::IDisplayEvents;
 
-class IarmHostImpl {
+class IarmImpl {
 
     // Manages a list of listeners and corresponding IARM Event Group operations.
     // Private internal class, not to be used directly by clients.
@@ -61,7 +61,7 @@ class IarmHostImpl {
         ~CallbackList()
         {
             // As best practise caller is supposed to call Release() explicitly
-            // this is just for safety (see IarmHostImpl destructor)
+            // this is just for safety (see IarmImpl destructor)
             Release();
         }
 
@@ -171,8 +171,8 @@ class IarmHostImpl {
     };
 
 public:
-    IarmHostImpl() = default;
-    ~IarmHostImpl();
+    IarmImpl() = default;
+    ~IarmImpl();
 
     // @brief Register a listener for HDMI device events
     // @param listener: class object implementing the listener
