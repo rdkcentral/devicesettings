@@ -284,6 +284,15 @@ public:
 	void setPreferredColorDepth(const unsigned int colordepth, bool persist = true);
 	void getColorDepthCapabilities (unsigned int *capabilities) const;
 
+//    static IARM_Result_t _SetStandbyVideoState(void *arg)
+    void SetStandbyVideoState();
+
+//    static IARM_Result_t _GetStandbyVideoState(void *arg)
+    void GetStandbyVideoState();
+
+//    static IARM_Result_t _SetAvPortState(void *arg)
+    void SetAvPortState();
+
 private:
 	Display _display;
 

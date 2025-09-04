@@ -327,6 +327,7 @@ public:
     void getCurrentAudioFormat(dsAudioFormat_t& audioFormat);
     void getMS12ConfigDetails(std::string& configType);
     void setAudioMixerLevels(dsAudioInput_t aInput, int volume);
+    void SetRebootConfig(dsMgrRebootConfigParam_t param);
 
 private:
     std::unique_ptr<DefaultImpl> m_impl;

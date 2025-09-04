@@ -965,6 +965,78 @@ dsError_t dsSetForceHDRMode(intptr_t handle, dsHDRStandard_t mode)
         return dsERR_GENERAL ;
 }
 
+dsError_t dsSetStandbyVideoState(string port , const bool enable)
+{
+    dsError_t dsErr = dsERR_GENERAL;
+    _DEBUG_ENTER();
+
+    if(!port.empty())
+    {
+        dsMgrStandbyVideoStateParam_t param;
+        param.port = port;
+        param.isEnabled = enable;
+        param.result = 0;
+
+        IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                (char *)IARM_BUS_DSMGR_API_dsSetStandbyVideoState,
+                                (void *)&param, sizeof(param));
+
+        if (IARM_RESULT_SUCCESS == rpcRet)
+        {
+            dsErr = dsERR_NONE;
+        }
+    }
+    return dsErr ;
+}
+
+dsError_t dsGetStandbyVideoState(string port , bool enable)
+{
+    dsError_t dsErr = dsERR_GENERAL;
+    _DEBUG_ENTER();
+
+    if(!port.empty())
+    {
+        dsMgrStandbyVideoStateParam_t param;
+        param.port = port;
+        param.result = 0;
+
+        IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                (char *)IARM_BUS_DSMGR_API_dsGetStandbyVideoState,
+                (void *)&param,
+                sizeof(param));
+
+        if (IARM_RESULT_SUCCESS == rpcRet)
+        {
+            enable = param.isEnabled;
+            dsErr = dsERR_NONE;
+        }
+    }
+    return dsErr ;
+}
+
+
+dsError_t dsSetAvPortState(const int powerState)
+{
+    dsError_t dsErr = dsERR_GENERAL;
+    dsMgrAVPortStateParam_t param;
+
+    _DEBUG_ENTER();
+
+    param.avPortPowerState = powerState;
+    param.result = 0;
+
+    IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+            (char *)IARM_BUS_DSMGR_API_dsSetAvPortState,
+            (void *)&param,
+            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        dsErr = dsERR_NONE;
+    }
+
+    return dsErr ;
+}
 
 /** @} */
 /** @} */

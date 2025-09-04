@@ -142,7 +142,7 @@ public:
     int getTextColorMode();
     void setTextBrightness(const int &brightness);
     void enableDisplay(const int enable);
-
+    void SetLEDStatus(const dsFPDIndicator_t fpdIndicator, const dsFPDState_t fpdState);
 
 /**
  * @fn Scroll getScroll() const

@@ -317,7 +317,10 @@ IARM_Result_t _dsVideoPortInit(void *arg)
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsColorDepthCapabilities,_dsColorDepthCapabilities);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetPreferredColorDepth,_dsGetPreferredColorDepth);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetPreferredColorDepth,_dsSetPreferredColorDepth);
-	
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetStandbyVideoState,_dsSetStandbyVideoState);
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetStandbyVideoState,_dsGetStandbyVideoState);
+        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetAvPortState,_dsSetAvPortState);
+
         dsError_t eRet = _dsVideoFormatUpdateRegisterCB (_dsVideoFormatUpdateCB) ;
         if (dsERR_NONE != eRet) {
             INT_DEBUG("%s: _dsVideoFormatUpdateRegisterCB eRet:%04x", __FUNCTION__, eRet);
@@ -1193,6 +1196,32 @@ IARM_Result_t _dsSetPreferredColorDepth(void *arg)
     IARM_BUS_Unlock(lock);
     return ret;
 
+}
+
+IARM_Result_t _dsSetStandbyVideoState(void *arg)
+{
+    _DEBUG_ENTER();
+
+    IARM_Result_t ret = IARM_RESULT_SUCCESS;
+    return ret;
+
+
+}
+
+IARM_Result_t _dsSetPreferredColorDepth(void *arg)
+{
+    _DEBUG_ENTER();
+
+    IARM_Result_t ret = IARM_RESULT_SUCCESS;
+    return ret;
+}
+
+IARM_Result_t _dsSetAvPortState(void *arg)
+{
+    _DEBUG_ENTER();
+
+    IARM_Result_t ret = IARM_RESULT_SUCCESS;
+    return ret;
 }
 
 dsError_t handleDsColorDepthCapabilities(intptr_t handle, unsigned int *colorDepthCapability )

@@ -449,8 +449,27 @@ dsError_t dsSetFPState (dsFPDIndicator_t eIndicator, dsFPDState_t state)
 	return dsERR_GENERAL ;
 }
 
+dsError_t dsSetLEDStatus(dsFPDIndicator_t eIndicator, dsFPDState_t state)
+{
+    _DEBUG_ENTER();
+    dsFPDStateParam_t param ;
+   
+    param.eIndicator = eIndicator;
+    param.state = state;
 
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
+    rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                (char *)IARM_BUS_DSMGR_API_dsSetLEDStatus,
+                (void *)&param,
+                sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet)
+    {
+        return dsERR_NONE;
+    }
+    return dsERR_GENERAL ;
+}
 
 dsError_t dsGetFPTimeFormat (dsFPDTimeFormat_t *pTimeFormat)
 {

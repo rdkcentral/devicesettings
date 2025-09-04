@@ -911,18 +911,48 @@ int VideoOutputPort::GetHdmiPreference()
     return hdcpProtocol;
 }
 
+bool VideoOutputPort::SetStandbyVideoState(const string port , const bool enable)
+{
+    dsError_t ret = dsSetStandbyVideoState(port, enable);
+    if (ret != dsERR_NONE) {
+        return false;
+    }
+    return true;
+
+}
+
+bool VideoOutputPort::GetStandbyVideoState(const string port, bool isEnabled)
+{
+    dsError_t ret = dsGetStandbyVideoState(port, isEnabled);
+    if (ret != dsERR_NONE) {
+        return false;
+    }
+    return true;
+
+}
+
+bool VideoOutputPort::SetAvPortState(const uint8_t powerState)
+{
+    dsError_t ret = dsSetAvPortState(powerState);
+    if (ret != dsERR_NONE) {
+        return false;
+    }
+    return true;
+
+}
+
 /**
  * @fn void setAllmEnabled(bool enable); 
  * @brief Enables/Disables ALLM mode for connected HDMI display.
  */
- void VideoOutputPort::Display::setAllmEnabled(bool enable) const
- {
-     printf("VideoOutputPort::Display::setAllmEnabled \r\n");
-     dsError_t ret = dsSetAllmEnabled(_handle,enable);
-     if (ret != dsERR_NONE) {
-         throw Exception(ret);
-     }
- }
+void VideoOutputPort::Display::setAllmEnabled(bool enable) const
+{
+    printf("VideoOutputPort::Display::setAllmEnabled \r\n");
+    dsError_t ret = dsSetAllmEnabled(_handle,enable);
+    if (ret != dsERR_NONE) {
+     throw Exception(ret);
+    }
+}
 
 /**
  * @fn void setAVIContentType(dsAviContentType_t contentType);

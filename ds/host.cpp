@@ -765,6 +765,16 @@ Host::~Host()
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
 
+
+bool Host::SetRebootConfig(string rebootReasonCustom, uint8_t powerState)
+{
+    dsError_t ret = dsSetRebootConfig(rebootReasonCustom, powerState);
+    if (ret == dsERR_NONE)
+        return true;
+    else
+        return false;
+}
+
 DefaultImpl& Host::impl()
 {
     /* lazy instantiation */
