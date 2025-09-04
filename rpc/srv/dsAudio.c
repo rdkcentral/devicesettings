@@ -332,6 +332,28 @@ void AudioConfigInit()
                 INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
                 std::string _AudioLevel("0");
                 float m_audioLevel = 0;
+//SPDIF init
+                handle = 0;
+                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                    try {
+                        _AudioLevel = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Level");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Level not found in persistence store. Try system default\n");
+                                _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Level");
+                            }
+                            catch(...) {
+                                _AudioLevel = "40";
+                            }
+                    }
+                    m_audioLevel = atof(_AudioLevel.c_str());
+                    audioLevel_cache_spdif = m_audioLevel;
+                    if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio level : %f\n","SPDIF0", m_audioLevel);
+                        m_volumeLevel = m_audioLevel;
+                    }
+                }
 //SPEAKER init
                 handle = 0;
                 if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
@@ -348,6 +370,7 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
+		    audioLevel_cache_speaker = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         m_volumeLevel = m_audioLevel;
                         INT_INFO("Port %s: Initialized audio level : %f\n","SPEAKER0", m_audioLevel);
@@ -369,6 +392,7 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
+		    audioLevel_cache_headphone = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
                     }
@@ -389,11 +413,13 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
+		    audioLevel_cache_hdmi = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                         m_volumeLevel = m_audioLevel;
                     }
                 }
+		
             }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
@@ -7050,7 +7076,7 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
-	float prev_audioLevel_spdif = 0.0, prev_audioLevel_speaker = 0.0, prev_audioLevel_hdmi = 0.0, prev_audioLevel_headphone = 0.0;
+	float prev_audioLevel_spdif = audioLevel_cache_spdif, prev_audioLevel_speaker = audioLevel_cache_speaker, prev_audioLevel_hdmi = audioLevel_cache_hdmi, prev_audioLevel_headphone = audioLevel_cache_headphone;
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
 	struct timespec ts;
 	    while(1){
