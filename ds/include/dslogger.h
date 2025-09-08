@@ -60,7 +60,7 @@ static inline const char* fileName(const char* path) {
 #if DS_LOG_LEVEL >= DEBUG_LEVEL
 #define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 #else
-#define INT_DEBUG(FORMAT, ...)      do {} while(0)
+#define INT_DEBUG(FORMAT, ...)      ((void)sizeof((0, ##__VA_ARGS__)))
 #endif
 
 #endif
