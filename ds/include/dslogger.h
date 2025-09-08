@@ -48,10 +48,20 @@ static inline const char* fileName(const char* path) {
     return slash ? slash + 1 : path;
 }
 
+#ifndef DS_LOG_LEVEL
+#define DS_LOG_LEVEL ERROR_LEVEL
+#endif
+
 #define INT_INFO(FORMAT, ...)       ds_log(INFO_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 #define INT_WARN(FORMAT, ...)       ds_log(WARN_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 #define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+
+// conditionally enable debug logs, based on DS_LOG_LEVEL
+#if DS_LOG_LEVEL >= DEBUG_LEVEL
 #define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+#else
+#define INT_DEBUG(FORMAT, ...)      do {} while(0)
+#endif
 
 #endif
 
