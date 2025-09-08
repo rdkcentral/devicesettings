@@ -56,7 +56,7 @@ static inline const char* fileName(const char* path) {
 #define INT_WARN(FORMAT, ...)       ds_log(WARN_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 #define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 
-// conditionally enable debug logs, based on LOG_LEVEL
+// conditionally enable debug logs, based on DS_LOG_LEVEL
 #if DS_LOG_LEVEL >= DEBUG_LEVEL
 #define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
 #else
