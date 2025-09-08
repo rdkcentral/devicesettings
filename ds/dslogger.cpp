@@ -54,7 +54,7 @@ int ds_log(int priority, const char* fileName, int lineNum, const char *format, 
 
     va_list args;
     va_start(args, format);
-    vsnprintf(tmp_buff + offset, MAX_LOG_BUFF - 1 - offset, format, args);
+    vsnprintf(tmp_buff + offset, MAX_LOG_BUFF - offset, format, args);
     va_end(args);
 
     if (nullptr != logCb) {
