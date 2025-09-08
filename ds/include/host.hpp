@@ -400,8 +400,6 @@ public:
     // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
-    bool setPowerMode(int mode);
-    int getPowerMode();
     SleepMode getPreferredSleepMode();
     int setPreferredSleepMode(const SleepMode);
     List<SleepMode> getAvailableSleepModes();

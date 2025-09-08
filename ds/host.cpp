@@ -26,7 +26,6 @@
 * @{
 **/
 
-
 #include <iostream>
 #include <string>
 
@@ -37,8 +36,8 @@
 #include "videoDeviceConfig.hpp"
 #include "dsAudio.h"
 #include "dsHost.h"
-#include "unsupportedOperationException.hpp"
 #include "dsInternal.h"
+#include "unsupportedOperationException.hpp"
 
 #include "iarm/IarmImpl.hpp"
 
@@ -51,10 +50,6 @@ using namespace std;
 
 namespace device 
 {
-
-const int Host::kPowerOn = dsPOWER_ON;
-const int Host::kPowerOff = dsPOWER_OFF;
-const int Host::kPowerStandby = dsPOWER_STANDBY;
 
 Host::Host()
     : m_impl(nullptr)
@@ -92,36 +87,6 @@ Host::~Host()
     		cout << "Host Exception Thrown ...!\n";
         }
         return instance;
-    }
-
-/**
- * @fn bool Host::setPowerMode(int mode)
- * @brief This API is used to change the power mode of the device.
- * This function will set the power mode to active or standby and turn off all the ouput ports.
- * The accepted modes are defined as constants in host module: Host::kPowerOn, Host::kPowerOff, Host::kPowerStandby.
- * Upon the return of this API, the power mode listeners will be notified of the new power mode.
- * This function is currently not supported.
- *
- * @param[in] mode New Power Mode.
- *
- * @return None
- */
-    bool Host::setPowerMode(int)
-    {
-        throw UnsupportedOperationException();
-    }
-
-
-/**
- * @fn int Host::getPowerMode()
- * @brief This API is used to get the current power mode of the device.
- * This function is currently not supported.
- *
- * @return  Current power mode
- */
-    int Host::getPowerMode()
-    {
-      throw UnsupportedOperationException();
     }
 
 
