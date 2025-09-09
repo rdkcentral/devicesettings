@@ -684,7 +684,7 @@ void HdmiInput::getHDMIARCPortId(int &portId) {
     error = dsGetHDMIARCPortId(portId);
     if(dsERR_NONE != error)
     {
-      *portId = -1;
+      portId = -1;
     }
 }
 
