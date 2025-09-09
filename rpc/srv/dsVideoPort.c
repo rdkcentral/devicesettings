@@ -61,8 +61,13 @@
 #define DEFAULT_RESOLUTION  "720p"
 #define DEFAULT_RESOLUTION_1080P "1080p"
 #define DEFAULT_RESOLUTION_2160P "2160p"
-
+#define MAX_NUM_VIDEO_PORTS 5
 #define DEFAULT_SD_RESOLUTION "480i"
+
+typedef struct{
+    char port[DSMGR_MAX_VIDEO_PORT_NAME_LENGTH];
+    bool isEnabled;
+}DSMgr_Standby_Video_State_t;
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
@@ -75,6 +80,8 @@ static dsHdcpStatus_t _hdcpStatus = dsHDCP_STATUS_UNAUTHENTICATED;
 static bool force_disable_4K = false;
 static const dsDisplayColorDepth_t DEFAULT_COLOR_DEPTH = dsDISPLAY_COLORDEPTH_AUTO;
 static dsDisplayColorDepth_t hdmiColorDept = DEFAULT_COLOR_DEPTH;
+static DSMgr_Standby_Video_State_t g_standby_video_port_setting[MAX_NUM_VIDEO_PORTS];
+
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
