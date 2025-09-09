@@ -289,7 +289,7 @@ extern "C" {
 #define MS12_CONFIG_BUF_SIZE 16
 
 typedef struct _dsMgrStandbyVideoStateParam_t{
-     char port[DSMGR_MAX_VIDEO_PORT_NAME_LENGTH];
+     char port[DSMGR_MAX_VIDEO_PORT_NAME_LENGTH]; 
      int isEnabled;
      int result;
 } dsMgrStandbyVideoStateParam_t;
