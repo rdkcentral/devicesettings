@@ -24,6 +24,72 @@
  * @{
  **/
 
+/**
+ * This file provides all the devicesettings notifications for the usage of the various plugin clients.
+ * The notifications are classified in to various blocks.
+ *
+ * The Clients have to register for the respective required blocks like IHdmiInEvents, ICompositeInEvents, 
+ * IVideoOutputPortEvents, IVideoDeviceEvents etc through the Register API Call.
+ * The Clients have to unregister for the respective required blocks like IHdmiInEvents, 
+ * ICompositeInEvents, IVideoOutputPortEvents, IVideoDeviceEvents etc through the UnRegister API Call 
+ * when the activity is completed.
+ * 
+ * The clients need to implement the required notification handler functions for the respective blocks 
+ * which they have registered. If clients don't need to handle some notifications in a block, they 
+ * need not implement those functions.
+ *
+ * Example: A client can choose to register for IHdmiInEvents block of events and implement only 
+ * required notification function OnHdmiInEventHotPlug and can ignore other functions in the same event 
+ * block like OnHdmiInEventSignalStatus.
+ * 
+ * The Client will receive the event notification for which it has registered and implemented the notification. 
+ * This will happen when the respective action has taken place in the device.
+ *
+ * IHdmiInEvents 
+ *     OnHdmiInEventHotPlug : Will notify the HDMI Hot Plug IN/OUT Event
+ *     OnHdmiInEventSignalStatus : Will notify the HDMI Signal Status
+ *     OnHdmiInEventStatus : Will notify the port specific HDMI status 
+ *     OnHdmiInVideoModeUpdate : Will notify the HDMI video resolution changes
+ *     OnHdmiInAllmStatus : Will notify the HDMI Auto Low Latency Mode
+ *     OnHdmiInAVIContentType : Will notify the HDMI AVI info like Gaming, Cinema, Photo etc
+ *     OnHdmiInVRRStatus : Will notify the HDMI VRR info(Variable Refresh Rate)
+ *     OnHdmiInAVLatency : Will notify about the HDMI AV Latency info.
+ *
+ * ICompositeInEvents
+ *     OnCompositeInHotPlug : Will notify about the Hotplug in Composite Mode.
+ *     OnCompositeInSignalStatus : Will notify about the Signal Status in Composite Mode.
+ *     OnCompositeInStatus : Will notify about the Composite Status in Composite Mode.
+ *     OnCompositeInVideoModeUpdate : Will notify about the Update in video Mode in Composite Mode.
+ *
+ * IDisplayEvents
+ *     OnDisplayRxSense : Will notify about the RX Sense
+ *
+ * IVideoDeviceEvents
+ *     OnDisplayFrameratePreChange : Will notify about the Frame Rate Before Change.
+ *     OnDisplayFrameratePostChange : Will notify about the Frame rate After change.
+ *     OnZoomSettingsChanged : Will notify about the zoom settings changed
+ *     
+ * IVideoOutputPortEvents
+ *     OnResolutionPreChange : Will notify about the Resolution Pre Change
+ *     OnHDCPStatusChange : Will notify about the HDCP status Change
+ *     OnVideoFormatUpdate : Will notify about the Video Format Change.
+ * 
+ * IAudioOutputPortEvents
+ *     OnAssociatedAudioMixingChanged : Will notify about the Audio Mixer Change.
+ *     OnAudioFaderControlChanged :  Will notify about the Fader Control Change.
+ *     OnAudioPrimaryLanguageChanged : Will notify about the Primary Language Change.
+ *     OnAudioSecondaryLanguageChanged : Will notify about the Secondary Language Change.
+ *     OnAudioOutHotPlug : Will notify about the Audio Out Hot Plug Change.
+ *     OnDolbyAtmosCapabilitiesChanged : Will notify about the ATMOS capability Change.
+ *     OnAudioPortStateChanged : Will notify about the Audio Port State  Change.
+ *     OnAudioModeEvent : Will notify about the Audio Mode Event Change.
+ *     OnAudioLevelChangedEvent : Will notify about the Audio Level Change.
+ *     OnAudioFormatUpdate : Will notify about the Audio Format Change.
+ * 
+ * IDisplayDeviceEvents
+ *     OnDisplayHDMIHotPlug : Will notify about the HDMI Hot Plug Change
+ **/
+
 #ifndef _DS_HOST_HPP_
 #define _DS_HOST_HPP_
 #include <memory>
@@ -38,6 +104,25 @@
 #include "videoDevice.hpp"
 #include "videoOutputPort.hpp"
 
+// dsMgr.h cannot be exposed to clients as we plan to deprecate it
+// this is only temporary until dsAudioPortState_t is moved to ds halif headers
+#ifndef HAVE_DSAUDIOPORT_STATE_TYPE
+#define HAVE_DSAUDIOPORT_STATE_TYPE
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum _dsAudioPortState {
+    dsAUDIOPORT_STATE_UNINITIALIZED,
+    dsAUDIOPORT_STATE_INITIALIZED,
+    dsAUDIOPORT_STATE_MAX
+} dsAudioPortState_t;
+
+#ifdef __cplusplus
+}
+#endif
+#endif // HAVE_DSAUDIOPORT_STATE_TYPE
+
 /**
  * @file host.hpp
  * @brief It contains class, structures referenced by host.cpp file.
@@ -47,9 +132,9 @@ using namespace std;
 namespace device {
 
 // Forward declaration of the implementation class
-class IarmHostImpl;
+class IarmImpl;
 // In future add a conditional to choose implementation class based on build configuration
-using DefaultImpl = IarmHostImpl;
+using DefaultImpl = IarmImpl;
 
 /**
  * @class Host
@@ -62,59 +147,64 @@ public:
     static const int kPowerOff;
     static const int kPowerStandby;
 
-    struct IHDMIInEvents {
-            // @brief HDMI Event Hot Plug
-            // @param port: port 0 or 1 et al
-            // @param isConnected: is it connected (true) or not (false)
-            virtual void OnHDMIInEventHotPlug(dsHdmiInPort_t port, bool isConnected) { };
+    struct IHdmiInEvents {
+        virtual ~IHdmiInEvents() = default;
 
-            // @brief HDMI Event Signal status
-            // @param port: port 0 or 1 et al
-            // @param signalStatus: Signal Status
-            virtual void OnHDMIInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus) { };
+        // @brief HDMI Event Hot Plug
+        // @param port: port 0 or 1 et al
+        // @param isConnected: is it connected (true) or not (false)
+        virtual void OnHdmiInEventHotPlug(dsHdmiInPort_t port, bool isConnected);
 
-            // @brief HDMI Event Signal status
-            // @param activePort: port 0 or 1 et al
-            // @param isPresented: is it presented or not
-            virtual void OnHDMIInEventStatus(dsHdmiInPort_t activePort, bool isPresented) { };
+        // @brief HDMI Event Signal status
+        // @param port: port 0 or 1 et al
+        // @param signalStatus: Signal Status
+        virtual void OnHdmiInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus);
 
-            // @brief HDMI Video Mode update
-            // @param port: port 0 or 1 et al
-            // @param videoPortResolution: Video port resolution
-            virtual void OnHDMIInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution) { };
+        // @brief HDMI Event Signal status
+        // @param activePort: port 0 or 1 et al
+        // @param isPresented: is it presented or not
+        virtual void OnHdmiInEventStatus(dsHdmiInPort_t activePort, bool isPresented);
 
-            // @brief HDMI ALLM (Auto Low Latency Mode) status
-            // @param port: port 0 or 1 et al
-            // @param allmStatus: allm status
-            virtual void OnHDMIInAllmStatus(dsHdmiInPort_t port, bool allmStatus) { };
+        // @brief HDMI Video Mode update
+        // @param port: port 0 or 1 et al
+        // @param videoPortResolution: Video port resolution
+        virtual void OnHdmiInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution);
 
-            // @brief HDMI Event AVI content type
-            // @param port: port 0 or 1 et al
-            // @param aviContentType: AVI content type
-            virtual void OnHDMIInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType) { };
+        // @brief HDMI ALLM (Auto Low Latency Mode) status
+        // @param port: port 0 or 1 et al
+        // @param allmStatus: allm status
+        virtual void OnHdmiInAllmStatus(dsHdmiInPort_t port, bool allmStatus);
 
-            // @brief HDMI VRR status
-            // @param port: port 0 or 1 et al
-            // @param vrrType: VRR type
-            virtual void OnHDMIInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType) { };
+        // @brief HDMI Event AVI content type
+        // @param port: port 0 or 1 et al
+        // @param aviContentType: AVI content type
+        virtual void OnHdmiInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType);
 
-            // @brief HDMI Event AV Latency
-            // @param audioDelay: audio delay (in millisecs)
-            // @param videoDelay: video delay (in millisecs)
-            virtual void OnHDMIInAVLatency(int audioDelay, int videoDelay) { };
+        // @brief HDMI VRR status
+        // @param port: port 0 or 1 et al
+        // @param vrrType: VRR type
+        virtual void OnHdmiInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType);
 
+        // @brief HDMI Event AV Latency
+        // @param audioDelay: audio delay (in millisecs)
+        // @param videoDelay: video delay (in millisecs)
+        virtual void OnHdmiInAVLatency(int audioDelay, int videoDelay);
     };
 
     // @brief Register a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IHDMIInEvents *listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IHdmiInEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for HDMI device events
     // @param listener: class object implementing the listener
-    dsError_t UnRegister(IHDMIInEvents *listener);
+    dsError_t UnRegister(IHdmiInEvents* listener);
 
     struct ICompositeInEvents {
         virtual ~ICompositeInEvents() = default;
+
         // @brief Composite In Hotplug event
         // @param port: Port of the hotplug
         // @param isConnected: Is it connected (true) or not(false)
@@ -138,11 +228,15 @@ public:
 
     // @brief Register a listener for composite events
     // @param listener: class object implementing the listener
-    dsError_t  Register(ICompositeInEvents *listener);
-    
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(ICompositeInEvents* listener, const std::string& clientName = "");
+
     // @brief UnRegister a listener for composite events
     // @param listener: class object implementing the listener
-    dsError_t  UnRegister(ICompositeInEvents *listener);
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t UnRegister(ICompositeInEvents* listener);
 
     struct IDisplayEvents {
         virtual ~IDisplayEvents() = default;
@@ -150,19 +244,19 @@ public:
         // @brief Display RX Sense event
         // @param displayEvent: DS_DISPLAY_RXSENSE_ON or DS_DISPLAY_RXSENSE_OFF
         virtual void OnDisplayRxSense(dsDisplayEvent_t displayEvent);
-
-        // @brief Display HDCP Status
-        virtual void OnDisplayHDCPStatus();
     };
-    
+
     // @brief Register a listener for display events
     // @param listener: class object implementing the listener
-    dsError_t Register(IDisplayEvents *listener);
-    
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IDisplayEvents* listener, const std::string& clientName = "");
+
     // @brief UnRegister a listener for display events
     // @param listener: class object implementing the listener
-    dsError_t UnRegister(IDisplayEvents *listener);
-
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t UnRegister(IDisplayEvents* listener);
 
     struct IVideoDeviceEvents {
         virtual ~IVideoDeviceEvents() = default;
@@ -182,10 +276,14 @@ public:
 
     // @brief Register a listener for video device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IVideoDeviceEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IVideoDeviceEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for video device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IVideoDeviceEvents* listener);
 
     struct IVideoOutputPortEvents {
@@ -212,10 +310,14 @@ public:
 
     // @brief Register a listener for video port events
     // @param listener: class object implementing the listener
-    dsError_t Register(IVideoOutputPortEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IVideoOutputPortEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for video port events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IVideoOutputPortEvents* listener);
 
     struct IAudioOutputPortEvents {
@@ -250,8 +352,7 @@ public:
 
         // @brief Audio port state changed
         // @param audioPortState: audio port state
-        // TODO: requires dsMgr.h header include ??
-        // virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState);
+        virtual void OnAudioPortStateChanged(dsAudioPortState_t audioPortState);
 
         // @brief Audio mode for the respective audio port - raised for every type of port
         // @param audioPortType: audio port type see dsAudioPortType_t
@@ -269,10 +370,14 @@ public:
 
     // @brief Register a listener for audio port events
     // @param listener: class object implementing the listener
-    dsError_t Register(IAudioOutputPortEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IAudioOutputPortEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for audio port events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IAudioOutputPortEvents* listener);
 
     struct IDisplayDeviceEvents {
@@ -285,10 +390,14 @@ public:
 
     // @brief Register a listener for display device events
     // @param listener: class object implementing the listener
-    dsError_t Register(IDisplayDeviceEvents* listener);
+    // @param clientName: Optional (but highly recommended) name of the client registering for events
+    //                    clientName is used for logging purposes only
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
+    dsError_t Register(IDisplayDeviceEvents* listener, const std::string& clientName = "");
 
     // @brief UnRegister a listener for display device events
     // @param listener: class object implementing the listener
+    // @return dsERR_NONE on success, appropriate dsError_t on failure
     dsError_t UnRegister(IDisplayDeviceEvents* listener);
 
     bool setPowerMode(int mode);
@@ -327,10 +436,10 @@ public:
     void getCurrentAudioFormat(dsAudioFormat_t& audioFormat);
     void getMS12ConfigDetails(std::string& configType);
     void setAudioMixerLevels(dsAudioInput_t aInput, int volume);
-    void SetRebootConfig(dsMgrRebootConfigParam_t param);
 
 private:
     std::unique_ptr<DefaultImpl> m_impl;
+
     Host();
     virtual ~Host();
     // Avoid copies

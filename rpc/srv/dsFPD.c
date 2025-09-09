@@ -73,8 +73,7 @@ IARM_Result_t _dsSetFPScroll(void *arg);
 IARM_Result_t _dsSetFPBlink(void *arg);
 IARM_Result_t _dsGetFPBrightness(void *arg);
 IARM_Result_t _dsSetFPBrightness(void *arg);
-IARM_Result_t _dsSetLEDStatus(void *arg);
-IARM_Result_t _dsSetLEDState(void *arg);
+IARM_Result_t _dsSetFPState(void *arg);
 IARM_Result_t _dsGetFPState(void *arg);
 IARM_Result_t _dsSetFPColor(void *arg);
 IARM_Result_t _dsGetFPColor(void *arg);
@@ -255,7 +254,6 @@ IARM_Result_t _dsFPInit(void *arg)
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetFPBlink,_dsSetFPBlink);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetFPBrightness,_dsGetFPBrightness);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetFPState,_dsSetFPState);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetLEDStatus,_dsSetLEDStatus);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetFPState,_dsGetFPState);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetFPBrightness,_dsSetFPBrightness);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetFPColor,_dsSetFPColor);
@@ -691,11 +689,7 @@ IARM_Result_t _dsSetFPState(void *arg)
 	return ret;
 }
 
-IARM_Result_t _dsSetLEDStatus(void *arg)
-{
-    IARM_Result_t ret = IARM_RESULT_SUCCESS;
-    return ret;
-}
+
 
 
 IARM_Result_t _dsGetTimeFormat(void *arg)

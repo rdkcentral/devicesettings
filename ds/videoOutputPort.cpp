@@ -931,16 +931,6 @@ bool VideoOutputPort::GetStandbyVideoState(const string port, bool isEnabled)
 
 }
 
-bool VideoOutputPort::SetAvPortState(const uint8_t powerState)
-{
-    dsError_t ret = dsSetAvPortState(powerState);
-    if (ret != dsERR_NONE) {
-        return false;
-    }
-    return true;
-
-}
-
 /**
  * @fn void setAllmEnabled(bool enable); 
  * @brief Enables/Disables ALLM mode for connected HDMI display.

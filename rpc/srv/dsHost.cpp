@@ -65,7 +65,6 @@ IARM_Result_t _dsGetVersion(void *arg);
 IARM_Result_t _dsGetSocIDFromSDK(void *arg);
 IARM_Result_t _dsGetHostEDID(void *arg);
 IARM_Result_t _dsGetMS12ConfigType(void *arg);
-IARM_Result_t _dsSetRebootConfig(void *arg);
 
 static dsSleepMode_t _SleepMode = dsHOST_SLEEP_MODE_LIGHT;
 
@@ -101,10 +100,10 @@ IARM_Result_t dsHostMgr_init()
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetCPUTemperature,_dsGetCPUTemperature);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetVersion,_dsGetVersion);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetSocIDFromSDK,_dsGetSocIDFromSDK);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetHostEDID,_dsGetHostEDID);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetMS12ConfigType,_dsGetMS12ConfigType);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetRebootConfig,_dsSetRebootConfig);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetHostEDID,_dsGetHostEDID);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetMS12ConfigType,_dsGetMS12ConfigType);
 
+        
         uint32_t  halVersion = 0x10000;
         halVersion =  dsHAL_APIVER(DSHAL_API_VERSION_MAJOR_DEFAULT, DSHAL_API_VERSION_MINOR_DEFAULT);
         INT_INFO("DS HAL Version is - %d.%d \r\n",dsHAL_APIVER_MAJOR(halVersion),dsHAL_APIVER_MINOR(halVersion));
@@ -268,13 +267,6 @@ IARM_Result_t _dsGetMS12ConfigType(void *arg)
     }
     return ret; 
 }
-
-IARM_Result_t _dsSetRebootConfig(void *arg)
-{
-    IARM_Result_t ret = IARM_RESULT_SUCCESS;
-    return ret;
-}
-
 IARM_Result_t _dsGetSocIDFromSDK(void *arg)
 {
     dsGetSocIDFromSDKParam_t *param = (dsGetSocIDFromSDKParam_t*) arg;

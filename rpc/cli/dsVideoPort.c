@@ -1014,29 +1014,5 @@ dsError_t dsGetStandbyVideoState(string port , bool enable)
     return dsErr ;
 }
 
-
-dsError_t dsSetAvPortState(const int powerState)
-{
-    dsError_t dsErr = dsERR_GENERAL;
-    dsMgrAVPortStateParam_t param;
-
-    _DEBUG_ENTER();
-
-    param.avPortPowerState = powerState;
-    param.result = 0;
-
-    IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-            (char *)IARM_BUS_DSMGR_API_dsSetAvPortState,
-            (void *)&param,
-            sizeof(param));
-
-    if (IARM_RESULT_SUCCESS == rpcRet)
-    {
-        dsErr = dsERR_NONE;
-    }
-
-    return dsErr ;
-}
-
 /** @} */
 /** @} */

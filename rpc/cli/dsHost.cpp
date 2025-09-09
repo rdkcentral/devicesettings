@@ -225,31 +225,6 @@ dsError_t dsGetMS12ConfigType(const char *ms12ConfigType)
    return ret;
 }
 
-dsError_t dsSetRebootConfig(string rebootReasonCustom, uint8_t powerState)
-{
-    dsError_t ret = dsERR_GENERAL;
-    _DEBUG_ENTER();
-
-    if (!rebootReasonCustom.empty())
-    {
-        dsMgrRebootConfigParam_t param;
-        param.powerState = powerState;
-        param.reboot_reason_custom = rebootReasonCustom;
-        param.result = 0;
-
-        IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
-        rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-                    (char *)IARM_BUS_DSMGR_API_dsSetRebootConfig,
-                    (void *)&param,
-                    sizeof(param));
-        if (IARM_RESULT_SUCCESS == rpcRet)
-        {
-            ret = dsERR_NONE;
-        }
-    }
-    return ret;
-}
-
 
 /** @} */
 /** @} */

@@ -208,22 +208,7 @@ void FrontPanelTextDisplay::enableDisplay(const int enable)
         }
 }
 
-/**
- * @fn FrontPanelTextDisplay::SetLEDStatus
- * @brief This function is used to Set LED status on front panel.
- *
- * @param[in] fpdIndicator.
- * @param[in] fpdState.
- *
- * @return None
- */
-    void SetLEDStatus(const dsFPDIndicator_t fpdIndicator, const dsFPDState_t fpdState);
-    {
-        dsError_t ret = dsSetLEDStatus(fpdIndicator, fpdState);
-        if (ret != dsERR_NONE) {
-            throw Exception(ret);
-        }
-    }
+
 /**
  * @fn FrontPanelTextDisplay::setTextBrightness(const int &brightness)
  * @brief This API sets the brightness value for the front panel LED.
