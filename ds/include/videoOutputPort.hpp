@@ -38,6 +38,7 @@
 #include <stdint.h>
 
 #include "dsTypes.h"
+#include "dsError.h"
 
 /**
  * @file videoOutputPort.hpp

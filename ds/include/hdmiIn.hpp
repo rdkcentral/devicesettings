@@ -52,7 +52,7 @@
 #include <vector>
 
 #include "dsTypes.h"
-
+#include "dsError.h"
 
 /**
  * @file hdmiIn.hpp
