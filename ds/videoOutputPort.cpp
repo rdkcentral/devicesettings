@@ -911,20 +911,14 @@ int VideoOutputPort::GetHdmiPreference()
     return hdcpProtocol;
 }
 
-void VideoOutputPort::SetStandbyVideoState(const string port , const bool enable)
+dsError_t VideoOutputPort::SetStandbyVideoState(const string port , const bool enable)
 {
-    dsError_t ret = dsSetStandbyVideoState(port.c_str(), enable);
-    if (ret != dsERR_NONE) {
-        throw Exception(ret);
-    }
+    return dsSetStandbyVideoState(port.c_str(), enable);
 }
 
-void VideoOutputPort::GetStandbyVideoState(const string port, bool isEnabled)
+dsError_t VideoOutputPort::GetStandbyVideoState(const string port, bool &isEnabled)
 {
-    dsError_t ret = dsGetStandbyVideoState(port.c_str(), isEnabled);
-    if (ret != dsERR_NONE) {
-        throw Exception(ret);
-    }
+    return dsGetStandbyVideoState(port.c_str(), isEnabled);
 }
 
 /**

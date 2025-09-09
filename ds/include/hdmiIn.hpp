@@ -101,7 +101,7 @@ public:
     void getVRRSupport (int iHdmiPort, bool *vrr_suppport);
     void getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus);
     void getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion);
-    void getHDMIARCPortId(int &portId);
+    dsError_t getHDMIARCPortId(int &portId);
 private:
     HdmiInput ();           /* default constructor */
     virtual ~HdmiInput ();  /* destructor */

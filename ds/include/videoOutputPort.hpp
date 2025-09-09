@@ -283,8 +283,8 @@ public:
 	unsigned int getPreferredColorDepth(bool persist = true) ;
 	void setPreferredColorDepth(const unsigned int colordepth, bool persist = true);
 	void getColorDepthCapabilities (unsigned int *capabilities) const;
-    void SetStandbyVideoState(const string port , const bool enable);
-    void GetStandbyVideoState(const string port , bool &enable);
+    dsError_t SetStandbyVideoState(const string port , const bool enable);
+    dsError_t GetStandbyVideoState(const string port , bool &enable);
 
 private:
 	Display _display;
