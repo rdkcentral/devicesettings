@@ -61,6 +61,7 @@
 #define DEFAULT_RESOLUTION  "720p"
 #define DEFAULT_RESOLUTION_1080P "1080p"
 #define DEFAULT_RESOLUTION_2160P "2160p"
+
 #define DEFAULT_SD_RESOLUTION "480i"
 
 static int m_isInitialized = 0;
@@ -74,7 +75,6 @@ static dsHdcpStatus_t _hdcpStatus = dsHDCP_STATUS_UNAUTHENTICATED;
 static bool force_disable_4K = false;
 static const dsDisplayColorDepth_t DEFAULT_COLOR_DEPTH = dsDISPLAY_COLORDEPTH_AUTO;
 static dsDisplayColorDepth_t hdmiColorDept = DEFAULT_COLOR_DEPTH;
-
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
@@ -317,7 +317,7 @@ IARM_Result_t _dsVideoPortInit(void *arg)
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsColorDepthCapabilities,_dsColorDepthCapabilities);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetPreferredColorDepth,_dsGetPreferredColorDepth);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetPreferredColorDepth,_dsSetPreferredColorDepth);
-
+	
         dsError_t eRet = _dsVideoFormatUpdateRegisterCB (_dsVideoFormatUpdateCB) ;
         if (dsERR_NONE != eRet) {
             INT_DEBUG("%s: _dsVideoFormatUpdateRegisterCB eRet:%04x", __FUNCTION__, eRet);

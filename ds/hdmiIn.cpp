@@ -678,6 +678,19 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
     printf ("%s:%d - HDMI Compatibility Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *capversion);
 }
 
+void HdmiInput::getHDMIARCPortId(int *portId)
+{
+    if(NULL != portId)
+    {
+      dsError_t error = dsERR_GENERAL;
+      error = dsGetHDMIARCPortId(portId);
+      if(dsERR_NONE != error)
+      {
+          *portId = -1;
+      }
+    }
+}
+
 }
 
 
