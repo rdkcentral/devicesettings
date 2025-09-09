@@ -972,40 +972,45 @@ dsError_t dsSetStandbyVideoState(string port , const bool enable)
 
     if(!port.empty())
     {
-        dsMgrStandbyVideoStateParam_t param;
-        param.port = port;
+        dsMgrStandbyVideoStateParam_t param = {0};
+        int n = port.length();
+        strcpy(param.port, port.c_str());
+        param.port[n+1] = '\n';
         param.isEnabled = enable;
-        param.result = 0;
+        param->result = -1;
 
         IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                                 (char *)IARM_BUS_DSMGR_API_SetStandbyVideoState,
                                 (void *)&param, sizeof(param));
 
-        if (IARM_RESULT_SUCCESS == rpcRet)
+        if (IARM_RESULT_SUCCESS == rpcRet && param.result == 0)
         {
             dsErr = dsERR_NONE;
         }
     }
-    return dsErr ;
+    return dsErr;
 }
 
-dsError_t dsGetStandbyVideoState(string port , bool enable)
+dsError_t dsGetStandbyVideoState(string port , bool &enable)
 {
     dsError_t dsErr = dsERR_GENERAL;
     _DEBUG_ENTER();
 
     if(!port.empty())
     {
-        dsMgrStandbyVideoStateParam_t param;
-        param.port = port;
-        param.result = 0;
+        dsMgrStandbyVideoStateParam_t param = {0};
+
+        int n = port.length();
+        strcpy(param.port, port.c_str());
+        param.port[n+1] = '\n';
+        param->result = -1;
 
         IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                 (char *)IARM_BUS_DSMGR_API_GetStandbyVideoState,
                 (void *)&param,
                 sizeof(param));
 
-        if (IARM_RESULT_SUCCESS == rpcRet)
+        if (IARM_RESULT_SUCCESS == rpcRet && param.result == 0)
         {
             enable = param.isEnabled;
             dsErr = dsERR_NONE;

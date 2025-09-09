@@ -918,7 +918,6 @@ bool VideoOutputPort::SetStandbyVideoState(const string port , const bool enable
         return false;
     }
     return true;
-
 }
 
 bool VideoOutputPort::GetStandbyVideoState(const string port, bool isEnabled)
@@ -928,7 +927,6 @@ bool VideoOutputPort::GetStandbyVideoState(const string port, bool isEnabled)
         return false;
     }
     return true;
-
 }
 
 /**
