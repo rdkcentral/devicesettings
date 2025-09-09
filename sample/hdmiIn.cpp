@@ -32,7 +32,6 @@
 #include "hdmiIn.hpp"
 #include "manager.hpp"
 #include "dsUtl.h"
-#include "dsError.h"
 #include <exception>
 #include <stdio.h>
 #include <stdlib.h>
