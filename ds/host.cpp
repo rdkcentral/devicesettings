@@ -52,10 +52,6 @@ using namespace std;
 namespace device 
 {
 
-const int Host::kPowerOn = dsPOWER_ON;
-const int Host::kPowerOff = dsPOWER_OFF;
-const int Host::kPowerStandby = dsPOWER_STANDBY;
-
 Host::Host()
     : m_impl(nullptr)
 {
