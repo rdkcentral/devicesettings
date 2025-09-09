@@ -81,11 +81,14 @@ typedef enum _DSMgr_EventId_t {
         IARM_BUS_DSMGR_EVENT_MAX,					       /*!< Max Event  */
 } IARM_Bus_DSMgr_EventId_t;
 
+#ifndef HAVE_DSAUDIOPORT_STATE_TYPE
+#define HAVE_DSAUDIOPORT_STATE_TYPE
 typedef enum _dsAudioPortState {
    dsAUDIOPORT_STATE_UNINITIALIZED,
    dsAUDIOPORT_STATE_INITIALIZED,
    dsAUDIOPORT_STATE_MAX
 } dsAudioPortState_t;
+#endif
 
 /*! DS Manager  Event Data */
 typedef struct _DSMgr_EventData_t {
