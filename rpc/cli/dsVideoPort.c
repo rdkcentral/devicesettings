@@ -965,7 +965,7 @@ dsError_t dsSetForceHDRMode(intptr_t handle, dsHDRStandard_t mode)
         return dsERR_GENERAL ;
 }
 
-dsError_t dsSetStandbyVideoState(string port , const bool enable)
+dsError_t dsSetStandbyVideoState(char *port, const bool enable)
 {
     dsError_t dsErr = dsERR_GENERAL;
     _DEBUG_ENTER();
@@ -973,9 +973,7 @@ dsError_t dsSetStandbyVideoState(string port , const bool enable)
     if(!port.empty())
     {
         dsMgrStandbyVideoStateParam_t param = {0};
-        int n = port.length();
-        strcpy(param.port, port.c_str());
-        param.port[n+1] = '\n';
+        strcpy(param.port, port);
         param.isEnabled = enable;
         param->result = -1;
 
@@ -991,7 +989,7 @@ dsError_t dsSetStandbyVideoState(string port , const bool enable)
     return dsErr;
 }
 
-dsError_t dsGetStandbyVideoState(string port , bool &enable)
+dsError_t dsGetStandbyVideoState(char *port, bool &enable)
 {
     dsError_t dsErr = dsERR_GENERAL;
     _DEBUG_ENTER();
@@ -999,10 +997,7 @@ dsError_t dsGetStandbyVideoState(string port , bool &enable)
     if(!port.empty())
     {
         dsMgrStandbyVideoStateParam_t param = {0};
-
-        int n = port.length();
-        strcpy(param.port, port.c_str());
-        param.port[n+1] = '\n';
+        strcpy(param.port, port);
         param->result = -1;
 
         IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,

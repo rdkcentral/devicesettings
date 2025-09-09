@@ -913,7 +913,7 @@ int VideoOutputPort::GetHdmiPreference()
 
 void VideoOutputPort::SetStandbyVideoState(const string port , const bool enable)
 {
-    dsError_t ret = dsSetStandbyVideoState(port, enable);
+    dsError_t ret = dsSetStandbyVideoState(port.c_str(), enable);
     if (ret != dsERR_NONE) {
         throw Exception(ret);
     }
@@ -921,7 +921,7 @@ void VideoOutputPort::SetStandbyVideoState(const string port , const bool enable
 
 void VideoOutputPort::GetStandbyVideoState(const string port, bool isEnabled)
 {
-    dsError_t ret = dsGetStandbyVideoState(port, isEnabled);
+    dsError_t ret = dsGetStandbyVideoState(port.c_str(), isEnabled);
     if (ret != dsERR_NONE) {
         throw Exception(ret);
     }
