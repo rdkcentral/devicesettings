@@ -195,8 +195,6 @@ extern "C" {
 #define IARM_BUS_DSMGR_API_dsSetBackgroundColor "dsSetBackgroundColor"
 #define IARM_BUS_DSMGR_API_dsSetForceHDRMode "dsSetForceHDRMode"
 #define IARM_BUS_DSMGR_API_dsSetAllmEnabled "dsSetAllmEnabled"
-#define IARM_BUS_DSMGR_API_dsSetStandbyVideoState   "dsSetStandbyVideoState"
-#define IARM_BUS_DSMGR_API_dsGetStandbyVideoState   "dsGetStandbyVideoState"
 
 /*
  * Declare RPC FP  API names 

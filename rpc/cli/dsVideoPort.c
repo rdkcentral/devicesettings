@@ -978,7 +978,7 @@ dsError_t dsSetStandbyVideoState(string port , const bool enable)
         param.result = 0;
 
         IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-                                (char *)IARM_BUS_DSMGR_API_dsSetStandbyVideoState,
+                                (char *)IARM_BUS_DSMGR_API_SetStandbyVideoState,
                                 (void *)&param, sizeof(param));
 
         if (IARM_RESULT_SUCCESS == rpcRet)
@@ -1001,7 +1001,7 @@ dsError_t dsGetStandbyVideoState(string port , bool enable)
         param.result = 0;
 
         IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
-                (char *)IARM_BUS_DSMGR_API_dsGetStandbyVideoState,
+                (char *)IARM_BUS_DSMGR_API_GetStandbyVideoState,
                 (void *)&param,
                 sizeof(param));
 

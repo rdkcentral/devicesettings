@@ -290,6 +290,9 @@ public:
 //    static IARM_Result_t _GetStandbyVideoState(void *arg)
     void GetStandbyVideoState();
 
+//    static IARM_Result_t _SetAvPortState(void *arg)
+    void SetAvPortState();
+
 private:
 	Display _display;
 

@@ -61,13 +61,7 @@
 #define DEFAULT_RESOLUTION  "720p"
 #define DEFAULT_RESOLUTION_1080P "1080p"
 #define DEFAULT_RESOLUTION_2160P "2160p"
-#define MAX_NUM_VIDEO_PORTS 5
 #define DEFAULT_SD_RESOLUTION "480i"
-
-typedef struct{
-    char port[DSMGR_MAX_VIDEO_PORT_NAME_LENGTH];
-    bool isEnabled;
-}DSMgr_Standby_Video_State_t;
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
@@ -80,7 +74,6 @@ static dsHdcpStatus_t _hdcpStatus = dsHDCP_STATUS_UNAUTHENTICATED;
 static bool force_disable_4K = false;
 static const dsDisplayColorDepth_t DEFAULT_COLOR_DEPTH = dsDISPLAY_COLORDEPTH_AUTO;
 static dsDisplayColorDepth_t hdmiColorDept = DEFAULT_COLOR_DEPTH;
-static DSMgr_Standby_Video_State_t g_standby_video_port_setting[MAX_NUM_VIDEO_PORTS];
 
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
@@ -324,8 +317,6 @@ IARM_Result_t _dsVideoPortInit(void *arg)
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsColorDepthCapabilities,_dsColorDepthCapabilities);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetPreferredColorDepth,_dsGetPreferredColorDepth);
 		IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetPreferredColorDepth,_dsSetPreferredColorDepth);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetStandbyVideoState,_dsSetStandbyVideoState);
-        IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetStandbyVideoState,_dsGetStandbyVideoState);
 
         dsError_t eRet = _dsVideoFormatUpdateRegisterCB (_dsVideoFormatUpdateCB) ;
         if (dsERR_NONE != eRet) {
@@ -1202,96 +1193,6 @@ IARM_Result_t _dsSetPreferredColorDepth(void *arg)
     IARM_BUS_Unlock(lock);
     return ret;
 
-}
-
-IARM_Result_t _dsSetStandbyVideoState(void *arg)
-{
-    dsMgrStandbyVideoStateParam_t *param = (dsMgrStandbyVideoStateParam_t *)arg;
-    if(NULL == param->port)
-    {
-        param->result = -1;
-        INT_DEBUG("[%s] empty port name. Cannot proceed.\n", __FUNCTION__);
-        return IARM_RESULT_SUCCESS;
-    }
-    else
-        param->result = 0;
-
-    int i = 0;
-    for(i = 0; i < MAX_NUM_VIDEO_PORTS; i++)
-    {
-        if(0 == strncasecmp(param->port, g_standby_video_port_setting[i].port, DSMGR_MAX_VIDEO_PORT_NAME_LENGTH))
-        {
-            /*Found a match. Update it*/
-            g_standby_video_port_setting[i].isEnabled = ((0 == param->isEnabled) ? false : true);
-            break;
-        }
-    }
-    if(MAX_NUM_VIDEO_PORTS == i)
-    {
-        /*No matching entries are present. Add one.*/
-        for(i = 0; i < MAX_NUM_VIDEO_PORTS; i++)
-        {
-            if('\0' == g_standby_video_port_setting[i].port[0])
-            {
-                strncpy(g_standby_video_port_setting[i].port, param->port, (DSMGR_MAX_VIDEO_PORT_NAME_LENGTH - 1));
-                g_standby_video_port_setting[i].isEnabled = ((0 == param->isEnabled) ? false : true);
-                break;
-            }
-        }
-    }
-    if(MAX_NUM_VIDEO_PORTS == i)
-    {
-        INT_DEBUG("[%s] Error! Out of room to write new video port setting for standby mode.\n", __FUNCTION__);
-    }
-
-    try
-    {
-        device::VideoOutputPort &vPort = device::Host::getInstance().getVideoOutputPort(param->port);
-        if((POWER_STATE_ON != curState) && (POWER_STATE_OFF != curState))
-        {
-            /*We're currently in one of the standby states. This new setting needs to be applied right away.*/
-            INT_DEBUG("[%s] Setting standby %s port status to %s.\n", __FUNCTION__, param->port, ((1 == param->isEnabled)? "enabled" : "disabled"));
-            if(1 == param->isEnabled)
-                vPort.enable();
-            else
-                vPort.disable();
-        }
-        else
-        {
-            INT_DEBUG("[%s] video port %s will be %s when going into standby mode.\n", __FUNCTION__, param->port, ((1 == param->isEnabled)? "enabled" : "disabled"));
-        }
-    }
-    catch (...)
-    {
-        INT_DEBUG("Exception Caught during [%s]. Possible bad video port.\n", __FUNCTION__);
-        param->result = -1;
-    }
-    return IARM_RESULT_SUCCESS;
-}
-
-IARM_Result_t _dsGetStandbyVideoState(void *arg)
-{
-    INT_INFO("Entering [%s]\r\n", __FUNCTION__);
-    dsMgrStandbyVideoStateParam_t *param = (dsMgrStandbyVideoStateParam_t *)arg;
-    if(NULL == param->port)
-    {
-        INT_DEBUG("[%s]Bad port name. Cannot get state.\n", __FUNCTION__);
-        return IARM_RESULT_SUCCESS;
-    }
-
-    try
-    {
-        device::VideoOutputPort &vPort = device::Host::getInstance().getVideoOutputPort(param->port);
-    }
-    catch (...)
-    {
-        INT_DEBUG("Exception Caught during [%s]. Possible bad video port.\n", __FUNCTION__);
-        param->result = -1;
-        return IARM_RESULT_SUCCESS;
-    }
-    param->isEnabled = ((true == get_video_port_standby_setting(param->port))? 1 : 0);
-    param->result = 0;
-    return IARM_RESULT_SUCCESS;
 }
 
 dsError_t handleDsColorDepthCapabilities(intptr_t handle, unsigned int *colorDepthCapability )
