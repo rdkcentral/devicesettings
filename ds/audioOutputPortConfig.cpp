@@ -40,10 +40,14 @@
 #include "libIBus.h"
 #include "iarmUtil.h"
 
-//extern dsAudioTypeConfig_t  *kConfig_audio;
-//extern dsAudioPortConfig_t  *kPort_audio;
+#define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
+#define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
+extern dsAudioTypeConfig_t  *kConfig_audio;
+extern dsAudioPortConfig_t  *kPort_audio;
 static dsAudioTypeConfig_t  *kConfigs1 = NULL;
 static dsAudioPortConfig_t  *kPorts1 = NULL;
+
+static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
 namespace device {
 
@@ -193,6 +197,31 @@ bool searchConfigs()
 			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
 		}
 	printf("\n\n=========================================================================================================================\n\n");
+	
+	printf("\n\n=========================================================================================================================\n\n");
+	printf("\n%d:%s print configs using extern\n", __LINE__, __func__);	
+	for (size_t i = 0; i < dsUTL_DIM(kConfig_audio); i++) {
+			const dsAudioTypeConfig_t *typeCfg = &kConfig_audio[i];
+			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
+			aPortType.enable();
+			printf("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
+			printf("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
+			printf("%d:%s: typeCfg->numSupportedEncodings = %zu\n", __LINE__, __func__, typeCfg->numSupportedEncodings);
+			printf("%d:%s: typeCfg->numSupportedCompressions = %zu\n", __LINE__, __func__, typeCfg->numSupportedCompressions);
+			printf("%d:%s: typeCfg->numSupportedStereoModes = %zu\n", __LINE__, __func__, typeCfg->numSupportedStereoModes);
+		}
+
+
+		/*
+		 * set up ports based on kPorts[]
+		 */
+		for (size_t i = 0; i < dsUTL_DIM(kPort_audio); i++) {
+			const dsAudioPortConfig_t *port = &kPort_audio[i];
+			printf("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
+			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
+		}
+	printf("\n\n=========================================================================================================================\n\n");
+
 
 	return (kConfigs1 || kPorts1);
 }
