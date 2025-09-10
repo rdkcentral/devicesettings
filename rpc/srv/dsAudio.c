@@ -53,6 +53,9 @@
 
 #include "safec_lib.h"
 
+const dsAudioTypeConfig_t  *kConfig_audio = kConfigs;
+const dsAudioPortConfig_t  *kPort_audio = kPorts;
+
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
 

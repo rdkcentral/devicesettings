@@ -35,6 +35,16 @@
 #include "stdlib.h"
 #include "dslogger.h"
 
+#include <dlfcn.h>
+#include "libIARM.h"
+#include "libIBus.h"
+#include "iarmUtil.h"
+
+//extern dsAudioTypeConfig_t  *kConfig_audio;
+//extern dsAudioPortConfig_t  *kPort_audio;
+static dsAudioTypeConfig_t  *kConfigs1 = NULL;
+static dsAudioPortConfig_t  *kPorts1 = NULL;
+
 namespace device {
 
 //To Make the instance as thread-safe, using = default, that can request special methods from the compiler. They are Special because only compiler can create them.
@@ -108,6 +118,85 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
+bool searchConfigs()
+{
+	//static dsAudioTypeConfig_t  *kConfigs1 = NULL;
+	//static dsAudioPortConfig_t  *kPorts1 = NULL;
+
+	//if ( kConfigs1 == NULL) 
+	{
+        void *dllib = dlopen("libdshalsrv.so", RTLD_LAZY);
+        if (dllib) {
+            kConfigs1 = (dsAudioTypeConfig_t *) dlsym(dllib, "kConfig_audio");
+            if (kConfigs1) {
+                INT_DEBUG("kConfig_audio is defined and loaded kConfigs1 = %p\r\n", kConfigs1);
+				printf("%d:%s: kConfig_audio is defined and loaded kConfigs1 = %p\n", __LINE__, __func__, kConfigs1);
+            }
+            else {
+                INT_INFO("kConfig_audio is not defined\r\n");
+				printf("%d:%s: kConfig_audio is not defined\n", __LINE__, __func__);
+                IARM_BUS_Unlock(lock);
+                dlclose(dllib);
+                return IARM_RESULT_INVALID_STATE;
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening libdshalsrv.so failed\r\n");
+			printf("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
+        }
+    }
+
+	//if ( kPorts1 == NULL) 
+	{
+        void *dllib = dlopen("libdshalsrv.so", RTLD_LAZY);
+        if (dllib) {
+            kPorts1 = (dsAudioPortConfig_t *) dlsym(dllib, "kPort_audio");
+            if (kPorts1) {
+                INT_DEBUG("kPort_audio is defined and loaded kPorts1 = %p\r\n", kPorts1);
+				printf("%d:%s: kPort_audio is defined and loaded kPorts1 = %p\n", __LINE__, __func__, kPorts1);
+            }
+            else {
+                INT_INFO("kPort_audio is not defined\r\n");
+				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
+                IARM_BUS_Unlock(lock);
+                dlclose(dllib);
+                return IARM_RESULT_INVALID_STATE;
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening libdshalsrv.so failed\r\n");
+			printf("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
+        }
+    }
+	printf("\n\n=========================================================================================================================\n\n");
+	printf("\n%d:%s print configs\n", __LINE__, __func__);	
+	for (size_t i = 0; i < dsUTL_DIM(kConfigs1); i++) {
+			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
+			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
+			aPortType.enable();
+			printf("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
+			printf("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
+			printf("%d:%s: typeCfg->numSupportedEncodings = %zu\n", __LINE__, __func__, typeCfg->numSupportedEncodings);
+			printf("%d:%s: typeCfg->numSupportedCompressions = %zu\n", __LINE__, __func__, typeCfg->numSupportedCompressions);
+			printf("%d:%s: typeCfg->numSupportedStereoModes = %zu\n", __LINE__, __func__, typeCfg->numSupportedStereoModes);
+		}
+
+
+		/*
+		 * set up ports based on kPorts[]
+		 */
+		for (size_t i = 0; i < dsUTL_DIM(kPorts1); i++) {
+			const dsAudioPortConfig_t *port = &kPorts1[i];
+			printf("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
+			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
+		}
+	printf("\n\n=========================================================================================================================\n\n");
+
+	return (kConfigs1 || kPorts1);
+}
+
 void AudioOutputPortConfig::load()
 {
 	try {
@@ -132,7 +221,7 @@ void AudioOutputPortConfig::load()
 			_aPortTypes.push_back(AudioOutputPortType(i));
 
 		}
-
+#if 1
 		/*
 		 * Initialize Audio portTypes (encodings, compressions etc.)
 		 * and its port instances (db, level etc)
@@ -165,6 +254,54 @@ void AudioOutputPortConfig::load()
 			_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
 			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 		}
+		searchConfigs();
+#else //gsk
+	if(searchConfigs())
+		{
+		/*if(kConfig_audio == NULL || kPort_audio == NULL) {
+			throw IllegalArgumentException();
+		}*/
+		//dsAudioTypeConfig_t  *kConfigs = kConfig_audio;
+		//dsAudioPortConfig_t  *kPorts = kPort_audio;	
+         /*
+		 * Initialize Audio portTypes (encodings, compressions etc.)
+		 * and its port instances (db, level etc)
+		 */
+		for (size_t i = 0; i < dsUTL_DIM(kConfigs1); i++) {
+			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
+			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
+			aPortType.enable();
+			for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
+				aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
+				_aEncodings.at(typeCfg->encodings[j]).enable();
+			}
+			for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
+				aPortType.addCompression(typeCfg->compressions[j]);
+				_aCompressions.at(typeCfg->compressions[j]).enable();
+
+			}
+			for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
+				aPortType.addStereoMode(typeCfg->stereoModes[j]);
+				_aStereoModes.at(typeCfg->stereoModes[j]).enable();
+
+			}
+		}
+
+
+		/*
+		 * set up ports based on kPorts[]
+		 */
+		for (size_t i = 0; i < dsUTL_DIM(kPorts1); i++) {
+			const dsAudioPortConfig_t *port = &kPorts1[i];
+			_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
+			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
+		}
+	}
+	else 
+	{
+		printf("%d:%s: kConfig and kPorts are not available\n", __LINE__, __func__);
+	}
+#endif
 
 	}
 	catch(const Exception &e) {
