@@ -135,7 +135,7 @@ bool searchConfigs()
             else {
                 INT_INFO("kConfig_audio is not defined\r\n");
 				printf("%d:%s: kConfig_audio is not defined\n", __LINE__, __func__);
-                IARM_BUS_Unlock(lock);
+                //IARM_BUS_Unlock(lock);
                 dlclose(dllib);
                 return IARM_RESULT_INVALID_STATE;
             }
@@ -159,7 +159,7 @@ bool searchConfigs()
             else {
                 INT_INFO("kPort_audio is not defined\r\n");
 				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
-                IARM_BUS_Unlock(lock);
+                //IARM_BUS_Unlock(lock);
                 dlclose(dllib);
                 return IARM_RESULT_INVALID_STATE;
             }
