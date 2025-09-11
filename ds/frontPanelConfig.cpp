@@ -93,10 +93,10 @@ FrontPanelConfig & FrontPanelConfig::getInstance()
             {
                 _singleton.load();
                 _singleton.m_isFPInitialized = true;
-                INT_INFO("dsFPInit success");
+                INT_INFO("dsFPInit success\n");
             }
             else{
-                INT_ERROR("dsFPInit failed with error code: %d. Retrying... (%d/20)", errorCode, retryCount);
+                INT_ERROR("dsFPInit failed with error[%d]. Retrying... (%d/20)\n", errorCode, retryCount);
                 usleep(50000); // Sleep for 50ms before retrying
             }
         }
@@ -104,7 +104,6 @@ FrontPanelConfig & FrontPanelConfig::getInstance()
     }
 	return _singleton;
 }
-
 
 /**
  * @fn FrontPanelConfig::getIndicator(const string &name)
