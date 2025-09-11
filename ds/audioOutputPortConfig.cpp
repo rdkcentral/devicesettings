@@ -136,7 +136,7 @@ bool searchConfigs()
 	{
         void *dllib = dlopen("libdshalsrv.so", RTLD_LAZY);
         if (dllib) {
-            kConfigs1 = (dsAudioTypeConfig_t *) dlsym(dllib, "kConfigs_audio");
+            kConfigs1 = (dsAudioTypeConfig_t *) dlsym(dllib, "kConfig_audio");
             if (kConfigs1) {
                 INT_DEBUG("kConfig_audio is defined and loaded kConfigs1 = %p\r\n", kConfigs1);
 				printf("%d:%s: kConfig_audio is defined and loaded kConfigs1 = %p\n", __LINE__, __func__, kConfigs1);
@@ -157,7 +157,7 @@ bool searchConfigs()
                 INT_INFO("kPort_audio is not defined\r\n");
 				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
                 IARM_BUS_Unlock(lock);
-                dlclose(dllib);
+                //dlclose(dllib);
                 //return IARM_RESULT_INVALID_STATE;
             }
 			pKConSize = (int *) dlsym(dllib, "kConfig_size");
@@ -204,7 +204,7 @@ bool searchConfigs()
 				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
                 IARM_BUS_Unlock(lock);
                 dlclose(dllib);
-                return IARM_RESULT_INVALID_STATE;
+                //return IARM_RESULT_INVALID_STATE;
             }
             dlclose(dllib);
         }
