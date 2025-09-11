@@ -53,8 +53,131 @@
 
 #include "safec_lib.h"
 
-const dsAudioTypeConfig_t  *kConfig_audio = kConfigs;
-const dsAudioPortConfig_t  *kPort_audio = kPorts;
+//const dsAudioTypeConfig_t  kConfig_audio ;
+//const dsAudioPortConfig_t  kPort_audio ;
+
+/*
+ * Setup the supported configurations here.
+ */
+#ifdef HAS_SPDIF_SUPPORT
+static const dsAudioPortType_t 			kSupportedPortTypes1[] 				= { dsAUDIOPORT_TYPE_SPDIF, dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC, dsAUDIOPORT_TYPE_HEADPHONE };
+#else
+static const dsAudioPortType_t                  kSupportedPortTypes1[]                           = { dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC };
+#endif
+#ifdef HAS_SPDIF_SUPPORT
+static const dsAudioEncoding_t          kSupportedSPDIFEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+static const dsAudioCompression_t       kSupportedSPDIFCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+static const dsAudioStereoMode_t        kSupportedSPDIFStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
+#endif
+#ifdef HAS_HEADPHONE_SUPPORT
+static const dsAudioEncoding_t          kSupportedHEADPHONEEncodings1[]                      = { dsAUDIO_ENC_PCM, };
+static const dsAudioCompression_t       kSupportedHEADPHONECompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+static const dsAudioStereoMode_t        kSupportedHEADPHONEStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
+#endif
+static const dsAudioEncoding_t          kSupportedSPEAKEREncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+static const dsAudioCompression_t       kSupportedSPEAKERCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+static const dsAudioStereoMode_t        kSupportedSPEAKERStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
+
+static const dsAudioEncoding_t          kSupportedARCEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+static const dsAudioCompression_t       kSupportedARCCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+static const dsAudioStereoMode_t        kSupportedARCStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
+
+
+static const dsAudioTypeConfig_t 	kConfig_audio[]= {
+#ifdef HAS_SPDIF_SUPPORT
+		{
+		/*.typeId = */					dsAUDIOPORT_TYPE_SPDIF,
+		/*.name = */					"SPDIF", //SPDIF
+		/*.numSupportedCompressions = */dsUTL_DIM(kSupportedSPDIFCompressions1),
+		/*.compressions = */			kSupportedSPDIFCompressions1,
+		/*.numSupportedEncodings = */	dsUTL_DIM(kSupportedSPDIFEncodings1),
+		/*.encodings = */				kSupportedSPDIFEncodings1,
+		/*.numSupportedStereoModes = */	dsUTL_DIM(kSupportedSPDIFStereoModes1),
+		/*.stereoModes = */				kSupportedSPDIFStereoModes1,
+		},
+#endif
+#ifdef HAS_HEADPHONE_SUPPORT
+                {
+                /*.typeId = */                                  dsAUDIOPORT_TYPE_HEADPHONE,
+                /*.name = */                                    "HEADPHONE", //HEADPHONE
+                /*.numSupportedCompressions = */dsUTL_DIM(kSupportedHEADPHONECompressions1),
+                /*.compressions = */                    kSupportedHEADPHONECompressions1,
+                /*.numSupportedEncodings = */   dsUTL_DIM(kSupportedHEADPHONEEncodings1),
+                /*.encodings = */                               kSupportedHEADPHONEEncodings1,
+                /*.numSupportedStereoModes = */ dsUTL_DIM(kSupportedHEADPHONEStereoModes1),
+                /*.stereoModes = */                             kSupportedHEADPHONEStereoModes1,
+                },
+#endif
+                {
+                /*.typeId = */                                  dsAUDIOPORT_TYPE_SPEAKER,
+                /*.name = */                                    "SPEAKER", //SPEAKER
+                /*.numSupportedCompressions = */dsUTL_DIM(kSupportedSPEAKERCompressions1),
+                /*.compressions = */                    kSupportedSPEAKERCompressions1,
+                /*.numSupportedEncodings = */   dsUTL_DIM(kSupportedSPEAKEREncodings1),
+                /*.encodings = */                               kSupportedSPEAKEREncodings1,
+                /*.numSupportedStereoModes = */ dsUTL_DIM(kSupportedSPEAKERStereoModes1),
+                /*.stereoModes = */                             kSupportedSPEAKERStereoModes1,
+                },
+                {
+                /*.typeId = */                                  dsAUDIOPORT_TYPE_HDMI_ARC,
+                /*.name = */                                    "HDMI_ARC", //ARC/eARC
+                /*.numSupportedCompressions = */dsUTL_DIM(kSupportedARCCompressions1),
+                /*.compressions = */                    kSupportedARCCompressions1,
+                /*.numSupportedEncodings = */   dsUTL_DIM(kSupportedARCEncodings1),
+                /*.encodings = */                               kSupportedARCEncodings1,
+                /*.numSupportedStereoModes = */ dsUTL_DIM(kSupportedARCStereoModes1),
+                /*.stereoModes = */                             kSupportedARCStereoModes1,
+                }
+};
+
+static const dsVideoPortPortId_t connectedVOPs1[dsAUDIOPORT_TYPE_MAX][dsVIDEOPORT_TYPE_MAX] = {
+		{/*VOPs connected to LR Audio */
+
+		},
+		{/*VOPs connected to HDMI Audio */
+		},
+		{/*VOPs connected to SPDIF Audio */
+				{dsVIDEOPORT_TYPE_INTERNAL, 0},
+		},
+                {/*VOPs connected to SPEAKER Audio */
+                                {dsVIDEOPORT_TYPE_INTERNAL, 0},
+                },
+                {/*VOPs connected to ARC Audio */
+                                {dsVIDEOPORT_TYPE_INTERNAL, 0},
+                },
+                {/*VOPs connected to HEADPHONE Audio */
+                                {dsVIDEOPORT_TYPE_INTERNAL, 0},
+                }
+};
+
+static const dsAudioPortConfig_t kPort_audio[] = {
+#ifdef HAS_SPDIF_SUPPORT
+		{
+		/*.typeId = */ 					{dsAUDIOPORT_TYPE_SPDIF, 0},
+		/*.connectedVOPs = */			connectedVOPs1[dsAUDIOPORT_TYPE_SPDIF],
+		},
+#endif
+#ifdef HAS_HEADPHONE_SUPPORT
+                {
+                /*.typeId = */                                  {dsAUDIOPORT_TYPE_HEADPHONE, 0},
+                /*.connectedVOPs = */                   connectedVOPs1[dsAUDIOPORT_TYPE_HEADPHONE],
+                },
+#endif
+                {
+                /*.typeId = */                                  {dsAUDIOPORT_TYPE_SPEAKER, 0},
+                /*.connectedVOPs = */                   connectedVOPs1[dsAUDIOPORT_TYPE_SPEAKER],
+                },
+                {
+                /*.typeId = */                                  {dsAUDIOPORT_TYPE_HDMI_ARC, 0},
+                /*.connectedVOPs = */                   connectedVOPs1[dsAUDIOPORT_TYPE_HDMI_ARC],
+                }
+};
+
+int kConfig_size =  sizeof(kConfig_audio) / sizeof(kConfig_audio[0]);
+int kPort_size =  sizeof(kPort_audio) / sizeof(kPort_audio[0]);
+
+
+
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
