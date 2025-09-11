@@ -58,6 +58,7 @@ private:
     std::vector<FrontPanelIndicator> 			_indicators;    //!< Container to hold all the FrontPanelIndicator instances.
     std::vector<FrontPanelTextDisplay> 			_textDisplays;  //!< Container to hold all the FrontPanelTextDisplay instances.
     std::vector<FrontPanelIndicator::Color> 	_colors;                //!< Container to hold all the Color instances.
+    bool m_isFPInitialized;
 
     FrontPanelConfig();
 	virtual ~FrontPanelConfig();
