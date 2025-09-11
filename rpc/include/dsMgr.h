@@ -263,6 +263,11 @@ typedef struct _DSMgr_EventData_t {
     } data;
 }IARM_Bus_DSMgr_EventData_t;
 
+IARM_Result_t _dsGetFPBrightness(void *arg);
+IARM_Result_t _dsSetFPBrightness(void *arg);
+IARM_Result_t _dsSetFPState(void *arg);
+IARM_Result_t _dsGetFPState(void *arg);
+
 #ifdef __cplusplus
 }
 #endif
