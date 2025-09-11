@@ -54,7 +54,7 @@ namespace device {
  */
 FrontPanelConfig::FrontPanelConfig()
 {
-    m_isPlatInitialized = false;
+    m_isFPInitialized = false;
 }
 
 
@@ -81,7 +81,7 @@ FrontPanelConfig::~FrontPanelConfig()
 FrontPanelConfig & FrontPanelConfig::getInstance()
 {
     static FrontPanelConfig _singleton;
-    if (!m_isFPInitialized)
+    if (!_singleton.m_isFPInitialized)
     {
         dsError_t errorCode = dsERR_NONE;
         unsigned int retryCount = 1;
@@ -90,8 +90,8 @@ FrontPanelConfig & FrontPanelConfig::getInstance()
             errorCode = dsFPInit();
             if (dsERR_NONE == errorCode)
             {
-                load();
-                m_isFPInitialized = true;
+                _singleton.load();
+                _singleton.m_isFPInitialized = true;
                 INT_INFO("dsFPInit success");
             }
             else{
@@ -99,7 +99,7 @@ FrontPanelConfig & FrontPanelConfig::getInstance()
                 usleep(50000); // Sleep for 50ms before retrying
             }
         }
-        while ((!m_isFPInitialized) && (retryCount++ < 20));
+        while ((!_singleton.m_isFPInitialized) && (retryCount++ < 20));
     }
 	return _singleton;
 }
