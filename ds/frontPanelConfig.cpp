@@ -34,6 +34,7 @@
 
 
 #include <iostream>
+#include <unistd.h>
 #include "dsError.h"
 #include "dsUtl.h"
 #include "frontPanelConfig.hpp"
