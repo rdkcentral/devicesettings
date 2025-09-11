@@ -54,8 +54,7 @@ namespace device {
  */
 FrontPanelConfig::FrontPanelConfig()
 {
-    dsFPInit();
-    load();
+    m_isPlatInitialized = false;
 }
 
 
@@ -82,6 +81,26 @@ FrontPanelConfig::~FrontPanelConfig()
 FrontPanelConfig & FrontPanelConfig::getInstance()
 {
     static FrontPanelConfig _singleton;
+    if (!m_isFPInitialized)
+    {
+        dsError_t errorCode = dsERR_NONE;
+        unsigned int retryCount = 1;
+        do
+        {
+            errorCode = dsFPInit();
+            if (dsERR_NONE == errorCode)
+            {
+                load();
+                m_isFPInitialized = true;
+                INT_INFO("dsFPInit success");
+            }
+            else{
+                INT_ERROR("dsFPInit failed with error code: %d. Retrying... (%d/20)", errorCode, retryCount);
+                usleep(50000); // Sleep for 50ms before retrying
+            }
+        }
+        while ((!m_isFPInitialized) && (retryCount++ < 20));
+    }
 	return _singleton;
 }
 
