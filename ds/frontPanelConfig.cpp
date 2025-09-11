@@ -68,6 +68,7 @@ FrontPanelConfig::FrontPanelConfig()
 FrontPanelConfig::~FrontPanelConfig()
 {
     //dsFPTerm();
+    m_isFPInitialized = false;
 }
 
 
