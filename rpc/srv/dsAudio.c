@@ -60,30 +60,30 @@
  * Setup the supported configurations here.
  */
 #ifdef HAS_SPDIF_SUPPORT
-static const dsAudioPortType_t 			kSupportedPortTypes1[] 				= { dsAUDIOPORT_TYPE_SPDIF, dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC, dsAUDIOPORT_TYPE_HEADPHONE };
+ const dsAudioPortType_t 			kSupportedPortTypes1[] 				= { dsAUDIOPORT_TYPE_SPDIF, dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC, dsAUDIOPORT_TYPE_HEADPHONE };
 #else
-static const dsAudioPortType_t                  kSupportedPortTypes1[]                           = { dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC };
+ const dsAudioPortType_t                  kSupportedPortTypes1[]                           = { dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC };
 #endif
 #ifdef HAS_SPDIF_SUPPORT
-static const dsAudioEncoding_t          kSupportedSPDIFEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
-static const dsAudioCompression_t       kSupportedSPDIFCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
-static const dsAudioStereoMode_t        kSupportedSPDIFStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
+ const dsAudioEncoding_t          kSupportedSPDIFEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+ const dsAudioCompression_t       kSupportedSPDIFCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ const dsAudioStereoMode_t        kSupportedSPDIFStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
 #endif
 #ifdef HAS_HEADPHONE_SUPPORT
-static const dsAudioEncoding_t          kSupportedHEADPHONEEncodings1[]                      = { dsAUDIO_ENC_PCM, };
-static const dsAudioCompression_t       kSupportedHEADPHONECompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
-static const dsAudioStereoMode_t        kSupportedHEADPHONEStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
+ const dsAudioEncoding_t          kSupportedHEADPHONEEncodings1[]                      = { dsAUDIO_ENC_PCM, };
+ const dsAudioCompression_t       kSupportedHEADPHONECompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ const dsAudioStereoMode_t        kSupportedHEADPHONEStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
 #endif
-static const dsAudioEncoding_t          kSupportedSPEAKEREncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
-static const dsAudioCompression_t       kSupportedSPEAKERCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
-static const dsAudioStereoMode_t        kSupportedSPEAKERStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
+ const dsAudioEncoding_t          kSupportedSPEAKEREncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+ const dsAudioCompression_t       kSupportedSPEAKERCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ const dsAudioStereoMode_t        kSupportedSPEAKERStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
 
-static const dsAudioEncoding_t          kSupportedARCEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
-static const dsAudioCompression_t       kSupportedARCCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
-static const dsAudioStereoMode_t        kSupportedARCStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
+ const dsAudioEncoding_t          kSupportedARCEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+ const dsAudioCompression_t       kSupportedARCCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ const dsAudioStereoMode_t        kSupportedARCStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
 
 
-static const dsAudioTypeConfig_t 	kConfig_audio[]= {
+ const dsAudioTypeConfig_t 	kConfig_audio[]= {
 #ifdef HAS_SPDIF_SUPPORT
 		{
 		/*.typeId = */					dsAUDIOPORT_TYPE_SPDIF,
@@ -130,7 +130,7 @@ static const dsAudioTypeConfig_t 	kConfig_audio[]= {
                 }
 };
 
-static const dsVideoPortPortId_t connectedVOPs1[dsAUDIOPORT_TYPE_MAX][dsVIDEOPORT_TYPE_MAX] = {
+ const dsVideoPortPortId_t connectedVOPs1[dsAUDIOPORT_TYPE_MAX][dsVIDEOPORT_TYPE_MAX] = {
 		{/*VOPs connected to LR Audio */
 
 		},
@@ -150,7 +150,7 @@ static const dsVideoPortPortId_t connectedVOPs1[dsAUDIOPORT_TYPE_MAX][dsVIDEOPOR
                 }
 };
 
-static const dsAudioPortConfig_t kPort_audio[] = {
+ const dsAudioPortConfig_t kPort_audio[] = {
 #ifdef HAS_SPDIF_SUPPORT
 		{
 		/*.typeId = */ 					{dsAUDIOPORT_TYPE_SPDIF, 0},
