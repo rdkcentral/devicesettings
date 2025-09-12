@@ -42,15 +42,15 @@
 
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
-extern dsAudioTypeConfig_t  kConfig_audio [dsAUDIOPORT_TYPE_MAX];
-extern dsAudioPortConfig_t  kPort_audio [dsAUDIOPORT_TYPE_MAX];
+extern dsAudioTypeConfig_t  kConfig_audio[dsAUDIOPORT_TYPE_MAX];
+extern dsAudioPortConfig_t  kPort_audio[dsAUDIOPORT_TYPE_MAX];
 extern int kConfig_size, kPort_size;
-static dsAudioTypeConfig_t  *kConfigs1 = NULL;
-static dsAudioPortConfig_t  *kPorts1 = NULL;
+static dsAudioTypeConfig_t  *kConfigs1 = NULL;//, *kConfigs2 = kConfig_audio;
+static dsAudioPortConfig_t  *kPorts1 = NULL;//, *kPorts2 = kPort_audio;
 int *pKConSize, *pKPortSize;
 
-
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 namespace device {
 
@@ -125,13 +125,14 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
+#if 1
 bool searchConfigs()
 {
 	//static dsAudioTypeConfig_t  *kConfigs1 = NULL;
 	//static dsAudioPortConfig_t  *kPorts1 = NULL;
 	int kConfig_size_local = -1, kPort_size_local = -1;
 	int kConfig_size_dl = -1, kPort_size_dl = -1;
-	IARM_BUS_Lock(lock);
+	//IARM_BUS_Lock(lock);
 	//if ( kConfigs1 == NULL) 
 	{
         void *dllib = dlopen("libdshalsrv.so", RTLD_LAZY);
@@ -144,22 +145,11 @@ bool searchConfigs()
             else {
                 INT_INFO("kConfig_audio is not defined\r\n");
 				printf("%d:%s: kConfig_audio is not defined\n", __LINE__, __func__);
-                IARM_BUS_Unlock(lock);
-                dlclose(dllib);
-                //return IARM_RESULT_INVALID_STATE;
-            }
-			kPorts1 = (dsAudioPortConfig_t *) dlsym(dllib, "kPort_audio");
-            if (kPorts1) {
-                INT_DEBUG("kPort_audio is defined and loaded kPorts1 = %p\r\n", kPorts1);
-				printf("%d:%s: kPort_audio is defined and loaded kPorts1 = %p\n", __LINE__, __func__, kPorts1);
-            }
-            else {
-                INT_INFO("kPort_audio is not defined\r\n");
-				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
-                IARM_BUS_Unlock(lock);
+                //IARM_BUS_Unlock(lock);
                 //dlclose(dllib);
                 //return IARM_RESULT_INVALID_STATE;
             }
+		
 			pKConSize = (int *) dlsym(dllib, "kConfig_size");
 			pKPortSize = (int *) dlsym(dllib, "kPort_size");
 			if(pKConSize)
@@ -202,8 +192,8 @@ bool searchConfigs()
             else {
                 INT_INFO("kPort_audio is not defined\r\n");
 				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
-                IARM_BUS_Unlock(lock);
-                dlclose(dllib);
+                //IARM_BUS_Unlock(lock);
+                //dlclose(dllib);
                 //return IARM_RESULT_INVALID_STATE;
             }
             dlclose(dllib);
@@ -213,16 +203,18 @@ bool searchConfigs()
 			printf("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
         }
     }
-	IARM_BUS_Unlock(lock);
-	kConfig_size_dl = dsUTL_DIM(kConfigs1);
-	kPort_size_dl = dsUTL_DIM(kPorts1);
-	printf("%d:%s: dsUTL_DIM kConfig_size_dl = %d kPort_size_dl = %d\n", __LINE__, __func__, kConfig_size_dl, kPort_size_dl);
-	#if 1
+	//dlclose(dllib);
+	//IARM_BUS_Unlock(lock);
+	//kConfig_size_dl = dsUTL_DIM(kConfigs1);
+	//kPort_size_dl = dsUTL_DIM(kPorts1);
+	//printf("%d:%s: dsUTL_DIM kConfig_size_dl = %d kPort_size_dl = %d\n", __LINE__, __func__, kConfig_size_dl, kPort_size_dl);
+	#if 0
 	printf("\n\n=========================================================================================================================\n\n");
 	printf("\n%d:%s print configs dlsym\n", __LINE__, __func__);
-
+	if 
 	for (size_t i = 0; i < kConfig_size_local; i++) {
-			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
+			//const dsAudioTypeConfig_t *typeCfg = &kConfig_audio[i];
+			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i]; //NO compile issues
 			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
 			aPortType.enable();
 			printf("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
@@ -237,6 +229,7 @@ bool searchConfigs()
 		 * set up ports based on kPorts[]
 		 */
 		for (size_t i = 0; i < kPort_size_local; i++) {
+			//const dsAudioPortConfig_t *port = &kPort_audio[i];
 			const dsAudioPortConfig_t *port = &kPorts1[i];
 			printf("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
 			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
@@ -252,7 +245,8 @@ bool searchConfigs()
 	if(kConfigs1 != NULL)
 	{
 	for (size_t i = 0; i < kConfig_size_local; i++) {
-			const dsAudioTypeConfig_t *typeCfg = &kConfig_audio[i];
+			//const dsAudioTypeConfig_t *typeCfg = &kConfig_audio[i];
+			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
 			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
 			aPortType.enable();
 			printf("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
@@ -272,7 +266,8 @@ bool searchConfigs()
 		 * set up ports based on kPorts[]
 		 */
 		for (size_t i = 0; i < kPort_size_local; i++) {
-			const dsAudioPortConfig_t *port = &kPort_audio[i];
+			//const dsAudioPortConfig_t *port = &kPort_audio[i];
+			const dsAudioPortConfig_t *port = &kPorts1[i];
 			printf("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
 			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
 		}
@@ -286,6 +281,7 @@ bool searchConfigs()
 
 	return (kConfigs1 || kPorts1);
 }
+#endif
 
 void AudioOutputPortConfig::load()
 {
@@ -336,6 +332,7 @@ void AudioOutputPortConfig::load()
 			}
 		}
 
+
 		/*
 		 * set up ports based on kPorts[]
 		 */
@@ -346,7 +343,7 @@ void AudioOutputPortConfig::load()
 		}
 		searchConfigs();
 #else //gsk
-	if(searchConfigs())
+		if(searchConfigs())
 		{
 		/*if(kConfig_audio == NULL || kPort_audio == NULL) {
 			throw IllegalArgumentException();
