@@ -82,6 +82,7 @@
  const dsAudioCompression_t       kSupportedARCCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
  const dsAudioStereoMode_t        kSupportedARCStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
 
+#error
 
  const dsAudioTypeConfig_t 	kConfig_audio[]= {
 #ifdef HAS_SPDIF_SUPPORT
