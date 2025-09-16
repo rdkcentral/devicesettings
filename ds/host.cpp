@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2025 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +28,19 @@
 
 
 #include <iostream>
-#include <algorithm>
-#include <string.h>
-#include "iarmProxy.hpp"
+#include <string>
+
 #include "audioOutputPortConfig.hpp"
 #include "videoOutputPortConfig.hpp"
 #include "list.hpp"
 #include "host.hpp"
 #include "videoDeviceConfig.hpp"
-#include "dsVideoPort.h"
-#include "dsVideoDevice.h"
 #include "dsAudio.h"
-#include "dsDisplay.h"
-#include "dslogger.h"
 #include "dsHost.h"
-#include "dsTypes.h"
 #include "unsupportedOperationException.hpp"
-#include "hostEDID.hpp"
 #include "dsInternal.h"
+
+#include "iarm/IarmImpl.hpp"
 
 /**
  * @file host.cpp
@@ -56,24 +51,16 @@ using namespace std;
 
 namespace device 
 {
-   	
-	const int Host::kPowerOn = dsPOWER_ON;
-    const int Host::kPowerOff = dsPOWER_OFF;
-    const int Host::kPowerStandby = dsPOWER_STANDBY;
- 
-	
-	Host::Host() 
-	{
-		// TODO Auto-generated destructor stub
-	}
 
-    Host::~Host() {
-    	if (true)
-		{
-			IARMProxy::getInstance().UnRegisterPowerEventHandler();
-		}
-    }
+Host::Host()
+    : m_impl(nullptr)
+{
+}
 
+Host::~Host()
+{
+    m_impl = nullptr;
+}
 
 /**
  * @addtogroup dssettingshostapi
@@ -103,145 +90,6 @@ namespace device
         return instance;
     }
 
-
-/**
- * @fn void Host::addPowerModeListener(PowerModeChangeListener *l)
- * @brief This API is used to register listeners for Power Mode change event.
- * The listener object is created by application and should be released by the application once the listener is removed.
- * Listeners will be notified with the new mode via the listener's powerModeChanged() callback.
- *
- * @param[in] PowerModeChangeListener Pointer to Power Mode change listener
- *
- * @return None
- */
-    void Host::addPowerModeListener(PowerModeChangeListener *l)
-    {
-        std::list < PowerModeChangeListener* > ::iterator it;
-        
-        it = find (powerEvntListeners.begin(),powerEvntListeners.end(), l);
-        if (it == powerEvntListeners.end())
-        {
-            powerEvntListeners.push_back (l);
-            cout << "Added Power Mode listener...!\n";
-        }
-        else
-        {
-            cout << "Already register for Power Mode Change\n";
-        }
-        return ;
-    }
-
-
-/**
- * @fn void Host::removePowerModeChangeListener(PowerModeChangeListener *l)
- * @brief This API is used to remove a listener from Power Mode change listener list.
- *
- * @param[in]PowerModeChangeListener The listener to remove.
- *
- * @return None
- */
-    void Host::removePowerModeChangeListener(PowerModeChangeListener *l)
-    {
-        std::list < PowerModeChangeListener* > ::iterator it ;
-        it = find (powerEvntListeners.begin(),powerEvntListeners.end(), l);
-        if (it == powerEvntListeners.end())
-        {
-            cout << "Not Registered for Power Mode change yet...!\n";
-        }
-        else
-        {
-            powerEvntListeners.erase (it);
-            cout << "Removed from Power Mode listener group..!\n";
-        }
-        return;
-    }
-
-
-/**
- * @fn void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
- * @brief This API is used to register listeners for Display connection change event.
- * The listener will be notified if Display device is connected/disconnected from the video output port.
- * The notification only carries the state change of the connection.
- * It does not carry any other system state change that may have been triggered by the connection.
- * The application is responsible to query the various parts of system to detect any such change.
- * For example, when a TV device is replaced, the application shall query the video output port again upon the connection
- * for the new resolution supported by the TV.
- * The listener object is created by application and should be released by the application once the listener is removed.
- *
- * @param[in] DisplayConnectionChangeListener Pointer to Display connection change listener
- *
- * @return None
- */
-    void Host::addDisplayConnectionListener (DisplayConnectionChangeListener *l)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        
-        it = find (dispEvntListeners.begin(), dispEvntListeners.end(), l);
-        if (it == dispEvntListeners.end())
-        {
-            dispEvntListeners.push_back (l);
-            cout << "Added Display listener...!\n";
-        }
-        else
-        {
-            cout << "Already registered to the Display listener\n";
-        }
-        return ;
-    }
-
-
-/**
- * @fn void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
- * @brief This API is used to remove listeners from the Display connection change event list.
- *
- * @param[in] DisplayConnectionChangeListener The listener to remove
- *
- * @return None
- */
-    void Host::removeDisplayConnectionListener (DisplayConnectionChangeListener *l)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it ;
-        it = find (dispEvntListeners.begin(), dispEvntListeners.end(), l);
-        if (it == dispEvntListeners.end())
-        {
-            cout << "Not Registered to Display Listener yet...!\n";
-        }
-        else
-        {
-            dispEvntListeners.erase (it);
-            cout << "Removed from the Display listener...!\n";
-        }
-        return;
-    }
-
-
-/**
- * @fn void Host::notifyPowerChange (const  int mode)
- * @brief This function is used to get the current power state.
- *
- * @param[in] mode Power mode of the decoder.
- * @return None.
- */
-    void Host::notifyPowerChange (const  int mode)
-    {
-    	std::list < PowerModeChangeListener* > ::iterator it;
-        for ( it = powerEvntListeners.begin() ; it != powerEvntListeners.end(); it++ )
-        {
-            (*it)->powerModeChanged (mode);
-        }
-    }
-
-    void Host::notifyDisplayConnectionChange (int portHandle, bool newConnectionStatus)
-    {
-        std::list < DisplayConnectionChangeListener* > ::iterator it;
-        for ( it = dispEvntListeners.begin() ; it != dispEvntListeners.end(); it++ )
-        {
-            (*it)->displayConnectionChanged(getVideoOutputPort(portHandle), newConnectionStatus);
-            getVideoOutputPort(portHandle).setDisplayConnected(newConnectionStatus);
-        }
-    }
-
-
 /**
  * @fn bool Host::setPowerMode(int mode)
  * @brief This API is used to change the power mode of the device.
@@ -254,7 +102,7 @@ namespace device
  *
  * @return None
  */
-    bool Host::setPowerMode(int mode)
+    bool Host::setPowerMode(int)
     {
         throw UnsupportedOperationException();
     }
@@ -603,7 +451,7 @@ namespace device
    void Host::getMS12ConfigDetails(std::string &configType)
    {
        dsError_t ret = dsERR_NONE;
-       char type[MS12_CONFIG_BUF_SIZE];
+       char type[MS12_CONFIG_BUF_SIZE] = { 0 };
        ret = dsGetMS12ConfigType(type);
        if (ret == dsERR_NONE)
        {
@@ -913,11 +761,270 @@ namespace device
     printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
    }
 
-
+DefaultImpl& Host::impl()
+{
+    // lazy instantiation
+    if (!m_impl) {
+        m_impl = std::unique_ptr<DefaultImpl>(new DefaultImpl());
+    }
+    return *m_impl;
 }
 
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInEventHotPlug(dsHdmiInPort_t port, bool isConnected)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInEventHotPlug called. port: %d, isConnected: %d", port, isConnected);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInEventSignalStatus(dsHdmiInPort_t port, dsHdmiInSignalStatus_t signalStatus)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInEventSignalStatus called. port: %d, signalStatus: %d", port, signalStatus);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInEventStatus(dsHdmiInPort_t activePort, bool isPresented)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInEventStatus called. activePort: %d, isPresented: %d", activePort, isPresented);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInVideoModeUpdate(dsHdmiInPort_t port, const dsVideoPortResolution_t& videoPortResolution)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInVideoModeUpdate called. port: %d, interlaced: %d", port, videoPortResolution.interlaced);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInAllmStatus(dsHdmiInPort_t port, bool allmStatus)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInAllmStatus called. port: %d, allmStatus: %d", port, allmStatus);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInAVIContentType(dsHdmiInPort_t port, dsAviContentType_t aviContentType)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInAVIContentType called. port: %d, aviContentType: %d", port, aviContentType);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInVRRStatus(dsHdmiInPort_t port, dsVRRType_t vrrType)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInVRRStatus called. port: %d, vrrType: %d", port, vrrType);
+}
+
+/* virtual */ void Host::IHdmiInEvents::OnHdmiInAVLatency(int audioDelay, int videoDelay)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHdmiInAVLatency called. audioDelay: %d, videoDelay: %d", audioDelay, videoDelay);
+}
+
+/* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePreChange(const std::string& frameRate)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnDisplayFrameratePreChange called. frameRate: %s", frameRate.c_str());
+}
+
+/* virtual */ void Host::IVideoDeviceEvents::OnDisplayFrameratePostChange(const std::string& frameRate)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnDisplayFrameratePostChange called. frameRate: %s", frameRate.c_str());
+}
+
+/* virtual */ void Host::IVideoDeviceEvents::OnZoomSettingsChanged(dsVideoZoom_t zoomSetting)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnZoomSettingsChanged called. zoomSetting: %d", zoomSetting);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnResolutionPreChange(int width, int height)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnResolutionPreChange called. width: %d, height: %d", width, height);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnResolutionPostChange(int width, int height)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnResolutionPostChange called. width: %d, height: %d", width, height);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnHDCPStatusChange(dsHdcpStatus_t hdcpStatus)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnHDCPStatusChange called. hdcpStatus: %d", hdcpStatus);
+}
+
+/* virtual */ void Host::IVideoOutputPortEvents::OnVideoFormatUpdate(dsHDRStandard_t videoFormatHDR)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnVideoFormatUpdate called. videoFormatHDR: %d", videoFormatHDR);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAssociatedAudioMixingChanged(bool mixing)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAssociatedAudioMixingChanged called. mixing: %d", mixing);
+}
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioFaderControlChanged(int mixerBalance)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioFaderControlChanged called. mixerBalance: %d", mixerBalance);
+}
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioPrimaryLanguageChanged(const std::string& primaryLanguage)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioPrimaryLanguageChanged called. primaryLanguage: %s", primaryLanguage.c_str());
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioSecondaryLanguageChanged(const std::string& secondaryLanguage)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioSecondaryLanguageChanged called. secondaryLanguage: %s", secondaryLanguage.c_str());
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioOutHotPlug(dsAudioPortType_t portType, uint32_t uiPortNumber, bool isPortConnected)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioOutHotPlug called. portType: %d, uiPortNumber: %d, isPortConnected: %d", portType, uiPortNumber, isPortConnected);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnDolbyAtmosCapabilitiesChanged(dsATMOSCapability_t atmosCapability, bool status)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnDolbyAtmosCapabilitiesChanged called. atmosCapability: %d, status: %d", atmosCapability, status);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioPortStateChanged(dsAudioPortState_t audioPortState)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioPortStateChanged called. audioPortState: %d", audioPortState);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioModeEvent(dsAudioPortType_t audioPortType, dsAudioStereoMode_t audioStereoMode)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioModeEvent called. audioPortType: %d, audioStereoMode: %d", audioPortType, audioStereoMode);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioLevelChangedEvent(int audioLevel)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioLevelChangedEvent called. audioLevel: %d", audioLevel);
+}
+
+/* virtual */ void Host::IAudioOutputPortEvents::OnAudioFormatUpdate(dsAudioFormat_t audioFormat)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnAudioFormatUpdate called. audioFormat: %d", audioFormat);
+}
+
+/* virtual */ void Host::IDisplayDeviceEvents::OnDisplayHDMIHotPlug(dsDisplayEvent_t displayEvent)
+{
+    // If client needs to handle this event, they should override this method
+    INT_DEBUG("Base impl of OnDisplayHDMIHotPlug called. displayEvent: %d", displayEvent);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInHotPlug(dsCompositeInPort_t port, bool isConnected)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_DEBUG("Base impl of OnCompositeInHotPlug called. port: %d isConnected %d", port, isConnected);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInSignalStatus(dsCompositeInPort_t port, dsCompInSignalStatus_t signalStatus)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_DEBUG("Base impl of OnCompositeInSignalStatus called. port: %d signalStatus %d", port, signalStatus);
+}
+
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInStatus(dsCompositeInPort_t activePort, bool isPresented)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_DEBUG("Base impl of OnCompositeInStatus called. activePort: %d isPresented %d", activePort, isPresented);
+}
+/* virtual */ void Host::ICompositeInEvents::OnCompositeInVideoModeUpdate(dsCompositeInPort_t activePort, dsVideoPortResolution_t videoResolution)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_DEBUG("Base impl of OnCompositeInVideoModeUpdate called. activePort: %d videoResolution %d", activePort, videoResolution.pixelResolution);
+}
+
+/* virtual */ void Host::IDisplayEvents::OnDisplayRxSense(dsDisplayEvent_t displayEvent)
+{
+    /* If client needs to handle this event, they should override this method */
+    INT_DEBUG("Base impl of OnDisplayRxSense called. displayEvent: %d ", displayEvent);
+}
+
+dsError_t Host::Register(IHdmiInEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(IHdmiInEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(ICompositeInEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(ICompositeInEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(IDisplayEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(IDisplayEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(IVideoDeviceEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(IVideoDeviceEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(IVideoOutputPortEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(IVideoOutputPortEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(IAudioOutputPortEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(IAudioOutputPortEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
+
+dsError_t Host::Register(IDisplayDeviceEvents* listener, const std::string& clientName)
+{
+    return impl().Register(listener, clientName);
+}
+
+dsError_t Host::UnRegister(IDisplayDeviceEvents* listener)
+{
+    return impl().UnRegister(listener);
+}
 
 /** @} */
 
+} /* namespace device */
 /** @} */
+
 /** @} */
