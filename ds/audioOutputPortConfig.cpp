@@ -35,21 +35,124 @@
 #include "stdlib.h"
 #include "dslogger.h"
 
-#include <dlfcn.h>
-#include "libIARM.h"
-#include "libIBus.h"
-#include "iarmUtil.h"
+//const dsAudioTypeConfig_t  kConfig_audio ;
+//const dsAudioPortConfig_t  kPort_audio ;
 
-#define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
-#define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
-extern dsAudioTypeConfig_t  kConfig_audio[dsAUDIOPORT_TYPE_MAX];
-extern dsAudioPortConfig_t  kPort_audio[dsAUDIOPORT_TYPE_MAX];
-extern int kConfig_size, kPort_size;
-static dsAudioTypeConfig_t  *kConfigs1 = NULL;//, *kConfigs2 = kConfig_audio;
-static dsAudioPortConfig_t  *kPorts1 = NULL;//, *kPorts2 = kPort_audio;
-int *pKConSize, *pKPortSize;
 
-static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+/*
+ * Setup the supported configurations here.
+ */
+ dsAudioPortType_t 			kSupportedPortTypes1[] 				= { dsAUDIOPORT_TYPE_SPDIF, dsAUDIOPORT_TYPE_SPEAKER, dsAUDIOPORT_TYPE_HDMI_ARC, dsAUDIOPORT_TYPE_HEADPHONE };
+
+ dsAudioEncoding_t          kSupportedSPDIFEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+ dsAudioCompression_t       kSupportedSPDIFCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ dsAudioStereoMode_t        kSupportedSPDIFStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
+
+ dsAudioEncoding_t          kSupportedHEADPHONEEncodings1[]                      = { dsAUDIO_ENC_PCM, };
+ dsAudioCompression_t       kSupportedHEADPHONECompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ dsAudioStereoMode_t        kSupportedHEADPHONEStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
+
+ dsAudioEncoding_t          kSupportedSPEAKEREncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+ dsAudioCompression_t       kSupportedSPEAKERCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ dsAudioStereoMode_t        kSupportedSPEAKERStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, };
+
+ dsAudioEncoding_t          kSupportedARCEncodings1[]                      = { dsAUDIO_ENC_PCM, dsAUDIO_ENC_AC3, };
+ dsAudioCompression_t       kSupportedARCCompressions1[]           = { dsAUDIO_CMP_NONE, dsAUDIO_CMP_LIGHT, dsAUDIO_CMP_MEDIUM, dsAUDIO_CMP_HEAVY, };
+ dsAudioStereoMode_t        kSupportedARCStereoModes1[]            = { dsAUDIO_STEREO_STEREO, dsAUDIO_STEREO_SURROUND, dsAUDIO_STEREO_PASSTHRU };
+
+
+ dsAudioTypeConfig_t 	kConfig_audio[]= {
+
+		{
+		/*.typeId = */					dsAUDIOPORT_TYPE_SPDIF,
+		/*.name = */					"SPDIF", //SPDIF
+		/*.numSupportedCompressions = */dsUTL_DIM(kSupportedSPDIFCompressions1),
+		/*.compressions = */			kSupportedSPDIFCompressions1,
+		/*.numSupportedEncodings = */	dsUTL_DIM(kSupportedSPDIFEncodings1),
+		/*.encodings = */				kSupportedSPDIFEncodings1,
+		/*.numSupportedStereoModes = */	dsUTL_DIM(kSupportedSPDIFStereoModes1),
+		/*.stereoModes = */				kSupportedSPDIFStereoModes1,
+		},
+
+                {
+                /*.typeId = */                                  dsAUDIOPORT_TYPE_HEADPHONE,
+                /*.name = */                                    "HEADPHONE", //HEADPHONE
+                /*.numSupportedCompressions = */dsUTL_DIM(kSupportedHEADPHONECompressions1),
+                /*.compressions = */                    kSupportedHEADPHONECompressions1,
+                /*.numSupportedEncodings = */   dsUTL_DIM(kSupportedHEADPHONEEncodings1),
+                /*.encodings = */                               kSupportedHEADPHONEEncodings1,
+                /*.numSupportedStereoModes = */ dsUTL_DIM(kSupportedHEADPHONEStereoModes1),
+                /*.stereoModes = */                             kSupportedHEADPHONEStereoModes1,
+                },
+
+                {
+                /*.typeId = */                                  dsAUDIOPORT_TYPE_SPEAKER,
+                /*.name = */                                    "SPEAKER", //SPEAKER
+                /*.numSupportedCompressions = */dsUTL_DIM(kSupportedSPEAKERCompressions1),
+                /*.compressions = */                    kSupportedSPEAKERCompressions1,
+                /*.numSupportedEncodings = */   dsUTL_DIM(kSupportedSPEAKEREncodings1),
+                /*.encodings = */                               kSupportedSPEAKEREncodings1,
+                /*.numSupportedStereoModes = */ dsUTL_DIM(kSupportedSPEAKERStereoModes1),
+                /*.stereoModes = */                             kSupportedSPEAKERStereoModes1,
+                },
+                {
+                /*.typeId = */                                  dsAUDIOPORT_TYPE_HDMI_ARC,
+                /*.name = */                                    "HDMI_ARC", //ARC/eARC
+                /*.numSupportedCompressions = */dsUTL_DIM(kSupportedARCCompressions1),
+                /*.compressions = */                    kSupportedARCCompressions1,
+                /*.numSupportedEncodings = */   dsUTL_DIM(kSupportedARCEncodings1),
+                /*.encodings = */                               kSupportedARCEncodings1,
+                /*.numSupportedStereoModes = */ dsUTL_DIM(kSupportedARCStereoModes1),
+                /*.stereoModes = */                             kSupportedARCStereoModes1,
+                }
+};
+
+ dsVideoPortPortId_t connectedVOPs1[dsAUDIOPORT_TYPE_MAX][dsVIDEOPORT_TYPE_MAX] = {
+		{/*VOPs connected to LR Audio */
+
+		},
+		{/*VOPs connected to HDMI Audio */
+		},
+		{/*VOPs connected to SPDIF Audio */
+				{dsVIDEOPORT_TYPE_INTERNAL, 0},
+		},
+                {/*VOPs connected to SPEAKER Audio */
+                                {dsVIDEOPORT_TYPE_INTERNAL, 0},
+                },
+                {/*VOPs connected to ARC Audio */
+                                {dsVIDEOPORT_TYPE_INTERNAL, 0},
+                },
+                {/*VOPs connected to HEADPHONE Audio */
+                                {dsVIDEOPORT_TYPE_INTERNAL, 0},
+                }
+};
+
+ dsAudioPortConfig_t kPort_audio[] = {
+
+		{
+		/*.typeId = */ 					{dsAUDIOPORT_TYPE_SPDIF, 0},
+		/*.connectedVOPs = */			connectedVOPs1[dsAUDIOPORT_TYPE_SPDIF],
+		},
+
+
+
+                {
+                /*.typeId = */                                  {dsAUDIOPORT_TYPE_HEADPHONE, 0},
+                /*.connectedVOPs = */                   connectedVOPs1[dsAUDIOPORT_TYPE_HEADPHONE],
+                },
+
+                {
+                /*.typeId = */                                  {dsAUDIOPORT_TYPE_SPEAKER, 0},
+                /*.connectedVOPs = */                   connectedVOPs1[dsAUDIOPORT_TYPE_SPEAKER],
+                },
+                {
+                /*.typeId = */                                  {dsAUDIOPORT_TYPE_HDMI_ARC, 0},
+                /*.connectedVOPs = */                   connectedVOPs1[dsAUDIOPORT_TYPE_HDMI_ARC],
+                }
+};
+
+int kConfig_size =  sizeof(kConfig_audio) / sizeof(kConfig_audio[0]);
+int kPort_size =  sizeof(kPort_audio) / sizeof(kPort_audio[0]);
 
 
 namespace device {
@@ -125,164 +228,6 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
-#if 1
-bool searchConfigs()
-{
-	//static dsAudioTypeConfig_t  *kConfigs1 = NULL;
-	//static dsAudioPortConfig_t  *kPorts1 = NULL;
-	int kConfig_size_local = -1, kPort_size_local = -1;
-	int kConfig_size_dl = -1, kPort_size_dl = -1;
-	//IARM_BUS_Lock(lock);
-	//if ( kConfigs1 == NULL) 
-	{
-        void *dllib = dlopen("libdshalsrv.so", RTLD_LAZY);
-        if (dllib) {
-            kConfigs1 = (dsAudioTypeConfig_t *) dlsym(dllib, "kConfig_audio");
-            if (kConfigs1) {
-                INT_DEBUG("kConfig_audio is defined and loaded kConfigs1 = %p\r\n", kConfigs1);
-				printf("%d:%s: kConfig_audio is defined and loaded kConfigs1 = %p\n", __LINE__, __func__, kConfigs1);
-            }
-            else {
-                INT_INFO("kConfig_audio is not defined\r\n");
-				printf("%d:%s: kConfig_audio is not defined\n", __LINE__, __func__);
-                //IARM_BUS_Unlock(lock);
-                //dlclose(dllib);
-                //return IARM_RESULT_INVALID_STATE;
-            }
-		
-			pKConSize = (int *) dlsym(dllib, "kConfig_size");
-			pKPortSize = (int *) dlsym(dllib, "kPort_size");
-			if(pKConSize)
-			{
-				kConfig_size_local = *pKConSize;
-				printf("%d:%s: pKConSize is defined and loaded kConfig_size_local = %d\n", __LINE__, __func__, kConfig_size_local);
-			}
-			else
-			{
-				printf("%d:%s: pKConSize is not defined\n", __LINE__, __func__);
-				kConfig_size_local = -1;
-			}
-			if(pKPortSize)
-			{
-				kPort_size_local = *pKPortSize;
-				printf("%d:%s: pKPortSize is defined and loaded kPort_size_local = %d\n", __LINE__, __func__, kPort_size_local);
-			}
-			else
-			{
-				printf("%d:%s: pKPortSize is not defined\n", __LINE__, __func__);
-				kPort_size_local = -1;
-			}
-            dlclose(dllib);
-        }
-        else {
-            INT_ERROR("Opening libdshalsrv.so failed\r\n");
-			printf("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
-        }
-    }
-
-	//if ( kPorts1 == NULL) 
-	{
-        void *dllib = dlopen("libdshalsrv.so", RTLD_LAZY);
-        if (dllib) {
-            kPorts1 = (dsAudioPortConfig_t *) dlsym(dllib, "kPort_audio");
-            if (kPorts1) {
-                INT_DEBUG("kPort_audio is defined and loaded kPorts1 = %p\r\n", kPorts1);
-				printf("%d:%s: kPort_audio is defined and loaded kPorts1 = %p\n", __LINE__, __func__, kPorts1);
-            }
-            else {
-                INT_INFO("kPort_audio is not defined\r\n");
-				printf("%d:%s: kPort_audio is not defined\n", __LINE__, __func__);
-                //IARM_BUS_Unlock(lock);
-                //dlclose(dllib);
-                //return IARM_RESULT_INVALID_STATE;
-            }
-            dlclose(dllib);
-        }
-        else {
-            INT_ERROR("Opening libdshalsrv.so failed\r\n");
-			printf("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
-        }
-    }
-	//dlclose(dllib);
-	//IARM_BUS_Unlock(lock);
-	//kConfig_size_dl = dsUTL_DIM(kConfigs1);
-	//kPort_size_dl = dsUTL_DIM(kPorts1);
-	//printf("%d:%s: dsUTL_DIM kConfig_size_dl = %d kPort_size_dl = %d\n", __LINE__, __func__, kConfig_size_dl, kPort_size_dl);
-	#if 0
-	printf("\n\n=========================================================================================================================\n\n");
-	printf("\n%d:%s print configs dlsym\n", __LINE__, __func__);
-	if 
-	for (size_t i = 0; i < kConfig_size_local; i++) {
-			//const dsAudioTypeConfig_t *typeCfg = &kConfig_audio[i];
-			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i]; //NO compile issues
-			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-			aPortType.enable();
-			printf("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
-			printf("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
-			printf("%d:%s: typeCfg->numSupportedEncodings = %zu\n", __LINE__, __func__, typeCfg->numSupportedEncodings);
-			printf("%d:%s: typeCfg->numSupportedCompressions = %zu\n", __LINE__, __func__, typeCfg->numSupportedCompressions);
-			printf("%d:%s: typeCfg->numSupportedStereoModes = %zu\n", __LINE__, __func__, typeCfg->numSupportedStereoModes);
-		}
-
-
-		/*
-		 * set up ports based on kPorts[]
-		 */
-		for (size_t i = 0; i < kPort_size_local; i++) {
-			//const dsAudioPortConfig_t *port = &kPort_audio[i];
-			const dsAudioPortConfig_t *port = &kPorts1[i];
-			printf("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
-			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
-		}
-	printf("\n\n=========================================================================================================================\n\n");
-	#else
-	printf("\n\n=========================================================================================================================\n\n");
-	printf("\n%d:%s print configs using extern\n", __LINE__, __func__);
-	//printf("%d:%s: size of(kConfig_audio) = %d size of(kPort_audio) = %d\n", __LINE__, __func__, kConfig_size, kPort_size);
-	//kConfig_size_local = kConfig_size;
-	//kPort_size_local = kPort_size;
-
-	if(kConfigs1 != NULL)
-	{
-	for (size_t i = 0; i < kConfig_size_local; i++) {
-			//const dsAudioTypeConfig_t *typeCfg = &kConfig_audio[i];
-			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
-			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-			aPortType.enable();
-			printf("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
-			printf("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
-			printf("%d:%s: typeCfg->numSupportedEncodings = %zu\n", __LINE__, __func__, typeCfg->numSupportedEncodings);
-			printf("%d:%s: typeCfg->numSupportedCompressions = %zu\n", __LINE__, __func__, typeCfg->numSupportedCompressions);
-			printf("%d:%s: typeCfg->numSupportedStereoModes = %zu\n", __LINE__, __func__, typeCfg->numSupportedStereoModes);
-		}
-	}
-	else
-	{
-		printf("%d:%s: kConfig_audio is NULL\n", __LINE__, __func__);
-	}
-	if(kPorts1 != NULL)
-	{
-		/*
-		 * set up ports based on kPorts[]
-		 */
-		for (size_t i = 0; i < kPort_size_local; i++) {
-			//const dsAudioPortConfig_t *port = &kPort_audio[i];
-			const dsAudioPortConfig_t *port = &kPorts1[i];
-			printf("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
-			printf("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
-		}
-	}
-	else
-	{
-		printf("%d:%s: kPort_audio is NULL\n", __LINE__, __func__);
-	}
-	printf("\n\n=========================================================================================================================\n\n");
-	#endif
-
-	return (kConfigs1 || kPorts1);
-}
-#endif
-
 void AudioOutputPortConfig::load()
 {
 	try {
@@ -307,7 +252,7 @@ void AudioOutputPortConfig::load()
 			_aPortTypes.push_back(AudioOutputPortType(i));
 
 		}
-#if 1
+
 		/*
 		 * Initialize Audio portTypes (encodings, compressions etc.)
 		 * and its port instances (db, level etc)
@@ -341,55 +286,6 @@ void AudioOutputPortConfig::load()
 			_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
 			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 		}
-		searchConfigs();
-#else //gsk
-		if(searchConfigs())
-		{
-		/*if(kConfig_audio == NULL || kPort_audio == NULL) {
-			throw IllegalArgumentException();
-		}*/
-		//dsAudioTypeConfig_t  *kConfigs = kConfig_audio;
-		//dsAudioPortConfig_t  *kPorts = kPort_audio;	
-         /*
-		 * Initialize Audio portTypes (encodings, compressions etc.)
-		 * and its port instances (db, level etc)
-		 */
-		for (size_t i = 0; i < dsUTL_DIM(kConfigs1); i++) {
-			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
-			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-			aPortType.enable();
-			for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
-				aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
-				_aEncodings.at(typeCfg->encodings[j]).enable();
-			}
-			for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
-				aPortType.addCompression(typeCfg->compressions[j]);
-				_aCompressions.at(typeCfg->compressions[j]).enable();
-
-			}
-			for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
-				aPortType.addStereoMode(typeCfg->stereoModes[j]);
-				_aStereoModes.at(typeCfg->stereoModes[j]).enable();
-
-			}
-		}
-
-
-		/*
-		 * set up ports based on kPorts[]
-		 */
-		for (size_t i = 0; i < dsUTL_DIM(kPorts1); i++) {
-			const dsAudioPortConfig_t *port = &kPorts1[i];
-			_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
-			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
-		}
-	}
-	else 
-	{
-		printf("%d:%s: kConfig and kPorts are not available\n", __LINE__, __func__);
-	}
-#endif
-
 	}
 	catch(const Exception &e) {
 		throw e;
