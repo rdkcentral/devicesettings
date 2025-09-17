@@ -34,6 +34,7 @@
 
 
 #include <iostream>
+#include <unistd.h>
 #include "dsError.h"
 #include "dsUtl.h"
 #include "frontPanelConfig.hpp"
@@ -54,8 +55,7 @@ namespace device {
  */
 FrontPanelConfig::FrontPanelConfig()
 {
-    dsFPInit();
-    load();
+    m_isFPInitialized = false;
 }
 
 
@@ -68,6 +68,7 @@ FrontPanelConfig::FrontPanelConfig()
 FrontPanelConfig::~FrontPanelConfig()
 {
     //dsFPTerm();
+    m_isFPInitialized = false;
 }
 
 
@@ -82,9 +83,28 @@ FrontPanelConfig::~FrontPanelConfig()
 FrontPanelConfig & FrontPanelConfig::getInstance()
 {
     static FrontPanelConfig _singleton;
+    if (!_singleton.m_isFPInitialized)
+    {
+        dsError_t errorCode = dsERR_NONE;
+        unsigned int retryCount = 1;
+        do
+        {
+            errorCode = dsFPInit();
+            if (dsERR_NONE == errorCode)
+            {
+                _singleton.load();
+                _singleton.m_isFPInitialized = true;
+                INT_INFO("dsFPInit success\n");
+            }
+            else{
+                INT_ERROR("dsFPInit failed with error[%d]. Retrying... (%d/20)\n", errorCode, retryCount);
+                usleep(50000); // Sleep for 50ms before retrying
+            }
+        }
+        while ((!_singleton.m_isFPInitialized) && (retryCount++ < 20));
+    }
 	return _singleton;
 }
-
 
 /**
  * @fn FrontPanelConfig::getIndicator(const string &name)
