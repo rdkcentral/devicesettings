@@ -679,9 +679,8 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
 }
 
 dsError_t HdmiInput::getHDMIARCPortId(int &portId) {
-
     dsError_t error = dsERR_GENERAL;
-    error = dsGetHDMIARCPortId(portId);
+    error = dsGetHDMIARCPortId(&portId);
     if(dsERR_NONE != error)
     {
       portId = -1;
