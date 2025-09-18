@@ -965,6 +965,54 @@ dsError_t dsSetForceHDRMode(intptr_t handle, dsHDRStandard_t mode)
         return dsERR_GENERAL ;
 }
 
+dsError_t dsSetStandbyVideoState(char *port, const bool enable)
+{
+    dsError_t dsErr = dsERR_GENERAL;
+    _DEBUG_ENTER();
+
+    if(NULL != port)
+    {
+        dsMgrStandbyVideoStateParam_t param = {0};
+        strcpy(param.port, port);
+        param.isEnabled = enable;
+        param.result = -1;
+
+        IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                (char *)IARM_BUS_DSMGR_API_SetStandbyVideoState,
+                                (void *)&param, sizeof(param));
+
+        if (IARM_RESULT_SUCCESS == rpcRet && param.result == 0)
+        {
+            dsErr = dsERR_NONE;
+        }
+    }
+    return dsErr;
+}
+
+dsError_t dsGetStandbyVideoState(char *port, bool &enable)
+{
+    dsError_t dsErr = dsERR_GENERAL;
+    _DEBUG_ENTER();
+
+    if(NULL != port)
+    {
+        dsMgrStandbyVideoStateParam_t param = {0};
+        strcpy(param.port, port);
+        param.result = -1;
+
+        IARM_Result_t rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                (char *)IARM_BUS_DSMGR_API_GetStandbyVideoState,
+                (void *)&param,
+                sizeof(param));
+
+        if (IARM_RESULT_SUCCESS == rpcRet && param.result == 0)
+        {
+            enable = param.isEnabled;
+            dsErr = dsERR_NONE;
+        }
+    }
+    return dsErr ;
+}
 
 /** @} */
 /** @} */

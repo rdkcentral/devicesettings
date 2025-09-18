@@ -38,6 +38,7 @@
 #include <stdint.h>
 
 #include "dsTypes.h"
+#include "dsError.h"
 
 /**
  * @file videoOutputPort.hpp
@@ -283,6 +284,8 @@ public:
 	unsigned int getPreferredColorDepth(bool persist = true) ;
 	void setPreferredColorDepth(const unsigned int colordepth, bool persist = true);
 	void getColorDepthCapabilities (unsigned int *capabilities) const;
+    dsError_t SetStandbyVideoState(const string port , const bool enable);
+    dsError_t GetStandbyVideoState(const string port , bool &enable);
 
 private:
 	Display _display;

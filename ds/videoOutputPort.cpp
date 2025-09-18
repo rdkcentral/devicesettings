@@ -911,18 +911,28 @@ int VideoOutputPort::GetHdmiPreference()
     return hdcpProtocol;
 }
 
+dsError_t VideoOutputPort::SetStandbyVideoState(const string port , const bool enable)
+{
+    return dsSetStandbyVideoState(port.c_str(), enable);
+}
+
+dsError_t VideoOutputPort::GetStandbyVideoState(const string port, bool &isEnabled)
+{
+    return dsGetStandbyVideoState(port.c_str(), isEnabled);
+}
+
 /**
  * @fn void setAllmEnabled(bool enable); 
  * @brief Enables/Disables ALLM mode for connected HDMI display.
  */
- void VideoOutputPort::Display::setAllmEnabled(bool enable) const
- {
-     printf("VideoOutputPort::Display::setAllmEnabled \r\n");
-     dsError_t ret = dsSetAllmEnabled(_handle,enable);
-     if (ret != dsERR_NONE) {
-         throw Exception(ret);
-     }
- }
+void VideoOutputPort::Display::setAllmEnabled(bool enable) const
+{
+    printf("VideoOutputPort::Display::setAllmEnabled \r\n");
+    dsError_t ret = dsSetAllmEnabled(_handle,enable);
+    if (ret != dsERR_NONE) {
+     throw Exception(ret);
+    }
+}
 
 /**
  * @fn void setAVIContentType(dsAviContentType_t contentType);
