@@ -274,7 +274,7 @@ FrontPanelIndicator::FrontPanelIndicator(int id, int maxBrightness, int maxCycle
                                          _maxBrightness(maxBrightness), _maxCycleRate(maxCycleRate), _levels(levels),_colorMode(colorMode)
 {
     printf("ID: %d\n", id);
-    printf("Brightness Levels: %d, %d, %d\n", levels, min, max);
+    printf("Brightness Levels: %d\n", levels);
 
 	_brightness = 0;
 	_state = 0;
