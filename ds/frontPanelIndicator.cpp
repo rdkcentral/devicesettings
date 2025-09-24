@@ -273,6 +273,9 @@ FrontPanelIndicator & FrontPanelIndicator::getInstance(const std::string &name)
 FrontPanelIndicator::FrontPanelIndicator(int id, int maxBrightness, int maxCycleRate, int levels , int colorMode):
                                          _maxBrightness(maxBrightness), _maxCycleRate(maxCycleRate), _levels(levels),_colorMode(colorMode)
 {
+    printf("ID: %d\n", id);
+    printf("Brightness Levels: %d, %d, %d\n", levels, min, max);
+
 	_brightness = 0;
 	_state = 0;
 	_color = 0;
@@ -406,6 +409,8 @@ int FrontPanelIndicator::getBrightness(const bool persist)
  */
 void FrontPanelIndicator::getBrightnessLevels(int &levels, int &min, int &max) 
 {
+    printf("Brightness Levels: %d, %d, %d\n", levels, min, max);
+
     max   = _maxBrightness;
 	levels = _levels;
     min    = 0;
