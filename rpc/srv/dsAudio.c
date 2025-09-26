@@ -3258,7 +3258,7 @@ IARM_Result_t _dsSetAudioMute(void *arg)
                     device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.mute", _mute);
                     break;
                 case dsAUDIOPORT_TYPE_HDMI_ARC:
-                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"HEADPHONE0", param->mute ? "TRUE" : "FALSE");
+                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"HDMI_ARC0", param->mute ? "TRUE" : "FALSE");
                     device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.audio.mute", _mute);
                     break;
 
