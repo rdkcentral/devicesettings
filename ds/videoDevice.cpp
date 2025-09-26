@@ -327,6 +327,8 @@ int VideoDevice::getCurrentDisframerate(char *framerate) const
         dsError_t ret;
         char getframerate[20];
         ret = dsGetCurrentDisplayframerate(_handle, getframerate);
+		std::cout << "dsGetCurrentDisplayframerate() returned: " << ret << std::endl;
+		std::cout << "getframerate buffer: '" << getframerate << "'" << std::endl;
 	    strncpy(framerate, getframerate, 20);
 
      	return 0;
