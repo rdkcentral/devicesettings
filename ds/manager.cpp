@@ -122,7 +122,7 @@ void Manager::Initialize()
 	    		err = dsDisplayInit();
 	    		printf ("Manager::Initialize: result :%d retryCount :%d\n", err, retryCount);
 	    		if (dsERR_NONE == err) break;
-	    		usleep(100000);
+	    		usleep(400000);
 	    	} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
             CHECK_RET_VAL(err);
 	    	err = dsAudioPortInit();
