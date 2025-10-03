@@ -7077,23 +7077,27 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
 	float prev_audioLevel_spdif = audioLevel_cache_spdif, prev_audioLevel_speaker = audioLevel_cache_speaker, prev_audioLevel_hdmi = audioLevel_cache_hdmi, prev_audioLevel_headphone = audioLevel_cache_headphone;
-	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
+	printf("%s Audio level persistence update timer thread running...\n",__func__);
 	struct timespec ts;
 	    while(1){
-	      clock_gettime(CLOCK_REALTIME, &ts);
-              ts.tv_sec += 5;
 
+	      printf("%s before lock \n",__func__);
               pthread_mutex_lock(&audioLevelMutex);
               while(!audioLevel_timer_set){
+	        clock_gettime(CLOCK_REALTIME, &ts);
+                ts.tv_sec += 5;
+	        INT_INFO("%s before lock  pthread_cond_timedwait \n",__func__);
                 int rc = pthread_cond_timedwait(&audioLevelTimerCV, &audioLevelMutex, &ts);
                 if (rc == ETIMEDOUT)
                         continue;
               }
+              printf("%s persist_audioLevel_timer_threadIsAlive \n",__func__);
               if(!persist_audioLevel_timer_threadIsAlive){
 		pthread_mutex_unlock(&audioLevelMutex);
                 break;
               }
 	      // wait for 3 sec, then update the latest audio level from cache variable
+              printf("Amit 3 sec sleep persist_audioLevel_timer_threadFunc \n "); 
 	      if(audioLevel_timer_set){
                 sleep(3);
 
