@@ -7089,11 +7089,11 @@ static void* persist_audioLevel_timer_threadFunc(void* arg) {
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
 	struct timespec ts;
 	    while(1){
-	      clock_gettime(CLOCK_REALTIME, &ts);
-              ts.tv_sec += 5;
 
               pthread_mutex_lock(&audioLevelMutex);
               while(!audioLevel_timer_set){
+	        clock_gettime(CLOCK_REALTIME, &ts);
+                ts.tv_sec += 5;
                 int rc = pthread_cond_timedwait(&audioLevelTimerCV, &audioLevelMutex, &ts);
                 if (rc == ETIMEDOUT)
                         continue;
