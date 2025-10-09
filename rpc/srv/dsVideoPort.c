@@ -921,23 +921,20 @@ IARM_Result_t _dsSetResolution(void *arg)
 		bool IsIgnoreEdid = ignoreEdidParam.ignoreEDID;
 		IARM_BUS_Lock(lock);
 		INT_DEBUG("ResOverride _dsSetResolution IsIgnoreEdid:%d\n", IsIgnoreEdid);
-		//IsIgnoreEdid is true platform will take care of current resolution cache.
-		if (!IsIgnoreEdid) {
-			dsVideoPortResolution_t platresolution;
-			memset(&platresolution,'\0',sizeof(platresolution));
-			dsGetResolution(param->handle,&platresolution);
-			INT_INFO("Resolution Requested ..%s Platform Resolution - %s\r\n",resolution.name,platresolution.name);
-			if ((strcmp(resolution.name,platresolution.name) == 0 ))
-			{
+		dsVideoPortResolution_t platresolution;
+		memset(&platresolution,'\0',sizeof(platresolution));
+		dsGetResolution(param->handle,&platresolution);
+		INT_INFO("Resolution Requested ..%s Platform Resolution - %s\r\n",resolution.name,platresolution.name);
+		if ((strcmp(resolution.name,platresolution.name) == 0 ))
+		{
 			
-				INT_INFO("Same Resolution ..Ignoring Resolution Request------\r\n");
-				_dsHDMIResolution = platresolution.name;
-				/*!< Persist Resolution Settings */
-				persistResolution(param);
-				param->result = ret;
-				IARM_BUS_Unlock(lock);
-				return IARM_RESULT_SUCCESS;
-			}
+			INT_INFO("Same Resolution ..Ignoring Resolution Request------\r\n");
+			_dsHDMIResolution = platresolution.name;
+			/*!< Persist Resolution Settings */
+			persistResolution(param);
+			param->result = ret;
+			IARM_BUS_Unlock(lock);
+			return IARM_RESULT_SUCCESS;
 		}
 		/*!< Resolution Pre Change Event  - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE */
 		_dsVideoPortPreResolutionCall(&param->resolution);

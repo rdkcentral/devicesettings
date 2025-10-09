@@ -52,7 +52,7 @@
 #include <vector>
 
 #include "dsTypes.h"
-
+#include "dsError.h"
 
 /**
  * @file hdmiIn.hpp
@@ -101,6 +101,7 @@ public:
     void getVRRSupport (int iHdmiPort, bool *vrr_suppport);
     void getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus);
     void getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion);
+    dsError_t getHDMIARCPortId(int &portId);
 private:
     HdmiInput ();           /* default constructor */
     virtual ~HdmiInput ();  /* destructor */
