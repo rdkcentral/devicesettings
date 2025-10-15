@@ -629,11 +629,10 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
 
 static void dumpEDIDInformation( dsDisplayEDID_t *edid)
 {
-     printf("[DsMgr]dumpEDIDInformation: Product:%x SN:%x Year:%d Week:%d Monitor:%s Type:%s Repeater:%x\n",
-		 		    edid->productCode,edid->serialNumber,edid->manufactureYear,edid->manufactureWeek,edid->monitorName,
-						    edid->hdmiDeviceType?"HDMI":"DVI",edid->isRepeater);
-     printf("Supported resolutions: ");
-     for (size_t j = 0; j < edid->numOfSupportedResolution; j++)
+    printf("[DsMgr]dumpEDIDInformation tags: Product, SN, Year, Week, Monitor, Type, Repeater\n");
+    printf("[DsMgr]dumpEDIDInformation values:%x,%x,%d,%d,%s,%s,%x\n",edid->productCode,edid->serialNumber,edid->manufactureYear,edid->manufactureWeek,edid->monitorName,edid->hdmiDeviceType?"HDMI":"DVI",edid->isRepeater);
+    printf("Supported resolutions: ");
+    for (size_t j = 0; j < edid->numOfSupportedResolution; j++)
     {
         dsVideoPortResolution_t *edidResn = &(edid->suppResolutionList[j]);
 	 printf("%s,",edidResn->name);
