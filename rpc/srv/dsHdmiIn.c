@@ -468,9 +468,9 @@ static dsError_t getHdmiVersion (dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVe
 
 IARM_Result_t dsHdmiInMgr_init()
 {
-    _dsHdmiInInit(NULL);
+    //_dsHdmiInInit(NULL);
 
-    IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsHdmiInInit, _dsHdmiInInit);
+    //IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsHdmiInInit, _dsHdmiInInit);
     return IARM_RESULT_SUCCESS;
 }
 

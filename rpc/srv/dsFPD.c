@@ -279,7 +279,7 @@ IARM_Result_t _dsFPInit(void *arg)
     }
 
     if (!m_isPlatInitialized) {
-        dsFPInit();
+        //dsFPInit();
         m_isPlatInitialized = 1;
     }
 
