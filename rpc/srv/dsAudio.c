@@ -3360,6 +3360,11 @@ IARM_Result_t _dsSetAudioMute(void *arg)
                     INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"HEADPHONE0", param->mute ? "TRUE" : "FALSE");
                     device::HostPersistence::getInstance().persistHostProperty("HEADPHONE0.audio.mute", _mute);
                     break;
+                case dsAUDIOPORT_TYPE_HDMI_ARC:
+                    INT_DEBUG("%s: port: %s , persist audio mute: %s\n",__func__,"HDMI_ARC0", param->mute ? "TRUE" : "FALSE");
+                    device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.audio.mute", _mute);
+                    break;
+
                 default:
                     break;
     }
@@ -3382,15 +3387,15 @@ IARM_Result_t _dsIsAudioMute(void *arg)
 
     dsAudioSetMutedParam_t *param = (dsAudioSetMutedParam_t *)arg;
     bool muted = false;
-    
+
     dsError_t ret = dsIsAudioMute(param->handle, &muted);
-    if (ret == dsERR_NONE) {
+    dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
+    if (ret == dsERR_NONE || (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC)) {
         param->mute = muted;
 
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string isMuteKey("");
         std::string _mute("FALSE");
-        dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
             switch(_APortType) {
                 case dsAUDIOPORT_TYPE_SPDIF:
                     isMuteKey.append("SPDIF0.audio.mute");
@@ -3404,6 +3409,9 @@ IARM_Result_t _dsIsAudioMute(void *arg)
                 case dsAUDIOPORT_TYPE_HEADPHONE:
                     isMuteKey.append("HEADPHONE0.audio.mute");
                     break;
+                case dsAUDIOPORT_TYPE_HDMI_ARC:
+                    isMuteKey.append("HDMI_ARC0.audio.mute");
+                    break;
                 default:
                     break;
             }
@@ -3415,6 +3423,7 @@ IARM_Result_t _dsIsAudioMute(void *arg)
             _mute = "FALSE";
         }
         if ("TRUE" == _mute) {
+            INT_INFO("%s: param mute to true \n", __FUNCTION__);
             param->mute = true;
         }
         INT_DEBUG("%s: persist value:%s for :%s\n", __FUNCTION__, _mute.c_str(), isMuteKey.c_str());
@@ -7193,11 +7202,11 @@ static void* persist_audioLevel_timer_threadFunc(void* arg) {
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
 	struct timespec ts;
 	    while(1){
-	      clock_gettime(CLOCK_REALTIME, &ts);
-              ts.tv_sec += 5;
 
               pthread_mutex_lock(&audioLevelMutex);
               while(!audioLevel_timer_set){
+	        clock_gettime(CLOCK_REALTIME, &ts);
+                ts.tv_sec += 5;
                 int rc = pthread_cond_timedwait(&audioLevelTimerCV, &audioLevelMutex, &ts);
                 if (rc == ETIMEDOUT)
                         continue;
