@@ -34,10 +34,9 @@
 #include "dsUtl.h"
 #include "stdlib.h"
 #include "dslogger.h"
+#include <dlfcn.h>
 
 #define DEBUG 1
-#define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
-#define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
 
 static dsAudioTypeConfig_t  *kConfigs1 = NULL;
 static dsAudioPortConfig_t  *kPorts1 = NULL;
@@ -120,7 +119,7 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 
 bool searchConfigs()
 {
-	IARM_BUS_Lock(lock);
+	pthread_mutex_lock(&dsLock);
 
         void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
         if (dllib) {
@@ -173,7 +172,7 @@ bool searchConfigs()
             INT_ERROR("Opening libdshalsrv.so failed\r\n");
 			INT_ERROR("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
         }
-	IARM_BUS_Unlock(lock);
+	pthread_mutex_unlock(&dsLock);
 #if DEBUG
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	INT_INFO("\n%d:%s print configs using extern\n", __LINE__, __func__);
