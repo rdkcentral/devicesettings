@@ -36,11 +36,14 @@
 #include "dslogger.h"
 
 #define DEBUG 1
+#define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
+#define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
 
 static dsAudioTypeConfig_t  *kConfigs1 = NULL;
 static dsAudioPortConfig_t  *kPorts1 = NULL;
 int *pKConSize, *pKPortSize;
 static int kConfig_size_local = -1, kPort_size_local = -1;
+static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
 namespace device {
 
