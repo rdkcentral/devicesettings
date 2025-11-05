@@ -353,6 +353,8 @@ void AudioOutputPortConfig::load()
         "kAudioConfigs_size",
         "kAudioPorts_size"
     };
+	bool ret = false;
+
 	try {
 		/*
 		 * Load Constants First.
