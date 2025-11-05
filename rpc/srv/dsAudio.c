@@ -351,7 +351,7 @@ void AudioConfigInit()
                     audioLevel_cache_spdif = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","SPDIF0", m_audioLevel);
-                        m_volumeLevel = m_audioLevel;
+//                        m_volumeLevel = m_audioLevel;
                     }
                 }
 //SPEAKER init
@@ -372,7 +372,7 @@ void AudioConfigInit()
                     m_audioLevel = atof(_AudioLevel.c_str());
 		    audioLevel_cache_speaker = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
-                        m_volumeLevel = m_audioLevel;
+//                        m_volumeLevel = m_audioLevel;
                         INT_INFO("Port %s: Initialized audio level : %f\n","SPEAKER0", m_audioLevel);
                     }
                 }
@@ -416,7 +416,7 @@ void AudioConfigInit()
 		    audioLevel_cache_hdmi = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
-                        m_volumeLevel = m_audioLevel;
+  //                      m_volumeLevel = m_audioLevel;
                     }
                 }
 		
@@ -2800,6 +2800,13 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
         INT_INFO("%s failed dsIsAudioPortEnabled\n",__FUNCTION__);
     }
 
+    ret = dsGetAudioLevel (param->handle, &m_volumeLevel);
+    if (ret != dsERR_NONE) {
+        INT_ERROR("%s dsGetAudioLevel\n",__FUNCTION__);
+    }
+
+    INT_INFO("%s m_volumeLevel:%f \n",__FUNCTION__, m_volumeLevel);
+
     if(param->action == dsAUDIO_DUCKINGACTION_START)
     {
         m_isDuckingInProgress = true;
@@ -3190,7 +3197,12 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     }
     else
     {
+	 ret = dsGetAudioLevel (handle, &m_volumeLevel);
+	 if (ret != dsERR_NONE) {
+	    INT_ERROR("%s dsGetAudioLevel\n",__FUNCTION__);
+	 }
          volume = m_volumeLevel;
+	 INT_INFO("%s: setting audio level volume %f\n", __FUNCTION__, volume);
     }
     if (dsSetAudioLevelFunc == 0)
     {
