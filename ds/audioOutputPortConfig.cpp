@@ -38,11 +38,15 @@
 
 #define DEBUG 1
 
-static dsAudioTypeConfig_t  *kConfigs1 = NULL;
-static dsAudioPortConfig_t  *kPorts1 = NULL;
-int *pKConSize, *pKPortSize;
-static int kConfig_size_local = -1, kPort_size_local = -1;
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct Configs
+{
+	dsAudioTypeConfig_t  *pKConfigs;
+	dsAudioPortConfig_t  *pKPorts;
+	int *pKConfigSize;
+	int *pKPortSize;
+}Configs_t;
 
 namespace device {
 
@@ -117,6 +121,115 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
+bool searchConfigs(Configs_t *config, char *searchVaribles)
+{
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+	INT_INFO("%d:%s: searchVaribles[0] = %s\n", __LINE__, __func__, &searchVaribles[0]);
+	INT_INFO("%d:%s: searchVaribles[1] = %s\n", __LINE__, __func__, &searchVaribles[1]);
+	INT_INFO("%d:%s: searchVaribles[2] = %s\n", __LINE__, __func__, &searchVaribles[2]);
+	INT_INFO("%d:%s: searchVaribles[3] = %s\n", __LINE__, __func__, &searchVaribles[4]);
+
+	pthread_mutex_lock(&dsLock);
+
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            config->pKConfigs = (dsAudioTypeConfig_t *) dlsym(dllib, searchVaribles[0]);
+            if (config->pKConfigs) {
+                INT_INFO("kAudioConfigs is defined and loaded kConfigs1 = %p\r\n", config->pKConfigs);
+            else {
+				INT_ERROR("%d:%s: kAudioConfigs is not defined\n", __LINE__, __func__);
+            }
+
+			config->pKConfigSize = (int *) dlsym(dllib, searchVaribles[2]);
+			if(config->pKConfigSize)
+			{
+				//kConfig_size_local = *pKConSize;
+				INT_INFO("%d:%s: kAudioConfigs_size is defined and loaded kConfig_size_local = %d\n", __LINE__, __func__, *config->pKConfigSize);
+			}
+			else
+			{
+				INT_ERROR("%d:%s: kAudioConfigs_size is not defined\n", __LINE__, __func__);
+				config->pKConfigSize = -1;
+			}
+
+			config->pKPorts = (dsAudioPortConfig_t *) dlsym(dllib, searchVaribles[1]);
+            if (config->pKPorts) {;
+				INT_INFO("%d:%s: kAudioPorts is defined and loaded config->pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
+            }
+            else {
+				INT_ERROR("%d:%s: kAudioPorts is not defined\n", __LINE__, __func__);
+            }
+
+			config->pKPortSize = (int *) dlsym(dllib, searchVaribles[3]);
+			if(config->pKPortSize)
+			{
+				INT_INFO("%d:%s: kAudioPorts_size is defined and loaded config->pKPortSize = %d\n", __LINE__, __func__, *config->pKPortSize);
+			}
+			else
+			{
+				INT_ERROR("%d:%s: kAudioPorts_size is not defined\n", __LINE__, __func__);
+				config->pKPortSize = -1;
+			}
+            dlclose(dllib);
+        }
+        else {
+			INT_ERROR("%d:%s: Opening libds-hal.so failed\n", __LINE__, __func__);
+        }
+	pthread_mutex_unlock(&dsLock);
+#if DEBUG
+	INT_INFO("\n\n=========================================================================================================================\n\n");
+	INT_INFO("\n%d:%s print configs using extern\n", __LINE__, __func__);
+	//printf("%d:%s: size of(kConfig_audio) = %d size of(kPort_audio) = %d\n", __LINE__, __func__, kConfig_size, kPort_size);
+	//kConfig_size_local = kConfig_size;
+	//kPort_size_local = kPort_size;
+
+	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)
+	{
+	for (size_t i = 0; i < *(config->pKConfigSize); i++) {
+			const dsAudioTypeConfig_t *typeCfg = &config->pKConfigs[i];
+			//AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
+			//aPortType.enable();
+			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
+			INT_INFO("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
+			INT_INFO("%d:%s: typeCfg->numSupportedEncodings = %zu\n", __LINE__, __func__, typeCfg->numSupportedEncodings);
+			INT_INFO("%d:%s: typeCfg->numSupportedCompressions = %zu\n", __LINE__, __func__, typeCfg->numSupportedCompressions);
+			INT_INFO("%d:%s: typeCfg->numSupportedStereoModes = %zu\n", __LINE__, __func__, typeCfg->numSupportedStereoModes);
+		}
+	}
+	else
+	{
+		INT_ERROR("%d:%s: kAudioConfigs is NULL and kConfig_size_local is -1\n", __LINE__, __func__);
+	}
+	if(configuration->pKPorts != NULL && *(configuration->pKPortSize) != -1)
+	{
+		/*
+		 * set up ports based on kPorts[]
+		 */
+		for (size_t i = 0; i < *(configuration->pKPortSize); i++) {
+			const dsAudioPortConfig_t *port = &configuration->pKPorts[i];
+			INT_INFO("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
+			INT_INFO("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
+		}
+	}
+	else
+	{
+		INT_ERROR("%d:%s: kAudioPorts is NULL and kPort_size_local is -1\n", __LINE__, __func__);
+	}
+	INT_INFO("\n\n=========================================================================================================================\n\n");
+#endif
+	if(kConfigs1 == NULL || kConfig_size_local == -1 || kPorts1 == NULL || kPort_size_local == -1)
+	{
+		printf("Either kAudioConfigs or kAudioPorts is NULL and kConfig_size_local is -1, kPort_size_local is -1\n");
+		return false;
+	}
+	else
+	{
+		printf("Both kAudioConfigs and kAudioPorts, kConfig_size_local, kPort_size_local are valid\n");
+		return true;
+	}
+}
+
+#if 0
 bool searchConfigs()
 {
 	pthread_mutex_lock(&dsLock);
@@ -169,8 +282,7 @@ bool searchConfigs()
             dlclose(dllib);
         }
         else {
-            INT_ERROR("Opening libdshalsrv.so failed\r\n");
-			INT_ERROR("%d:%s: Opening libdshalsrv.so failed\n", __LINE__, __func__);
+			INT_ERROR("%d:%s: Opening libds-hal.so failed\n", __LINE__, __func__);
         }
 	pthread_mutex_unlock(&dsLock);
 #if DEBUG
@@ -226,10 +338,17 @@ bool searchConfigs()
 	}
 	//return (kConfigs1 && kPorts1);
 }
-
+#endif
 
 void AudioOutputPortConfig::load()
 {
+	dsAudioTypeConfig_t  *pKConfigs = NULL;
+	dsAudioPortConfig_t  *pKPorts = NULL;
+	int *pKConfigSize, *pKPortSize;
+	Configs_t configuration = {0};
+	char searchVaribles[][30] = { "kAudioConfigs", "kAudioPorts", "kAudioConfigs_size", "kAudioPorts_size" };
+	bool ret;
+	//static int kConfig_size_local = -1, kPort_size_local = -1;
 	try {
 		/*
 		 * Load Constants First.
@@ -253,6 +372,51 @@ void AudioOutputPortConfig::load()
 
 		}
 
+	ret = searchConfigs(&configuration, searchVaribles);
+	if (ret ==  true)
+	{
+		INT_INFO("Both kAudioConfigs and kAudioPorts, kConfig_size_local, kPort_size_local are valid\n");
+	}
+	else
+	{
+		INT_ERROR("Invalid kAudioConfigs or kAudioPorts, kConfig_size_local, kPort_size_local\n");
+		config.pKConfigs = kConfigs;
+		config.pKConfigSize = dsUTL_DIM(kConfigs);
+		config.pKPorts = kPorts;
+		config.pKPortSize = dsUTL_DIM(kPorts);
+	}
+		/*
+	* Initialize Audio portTypes (encodings, compressions etc.)
+	* and its port instances (db, level etc)
+	*/
+	for (size_t i = 0; i < configuration->pKConfigSize; i++) {
+		const dsAudioTypeConfig_t *typeCfg = &(configuration->pKConfigs[i]);
+		AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
+		aPortType.enable();
+		for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
+			aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
+			_aEncodings.at(typeCfg->encodings[j]).enable();
+		}
+		for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
+			aPortType.addCompression(typeCfg->compressions[j]);
+			_aCompressions.at(typeCfg->compressions[j]).enable();
+		}
+		for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
+			aPortType.addStereoMode(typeCfg->stereoModes[j]);
+			_aStereoModes.at(typeCfg->stereoModes[j]).enable();
+		}
+	}
+
+	/*
+	 * set up ports based on kPorts[]
+	 */
+	for (size_t i = 0; i < configuration->pKPortSize; i++) {
+		const dsAudioPortConfig_t *port = &configuration->pKPorts[i];
+		_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
+		_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
+	}
+
+#if 0
 		if(searchConfigs() ==  true)
 		{
 			/*
@@ -327,6 +491,7 @@ void AudioOutputPortConfig::load()
 			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 		}
 	}
+	#endif
 
 	}
 	catch(const Exception &e) {
