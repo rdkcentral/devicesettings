@@ -278,10 +278,10 @@ void AudioOutputPortConfig::load()
 			INT_ERROR("Invalid kAudioConfigs or kAudioPorts, kConfig_size_local, kPort_size_local\n");
 			configuration.pKConfigs = kConfigs;
 			configSize = dsUTL_DIM(kConfigs);
-			*(configuration.pKConfigSize) = &configSize;
+			configuration.pKConfigSize = &configSize;
 			configuration.pKPorts = kPorts;
 			portSize = dsUTL_DIM(kPorts);
-			*(configuration.pKPortSize) = &portSize;
+			configuration.pKPortSize = &portSize;
 			INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
 		}
 		/*
