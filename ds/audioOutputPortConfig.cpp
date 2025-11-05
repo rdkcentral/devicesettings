@@ -127,7 +127,7 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 	INT_INFO("%d:%s: searchVaribles[0] = %s\n", __LINE__, __func__, searchVaribles[0]);
 	INT_INFO("%d:%s: searchVaribles[1] = %s\n", __LINE__, __func__, searchVaribles[1]);
 	INT_INFO("%d:%s: searchVaribles[2] = %s\n", __LINE__, __func__, searchVaribles[2]);
-	INT_INFO("%d:%s: searchVaribles[3] = %s\n", __LINE__, __func__, searchVaribles[4]);
+	INT_INFO("%d:%s: searchVaribles[3] = %s\n", __LINE__, __func__, searchVaribles[3]);
 	static int invalidsize = -1;
 
 	pthread_mutex_lock(&dsLock);
@@ -233,9 +233,9 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 
 void AudioOutputPortConfig::load()
 {
-	dsAudioTypeConfig_t  *pKConfigs = NULL;
-	dsAudioPortConfig_t  *pKPorts = NULL;
-	int *pKConfigSize, *pKPortSize;
+	//dsAudioTypeConfig_t  *pKConfigs = NULL;
+	//dsAudioPortConfig_t  *pKPorts = NULL;
+	int configSize, portSize;
 	Configs_t configuration = {0};
 	 const char* searchVaribles[] = {
         "kAudioConfigs",
@@ -268,99 +268,28 @@ void AudioOutputPortConfig::load()
 
 		}
 
-	ret = searchConfigs(&configuration, searchVaribles);
-	if (ret ==  true)
-	{
-		INT_INFO("Both kAudioConfigs and kAudioPorts, kConfig_size_local, kPort_size_local are valid\n");
-	}
-	else
-	{
-		INT_ERROR("Invalid kAudioConfigs or kAudioPorts, kConfig_size_local, kPort_size_local\n");
-		configuration.pKConfigs = kConfigs;
-		*(configuration.pKConfigSize) = dsUTL_DIM(kConfigs);
-		configuration.pKPorts = kPorts;
-		*(configuration.pKPortSize) = dsUTL_DIM(kPorts);
-		INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
-	}
-	/*
-	* Initialize Audio portTypes (encodings, compressions etc.)
-	* and its port instances (db, level etc)
-	*/
-	for (size_t i = 0; i < *(configuration.pKConfigSize); i++) {
-		const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
-		AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-		aPortType.enable();
-		for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
-			aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
-			_aEncodings.at(typeCfg->encodings[j]).enable();
-		}
-		for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
-			aPortType.addCompression(typeCfg->compressions[j]);
-			_aCompressions.at(typeCfg->compressions[j]).enable();
-		}
-		for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
-			aPortType.addStereoMode(typeCfg->stereoModes[j]);
-			_aStereoModes.at(typeCfg->stereoModes[j]).enable();
-		}
-	}
-
-	/*
-	 * set up ports based on kPorts[]
-	 */
-	for (size_t i = 0; i < *(configuration.pKPortSize); i++) {
-		const dsAudioPortConfig_t *port = &configuration.pKPorts[i];
-		_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
-		_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
-	}
-
-#if 0
-		if(searchConfigs() ==  true)
+		ret = searchConfigs(&configuration, searchVaribles);
+		if (ret ==  true)
 		{
-			/*
-		 	* Initialize Audio portTypes (encodings, compressions etc.)
-		 	* and its port instances (db, level etc)
-		 	*/
-			if(kConfigs1 != NULL)
-			{
-				for (size_t i = 0; i < kConfig_size_local; i++) {
-					const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
-					AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-					aPortType.enable();
-					for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
-						aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
-						_aEncodings.at(typeCfg->encodings[j]).enable();
-					}
-					for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
-						aPortType.addCompression(typeCfg->compressions[j]);
-						_aCompressions.at(typeCfg->compressions[j]).enable();
-					}
-					for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
-						aPortType.addStereoMode(typeCfg->stereoModes[j]);
-						_aStereoModes.at(typeCfg->stereoModes[j]).enable();
-					}
-				}
-
-				/*
-		 		* set up ports based on kPorts[]
-		 		*/
-				if(kPorts1 != NULL)
-				{
-					for (size_t i = 0; i < kPort_size_local; i++) {
-						const dsAudioPortConfig_t *port = &kPorts1[i];
-						_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
-						_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
-					}
-				}
-			}
-
+			INT_INFO("Both kAudioConfigs and kAudioPorts, kConfig_size_local, kPort_size_local are valid\n");
 		}
-		else{
+		else
+		{
+			INT_ERROR("Invalid kAudioConfigs or kAudioPorts, kConfig_size_local, kPort_size_local\n");
+			configuration.pKConfigs = kConfigs;
+			configSize = dsUTL_DIM(kConfigs);
+			*(configuration.pKConfigSize) = &configSize;
+			configuration.pKPorts = kPorts;
+			portSize = dsUTL_DIM(kPorts);
+			*(configuration.pKPortSize) = &portSize;
+			INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
+		}
 		/*
-		 * Initialize Audio portTypes (encodings, compressions etc.)
-		 * and its port instances (db, level etc)
-		 */
-		for (size_t i = 0; i < dsUTL_DIM(kConfigs); i++) {
-			const dsAudioTypeConfig_t *typeCfg = &kConfigs[i];
+		* Initialize Audio portTypes (encodings, compressions etc.)
+		* and its port instances (db, level etc)
+		*/
+		for (size_t i = 0; i < *(configuration.pKConfigSize); i++) {
+			const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
 			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
 			aPortType.enable();
 			for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
@@ -370,25 +299,21 @@ void AudioOutputPortConfig::load()
 			for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
 				aPortType.addCompression(typeCfg->compressions[j]);
 				_aCompressions.at(typeCfg->compressions[j]).enable();
-
 			}
 			for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
 				aPortType.addStereoMode(typeCfg->stereoModes[j]);
 				_aStereoModes.at(typeCfg->stereoModes[j]).enable();
-
 			}
 		}
 
 		/*
-		 * set up ports based on kPorts[]
-		 */
-		for (size_t i = 0; i < dsUTL_DIM(kPorts); i++) {
-			const dsAudioPortConfig_t *port = &kPorts[i];
+	 	* set up ports based on kPorts[]
+	 	*/
+		for (size_t i = 0; i < *(configuration.pKPortSize); i++) {
+			const dsAudioPortConfig_t *port = &configuration.pKPorts[i];
 			_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
 			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 		}
-	}
-	#endif
 
 	}
 	catch(const Exception &e) {
