@@ -42,8 +42,8 @@ static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct Configs
 {
-	dsAudioTypeConfig_t  *pKConfigs;
-	dsAudioPortConfig_t  *pKPorts;
+	const dsAudioTypeConfig_t  *pKConfigs;
+	const dsAudioPortConfig_t  *pKPorts;
 	int *pKConfigSize;
 	int *pKPortSize;
 }Configs_t;
@@ -187,7 +187,7 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)
 	{
 	for (size_t i = 0; i < *(config->pKConfigSize); i++) {
-			const dsAudioTypeConfig_t *typeCfg = &config->pKConfigs[i];
+			const dsAudioTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
 			//AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
 			//aPortType.enable();
 			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
@@ -347,9 +347,12 @@ void AudioOutputPortConfig::load()
 	dsAudioPortConfig_t  *pKPorts = NULL;
 	int *pKConfigSize, *pKPortSize;
 	Configs_t configuration = {0};
-	char searchVaribles[][30] = { "kAudioConfigs", "kAudioPorts", "kAudioConfigs_size", "kAudioPorts_size" };
-	bool ret;
-	//static int kConfig_size_local = -1, kPort_size_local = -1;
+	 const char* searchVaribles[] = {
+        "kAudioConfigs",
+        "kAudioPorts",
+        "kAudioConfigs_size",
+        "kAudioPorts_size"
+    };
 	try {
 		/*
 		 * Load Constants First.
@@ -385,9 +388,9 @@ void AudioOutputPortConfig::load()
 		*(configuration.pKConfigSize) = dsUTL_DIM(kConfigs);
 		configuration.pKPorts = kPorts;
 		*(configuration.pKPortSize) = dsUTL_DIM(kPorts);
+		INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
 	}
-	INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
-		/*
+	/*
 	* Initialize Audio portTypes (encodings, compressions etc.)
 	* and its port instances (db, level etc)
 	*/
