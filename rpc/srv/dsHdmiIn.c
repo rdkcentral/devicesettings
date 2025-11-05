@@ -291,10 +291,10 @@ static dsError_t setEdidVersion (dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_
 		        INT_INFO("Invalid port number to update in persistence\n");
 	       }
 
-            // Whenever there is a change in edid version to 2.0, ensure the edid allm support is updated with latest value
+            // Whenever there is a change in edid version to 2.0, ensure the edid allm and vrr support is updated with latest value
             if(iEdidVersion == HDMI_EDID_VER_20)
             {
-               INT_INFO("As the version is changed to 2.0, we are updating the allm bit in edid\n");
+               INT_INFO("As the version is changed to 2.0, we are updating the allm and vrr bit in edid\n");
                setEdid2AllmSupport(iHdmiPort,m_edidallmsupport[iHdmiPort]);
 			   setVRRSupport(iHdmiPort,m_vrrsupport[iHdmiPort]);
             }
