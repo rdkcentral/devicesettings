@@ -121,7 +121,7 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
-bool searchConfigs(Configs_t *config, char *searchVaribles)
+bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: searchVaribles[0] = %s\n", __LINE__, __func__, &searchVaribles[0]);
@@ -136,6 +136,7 @@ bool searchConfigs(Configs_t *config, char *searchVaribles)
             config->pKConfigs = (dsAudioTypeConfig_t *) dlsym(dllib, searchVaribles[0]);
             if (config->pKConfigs) {
                 INT_INFO("kAudioConfigs is defined and loaded kConfigs1 = %p\r\n", config->pKConfigs);
+			}
             else {
 				INT_ERROR("%d:%s: kAudioConfigs is not defined\n", __LINE__, __func__);
             }
@@ -149,11 +150,11 @@ bool searchConfigs(Configs_t *config, char *searchVaribles)
 			else
 			{
 				INT_ERROR("%d:%s: kAudioConfigs_size is not defined\n", __LINE__, __func__);
-				config->pKConfigSize = -1;
+				*(config->pKConfigSize) = -1;
 			}
 
 			config->pKPorts = (dsAudioPortConfig_t *) dlsym(dllib, searchVaribles[1]);
-            if (config->pKPorts) {;
+            if (config->pKPorts) {
 				INT_INFO("%d:%s: kAudioPorts is defined and loaded config->pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
             }
             else {
@@ -168,7 +169,7 @@ bool searchConfigs(Configs_t *config, char *searchVaribles)
 			else
 			{
 				INT_ERROR("%d:%s: kAudioPorts_size is not defined\n", __LINE__, __func__);
-				config->pKPortSize = -1;
+				*(config->pKPortSize) = -1;
 			}
             dlclose(dllib);
         }
@@ -200,13 +201,13 @@ bool searchConfigs(Configs_t *config, char *searchVaribles)
 	{
 		INT_ERROR("%d:%s: kAudioConfigs is NULL and kConfig_size_local is -1\n", __LINE__, __func__);
 	}
-	if(configuration->pKPorts != NULL && *(configuration->pKPortSize) != -1)
+	if(config->pKPorts != NULL && *(config->pKPortSize) != -1)
 	{
 		/*
 		 * set up ports based on kPorts[]
 		 */
-		for (size_t i = 0; i < *(configuration->pKPortSize); i++) {
-			const dsAudioPortConfig_t *port = &configuration->pKPorts[i];
+		for (size_t i = 0; i < *(config->pKPortSize); i++) {
+			const dsAudioPortConfig_t *port = &(config->pKPorts[i]);
 			INT_INFO("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
 			INT_INFO("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
 		}
@@ -217,14 +218,14 @@ bool searchConfigs(Configs_t *config, char *searchVaribles)
 	}
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 #endif
-	if(kConfigs1 == NULL || kConfig_size_local == -1 || kPorts1 == NULL || kPort_size_local == -1)
+	if(config->pKConfigs == NULL || config->pKConfigSize == -1 || config->pKPorts == NULL || config->pKPortSize == -1)
 	{
-		printf("Either kAudioConfigs or kAudioPorts is NULL and kConfig_size_local is -1, kPort_size_local is -1\n");
+		printf("Either kAudioConfigs or kAudioPorts is NULL and pKConfigSize is -1, pKPortSize is -1\n");
 		return false;
 	}
 	else
 	{
-		printf("Both kAudioConfigs and kAudioPorts, kConfig_size_local, kPort_size_local are valid\n");
+		printf("Both kAudioConfigs and kAudioPorts, pKConfigSize, pKPortSize are valid\n");
 		return true;
 	}
 }
@@ -389,8 +390,8 @@ void AudioOutputPortConfig::load()
 	* Initialize Audio portTypes (encodings, compressions etc.)
 	* and its port instances (db, level etc)
 	*/
-	for (size_t i = 0; i < configuration->pKConfigSize; i++) {
-		const dsAudioTypeConfig_t *typeCfg = &(configuration->pKConfigs[i]);
+	for (size_t i = 0; i < configuration.pKConfigSize; i++) {
+		const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
 		AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
 		aPortType.enable();
 		for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
@@ -410,8 +411,8 @@ void AudioOutputPortConfig::load()
 	/*
 	 * set up ports based on kPorts[]
 	 */
-	for (size_t i = 0; i < configuration->pKPortSize; i++) {
-		const dsAudioPortConfig_t *port = &configuration->pKPorts[i];
+	for (size_t i = 0; i < configuration.pKPortSize; i++) {
+		const dsAudioPortConfig_t *port = &configuration.pKPorts[i];
 		_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
 		_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 	}
