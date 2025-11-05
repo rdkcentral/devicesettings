@@ -218,7 +218,7 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 	}
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 #endif
-	if(config->pKConfigs == NULL || config->pKConfigSize == -1 || config->pKPorts == NULL || config->pKPortSize == -1)
+	if(config->pKConfigs == NULL || *(config->pKConfigSize) == -1 || config->pKPorts == NULL || *(config->pKPortSize) == -1)
 	{
 		printf("Either kAudioConfigs or kAudioPorts is NULL and pKConfigSize is -1, pKPortSize is -1\n");
 		return false;
@@ -381,16 +381,17 @@ void AudioOutputPortConfig::load()
 	else
 	{
 		INT_ERROR("Invalid kAudioConfigs or kAudioPorts, kConfig_size_local, kPort_size_local\n");
-		config.pKConfigs = kConfigs;
-		config.pKConfigSize = dsUTL_DIM(kConfigs);
-		config.pKPorts = kPorts;
-		config.pKPortSize = dsUTL_DIM(kPorts);
+		configuration.pKConfigs = kConfigs;
+		*(configuration.pKConfigSize) = dsUTL_DIM(kConfigs);
+		configuration.pKPorts = kPorts;
+		*(configuration.pKPortSize) = dsUTL_DIM(kPorts);
 	}
+	INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
 		/*
 	* Initialize Audio portTypes (encodings, compressions etc.)
 	* and its port instances (db, level etc)
 	*/
-	for (size_t i = 0; i < configuration.pKConfigSize; i++) {
+	for (size_t i = 0; i < *(configuration.pKConfigSize); i++) {
 		const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
 		AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
 		aPortType.enable();
@@ -411,7 +412,7 @@ void AudioOutputPortConfig::load()
 	/*
 	 * set up ports based on kPorts[]
 	 */
-	for (size_t i = 0; i < configuration.pKPortSize; i++) {
+	for (size_t i = 0; i < *(configuration.pKPortSize); i++) {
 		const dsAudioPortConfig_t *port = &configuration.pKPorts[i];
 		_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
 		_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
