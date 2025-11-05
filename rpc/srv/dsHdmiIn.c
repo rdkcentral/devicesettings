@@ -280,7 +280,7 @@ static dsError_t setEdidVersion (dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_
         eRet = dsSetEdidVersionFunc (iHdmiPort, iEdidVersion);
         if (eRet == dsERR_NONE) {
            int port_no = (int)iHdmiPort;
-			if((port_no  > 0) && (port_no < noOfSupportedHdmiInputs))
+			if((port_no  >= 0) && (port_no < noOfSupportedHdmiInputs))
 			{
                 std::string port_edidVer = "HDMI"+std::to_string(port_no)+".edidversion";
                 device::HostPersistence::getInstance().persistHostProperty(port_edidVer, edidVer);
@@ -1185,7 +1185,7 @@ void updateEdidAllmBitValuesInPersistence(dsHdmiInPort_t iHdmiPort, bool allmSup
 {
       INT_INFO("[srv]: Updating values of edid allm bit in persistence\n");
       int port_no = (int)iHdmiPort;
-	  if((port_no  > 0) && (port_no < noOfSupportedHdmiInputs))
+	  if((port_no  >= 0) && (port_no < noOfSupportedHdmiInputs))
 	  {
           std::string port_edidAllmSupport = "HDMI"+std::to_string(port_no)+".edidallmEnable";
           device::HostPersistence::getInstance().persistHostProperty(port_edidAllmSupport, allmSupport ? "TRUE" : "FALSE");
@@ -1272,7 +1272,7 @@ void updateVRRBitValuesInPersistence(dsHdmiInPort_t iHdmiPort, bool vrrSupport)
 {
       INT_INFO("[srv]: Updating values of vrr bit in persistence\n");
 	  int port_no = (int)iHdmiPort;
-	  if((port_no  > 0) && (port_no < noOfSupportedHdmiInputs))
+	  if((port_no  >= 0) && (port_no < noOfSupportedHdmiInputs))
 	  {	  
           std::string port_vrrSupport = "HDMI"+std::to_string(port_no)+".vrrEnable";
           device::HostPersistence::getInstance().persistHostProperty(port_vrrSupport, vrrSupport ? "TRUE" : "FALSE");
