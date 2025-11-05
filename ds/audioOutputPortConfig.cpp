@@ -124,10 +124,11 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-	INT_INFO("%d:%s: searchVaribles[0] = %s\n", __LINE__, __func__, &searchVaribles[0]);
-	INT_INFO("%d:%s: searchVaribles[1] = %s\n", __LINE__, __func__, &searchVaribles[1]);
-	INT_INFO("%d:%s: searchVaribles[2] = %s\n", __LINE__, __func__, &searchVaribles[2]);
-	INT_INFO("%d:%s: searchVaribles[3] = %s\n", __LINE__, __func__, &searchVaribles[4]);
+	INT_INFO("%d:%s: searchVaribles[0] = %s\n", __LINE__, __func__, searchVaribles[0]);
+	INT_INFO("%d:%s: searchVaribles[1] = %s\n", __LINE__, __func__, searchVaribles[1]);
+	INT_INFO("%d:%s: searchVaribles[2] = %s\n", __LINE__, __func__, searchVaribles[2]);
+	INT_INFO("%d:%s: searchVaribles[3] = %s\n", __LINE__, __func__, searchVaribles[4]);
+	static int invalidsize = -1;
 
 	pthread_mutex_lock(&dsLock);
 
@@ -149,8 +150,8 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 			}
 			else
 			{
-				INT_ERROR("%d:%s: kAudioConfigs_size is not defined\n", __LINE__, __func__);
-				*(config->pKConfigSize) = -1;
+				config->pKConfigSize = &invalidsize;
+				INT_ERROR("%d:%s: kAudioConfigs_size is not defined *(config->pKConfigSize)= %d\n", __LINE__, __func__, *config->pKConfigSize);
 			}
 
 			config->pKPorts = (dsAudioPortConfig_t *) dlsym(dllib, searchVaribles[1]);
@@ -168,8 +169,8 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 			}
 			else
 			{
-				INT_ERROR("%d:%s: kAudioPorts_size is not defined\n", __LINE__, __func__);
-				*(config->pKPortSize) = -1;
+				config->pKPortSize = &invalidsize;
+				INT_ERROR("%d:%s: kAudioPorts_size is not defined *(config->pKPortSize)= %d\n", __LINE__, __func__, *config->pKPortSize);
 			}
             dlclose(dllib);
         }
@@ -229,117 +230,6 @@ bool searchConfigs(Configs_t *config, const char *searchVaribles[])
 		return true;
 	}
 }
-
-#if 0
-bool searchConfigs()
-{
-	pthread_mutex_lock(&dsLock);
-
-        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-        if (dllib) {
-            kConfigs1 = (dsAudioTypeConfig_t *) dlsym(dllib, "kAudioConfigs");
-            if (kConfigs1) {
-                INT_INFO("kAudioConfigs is defined and loaded kConfigs1 = %p\r\n", kConfigs1);
-				printf("%d:%s: kAudioConfigs is defined and loaded kConfigs1 = %p\n", __LINE__, __func__, kConfigs1);
-            }
-            else {
-                INT_ERROR("kAudioConfigs is not defined\r\n");
-				INT_ERROR("%d:%s: kAudioConfigs is not defined\n", __LINE__, __func__);
-            }
-
-			pKConSize = (int *) dlsym(dllib, "kAudioConfigs_size");
-			if(pKConSize)
-			{
-				kConfig_size_local = *pKConSize;
-				INT_INFO("%d:%s: kAudioConfigs_size is defined and loaded kConfig_size_local = %d\n", __LINE__, __func__, kConfig_size_local);
-			}
-			else
-			{
-				INT_ERROR("%d:%s: kAudioConfigs_size is not defined\n", __LINE__, __func__);
-				kConfig_size_local = -1;
-			}
-
-			kPorts1 = (dsAudioPortConfig_t *) dlsym(dllib, "kAudioPorts");
-            if (kPorts1) {
-                INT_INFO("kAudioPorts is defined and loaded kPorts1 = %p\r\n", kPorts1);
-				INT_INFO("%d:%s: kAudioPorts is defined and loaded kPorts1 = %p\n", __LINE__, __func__, kPorts1);
-            }
-            else {
-                INT_ERROR("kAudioPorts is not defined\r\n");
-				INT_ERROR("%d:%s: kAudioPorts is not defined\n", __LINE__, __func__);
-            }
-
-			pKPortSize = (int *) dlsym(dllib, "kAudioPorts_size");
-			if(pKPortSize)
-			{
-				kPort_size_local = *pKPortSize;
-				INT_INFO("%d:%s: kAudioPorts_size is defined and loaded kPort_size_local = %d\n", __LINE__, __func__, kPort_size_local);
-			}
-			else
-			{
-				INT_ERROR("%d:%s: kAudioPorts_size is not defined\n", __LINE__, __func__);
-				kPort_size_local = -1;
-			}
-            dlclose(dllib);
-        }
-        else {
-			INT_ERROR("%d:%s: Opening libds-hal.so failed\n", __LINE__, __func__);
-        }
-	pthread_mutex_unlock(&dsLock);
-#if DEBUG
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-	INT_INFO("\n%d:%s print configs using extern\n", __LINE__, __func__);
-	//printf("%d:%s: size of(kConfig_audio) = %d size of(kPort_audio) = %d\n", __LINE__, __func__, kConfig_size, kPort_size);
-	//kConfig_size_local = kConfig_size;
-	//kPort_size_local = kPort_size;
-
-	if(kConfigs1 != NULL && kConfig_size_local != -1)
-	{
-	for (size_t i = 0; i < kConfig_size_local; i++) {
-			const dsAudioTypeConfig_t *typeCfg = &kConfigs1[i];
-			//AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-			//aPortType.enable();
-			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
-			INT_INFO("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
-			INT_INFO("%d:%s: typeCfg->numSupportedEncodings = %zu\n", __LINE__, __func__, typeCfg->numSupportedEncodings);
-			INT_INFO("%d:%s: typeCfg->numSupportedCompressions = %zu\n", __LINE__, __func__, typeCfg->numSupportedCompressions);
-			INT_INFO("%d:%s: typeCfg->numSupportedStereoModes = %zu\n", __LINE__, __func__, typeCfg->numSupportedStereoModes);
-		}
-	}
-	else
-	{
-		INT_ERROR("%d:%s: kAudioConfigs is NULL and kConfig_size_local is -1\n", __LINE__, __func__);
-	}
-	if(kPorts1 != NULL && kPort_size_local != -1)
-	{
-		/*
-		 * set up ports based on kPorts[]
-		 */
-		for (size_t i = 0; i < kPort_size_local; i++) {
-			const dsAudioPortConfig_t *port = &kPorts1[i];
-			INT_INFO("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
-			INT_INFO("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
-		}
-	}
-	else
-	{
-		INT_ERROR("%d:%s: kAudioPorts is NULL and kPort_size_local is -1\n", __LINE__, __func__);
-	}
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-#endif
-	if(kConfigs1 == NULL || kConfig_size_local == -1 || kPorts1 == NULL || kPort_size_local == -1)
-	{
-		printf("Either kAudioConfigs or kAudioPorts is NULL and kConfig_size_local is -1, kPort_size_local is -1\n");
-		return false;
-	}
-	else
-	{
-		printf("Both kAudioConfigs and kAudioPorts, kConfig_size_local, kPort_size_local are valid\n");
-		return true;
-	}
-	//return (kConfigs1 && kPorts1);
-}
-#endif
 
 void AudioOutputPortConfig::load()
 {
