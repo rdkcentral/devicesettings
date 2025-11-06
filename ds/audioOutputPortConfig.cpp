@@ -121,7 +121,7 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
-bool searchConfigs(void *pConfigVar, char *searchConfigStr)
+bool searchConfigs(void **pConfigVar, const char *searchConfigStr)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
@@ -132,9 +132,9 @@ bool searchConfigs(void *pConfigVar, char *searchConfigStr)
 
 		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
 		if (dllib) {
-			pConfigVar = (void *) dlsym(dllib, searchConfigStr);
-			if (pConfigVar != NULL) {
-				INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, pConfigVar);
+			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
+			if (*pConfigVar != NULL) {
+				INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
 			}
 			else {
 				INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
@@ -145,8 +145,9 @@ bool searchConfigs(void *pConfigVar, char *searchConfigStr)
 		else {
 			INT_ERROR("%d:%s: Open %s failed\n", __LINE__, __func__, RDK_DSHAL_NAME);
 		}
-		pthread_mutex_unlock(&dsLock);
+	pthread_mutex_unlock(&dsLock);
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	return (*pConfigVar != NULL);
 }
 
 void dumpconfig(Configs_t *config)
@@ -312,7 +313,7 @@ void AudioOutputPortConfig::load()
 	//dsAudioPortConfig_t  *pKPorts = NULL;
 	int configSize, portSize;
 	Configs_t configuration = {0};
-	 const char* searchVaribles[] = {
+	const char* searchVaribles[] = {
         "kAudioConfigs",
         "kAudioPorts",
         "kAudioConfigs_size",
@@ -361,23 +362,23 @@ void AudioOutputPortConfig::load()
 		}
 #endif
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs(configuration.pKConfigs, searchVaribles[0]);
+		ret = searchConfigs((void **)&configuration.pKConfigs, searchVaribles[0]);
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs(configuration.pKConfigSize, (char *)searchVaribles[2]);
+			ret = searchConfigs((void **)&configuration.pKConfigSize, (char *)searchVaribles[2]);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[2]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs(configuration.pKPorts, searchVaribles[1]);
+			ret = searchConfigs((void **)&configuration.pKPorts, searchVaribles[1]);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[1]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs((void *)configuration.pKPortSize, (char *)searchVaribles[3]);
+			ret = searchConfigs((void **)&configuration.pKPortSize, (char *)searchVaribles[3]);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
