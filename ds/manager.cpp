@@ -43,6 +43,12 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include "dsHALConfig.h"
+
+
+static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 /**
  * @file manager.cpp
@@ -153,6 +159,36 @@ void Manager::load()
 	device::VideoDeviceConfig::getInstance().load();
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
+
+bool searchConfigs(void **pConfigVar, const char *searchConfigStr)
+{
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
+
+	static int invalidsize = -1;
+
+	pthread_mutex_lock(&dsLock);
+
+		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+		if (dllib) {
+			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
+			if (*pConfigVar != NULL) {
+				INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
+			}
+			else {
+				INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
+			}
+
+			dlclose(dllib);
+		}
+		else {
+			INT_ERROR("%d:%s: Open %s failed\n", __LINE__, __func__, RDK_DSHAL_NAME);
+		}
+	pthread_mutex_unlock(&dsLock);
+	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	return (*pConfigVar != NULL);
+}
+
 
 /**
  * @fn void Manager::DeInitialize()
