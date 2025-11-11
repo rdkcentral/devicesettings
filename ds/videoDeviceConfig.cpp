@@ -88,19 +88,27 @@ VideoDFC & VideoDeviceConfig::getDefaultDFC()
 	return _vDFCs.back();
 }
 
+
 void dumpconfig(dsVideoConfig_t *pKVideoDeviceConfigs, int videoDeviceConfigs_size)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: pKVideoDeviceConfigs = %p\n", __LINE__, __func__, pKVideoDeviceConfigs);
 	INT_INFO("%d:%s: videoDeviceConfigs_size = %d\n", __LINE__, __func__, videoDeviceConfigs_size);
 
+	#if 0
+	typedef struct _dsVideoConfig_t {
+    	size_t numSupportedDFCs;            /*!< Number of zoom modes supported */
+    	const dsVideoZoom_t *supportedDFCs; /*!< List of zoom modes supported  */
+    	dsVideoZoom_t defaultDFC;           /*!< The default zoom mode         */
+	} dsVideoConfig_t;
+	#endif
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(pKVideoDeviceConfigs != NULL && videoDeviceConfigs_size != -1)
 	{
 		for (size_t i = 0; i < videoDeviceConfigs_size; i++) {
-			INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %d\n ", i, pKVideoDeviceConfigs[i]->numSupportedDFCs);
-			for (size_t j = 0; j < pKVideoDeviceConfigs[i]->numSupportedDFCs; j++) {
-				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, pKVideoDeviceConfigs[i]->supportedDFCs[j]);
+			INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %d\n ", i, pKVideoDeviceConfigs[i].numSupportedDFCs);
+			for (size_t j = 0; j < pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
+				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, pKVideoDeviceConfigs[i].supportedDFCs[j]);
 			}
 		}
 	}

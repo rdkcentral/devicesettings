@@ -42,6 +42,7 @@
 #include "videoResolution.hpp"
 #include "dslogger.h"
 #include "host.hpp"
+#include "manager.hpp"
 
 
 #include <thread>
@@ -56,9 +57,9 @@ typedef struct videoPortConfigs
 {
 	const dsVideoPortTypeConfig_t  *pKConfigs;
 	int *pKVideoPortConfigs_size;
-	const kVideoPortPorts  *pKPorts;
+	const dsVideoPortPortConfig_t  *pKPorts;
 	int *pKVideoPortPorts_size;
-	const dsVideoPortResolution_t *pKResolutionsSettings;
+	dsVideoPortResolution_t *pKResolutionsSettings;
 	int *pKResolutionsSettings_size;
 }videoPortConfigs_t;
 
@@ -275,15 +276,6 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	return supportedResolutions;
 }
 
-typedef struct videoPortConfigs
-{
-	const dsVideoPortTypeConfig_t  *pKConfigs;
-	int *pKVideoPortConfigs_size;
-	const kVideoPortPorts  *pKPorts;
-	int *pKVideoPortPorts_size;
-	const dsVideoPortResolution_t *pKResolutionsSettings;
-	int *pKResolutionsSettings_size;
-}videoPortConfigs_t;
 
 void dumpconfig(videoPortConfigs_t *config)
 {
@@ -327,6 +319,17 @@ void dumpconfig(videoPortConfigs_t *config)
 		for (size_t i = 0; i < *(config->pKVideoPortConfigs_size); i++)
 		{
 			const dsVideoPortTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
+			#if 0
+			typedef struct _dsVideoPortTypeConfig_t {
+    			dsVideoPortType_t typeId;                       ///< The video output type
+    			const char *name;                               ///< Name of the video output port
+    			bool dtcpSupported;                             ///< Is DTCP supported?                 
+    			bool hdcpSupported;                             ///< Is HDCP supported?                 
+    			int32_t restrictedResollution;                  ///< Any restricted resolution; -1 if no.
+    			size_t numSupportedResolutions;                 ///< Number of supported resolutions
+    			dsVideoPortResolution_t *supportedResolutions;  ///< List of supported resolutions
+			} dsVideoPortTypeConfig_t;
+			#endif
 			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
 			INT_INFO("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
 			INT_INFO("%d:%s: typeCfg->dtcpSupported= %d\n", __LINE__, __func__, typeCfg->dtcpSupported);
@@ -343,13 +346,13 @@ void dumpconfig(videoPortConfigs_t *config)
     			bool interlaced;                                ///< The associated scan mode( @a true if interlaced, @a false if progressive )
 			}dsVideoPortResolution_t;
 			#endif
-			INT_INFO("%d:%s: typeCfg->supportedResolutons = %p\n", __LINE__, __func__, typeCfg->supportedResolutons);
-			INT_INFO("%d:%s: typeCfg->supportedResolutons->name = %s\n", __LINE__, __func__, typeCfg->supportedResolutons->name);
-			INT_INFO("%d:%s: typeCfg->supportedResolutons->pixelResolution= %d\n", __LINE__, __func__, typeCfg->supportedResolutons->pixelResolution);
-			INT_INFO("%d:%s: typeCfg->supportedResolutons->aspectRatio= %d\n", __LINE__, __func__, typeCfg->supportedResolutons->aspectRatio);
-			INT_INFO("%d:%s: typeCfg->supportedResolutons->stereoScopicMode= %d\n", __LINE__, __func__, typeCfg->supportedResolutons->stereoScopicMode);
-			INT_INFO("%d:%s: typeCfg->supportedResolutons->frameRate= %d\n", __LINE__, __func__, typeCfg->supportedResolutons->frameRate);
-			INT_INFO("%d:%s: typeCfg->supportedResolutons->interlaced= %d\n", __LINE__, __func__, typeCfg->supportedResolutons->interlaced);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions = %p\n", __LINE__, __func__, typeCfg->supportedResolutions);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions->name = %s\n", __LINE__, __func__, typeCfg->supportedResolutions->name);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions->pixelResolution= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->pixelResolution);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions->aspectRatio= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->aspectRatio);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions->stereoScopicMode= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->stereoScopicMode);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions->frameRate= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->frameRate);
+			INT_INFO("%d:%s: typeCfg->supportedResolutions->interlaced= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->interlaced);
 		}
 		INT_INFO("\n\n####################################################################### \n\n");
 		#if 0
@@ -361,8 +364,8 @@ void dumpconfig(videoPortConfigs_t *config)
 		#endif
 		INT_INFO("\n\n####################################################################### \n\n");
 		INT_INFO("%d:%s: Dumping Video Port Connections\n", __LINE__, __func__);
-		for (size_t i = 0; i < *(configuration.pKVideoPortPorts_size); i++) {
-			const dsVideoPortPortConfig_t *port = &(configuration.pKPorts[i]);
+		for (size_t i = 0; i < *(config->pKVideoPortPorts_size); i++) {
+			const dsVideoPortPortConfig_t *port = &(config->pKPorts[i]);
 			INT_INFO("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
 			INT_INFO("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
 			INT_INFO("%d:%s: port->connectedAOP.type = %d\n", __LINE__, __func__, port->connectedAOP.type);
@@ -419,7 +422,7 @@ void VideoOutputPortConfig::load()
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs((void **)&configuration.pKConfigSize, (char *)searchVaribles[1]);
+			ret = searchConfigs((void **)&configuration.pKVideoPortConfigs_size, (char *)searchVaribles[1]);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[1]);
@@ -431,7 +434,7 @@ void VideoOutputPortConfig::load()
 				INT_ERROR("%s is not defined\n", searchVaribles[2]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs((void **)&configuration.pKPortSize, (char *)searchVaribles[3]);
+			ret = searchConfigs((void **)&configuration.pKVideoPortPorts_size, (char *)searchVaribles[3]);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
@@ -454,15 +457,15 @@ void VideoOutputPortConfig::load()
 			INT_ERROR("Read Old Configs\n");
 			configuration.pKConfigs = kConfigs;
 			configSize = dsUTL_DIM(kConfigs);
-			configuration.pKConfigSize = &configSize;
+			configuration.pKVideoPortConfigs_size = &configSize;
 			configuration.pKPorts = kPorts;
 			portSize = dsUTL_DIM(kPorts);
-			configuration.pKPortSize = &portSize;
+			configuration.pKVideoPortPorts_size = &portSize;
 			configuration.pKResolutionsSettings = kResolutions;
 			resolutionSize = dsUTL_DIM(kResolutions);
 			configuration.pKResolutionsSettings_size = &resolutionSize;
-			INT_INFO("configuration.pKConfigs =%p, *(configuration.pKConfigSize) = %d\n", configuration.pKConfigs, *(configuration.pKConfigSize));
-			INT_INFO("configuration.pKPorts =%p, *(configuration.pKPortSize) = %d\n", configuration.pKPorts, *(configuration.pKPortSize));
+			INT_INFO("configuration.pKConfigs =%p, *(configuration.pKConfigSize) = %d\n", configuration.pKConfigs, *(configuration.pKVideoPortConfigs_size));
+			INT_INFO("configuration.pKPorts =%p, *(configuration.pKPortSize) = %d\n", configuration.pKPorts, *(configuration.pKVideoPortPorts_size));
 			INT_INFO("configuration.pKResolutionsSettings =%p, *(configuration.pKResolutionsSettings_size) = %d\n", configuration.pKResolutionsSettings, *(configuration.pKResolutionsSettings_size));
 		}
 		#if DEBUG
@@ -496,7 +499,7 @@ void VideoOutputPortConfig::load()
 	 */
 		for (size_t i = 0; i < *(configuration.pKVideoPortConfigs_size); i++)
 		{
-			const dsVideoPortTypeConfig_t *typeCfg = &()configuration.pKConfigs[i];
+			const dsVideoPortTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
 			VideoOutputPortType &vPortType = VideoOutputPortType::getInstance(typeCfg->typeId);
 			vPortType.enable();
 			vPortType.setRestrictedResolution(typeCfg->restrictedResollution);
