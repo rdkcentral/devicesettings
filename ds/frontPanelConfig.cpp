@@ -352,9 +352,9 @@ void dumpconfig(fpdConfigs_t *configuration)
 	printf("Dumping Front Panel Configuration Details:\n");
 	printf("Indicator Colors:\n");
 	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
-		printf("  Color ID: %d, Name: %s\n",
+		printf("  Color ID: %d, color: %d\n",
 			   configuration->pKFPDIndicatorColors[i].id,
-			   configuration->pKFPDIndicatorColors[i].name);
+			   configuration->pKFPDIndicatorColors[i].color);
 	}
 
 	printf("Indicators:\n");
