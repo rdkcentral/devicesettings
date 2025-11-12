@@ -41,8 +41,17 @@
 #include "frontPanelSettings.hpp"
 #include "illegalArgumentException.hpp"
 #include "dslogger.h"
+#include "manager.hpp"
 
 using namespace std;
+
+typedef struct fpdConfigs
+{
+	const dsFPDColorConfig_t    *pKFPDIndicatorColors;
+	const dsFPDIndicatorConfig_t   *pKIndicators;
+	int *pKFPDIndicatorColors_size;
+	int *pKIndicators_size;
+}fpdConfigs_t;
 
 namespace device {
 
@@ -337,6 +346,27 @@ List<FrontPanelTextDisplay>  FrontPanelConfig::getTextDisplays()
 	return rTexts;
 }
 
+void dumpconfig(fpdConfigs_t *configuration)
+{
+	// Dump the configuration details
+	printf("Dumping Front Panel Configuration Details:\n");
+	printf("Indicator Colors:\n");
+	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
+		printf("  Color ID: %d, Name: %s\n",
+			   configuration->pKFPDIndicatorColors[i].id,
+			   configuration->pKFPDIndicatorColors[i].name);
+	}
+
+	printf("Indicators:\n");
+	for (size_t i = 0; i < *(configuration->pKIndicators_size); i++) {
+		printf("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d\n",
+			   configuration->pKIndicators[i].id,
+			   configuration->pKIndicators[i].maxBrightness,
+			   configuration->pKIndicators[i].maxCycleRate,
+			   configuration->pKIndicators[i].levels,
+			   configuration->pKIndicators[i].colorMode);
+	}
+}
 
 /**
  * @fn FrontPanelConfig::load()
@@ -352,18 +382,71 @@ void FrontPanelConfig::load()
 	 * 1. Create Supported Colors.
 	 * 2. Create Indicators.
 	 */
+	int indicatorSize, indicatorColorSize, invalid_size = -1;
+	fpdConfigs_t configuration = {0};
+
+	const char* searchVaribles[] = {
+        "kFPDIndicatorColors",
+        "kFPDIndicatorColors_size",
+        "kIndicators",
+        "kIndicators_size"
+    };
+	bool ret = false;
+
+		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
+		ret = searchConfigs((void **)&configuration.pKFPDIndicatorColors, searchVaribles[0]);
+		if(ret == true)
+		{
+			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
+			ret = searchConfigs((void **)&configuration.pKFPDIndicatorColors_size, (char *)searchVaribles[1]);
+			if(ret == false)
+			{
+				INT_ERROR("%s is not defined\n", searchVaribles[1]);
+				configuration.pKFPDIndicatorColors_size = &invalid_size;
+			}
+			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
+			ret = searchConfigs((void **)&configuration.pKIndicators, searchVaribles[2]);
+			if(ret == false)
+			{
+				INT_ERROR("%s is not defined\n", searchVaribles[2]);
+			}
+			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
+			ret = searchConfigs((void **)&configuration.pKIndicators_size, (char *)searchVaribles[3]);
+			if(ret == false)
+			{
+				INT_ERROR("%s is not defined\n", searchVaribles[3]);
+				configuration.pKIndicators_size = &invalid_size;
+			}
+		}
+		else
+		{
+			INT_ERROR("Read Old Configs\n");
+			configuration.pKFPDIndicatorColors = kIndicatorColors;
+			indicatorColorSize = dsUTL_DIM(kIndicatorColors);
+			configuration.pKFPDIndicatorColors_size = &indicatorColorSize;
+			configuration.pKIndicators = kIndicators;
+			indicatorSize = dsUTL_DIM(kIndicators);
+			configuration.pKIndicators_size = &indicatorSize;
+
+			INT_INFO("configuration.pKFPDIndicatorColors =%p, *(configuration.pKFPDIndicatorColors_size) = %d\n", configuration.pKFPDIndicatorColors, *(configuration.pKFPDIndicatorColors_size));
+			INT_INFO("configuration.pKIndicators =%p, *(configuration.pKIndicators_size) = %d\n", configuration.pKIndicators, *(configuration.pKIndicators_size));
+		}
+		#if DEBUG
+		//dumpconfig(&configuration);
+		#endif
+
 	{
-		for (size_t i = 0; i < dsUTL_DIM(kIndicatorColors); i++) {
-			_colors.push_back(FrontPanelIndicator::Color(kIndicatorColors[i].id));
+		for (size_t i = 0; i < *(configuration.pKFPDIndicatorColors_size); i++) {
+			_colors.push_back(FrontPanelIndicator::Color(configuration.pKFPDIndicatorColors[i].id));
 		}
 
-		for (size_t i = 0; i < dsUTL_DIM(kIndicators); i++) {
+		for (size_t i = 0; i < *(configuration.pKIndicators_size); i++) {
 			/* All indicators support a same set of colors */
-			_indicators.push_back(FrontPanelIndicator(kIndicators[i].id,
-													  kIndicators[i].maxBrightness,
-													  kIndicators[i].maxCycleRate,
-													  kIndicators[i].levels,
-													  kIndicators[i].colorMode));
+			_indicators.push_back(FrontPanelIndicator(configuration.pKIndicators[i].id,
+													  configuration.pKIndicators[i].maxBrightness,
+													  configuration.pKIndicators[i].maxCycleRate,
+													  configuration.pKIndicators[i].levels,
+													  configuration.pKIndicators[i].colorMode));
 		}
 
 	}

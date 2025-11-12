@@ -121,11 +121,18 @@ void dumpconfig(dsVideoConfig_t *pKVideoDeviceConfigs, int videoDeviceConfigs_si
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 }
 
+typedef struct videoDeviceConfig
+{
+	dsVideoConfig_t *pKVideoDeviceConfigs;
+	int *pKVideoDeviceConfigs_size;
+}videoDeviceConfig_t;
+
 void VideoDeviceConfig::load()
 {
-	int configSize, portSize, invalid_size = -1;
-	dsVideoConfig_t *pKVideoDeviceConfigs = NULL;
-	int *pKVideoDeviceConfigs_size = NULL;
+	int configSize, invalid_size = -1;
+	//dsVideoConfig_t *pKVideoDeviceConfigs = NULL;
+	//int *pKVideoDeviceConfigs_size = NULL;
+	videoDeviceConfig_t videoDeviceConfig = {0};
 	const char* searchVaribles[] = {
         "kVideoDeviceConfigs",
         "kVideoDeviceConfigs_size",
@@ -140,33 +147,39 @@ void VideoDeviceConfig::load()
 	}
 
 	INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-	ret = searchConfigs((void **)&pKVideoDeviceConfigs, searchVaribles[0]);
+	//ret = searchConfigs((void **)&pKVideoDeviceConfigs, searchVaribles[0]);
+	ret = searchConfigs((void **)&(videoDeviceConfig.pKVideoDeviceConfigs), searchVaribles[0]);
 	if(ret == true)
 	{
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-		ret = searchConfigs((void **)&pKVideoDeviceConfigs_size, (char *)searchVaribles[1]);
+		ret = searchConfigs((void **)&(videoDeviceConfig.pKVideoDeviceConfigs_size), (char *)searchVaribles[1]);
 		if(ret == false)
 		{
 			INT_ERROR("%s is not defined\n", searchVaribles[1]);
+			videoDeviceConfig.pKVideoDeviceConfigs_size = &invalid_size;
 		}
 	}
 	else
 	{
-		pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
-		*pKVideoDeviceConfigs_size = dsUTL_DIM(kConfigs);
+		//pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
+		//*pKVideoDeviceConfigs_size = dsUTL_DIM(kConfigs);
+		INT_INFO("Read Old Configs\n");
+		videoDeviceConfig.pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
+		configSize = dsUTL_DIM(kConfigs);
+		videoDeviceConfig.pKVideoDeviceConfigs_size = &configSize;
 	}
 	#if DEBUG
-	dumpconfig(pKVideoDeviceConfigs, *pKVideoDeviceConfigs_size);
+	dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));
 	#endif
 
 	/*
 	 * Initialize Video Devices (supported DFCs etc.)
 	 */
-	for (size_t i = 0; i < *pKVideoDeviceConfigs_size; i++) {
+	for (size_t i = 0; i < *(videoDeviceConfig.pKVideoDeviceConfigs_size); i++) {
 		_vDevices.push_back(VideoDevice(i));
 
-		for (size_t j = 0; j < pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
-			_vDevices.at(i).addDFC(VideoDFC::getInstance(pKVideoDeviceConfigs[i].supportedDFCs[j]));
+		for (size_t j = 0; j < videoDeviceConfig.pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
+			_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceConfig.pKVideoDeviceConfigs[i].supportedDFCs[j]));
 		}
 	}
 	
