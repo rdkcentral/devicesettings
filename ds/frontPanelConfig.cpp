@@ -43,14 +43,18 @@
 #include "dslogger.h"
 #include "manager.hpp"
 
+#define DEBUG 1 // Using for dumpconfig 
+
 using namespace std;
 
 typedef struct fpdConfigs
 {
 	const dsFPDColorConfig_t    *pKFPDIndicatorColors;
 	const dsFPDIndicatorConfig_t   *pKIndicators;
+	const dsFPDTextDisplayConfig_t   *pKTextDisplays;
 	int *pKFPDIndicatorColors_size;
 	int *pKIndicators_size;
+	int *pKTextDisplays_size;
 }fpdConfigs_t;
 
 namespace device {
@@ -349,23 +353,43 @@ List<FrontPanelTextDisplay>  FrontPanelConfig::getTextDisplays()
 void dumpconfig(fpdConfigs_t *configuration)
 {
 	// Dump the configuration details
-	printf("Dumping Front Panel Configuration Details:\n");
-	printf("Indicator Colors:\n");
+	INT_INFO("\n\n===========================================================================\n\n");
+	INT_INFO("Start of Front Panel Configuration Details:\n");
+	INT_INFO("configuration->pKFPDIndicatorColors_size: %d\n", *(configuration->pKFPDIndicatorColors_size));
+	INT_INFO("configuration->pKIndicators_size: %d\n", *(configuration->pKIndicators_size));
+	INT_INFO("configuration->pKTextDisplays_size: %d\n", *(configuration->pKTextDisplays_size));
+	INT_INFO("Dumping Front Panel Configuration Details:\n");
+	INT_INFO("Indicator Colors:\n");
 	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
-		printf("  Color ID: %d, color: %d\n",
+		INT_INFO("  Color ID: %d, color: %d\n",
 			   configuration->pKFPDIndicatorColors[i].id,
 			   configuration->pKFPDIndicatorColors[i].color);
 	}
 
-	printf("Indicators:\n");
+	INT_INFO("Indicators:\n");
 	for (size_t i = 0; i < *(configuration->pKIndicators_size); i++) {
-		printf("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d\n",
+		INT_INFO("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d\n",
 			   configuration->pKIndicators[i].id,
 			   configuration->pKIndicators[i].maxBrightness,
 			   configuration->pKIndicators[i].maxCycleRate,
 			   configuration->pKIndicators[i].levels,
 			   configuration->pKIndicators[i].colorMode);
 	}
+	INT_INFO("Text Displays:\n");
+
+	for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
+		INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %d, Color Mode: %d\n",
+			   configuration->pKTextDisplays[i].id,
+			   configuration->pKTextDisplays[i].maxBrightness,
+			   configuration->pKTextDisplays[i].maxCycleRate,
+			   configuration->pKTextDisplays[i].levels,
+			   configuration->pKTextDisplays[i].maxHorizontalIterations,
+			   configuration->pKTextDisplays[i].maxVerticalIterations,
+			   configuration->pKTextDisplays[i].supportedCharacters,
+			   configuration->pKTextDisplays[i].colorMode);
+	}
+	INT_INFO("End of Front Panel Configuration Details.\n");
+	INT_INFO("\n\n===========================================================================\n\n");
 }
 
 /**
@@ -389,7 +413,9 @@ void FrontPanelConfig::load()
         "kFPDIndicatorColors",
         "kFPDIndicatorColors_size",
         "kIndicators",
-        "kIndicators_size"
+        "kIndicators_size",
+		"kTextDisplays",
+		"kTextDisplays_size"
     };
 	bool ret = false;
 
@@ -417,6 +443,19 @@ void FrontPanelConfig::load()
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
 				configuration.pKIndicators_size = &invalid_size;
 			}
+			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[4]);
+			ret = searchConfigs((void **)&configuration.pKTextDisplays, searchVaribles[4]);
+			if(ret == false)
+			{
+				INT_ERROR("%s is not defined\n", searchVaribles[4]);
+			}
+			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
+			ret = searchConfigs((void **)&configuration.pKTextDisplays_size, (char *)searchVaribles[5]);
+			if(ret == false)
+			{
+				INT_ERROR("%s is not defined\n", searchVaribles[5]);
+				configuration.pKTextDisplays_size = &invalid_size;
+			}
 		}
 		else
 		{
@@ -427,12 +466,16 @@ void FrontPanelConfig::load()
 			configuration.pKIndicators = kIndicators;
 			indicatorSize = dsUTL_DIM(kIndicators);
 			configuration.pKIndicators_size = &indicatorSize;
+			configuration.pKTextDisplays = kTextDisplays;
+			indicatorSize = dsUTL_DIM(kTextDisplays);
+			configuration.pKTextDisplays_size = &indicatorSize;
 
 			INT_INFO("configuration.pKFPDIndicatorColors =%p, *(configuration.pKFPDIndicatorColors_size) = %d\n", configuration.pKFPDIndicatorColors, *(configuration.pKFPDIndicatorColors_size));
 			INT_INFO("configuration.pKIndicators =%p, *(configuration.pKIndicators_size) = %d\n", configuration.pKIndicators, *(configuration.pKIndicators_size));
+			INT_INFO("configuration.pKTextDisplays =%p, *(configuration.pKTextDisplays_size) = %d\n", configuration.pKTextDisplays, *(configuration.pKTextDisplays_size));
 		}
 		#if DEBUG
-		//dumpconfig(&configuration);
+		dumpconfig(&configuration);
 		#endif
 
 	{
@@ -457,16 +500,16 @@ void FrontPanelConfig::load()
 		 * 1. Use Supported Colors created for indicators.
 		 * 2. Create Text Displays.
 		 */
-		for (size_t i = 0; i < dsUTL_DIM(kTextDisplays); i++) {
+		for (size_t i = 0; i < *(configuration.pKTextDisplays_size); i++) {
 			_textDisplays.push_back(
-					FrontPanelTextDisplay(kTextDisplays[i].id,
-										  kTextDisplays[i].maxBrightness,
-										  kTextDisplays[i].maxCycleRate,
-                                          kTextDisplays[i].levels,
-										  kTextDisplays[i].maxHorizontalIterations,
-										  kTextDisplays[i].maxVerticalIterations,
-										  kTextDisplays[i].supportedCharacters,
-										  kTextDisplays[i].colorMode));
+					FrontPanelTextDisplay(configuration.pKTextDisplays[i].id,
+										  configuration.pKTextDisplays[i].maxBrightness,
+										  configuration.pKTextDisplays[i].maxCycleRate,
+                                          configuration.pKTextDisplays[i].levels,
+										  configuration.pKTextDisplays[i].maxHorizontalIterations,
+										  configuration.pKTextDisplays[i].maxVerticalIterations,
+										  configuration.pKTextDisplays[i].supportedCharacters,
+										  configuration.pKTextDisplays[i].colorMode));
 		}
 	}
 }
