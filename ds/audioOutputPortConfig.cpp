@@ -121,44 +121,14 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
-#if 0
-bool searchConfigs(void **pConfigVar, const char *searchConfigStr)
-{
-	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
-
-	static int invalidsize = -1;
-
-	pthread_mutex_lock(&dsLock);
-
-		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-		if (dllib) {
-			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
-			if (*pConfigVar != NULL) {
-				INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
-			}
-			else {
-				INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
-			}
-
-			dlclose(dllib);
-		}
-		else {
-			INT_ERROR("%d:%s: Open %s failed\n", __LINE__, __func__, RDK_DSHAL_NAME);
-		}
-	pthread_mutex_unlock(&dsLock);
-	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
-	return (*pConfigVar != NULL);
-}
-#endif
 void dumpconfig(audioConfigs_t *config)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
 	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
-	INT_INFO("%d:%s: pKConfigSize = %p\n", __LINE__, __func__, config->pKConfigSize);
-	INT_INFO("%d:%s: pKPortSize = %p\n", __LINE__, __func__, config->pKPortSize);
-	
+	INT_INFO("%d:%s: pKConfigSize %p = %d \n", __LINE__, __func__, config->pKConfigSize, *(config->pKConfigSize));
+	INT_INFO("%d:%s: pKPortSize %p = %d \n", __LINE__, __func__, config->pKPortSize, *(config->pKPortSize));
+
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)
 	{
@@ -261,41 +231,49 @@ void AudioOutputPortConfig::load()
 			configuration.pKPortSize = &portSize;
 			INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
 		}
-		#if DEBUG
-		dumpconfig(&configuration);
-		#endif
-
 		/*
-		* Initialize Audio portTypes (encodings, compressions etc.)
-		* and its port instances (db, level etc)
-		*/
-		for (size_t i = 0; i < *(configuration.pKConfigSize); i++) {
-			const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
-			AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
-			aPortType.enable();
-			for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
-				aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
-				_aEncodings.at(typeCfg->encodings[j]).enable();
+		 * Check if configs are loaded properly
+		 */
+		if ( configuration.pKConfigs != NULL || configuration.pKPorts != NULL ||
+			configuration.pKConfigSize != NULL || configuration.pKPortSize != NULL) {
+			#if DEBUG
+			dumpconfig(&configuration);
+			#endif
+			INT_INFO("%d:%s: Audio Configs loaded successfully\n", __LINE__, __func__);
+			/*
+			* Initialize Audio portTypes (encodings, compressions etc.)
+			* and its port instances (db, level etc)
+			*/
+			for (size_t i = 0; i < *(configuration.pKConfigSize); i++) {
+				const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
+				AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
+				aPortType.enable();
+				for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
+					aPortType.addEncoding(AudioEncoding::getInstance(typeCfg->encodings[j]));
+					_aEncodings.at(typeCfg->encodings[j]).enable();
+				}
+				for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
+					aPortType.addCompression(typeCfg->compressions[j]);
+					_aCompressions.at(typeCfg->compressions[j]).enable();
+				}
+				for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
+					aPortType.addStereoMode(typeCfg->stereoModes[j]);
+					_aStereoModes.at(typeCfg->stereoModes[j]).enable();
+				}
 			}
-			for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
-				aPortType.addCompression(typeCfg->compressions[j]);
-				_aCompressions.at(typeCfg->compressions[j]).enable();
-			}
-			for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
-				aPortType.addStereoMode(typeCfg->stereoModes[j]);
-				_aStereoModes.at(typeCfg->stereoModes[j]).enable();
+
+			/*
+	 		* set up ports based on kPorts[]
+	 		*/
+			for (size_t i = 0; i < *(configuration.pKPortSize); i++) {
+				const dsAudioPortConfig_t *port = &configuration.pKPorts[i];
+				_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
+				_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 			}
 		}
-
-		/*
-	 	* set up ports based on kPorts[]
-	 	*/
-		for (size_t i = 0; i < *(configuration.pKPortSize); i++) {
-			const dsAudioPortConfig_t *port = &configuration.pKPorts[i];
-			_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
-			_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
+		else {
+			INT_ERROR("%d:%s: Audio Configs loading failed\n", __LINE__, __func__);
 		}
-
 	}
 	catch(const Exception &e) {
 		throw e;

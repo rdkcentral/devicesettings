@@ -95,19 +95,12 @@ void dumpconfig(dsVideoConfig_t *pKVideoDeviceConfigs, int videoDeviceConfigs_si
 	INT_INFO("%d:%s: pKVideoDeviceConfigs = %p\n", __LINE__, __func__, pKVideoDeviceConfigs);
 	INT_INFO("%d:%s: videoDeviceConfigs_size = %d\n", __LINE__, __func__, videoDeviceConfigs_size);
 
-	#if 0
-	typedef struct _dsVideoConfig_t {
-    	size_t numSupportedDFCs;            /*!< Number of zoom modes supported */
-    	const dsVideoZoom_t *supportedDFCs; /*!< List of zoom modes supported  */
-    	dsVideoZoom_t defaultDFC;           /*!< The default zoom mode         */
-	} dsVideoConfig_t;
-	#endif
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(pKVideoDeviceConfigs != NULL && videoDeviceConfigs_size != -1)
 	{
-		for (size_t i = 0; i < videoDeviceConfigs_size; i++) {
-			INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %d\n ", i, pKVideoDeviceConfigs[i].numSupportedDFCs);
-			for (size_t j = 0; j < pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
+		for (int i = 0; i < videoDeviceConfigs_size; i++) {
+			INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu\n ", i, pKVideoDeviceConfigs[i].numSupportedDFCs);
+			for (int j = 0; j < pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
 				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, pKVideoDeviceConfigs[i].supportedDFCs[j]);
 			}
 		}
@@ -130,8 +123,6 @@ typedef struct videoDeviceConfig
 void VideoDeviceConfig::load()
 {
 	int configSize, invalid_size = -1;
-	//dsVideoConfig_t *pKVideoDeviceConfigs = NULL;
-	//int *pKVideoDeviceConfigs_size = NULL;
 	videoDeviceConfig_t videoDeviceConfig = {0};
 	const char* searchVaribles[] = {
         "kVideoDeviceConfigs",
@@ -147,7 +138,6 @@ void VideoDeviceConfig::load()
 	}
 
 	INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-	//ret = searchConfigs((void **)&pKVideoDeviceConfigs, searchVaribles[0]);
 	ret = searchConfigs((void **)&(videoDeviceConfig.pKVideoDeviceConfigs), searchVaribles[0]);
 	if(ret == true)
 	{
@@ -161,8 +151,6 @@ void VideoDeviceConfig::load()
 	}
 	else
 	{
-		//pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
-		//*pKVideoDeviceConfigs_size = dsUTL_DIM(kConfigs);
 		INT_INFO("Read Old Configs\n");
 		videoDeviceConfig.pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
 		configSize = dsUTL_DIM(kConfigs);

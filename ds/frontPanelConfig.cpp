@@ -378,7 +378,7 @@ void dumpconfig(fpdConfigs_t *configuration)
 	INT_INFO("Text Displays:\n");
 
 	for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
-		INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %d, Color Mode: %d\n",
+		INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",
 			   configuration->pKTextDisplays[i].id,
 			   configuration->pKTextDisplays[i].maxBrightness,
 			   configuration->pKTextDisplays[i].maxCycleRate,
