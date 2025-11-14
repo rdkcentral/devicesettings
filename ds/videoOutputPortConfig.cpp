@@ -305,47 +305,19 @@ void dumpconfig(videoPortConfigs_t *config)
 
 		}
 		INT_INFO("\n\n####################################################################### \n\n");
-		#if 0
-		/*.typeId = */					dsVIDEOPORT_TYPE_INTERNAL,
-		/*.name = */ 					"INTERNAL",
-		/*.dtcpSupported = */			false,
-		/*.hdcpSupported = */			true,
-		/*.restrictedResollution = */	-1,
-		/*.numSupportedResolutions = */ dsUTL_DIM(kResolutions), // 0 means "Info available at runtime"
-		/*.supportedResolutons = */     kResolutions,
-		#endif
 		INT_INFO("\n\n####################################################################### \n\n");
 		INT_INFO("%d:%s: Dumping Video Port Configurations\n", __LINE__, __func__);
 		for (size_t i = 0; i < *(config->pKVideoPortConfigs_size); i++)
 		{
 			const dsVideoPortTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
-			#if 0
-			typedef struct _dsVideoPortTypeConfig_t {
-    			dsVideoPortType_t typeId;                       ///< The video output type
-    			const char *name;                               ///< Name of the video output port
-    			bool dtcpSupported;                             ///< Is DTCP supported?                 
-    			bool hdcpSupported;                             ///< Is HDCP supported?                 
-    			int32_t restrictedResollution;                  ///< Any restricted resolution; -1 if no.
-    			size_t numSupportedResolutions;                 ///< Number of supported resolutions
-    			dsVideoPortResolution_t *supportedResolutions;  ///< List of supported resolutions
-			} dsVideoPortTypeConfig_t;
-			#endif
+
 			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
 			INT_INFO("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
 			INT_INFO("%d:%s: typeCfg->dtcpSupported= %d\n", __LINE__, __func__, typeCfg->dtcpSupported);
 			INT_INFO("%d:%s: typeCfg->hdcpSupported = %d\n", __LINE__, __func__, typeCfg->hdcpSupported);
 			INT_INFO("%d:%s: typeCfg->restrictedResollution = %d\n", __LINE__, __func__, typeCfg->restrictedResollution);
-			INT_INFO("%d:%s: typeCfg->numSupportedResolutions= %d\n", __LINE__, __func__, typeCfg->numSupportedResolutions);
-			#if 0
-			typedef struct _dsVideoPortResolution_t {
-    			char name[32];                                  ///< Name the resolution
-   	 			dsVideoResolution_t  pixelResolution;           ///< The resolution associated with the name
-    			dsVideoAspectRatio_t  aspectRatio;              ///< The associated aspect ratio
-    			dsVideoStereoScopicMode_t  stereoScopicMode;    ///< The associated stereoscopic mode
-    			dsVideoFrameRate_t  frameRate;                  ///< The associated frame rate
-    			bool interlaced;                                ///< The associated scan mode( @a true if interlaced, @a false if progressive )
-			}dsVideoPortResolution_t;
-			#endif
+			INT_INFO("%d:%s: typeCfg->numSupportedResolutions= %lu\n", __LINE__, __func__, typeCfg->numSupportedResolutions);
+
 			INT_INFO("%d:%s: typeCfg->supportedResolutions = %p\n", __LINE__, __func__, typeCfg->supportedResolutions);
 			INT_INFO("%d:%s: typeCfg->supportedResolutions->name = %s\n", __LINE__, __func__, typeCfg->supportedResolutions->name);
 			INT_INFO("%d:%s: typeCfg->supportedResolutions->pixelResolution= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->pixelResolution);
@@ -355,13 +327,7 @@ void dumpconfig(videoPortConfigs_t *config)
 			INT_INFO("%d:%s: typeCfg->supportedResolutions->interlaced= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->interlaced);
 		}
 		INT_INFO("\n\n####################################################################### \n\n");
-		#if 0
-		{
-            /*.typeId = */                                  {dsVIDEOPORT_TYPE_INTERNAL, 0},
-            /* connectedAOP */             {dsAUDIOPORT_TYPE_SPEAKER, 0},
-            /*.defaultResolution = */               "1080i50"
-        }
-		#endif
+
 		INT_INFO("\n\n####################################################################### \n\n");
 		INT_INFO("%d:%s: Dumping Video Port Connections\n", __LINE__, __func__);
 		for (size_t i = 0; i < *(config->pKVideoPortPorts_size); i++) {
