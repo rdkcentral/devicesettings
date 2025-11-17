@@ -160,7 +160,7 @@ void Manager::load()
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
 
-bool searchConfigs(void **pConfigVar, const char *searchConfigStr)
+bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);

@@ -406,7 +406,7 @@ void FrontPanelConfig::load()
 	 * 1. Create Supported Colors.
 	 * 2. Create Indicators.
 	 */
-	int indicatorSize, indicatorColorSize, invalid_size = -1;
+	static int indicatorSize, indicatorColorSize, invalid_size = -1;
 	fpdConfigs_t configuration = {0};
 
 	const char* searchVaribles[] = {
@@ -420,37 +420,37 @@ void FrontPanelConfig::load()
 	bool ret = false;
 
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs((void **)&configuration.pKFPDIndicatorColors, searchVaribles[0]);
+		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKFPDIndicatorColors );
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs((void **)&configuration.pKFPDIndicatorColors_size, (char *)searchVaribles[1]);
+			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKFPDIndicatorColors_size);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[1]);
 				configuration.pKFPDIndicatorColors_size = &invalid_size;
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs((void **)&configuration.pKIndicators, searchVaribles[2]);
+			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKIndicators);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[2]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs((void **)&configuration.pKIndicators_size, (char *)searchVaribles[3]);
+			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKIndicators_size);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
 				configuration.pKIndicators_size = &invalid_size;
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[4]);
-			ret = searchConfigs((void **)&configuration.pKTextDisplays, searchVaribles[4]);
+			ret = searchConfigs(searchVaribles[4], (void **)&configuration.pKTextDisplays);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[4]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
-			ret = searchConfigs((void **)&configuration.pKTextDisplays_size, (char *)searchVaribles[5]);
+			ret = searchConfigs(searchVaribles[5], (void **)&configuration.pKTextDisplays_size);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[5]);
@@ -474,6 +474,11 @@ void FrontPanelConfig::load()
 			INT_INFO("configuration.pKIndicators =%p, *(configuration.pKIndicators_size) = %d\n", configuration.pKIndicators, *(configuration.pKIndicators_size));
 			INT_INFO("configuration.pKTextDisplays =%p, *(configuration.pKTextDisplays_size) = %d\n", configuration.pKTextDisplays, *(configuration.pKTextDisplays_size));
 		}
+	if (configuration.pKFPDIndicatorColors != NULL && configuration.pKFPDIndicatorColors_size != NULL &&
+		*(configuration.pKFPDIndicatorColors_size) > 0 &&
+		configuration.pKIndicators != NULL && configuration.pKIndicators_size != NULL &&
+		*(configuration.pKIndicators_size) > 0)
+	{
 		#if DEBUG
 		dumpconfig(&configuration);
 		#endif
@@ -494,6 +499,8 @@ void FrontPanelConfig::load()
 
 	}
 
+	if(configuration.pKTextDisplays != NULL && configuration.pKTextDisplays_size != NULL &&
+		*(configuration.pKTextDisplays_size) > 0)
 	{
 		/*
 		 * Create TextDisplays
@@ -512,10 +519,12 @@ void FrontPanelConfig::load()
 										  configuration.pKTextDisplays[i].colorMode));
 		}
 	}
+	} else {
+		INT_ERROR("No valid front panel configuration found\n");	
+	}
 }
 
 }
-
 
 /** @} */
 /** @} */
