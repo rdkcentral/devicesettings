@@ -406,7 +406,7 @@ void FrontPanelConfig::load()
 	 * 1. Create Supported Colors.
 	 * 2. Create Indicators.
 	 */
-	static int indicatorSize, indicatorColorSize, invalid_size = -1;
+	static int indicatorSize, indicatorColorSize, textDisplaySize, invalid_size = -1;
 	fpdConfigs_t configuration = {0};
 
 	const char* searchVaribles[] = {
@@ -467,8 +467,8 @@ void FrontPanelConfig::load()
 			indicatorSize = dsUTL_DIM(kIndicators);
 			configuration.pKIndicators_size = &indicatorSize;
 			configuration.pKTextDisplays = kTextDisplays;
-			indicatorSize = dsUTL_DIM(kTextDisplays);
-			configuration.pKTextDisplays_size = &indicatorSize;
+			textDisplaySize = dsUTL_DIM(kTextDisplays);
+			configuration.pKTextDisplays_size = &textDisplaySize;
 
 			INT_INFO("configuration.pKFPDIndicatorColors =%p, *(configuration.pKFPDIndicatorColors_size) = %d\n", configuration.pKFPDIndicatorColors, *(configuration.pKFPDIndicatorColors_size));
 			INT_INFO("configuration.pKIndicators =%p, *(configuration.pKIndicators_size) = %d\n", configuration.pKIndicators, *(configuration.pKIndicators_size));

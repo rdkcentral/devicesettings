@@ -165,8 +165,6 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
 
-	static int invalidsize = -1;
-
 	pthread_mutex_lock(&dsLock);
 
 		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
