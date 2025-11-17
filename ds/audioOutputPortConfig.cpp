@@ -38,8 +38,6 @@
 #include "manager.hpp"
 
 
-#define DEBUG 1 // Using for dumpconfig 
-
 typedef struct audioConfigs
 {
 	const dsAudioTypeConfig_t  *pKConfigs;
@@ -164,7 +162,7 @@ void dumpconfig(audioConfigs_t *config)
 
 void AudioOutputPortConfig::load()
 {
-	int configSize, portSize;
+	static int configSize, portSize, invalidSize = -1;
 	audioConfigs_t configuration = {0};
 	const char* searchVaribles[] = {
         "kAudioConfigs",
@@ -198,26 +196,28 @@ void AudioOutputPortConfig::load()
 		}
 
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs((void **)&configuration.pKConfigs, searchVaribles[0]);
+		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKConfigs);
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs((void **)&configuration.pKConfigSize, (char *)searchVaribles[2]);
+			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKConfigSize);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[2]);
+				configuration.pKConfigSize = &invalidSize;
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs((void **)&configuration.pKPorts, searchVaribles[1]);
+			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKPorts);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[1]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs((void **)&configuration.pKPortSize, (char *)searchVaribles[3]);
+			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKPortSize);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
+				configuration.pKPortSize = &invalidSize;
 			}
 		}
 		else
@@ -234,12 +234,11 @@ void AudioOutputPortConfig::load()
 		/*
 		 * Check if configs are loaded properly
 		 */
-		if ( configuration.pKConfigs != NULL || configuration.pKPorts != NULL ||
-			configuration.pKConfigSize != NULL || configuration.pKPortSize != NULL) {
-			#if DEBUG
+		if ( configuration.pKConfigs != NULL && configuration.pKPorts != NULL && 
+			configuration.pKConfigSize != NULL && (*(configuration.pKConfigSize) > 0 ) && 
+			configuration.pKPortSize != NULL && (*(configuration.pKPortSize) > 0 )) 
+		{
 			dumpconfig(&configuration);
-			#endif
-			INT_INFO("%d:%s: Audio Configs loaded successfully\n", __LINE__, __func__);
 			/*
 			* Initialize Audio portTypes (encodings, compressions etc.)
 			* and its port instances (db, level etc)
@@ -270,6 +269,7 @@ void AudioOutputPortConfig::load()
 				_aPorts.push_back(AudioOutputPort((port->id.type), port->id.index, i));
 				_aPortTypes.at(port->id.type).addPort(_aPorts.at(i));
 			}
+			INT_INFO("%d:%s: Audio Configs loaded successfully\n", __LINE__, __func__);
 		}
 		else {
 			INT_ERROR("%d:%s: Audio Configs loading failed\n", __LINE__, __func__);

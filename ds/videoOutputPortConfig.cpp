@@ -384,35 +384,35 @@ void VideoOutputPortConfig::load()
 		}
 
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs((void **)&configuration.pKConfigs, searchVaribles[0]);
+		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKConfigs);
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs((void **)&configuration.pKVideoPortConfigs_size, (char *)searchVaribles[1]);
+			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKVideoPortConfigs_size);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[1]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs((void **)&configuration.pKPorts, searchVaribles[2]);
+			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKPorts);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[2]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs((void **)&configuration.pKVideoPortPorts_size, (char *)searchVaribles[3]);
+			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKVideoPortPorts_size);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
 			}
 			// Resolutions
-			ret = searchConfigs((void **)&configuration.pKResolutionsSettings, searchVaribles[4]);
+			ret = searchConfigs(searchVaribles[4], (void **)&configuration.pKResolutionsSettings);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[4]);
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
-			ret = searchConfigs((void **)&configuration.pKResolutionsSettings_size, (char *)searchVaribles[5]);
+			ret = searchConfigs(searchVaribles[5], (void **)&configuration.pKResolutionsSettings_size);
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[5]);
@@ -434,6 +434,12 @@ void VideoOutputPortConfig::load()
 			INT_INFO("configuration.pKPorts =%p, *(configuration.pKPortSize) = %d\n", configuration.pKPorts, *(configuration.pKVideoPortPorts_size));
 			INT_INFO("configuration.pKResolutionsSettings =%p, *(configuration.pKResolutionsSettings_size) = %d\n", configuration.pKResolutionsSettings, *(configuration.pKResolutionsSettings_size));
 		}
+
+		if(configuration.pKConfigs == NULL && configuration.pKVideoPortConfigs_size == NULL &&
+		   configuration.pKPorts == NULL && configuration.pKVideoPortPorts_size == NULL &&
+		   configuration.pKResolutionsSettings == NULL && configuration.pKResolutionsSettings_size == NULL)
+		{
+
 		#if DEBUG
 		dumpconfig(&configuration);
 		#endif
@@ -485,7 +491,13 @@ void VideoOutputPortConfig::load()
 			_vPortTypes.at(port->id.type).addPort(_vPorts.at(i));
 
 		}
+	}
+	else
+	{
+		cout << "Video Outport Configs or Ports or Resolutions is NULL. ..."<<endl;
+		throw Exception("Failed to load video outport config");
 
+	}
 	}
 	catch (...) {
 		cout << "VIdeo Outport Exception Thrown. ..."<<endl;

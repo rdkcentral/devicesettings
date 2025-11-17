@@ -157,7 +157,7 @@
 namespace device {
 
 // Forward declaration for searchConfigs function
-bool searchConfigs(void **pConfigVar, const char *searchConfigStr);
+bool searchConfigs(const char *searchConfigStr, void **pConfigVar);
 
 /**
  * @class Manager

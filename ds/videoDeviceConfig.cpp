@@ -138,11 +138,11 @@ void VideoDeviceConfig::load()
 	}
 
 	INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-	ret = searchConfigs((void **)&(videoDeviceConfig.pKVideoDeviceConfigs), searchVaribles[0]);
+	ret = searchConfigs(searchVaribles[0], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs));
 	if(ret == true)
 	{
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-		ret = searchConfigs((void **)&(videoDeviceConfig.pKVideoDeviceConfigs_size), (char *)searchVaribles[1]);
+		ret = searchConfigs(searchVaribles[1], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs_size));
 		if(ret == false)
 		{
 			INT_ERROR("%s is not defined\n", searchVaribles[1]);
@@ -156,22 +156,28 @@ void VideoDeviceConfig::load()
 		configSize = dsUTL_DIM(kConfigs);
 		videoDeviceConfig.pKVideoDeviceConfigs_size = &configSize;
 	}
-	#if DEBUG
-	dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));
-	#endif
 
 	/*
 	 * Initialize Video Devices (supported DFCs etc.)
 	 */
-	for (size_t i = 0; i < *(videoDeviceConfig.pKVideoDeviceConfigs_size); i++) {
-		_vDevices.push_back(VideoDevice(i));
+	if (videoDeviceConfig.pKVideoDeviceConfigs != NULL && videoDeviceConfig.pKVideoDeviceConfigs_size != NULL &&
+		*(videoDeviceConfig.pKVideoDeviceConfigs_size) > 0)
+	{
+		#if DEBUG
+		dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));
+		#endif
+		for (size_t i = 0; i < *(videoDeviceConfig.pKVideoDeviceConfigs_size); i++) {
+			_vDevices.push_back(VideoDevice(i));
 
-		for (size_t j = 0; j < videoDeviceConfig.pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
-			_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceConfig.pKVideoDeviceConfigs[i].supportedDFCs[j]));
+			for (size_t j = 0; j < videoDeviceConfig.pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
+				_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceConfig.pKVideoDeviceConfigs[i].supportedDFCs[j]));
+			}
 		}
 	}
-	
-
+	else
+	{
+		INT_ERROR("%d:%s:  Congigs are NULL and  config size are -1\n", __LINE__, __func__);
+	}
 }
 
 void VideoDeviceConfig::release()
