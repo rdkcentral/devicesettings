@@ -433,14 +433,14 @@ void VideoOutputPortConfig::load()
 			configuration.pKResolutionsSettings = kResolutions;
 			resolutionSize = dsUTL_DIM(kResolutions);
 			configuration.pKResolutionsSettings_size = &resolutionSize;
-			INT_INFO("configuration.pKConfigs =%p, *(configuration.pKConfigSize) = %d\n", configuration.pKConfigs, *(configuration.pKVideoPortConfigs_size));
-			INT_INFO("configuration.pKPorts =%p, *(configuration.pKPortSize) = %d\n", configuration.pKPorts, *(configuration.pKVideoPortPorts_size));
+			INT_INFO("configuration.pKConfigs =%p, *(configuration.pKVideoPortConfigs_size) = %d\n", configuration.pKConfigs, *(configuration.pKVideoPortConfigs_size));
+			INT_INFO("configuration.pKPorts =%p, *(configuration.pKVideoPortPorts_size) = %d\n", configuration.pKPorts, *(configuration.pKVideoPortPorts_size));
 			INT_INFO("configuration.pKResolutionsSettings =%p, *(configuration.pKResolutionsSettings_size) = %d\n", configuration.pKResolutionsSettings, *(configuration.pKResolutionsSettings_size));
 		}
 
-		if(configuration.pKConfigs == NULL && configuration.pKVideoPortConfigs_size == NULL &&
-		   configuration.pKPorts == NULL && configuration.pKVideoPortPorts_size == NULL &&
-		   configuration.pKResolutionsSettings == NULL && configuration.pKResolutionsSettings_size == NULL)
+		if((configuration.pKConfigs != NULL) && (configuration.pKVideoPortConfigs_size != NULL) &&
+		   (configuration.pKPorts != NULL) && (configuration.pKVideoPortPorts_size != NULL) &&
+		   (configuration.pKResolutionsSettings != NULL) && (configuration.pKResolutionsSettings_size != NULL))
 		{
 
 			#if DEBUG
@@ -491,13 +491,12 @@ void VideoOutputPortConfig::load()
 				_vPortTypes.at(port->id.type).addPort(_vPorts.at(i));
 
 			}
-	}
-	else
-	{
-		cout << "Video Outport Configs or Ports or Resolutions is NULL. ..."<<endl;
-		throw Exception("Failed to load video outport config");
-
-	}
+		}
+		else
+		{
+			cout << "Video Outport Configs or Ports or Resolutions is NULL. ..."<<endl;
+			throw Exception("Failed to load video outport config");
+		}
 	}
 	catch (...) {
 		cout << "VIdeo Outport Exception Thrown. ..."<<endl;
