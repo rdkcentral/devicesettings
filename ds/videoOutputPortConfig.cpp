@@ -350,7 +350,7 @@ void dumpconfig(videoPortConfigs_t *config)
 
 void VideoOutputPortConfig::load()
 {
-	int configSize, portSize, resolutionSize;
+	static int configSize, portSize, resolutionSize, invalid_size = -1;
 	videoPortConfigs_t configuration = {0};
 	const char* searchVaribles[] = {
         "kVideoPortConfigs",
@@ -392,6 +392,7 @@ void VideoOutputPortConfig::load()
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[1]);
+				configuration.pKVideoPortConfigs_size = &invalid_size;
 			}
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
 			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKPorts);
@@ -404,6 +405,7 @@ void VideoOutputPortConfig::load()
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[3]);
+				configuration.pKVideoPortPorts_size = &invalid_size;
 			}
 			// Resolutions
 			ret = searchConfigs(searchVaribles[4], (void **)&configuration.pKResolutionsSettings);
@@ -416,6 +418,7 @@ void VideoOutputPortConfig::load()
 			if(ret == false)
 			{
 				INT_ERROR("%s is not defined\n", searchVaribles[5]);
+				configuration.pKResolutionsSettings_size = &invalid_size;
 			}
 		}
 		else
@@ -440,57 +443,54 @@ void VideoOutputPortConfig::load()
 		   configuration.pKResolutionsSettings == NULL && configuration.pKResolutionsSettings_size == NULL)
 		{
 
-		#if DEBUG
-		dumpconfig(&configuration);
-		#endif
-
-
-		/* Initialize a set of supported resolutions
-		 *
-		 */
-		//size_t numResolutions = dsUTL_DIM(kResolutions);
-		for (size_t i = 0; i < *(configuration.pKResolutionsSettings_size); i++) {
-			dsVideoPortResolution_t *resolution = &(configuration.pKResolutionsSettings[i]);
-			{std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
-				_supportedResolutions.push_back(
-									VideoResolution(
-										i, /* id */
-										std::string(resolution->name),
-										resolution->pixelResolution,
-										resolution->aspectRatio,
-										resolution->stereoScopicMode,
-										resolution->frameRate,
-										resolution->interlaced));
+			#if DEBUG
+			dumpconfig(&configuration);
+			#endif
+			/* Initialize a set of supported resolutions
+		 	*
+		 	*/
+			for (size_t i = 0; i < *(configuration.pKResolutionsSettings_size); i++) {
+				dsVideoPortResolution_t *resolution = &(configuration.pKResolutionsSettings[i]);
+				{std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
+					_supportedResolutions.push_back(
+										VideoResolution(
+											i, /* id */
+											std::string(resolution->name),
+											resolution->pixelResolution,
+											resolution->aspectRatio,
+											resolution->stereoScopicMode,
+											resolution->frameRate,
+											resolution->interlaced));
+				}
 			}
-		}
 
 
-	/*
-	 * Initialize Video portTypes (Only Enable POrts)
-	 * and its port instances (curr resolution)
-	 */
-		for (size_t i = 0; i < *(configuration.pKVideoPortConfigs_size); i++)
-		{
-			const dsVideoPortTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
-			VideoOutputPortType &vPortType = VideoOutputPortType::getInstance(typeCfg->typeId);
-			vPortType.enable();
-			vPortType.setRestrictedResolution(typeCfg->restrictedResollution);
-		}
+			/*
+	 		* Initialize Video portTypes (Only Enable POrts)
+	 		* and its port instances (curr resolution)
+	 		*/
+			for (size_t i = 0; i < *(configuration.pKVideoPortConfigs_size); i++)
+			{
+				const dsVideoPortTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
+				VideoOutputPortType &vPortType = VideoOutputPortType::getInstance(typeCfg->typeId);
+				vPortType.enable();
+				vPortType.setRestrictedResolution(typeCfg->restrictedResollution);
+			}
 
-		/*
-		 * set up ports based on kPorts[]
-		 */
-		for (size_t i = 0; i < *(configuration.pKVideoPortPorts_size); i++) {
-			const dsVideoPortPortConfig_t *port = &(configuration.pKPorts[i]);
+			/*
+		 	* set up ports based on kPorts[]
+		 	*/
+			for (size_t i = 0; i < *(configuration.pKVideoPortPorts_size); i++) {
+				const dsVideoPortPortConfig_t *port = &(configuration.pKPorts[i]);
 
-			_vPorts.push_back(
-					VideoOutputPort((port->id.type), port->id.index, i,
-							AudioOutputPortType::getInstance(configuration.pKPorts[i].connectedAOP.type).getPort(configuration.pKPorts[i].connectedAOP.index).getId(),
-							std::string(port->defaultResolution)));
+				_vPorts.push_back(
+						VideoOutputPort((port->id.type), port->id.index, i,
+								AudioOutputPortType::getInstance(configuration.pKPorts[i].connectedAOP.type).getPort(configuration.pKPorts[i].connectedAOP.index).getId(),
+								std::string(port->defaultResolution)));
 
-			_vPortTypes.at(port->id.type).addPort(_vPorts.at(i));
+				_vPortTypes.at(port->id.type).addPort(_vPorts.at(i));
 
-		}
+			}
 	}
 	else
 	{
