@@ -375,18 +375,24 @@ void dumpconfig(fpdConfigs_t *configuration)
 			   configuration->pKIndicators[i].levels,
 			   configuration->pKIndicators[i].colorMode);
 	}
-	INT_INFO("Text Displays:\n");
 
-	for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
-		INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",
-			   configuration->pKTextDisplays[i].id,
-			   configuration->pKTextDisplays[i].maxBrightness,
-			   configuration->pKTextDisplays[i].maxCycleRate,
-			   configuration->pKTextDisplays[i].levels,
-			   configuration->pKTextDisplays[i].maxHorizontalIterations,
-			   configuration->pKTextDisplays[i].maxVerticalIterations,
-			   configuration->pKTextDisplays[i].supportedCharacters,
-			   configuration->pKTextDisplays[i].colorMode);
+	if(configuration->pKTextDisplays == NULL && configuration->pKTextDisplays_size == NULL && *(configuration->pKTextDisplays_size) > 0){
+		INT_INFO("Text Displays:\n");
+
+		for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
+			INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",
+				   configuration->pKTextDisplays[i].id,
+			   	configuration->pKTextDisplays[i].maxBrightness,
+			   	configuration->pKTextDisplays[i].maxCycleRate,
+			   	configuration->pKTextDisplays[i].levels,
+			   	configuration->pKTextDisplays[i].maxHorizontalIterations,
+			   	configuration->pKTextDisplays[i].maxVerticalIterations,
+			   	configuration->pKTextDisplays[i].supportedCharacters,
+			   	configuration->pKTextDisplays[i].colorMode);
+		}
+	}
+	else {
+		INT_INFO("  No Text Displays configured.\n");
 	}
 	INT_INFO("End of Front Panel Configuration Details.\n");
 	INT_INFO("\n\n===========================================================================\n\n");
@@ -414,8 +420,8 @@ void FrontPanelConfig::load()
         "kFPDIndicatorColors_size",
         "kIndicators",
         "kIndicators_size",
-		"kTextDisplays",
-		"kTextDisplays_size"
+		"kFPDTextDisplays",
+		"kFPDTextDisplays_size"
     };
 	bool ret = false;
 
@@ -483,43 +489,49 @@ void FrontPanelConfig::load()
 		dumpconfig(&configuration);
 		#endif
 
-	{
-		for (size_t i = 0; i < *(configuration.pKFPDIndicatorColors_size); i++) {
-			_colors.push_back(FrontPanelIndicator::Color(configuration.pKFPDIndicatorColors[i].id));
+		{
+			for (size_t i = 0; i < *(configuration.pKFPDIndicatorColors_size); i++) {
+				_colors.push_back(FrontPanelIndicator::Color(configuration.pKFPDIndicatorColors[i].id));
+			}
+
+			for (size_t i = 0; i < *(configuration.pKIndicators_size); i++) {
+				/* All indicators support a same set of colors */
+				_indicators.push_back(FrontPanelIndicator(configuration.pKIndicators[i].id,
+														  configuration.pKIndicators[i].maxBrightness,
+														  configuration.pKIndicators[i].maxCycleRate,
+														  configuration.pKIndicators[i].levels,
+														  configuration.pKIndicators[i].colorMode));
+				}
 		}
 
-		for (size_t i = 0; i < *(configuration.pKIndicators_size); i++) {
-			/* All indicators support a same set of colors */
-			_indicators.push_back(FrontPanelIndicator(configuration.pKIndicators[i].id,
-													  configuration.pKIndicators[i].maxBrightness,
-													  configuration.pKIndicators[i].maxCycleRate,
-													  configuration.pKIndicators[i].levels,
-													  configuration.pKIndicators[i].colorMode));
+		if(configuration.pKTextDisplays != NULL && configuration.pKTextDisplays_size != NULL &&
+			*(configuration.pKTextDisplays_size) > 0)
+		{
+			/*
+		 	* Create TextDisplays
+		 	* 1. Use Supported Colors created for indicators.
+		 	* 2. Create Text Displays.
+		 	*/
+			INT_DEBUG("Text Displays \n");
+			for (size_t i = 0; i < *(configuration.pKTextDisplays_size); i++) {
+				_textDisplays.push_back(
+						FrontPanelTextDisplay(configuration.pKTextDisplays[i].id,
+											  configuration.pKTextDisplays[i].maxBrightness,
+											  configuration.pKTextDisplays[i].maxCycleRate,
+                            	              configuration.pKTextDisplays[i].levels,
+											  configuration.pKTextDisplays[i].maxHorizontalIterations,
+											  configuration.pKTextDisplays[i].maxVerticalIterations,
+											  configuration.pKTextDisplays[i].supportedCharacters,
+										  	  configuration.pKTextDisplays[i].colorMode));
+		 }
 		}
-
+		else
+		{
+			INT_ERROR("No valid text display configuration found\n");
+		} 
 	}
-
-	if(configuration.pKTextDisplays != NULL && configuration.pKTextDisplays_size != NULL &&
-		*(configuration.pKTextDisplays_size) > 0)
+	else 
 	{
-		/*
-		 * Create TextDisplays
-		 * 1. Use Supported Colors created for indicators.
-		 * 2. Create Text Displays.
-		 */
-		for (size_t i = 0; i < *(configuration.pKTextDisplays_size); i++) {
-			_textDisplays.push_back(
-					FrontPanelTextDisplay(configuration.pKTextDisplays[i].id,
-										  configuration.pKTextDisplays[i].maxBrightness,
-										  configuration.pKTextDisplays[i].maxCycleRate,
-                                          configuration.pKTextDisplays[i].levels,
-										  configuration.pKTextDisplays[i].maxHorizontalIterations,
-										  configuration.pKTextDisplays[i].maxVerticalIterations,
-										  configuration.pKTextDisplays[i].supportedCharacters,
-										  configuration.pKTextDisplays[i].colorMode));
-		}
-	}
-	} else {
 		INT_ERROR("No valid front panel configuration found\n");	
 	}
 }
