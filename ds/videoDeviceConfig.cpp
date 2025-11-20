@@ -160,8 +160,7 @@ void VideoDeviceConfig::load()
 	/*
 	 * Initialize Video Devices (supported DFCs etc.)
 	 */
-	if (videoDeviceConfig.pKVideoDeviceConfigs != NULL && videoDeviceConfig.pKVideoDeviceConfigs_size != NULL &&
-		*(videoDeviceConfig.pKVideoDeviceConfigs_size) > 0)
+	if (videoDeviceConfig.pKVideoDeviceConfigs != NULL && videoDeviceConfig.pKVideoDeviceConfigs_size != NULL)
 	{
 		#if DEBUG
 		dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));

@@ -357,7 +357,7 @@ void dumpconfig(fpdConfigs_t *configuration)
 	INT_INFO("Start of Front Panel Configuration Details:\n");
 	INT_INFO("configuration->pKFPDIndicatorColors_size: %d\n", *(configuration->pKFPDIndicatorColors_size));
 	INT_INFO("configuration->pKIndicators_size: %d\n", *(configuration->pKIndicators_size));
-	INT_INFO("configuration->pKTextDisplays_size: %d\n", *(configuration->pKTextDisplays_size));
+	INT_INFO("configuration->pKTextDisplays_size: %p\n", configuration->pKTextDisplays_size);
 	INT_INFO("Dumping Front Panel Configuration Details:\n");
 	INT_INFO("Indicator Colors:\n");
 	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
@@ -376,8 +376,8 @@ void dumpconfig(fpdConfigs_t *configuration)
 			   configuration->pKIndicators[i].colorMode);
 	}
 
-	if(configuration->pKTextDisplays == NULL && configuration->pKTextDisplays_size == NULL && *(configuration->pKTextDisplays_size) > 0){
-		INT_INFO("Text Displays:\n");
+	if(configuration->pKTextDisplays == NULL && configuration->pKTextDisplays_size == NULL){
+		INT_INFO("Text Displays:*(configuration->pKTextDisplays_size) =%d\n", *(configuration->pKTextDisplays_size));
 
 		for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
 			INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",
@@ -504,8 +504,7 @@ void FrontPanelConfig::load()
 				}
 		}
 
-		if(configuration.pKTextDisplays != NULL && configuration.pKTextDisplays_size != NULL &&
-			*(configuration.pKTextDisplays_size) > 0)
+		if(configuration.pKTextDisplays != NULL && configuration.pKTextDisplays_size != NULL)
 		{
 			/*
 		 	* Create TextDisplays
