@@ -82,6 +82,8 @@ dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
 #endif
+int _srv_AudioSPEAKERAuto = 1;
+dsAudioStereoMode_t _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_SURROUND;
 
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
 static std::atomic<bool> persist_audioLevel_timer_threadIsAlive = ATOMIC_VAR_INIT(false);
@@ -2205,6 +2207,22 @@ IARM_Result_t dsAudioMgr_init()
                }
            }
 
+           std::string _SPEAKERAudioModeAuto("TRUE");
+
+           try {
+                _SPEAKERAudioModeAuto = device::HostPersistence::getInstance().getProperty("SPEAKER0.AudioMode.AUTO");
+           }
+           catch(...) {
+               try {
+                   INT_DEBUG("SPEAKER0.AudioMode.AUTO not found in persistence store. Try system default\n");
+                   _SPEAKERAudioModeAuto = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.AudioMode.AUTO");
+               }
+               catch(...) {
+                   _SPEAKERAudioModeAuto = "TRUE";
+               }
+           }
+           
+
            if(_AudioModeAuto.compare("TRUE") == 0)
            {
                 _srv_AudioHDMIAuto = 1;
@@ -2229,10 +2247,17 @@ IARM_Result_t dsAudioMgr_init()
            {
                 _srv_AudioSPDIFAuto = 0;
            }
+           if (_SPEAKERAudioModeAuto.compare("TRUE") == 0){
+                _srv_AudioSPEAKERAuto = 1;
+           }
+           else if (_SPEAKERAudioModeAuto.compare("FALSE") == 0){
+                _srv_AudioSPEAKERAuto = 0;
+           }
 
-        INT_DEBUG("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
-        INT_DEBUG("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
-        INT_DEBUG("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
+        INT_INFO("The HDMI Audio Auto Setting on startup  is %s \r\n",_AudioModeAuto.c_str());
+        INT_INFO("The HDMI ARC Audio Auto Setting on startup  is %s \r\n",_ARCAudioModeAuto.c_str());
+        INT_INFO("The SPDIF Audio Auto Setting on startup  is %s \r\n",_SPDIFAudioModeAuto.c_str());
+        INT_INFO("The SPEAKER Audio Auto Setting on startup  is %s \r\n",_SPEAKERAudioModeAuto.c_str());
 		/* Get the AudioModesettings for SPDIF from Persistence */
 		std::string _SPDIFModeSettings("STEREO");
 		_SPDIFModeSettings = device::HostPersistence::getInstance().getProperty("SPDIF0.AudioMode",_SPDIFModeSettings);
@@ -2249,23 +2274,50 @@ IARM_Result_t dsAudioMgr_init()
         {
 			_srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
         }
-                /* Get the AudioModesettings for HDMI_ARC from Persistence */
-                std::string _ARCModeSettings("STEREO");
-                _ARCModeSettings = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode",_ARCModeSettings);
-                INT_DEBUG("The HDMI ARC Audio Mode Setting on startup  is %s \r\n",_ARCModeSettings.c_str());
-                if (_ARCModeSettings.compare("SURROUND") == 0)
-                {
-                        _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
-                }
-                else if (_ARCModeSettings.compare("PASSTHRU") == 0)
-                {
-                        _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_PASSTHRU;
-                }
-                else
-                {
-                        _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
-                }
-	}
+        /* Get the AudioModesettings for HDMI_ARC from Persistence */
+        std::string _ARCModeSettings("STEREO");
+        _ARCModeSettings = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode",_ARCModeSettings);
+        INT_DEBUG("The HDMI ARC Audio Mode Setting on startup  is %s \r\n",_ARCModeSettings.c_str());
+        if (_ARCModeSettings.compare("SURROUND") == 0)
+        {
+                _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
+        }
+        else if (_ARCModeSettings.compare("PASSTHRU") == 0)
+        {
+                _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_PASSTHRU;
+        }
+        else
+        {
+                _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
+        }
+
+        std::string _SPEAKERModeSettings("SURROUND");
+        
+        try{
+            _SPEAKERModeSettings = device::HostPersistence::getInstance().getProperty("SPEAKER0.AudioMode",_SPEAKERModeSettings);
+            INT_DEBUG("The SPEAKER Audio Mode Setting on startup  is %s \r\n",_SPEAKERModeSettings.c_str());
+        }
+        catch(...){
+            _SPEAKERModeSettings = "SURROUND";
+        }
+
+        if (_SPEAKERModeSettings.compare("SURROUND") == 0)
+        {
+            _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_SURROUND;
+        }
+        else if (_SPEAKERModeSettings.compare("PASSTHRU") == 0)
+        {
+            _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_PASSTHRU;
+        }
+        else if (_SPEAKERModeSettings.compare("STEREO") == 0)
+        {
+            _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_STEREO;
+        }
+        else
+        {
+            _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_SURROUND;
+        }
+    }
 	catch(...) 
 	{
 		INT_INFO("Exception in Getting the Audio  settings on Startup..... \r\n");
@@ -2502,6 +2554,12 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             }
             param->mode = stereoMode;
         }
+        else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
+            ret = dsGetStereoMode(param->handle, &param->mode);
+            if(ret == dsERR_NONE) {
+                result = IARM_RESULT_SUCCESS;
+            }
+        }
         else {
             if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
             {
@@ -2576,6 +2634,14 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
                     _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
                 }
+                else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
+                {
+                    if (param->toPersist){
+                        device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode","STEREO");
+                    }
+                    _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_STEREO;
+                }
+
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_STEREO;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
@@ -2606,6 +2672,13 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
                     _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
                 }
+                else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
+                {
+                    if (param->toPersist){
+                        device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode","SURROUND");
+                    }
+                    _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_SURROUND;
+                }
 
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_SURROUND;
                 eventData.data.Audioport.type = _APortType;
@@ -2622,6 +2695,14 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
                     _srv_HDMI_Audiomode = dsAUDIO_STEREO_DD;
                 }
+                else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
+                {
+                    if (param->toPersist){
+                        device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode","DOLBYDIGITAL");
+                    }
+                    _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_DD;
+                }
+
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_DD;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
@@ -2637,6 +2718,14 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
                     _srv_HDMI_Audiomode = dsAUDIO_STEREO_DDPLUS;
                 }
+                else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
+                {
+                    if (param->toPersist){
+                        device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode","DOLBYDIGITALPLUS");
+                    }
+                    _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_DDPLUS;
+                }
+
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_DDPLUS;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
@@ -2663,6 +2752,13 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                     device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.AudioMode","PASSTHRU");
 
                     _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_PASSTHRU;
+                }
+                else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER)
+                {
+                    if (param->toPersist){
+                        device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode","PASSTHRU");
+                    }
+                    _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_PASSTHRU;
                 }
 
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_PASSTHRU;
@@ -2708,6 +2804,9 @@ IARM_Result_t _dsGetStereoAuto(void *arg)
         else if (_APortType == dsAUDIOPORT_TYPE_SPDIF) {
             param->autoMode = _srv_AudioSPDIFAuto ? 1 : 0;
         }
+        else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
+            param->autoMode = _srv_AudioSPEAKERAuto ? 1 : 0;
+        }
     }
 
     IARM_BUS_Unlock(lock);
@@ -2742,6 +2841,10 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
             _srv_AudioSPDIFAuto = param->autoMode;
 		break;
 
+        case dsAUDIOPORT_TYPE_SPEAKER:
+            device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+            _srv_AudioSPEAKERAuto = param->autoMode;
+        break; 
 	    default:
 		break;
 	}
@@ -6245,10 +6348,20 @@ static void _GetAudioModeFromPersistent(void *arg)
             }
             INT_INFO("The HDMI Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
         }
-	else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC){
-	    _AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode",_AudioModeSettings);
-	    INT_INFO("The HDMI_ARC Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
-	}
+        else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC){
+            _AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode",_AudioModeSettings);
+            INT_INFO("The HDMI_ARC Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
+        }
+        else if(_APortType == dsAUDIOPORT_TYPE_SPEAKER){
+            try{
+                _AudioModeSettings = device::HostPersistence::getInstance().getProperty("SPEAKER0.AudioMode",_AudioModeSettings);
+            }
+            catch(...){
+                INT_INFO("SPEAKER0.AudioMode Not in persistent");
+                _AudioModeSettings = "SURROUND";
+            }
+            INT_INFO("The SPEAKER Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
+        }
 
         if (_AudioModeSettings.compare("SURROUND") == 0)
         {
