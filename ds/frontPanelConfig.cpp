@@ -376,7 +376,7 @@ void dumpconfig(fpdConfigs_t *configuration)
 			   configuration->pKIndicators[i].colorMode);
 	}
 
-	if(configuration->pKTextDisplays == NULL && configuration->pKTextDisplays_size == NULL){
+	if(configuration->pKTextDisplays != NULL && configuration->pKTextDisplays_size != NULL){
 		INT_INFO("Text Displays:*(configuration->pKTextDisplays_size) =%d\n", *(configuration->pKTextDisplays_size));
 
 		for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
