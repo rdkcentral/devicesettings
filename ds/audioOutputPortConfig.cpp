@@ -235,8 +235,7 @@ void AudioOutputPortConfig::load()
 		 * Check if configs are loaded properly
 		 */
 		if ( configuration.pKConfigs != NULL && configuration.pKPorts != NULL && 
-			configuration.pKConfigSize != NULL && (*(configuration.pKConfigSize) > 0 ) && 
-			configuration.pKPortSize != NULL && (*(configuration.pKPortSize) > 0 )) 
+			configuration.pKConfigSize != NULL && configuration.pKPortSize != NULL) 
 		{
 			dumpconfig(&configuration);
 			/*
