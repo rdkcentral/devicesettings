@@ -59,7 +59,7 @@ all: install
 
 library: $(OBJS)
 	@echo "Building $(LIBNAMEFULL) ...."
-	$(CXX) $(OBJS) $(CFLAGS) $(DSHAL_LDFLAGS) -L$(INSTALL)/lib -ldshalcli -shared -o $(LIBNAMEFULL)
+	$(CXX) $(OBJS) $(CFLAGS) $(DSHAL_LDFLAGS) -L$(INSTALL)/lib -ldshalcli -ldshalsrv -shared -o $(LIBNAMEFULL)
 	$(CXX) $(OBJS) $(CFLAGS) -L$(INSTALL)/lib -ldshalcli -shared -o $(LIBNAMECLI)
 
 %.o: %.cpp
