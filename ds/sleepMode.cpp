@@ -104,9 +104,6 @@ List<SleepMode> SleepMode::getSleepModes()
 	for(std::vector<SleepMode>::const_iterator it = _vSleepModes.begin(); 
 			it != _vSleepModes.end(); it++)
 	{
-#ifndef ENABLE_DEEP_SLEEP 
-        if (it->getId() == dsHOST_SLEEP_MODE_DEEP) continue;
-#endif
 		sleepModes.push_back(*it);
 	}
 	return sleepModes;
