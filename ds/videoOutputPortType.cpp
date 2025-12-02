@@ -220,7 +220,7 @@ void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size
     if ((ret == dsERR_NONE) && (handle != -1)) {
         ret = dsEnableHDCP(handle, contentProtect, hdcpKey, keySize);
     } else {
-        INT_ERROR("VideoOutputPortType::enabledHDCP: Error type %d, handle=%ld, error code=%d", portType, handle, ret);
+        INT_ERROR("VideoOutputPortType::enabledHDCP: Error type %d, handle=%ld, error code=%d", portType, (long)handle, ret);
         // Set ret to an error code on dsGetVideoPort failure or invalid handle to ensure exception is thrown
         ret = dsERR_GENERAL;
     }
