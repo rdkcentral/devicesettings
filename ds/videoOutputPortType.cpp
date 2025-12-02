@@ -220,7 +220,7 @@ void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size
     dsVideoPortType_t portType = device::Host::getInstance().isHDMIOutPortPresent()
                                  ? dsVIDEOPORT_TYPE_HDMI
                                  : dsVIDEOPORT_TYPE_INTERNAL;
-    ret = dsGetVideoPort(portType, &handle);
+    ret = dsGetVideoPort(portType, 0, &handle);
     if ((ret == dsERR_NONE) && (handle != -1)) {
         ret = dsEnableHDCP(handle, contentProtect, hdcpKey, keySize);
     } else {
