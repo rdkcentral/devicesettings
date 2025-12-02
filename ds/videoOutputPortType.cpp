@@ -212,7 +212,7 @@ void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size
     dsError_t ret = dsERR_NONE;
     intptr_t handle = -1;
 
-    // Assuming isHDMIOutPortPresent() will only be 'true' for TV profile devices
+    // Assuming isHDMIOutPortPresent() will only be 'true' for Source devices
     dsVideoPortType_t portType = device::Host::getInstance().isHDMIOutPortPresent()
                                  ? dsVIDEOPORT_TYPE_HDMI
                                  : dsVIDEOPORT_TYPE_INTERNAL;
