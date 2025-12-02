@@ -36,7 +36,7 @@
 #include "illegalArgumentException.hpp"
 #include "videoOutputPortConfig.hpp"
 #include "dslogger.h"
-
+#include "dsVideoPort.h"
 
 
 #include <iostream>
