@@ -212,10 +212,6 @@ void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size
     dsError_t ret = dsERR_NONE;
     intptr_t handle = -1;
 
-    if (!hdcpKey || keySize == 0) {
-        INT_ERROR("VideoOutputPortType::enabledHDCP: Invalid HDCP key or key size");
-        throw IllegalArgumentException();
-    }
     // Assuming isHDMIOutPortPresent() will only be 'true' for TV profile devices
     dsVideoPortType_t portType = device::Host::getInstance().isHDMIOutPortPresent()
                                  ? dsVIDEOPORT_TYPE_HDMI
