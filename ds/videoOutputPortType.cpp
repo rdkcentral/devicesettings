@@ -36,7 +36,7 @@
 #include "illegalArgumentException.hpp"
 #include "videoOutputPortConfig.hpp"
 #include "dslogger.h"
-
+#include "dsVideoPort.h"
 
 
 #include <iostream>
@@ -220,14 +220,15 @@ void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size
     if ((ret == dsERR_NONE) && (handle != -1)) {
         ret = dsEnableHDCP(handle, contentProtect, hdcpKey, keySize);
     } else {
-        INT_ERROR("VideoOutputPortType::enabledHDCP: Error for type %d; error code=%d", portType, ret);
+        INT_ERROR("VideoOutputPortType::enabledHDCP: Error type %d, handle=%ld, error code=%d", portType, handle, ret);
+        // Set ret to an error code on dsGetVideoPort failure or invalid handle to ensure exception is thrown
+        ret = dsERR_GENERAL;
     }
 
-  	if (ret != dsERR_NONE)
-  	{
-  		throw IllegalArgumentException();
-  	}
- 	_hdcpSupported = true;
+    if (ret != dsERR_NONE) {
+        throw IllegalArgumentException();
+    }
+    _hdcpSupported = true;
 }
 
 
