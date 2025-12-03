@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 #include "dsError.h"
 #include "dsUtl.h"
 #include "dsRpc.h"
@@ -82,7 +83,7 @@ dsError_t dsGetVideoPort(dsVideoPortType_t type, int index, intptr_t *handle)
 							 &param,
 							sizeof(param));
 
-	printf("%s..%d-%d\n",__func__,param.type,param.handle);
+	printf("%s..%d-%" PRIdPTR "\n",__func__,param.type,param.handle);
 
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
@@ -505,7 +506,7 @@ dsError_t  dsEnableHDCP(intptr_t handle, bool contentProtect, char *hdcpKey, siz
     _DEBUG_ENTER();
 
 //    if ((keySize <= 0) || (keySize > HDCP_KEY_MAX_SIZE) )
-    if (((unsigned int) keySize > HDCP_KEY_MAX_SIZE) )
+    if (keySize > HDCP_KEY_MAX_SIZE)
     {
         return dsERR_INVALID_PARAM;
     }
@@ -527,6 +528,7 @@ dsError_t  dsEnableHDCP(intptr_t handle, bool contentProtect, char *hdcpKey, siz
             if(rc!=EOK)
             {
                     ERR_CHK(rc);
+		    return dsERR_INVALID_PARAM;
             }
     } 
     

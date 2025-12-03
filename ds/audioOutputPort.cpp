@@ -496,10 +496,13 @@ float AudioOutputPort::getLevel() const{
  * @retval 0 When output is not loop thru
  */
 bool AudioOutputPort::isLoopThru() const {
-       dsError_t ret = dsERR_OPERATION_NOT_SUPPORTED;
 
-       if (ret != dsERR_NONE) throw Exception(ret);
-
+	bool loopThru = false;
+        dsError_t ret = dsIsAudioLoopThru(_handle, &loopThru);
+        if (ret != dsERR_NONE) {
+                throw Exception(ret);
+        }
+        return loopThru;
 }
 
 
@@ -1795,7 +1798,7 @@ void AudioOutputPort::setMuted(const bool mute)
 	if ( (ret = dsSetAudioMute(_handle, mute)) == dsERR_NONE) {
 		_muted = mute;
 	}
-	if (ret != dsERR_NONE) throw IllegalArgumentException();
+	if (ret != dsERR_NONE) throw Exception(ret);
 
 }
 

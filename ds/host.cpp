@@ -78,11 +78,9 @@ Host::~Host()
         static Host instance; // instance is in thread-safe now.
         static bool isFirstTime = true;
         try {
-			if (isFirstTime) {
-				isFirstTime = false;
-            }
-            else {
-            }
+		if (isFirstTime) {
+			isFirstTime = false;
+            	}
         }
         catch (...) {
     		cout << "Host Exception Thrown ...!\n";
@@ -292,7 +290,11 @@ Host::~Host()
  */
     int Host::setPreferredSleepMode(const SleepMode mode)
     {
-        return dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
+	    dsError_t ret = dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
+            if (ret != dsERR_NONE) {
+                throw Exception(ret);
+            }
+            return ret;
     }
 
 
@@ -319,7 +321,10 @@ Host::~Host()
     float Host::getCPUTemperature()
     {
         float temperature = 45.0;
-        dsGetCPUTemperature(&temperature);
+	dsError_t ret = dsGetCPUTemperature(&temperature);
+        if (ret != dsERR_NONE) {
+            throw Exception(ret);
+        }
         return temperature;
     }
 
@@ -334,8 +339,11 @@ Host::~Host()
     uint32_t  Host::getVersion(void) 
     {
         uint32_t versionNumber;     
-        dsGetVersion(&versionNumber);
-        return versionNumber;
+        dsError_t ret = dsGetVersion(&versionNumber);
+        if (ret != dsERR_NONE) {
+            throw Exception(ret);
+        }
+	return versionNumber;
     }
   
 /**
