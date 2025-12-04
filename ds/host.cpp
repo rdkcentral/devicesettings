@@ -322,7 +322,7 @@ Host::~Host()
     */
     uint32_t  Host::getVersion(void) 
     {
-        uint32_t versionNumber;
+        uint32_t versionNumber;     
         dsGetVersion(&versionNumber);
         return versionNumber;
     }
