@@ -76,15 +76,6 @@ Host::~Host()
     Host& Host::getInstance()
     {
         static Host instance; // instance is in thread-safe now.
-        static bool isFirstTime = true;
-        try {
-			if (isFirstTime) {
-				isFirstTime = false;
-            }
-        }
-        catch (...) {
-    		cout << "Host Exception Thrown ...!\n";
-        }
         return instance;
     }
 
