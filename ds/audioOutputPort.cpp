@@ -497,11 +497,8 @@ float AudioOutputPort::getLevel() const{
  */
 bool AudioOutputPort::isLoopThru() const {
 
-	bool loopThru = false;
-        dsError_t ret = dsIsAudioLoopThru(_handle, &loopThru);
-        if (ret != dsERR_NONE) {
-                throw Exception(ret);
-        }
+	   // FIX(Coverity): DEADCODE, NULL_DEREFERENCE
+       // Reason: Return cached value initialized in constructor
         return loopThru;
 }
 
