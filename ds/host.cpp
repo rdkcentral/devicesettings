@@ -388,6 +388,9 @@ Host::~Host()
  */
    std::string Host::getSocIDFromSDK()
    {
+	    // FIX(Coverity): BUFFER_OVERFLOW
+        // Reason: Ensure buffer is initialized and null-terminated
+        // Impact: Internal logic corrected. Public API unchanged.
         char socID[1024] = {0};
         dsGetSocIDFromSDK(socID);
         socID[sizeof(socID) - 1] = '\0';
