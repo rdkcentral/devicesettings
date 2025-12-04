@@ -388,8 +388,9 @@ Host::~Host()
  */
    std::string Host::getSocIDFromSDK()
    {
-        char socID[1024];
+        char socID[1024] = {0};
         dsGetSocIDFromSDK(socID);
+        socID[sizeof(socID) - 1] = '\0';
         return std::string(socID);
    }
 
