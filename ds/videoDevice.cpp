@@ -258,7 +258,7 @@ void VideoDevice::addDFC(const VideoDFC &dfc)
 
 void VideoDevice::getHDRCapabilities(int *capabilities)
 {
-	dsGetHDRCapabilities(_handle, capabilities);
+    dsGetHDRCapabilities(_handle, capabilities);
 }
 
 void VideoDevice::getSettopSupportedResolutions(std::list<std::string>& stbSupportedResoltuions)
