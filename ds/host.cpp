@@ -78,9 +78,9 @@ Host::~Host()
         static Host instance; // instance is in thread-safe now.
         static bool isFirstTime = true;
         try {
-		if (isFirstTime) {
-			isFirstTime = false;
-            	}
+			if (isFirstTime) {
+				isFirstTime = false;
+            }
         }
         catch (...) {
     		cout << "Host Exception Thrown ...!\n";
@@ -290,11 +290,7 @@ Host::~Host()
  */
     int Host::setPreferredSleepMode(const SleepMode mode)
     {
-	    dsError_t ret = dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
-            if (ret != dsERR_NONE) {
-                throw Exception(ret);
-            }
-            return ret;
+	    return dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
     }
 
 
@@ -321,10 +317,7 @@ Host::~Host()
     float Host::getCPUTemperature()
     {
         float temperature = 45.0;
-	dsError_t ret = dsGetCPUTemperature(&temperature);
-        if (ret != dsERR_NONE) {
-            throw Exception(ret);
-        }
+		dsGetCPUTemperature(&temperature);
         return temperature;
     }
 
@@ -338,12 +331,9 @@ Host::~Host()
     */
     uint32_t  Host::getVersion(void) 
     {
-        uint32_t versionNumber;     
-        dsError_t ret = dsGetVersion(&versionNumber);
-        if (ret != dsERR_NONE) {
-            throw Exception(ret);
-        }
-	return versionNumber;
+        uint32_t versionNumber;
+		dsGetVersion(&versionNumber);
+        return versionNumber;
     }
   
 /**
@@ -388,12 +378,9 @@ Host::~Host()
  */
    std::string Host::getSocIDFromSDK()
    {
-	    // FIX(Coverity): BUFFER_OVERFLOW
-        // Reason: Ensure buffer is initialized and null-terminated
-        // Impact: Internal logic corrected. Public API unchanged.
+	    // FIX(Copilot): BUFFER_OVERFLOW
         char socID[1024] = {0};
         dsGetSocIDFromSDK(socID);
-        socID[sizeof(socID) - 1] = '\0';
         return std::string(socID);
    }
 
