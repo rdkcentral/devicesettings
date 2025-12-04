@@ -672,9 +672,8 @@ edid_status_e EDID_Parse(unsigned char* bytes, size_t count, edid_data_t* data_p
     parse_product_code(bytes[idx + 2], bytes[idx + 3], data_ptr);
     parse_serial_number(&bytes[idx + 4], data_ptr);
     parse_manufacture_week(bytes[idx + 8], data_ptr);
-    if (idx + 9 < (int)count) {
-        parse_manufacture_year(bytes[idx + 9], data_ptr);
-    }
+    parse_manufacture_year(bytes[idx + 9], data_ptr);
+    
     idx += 10;
     // EDID version (version, revision)
     parse_edid_version(bytes[idx], bytes[idx + 1], data_ptr);
