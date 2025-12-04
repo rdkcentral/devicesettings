@@ -281,7 +281,7 @@ Host::~Host()
  */
     int Host::setPreferredSleepMode(const SleepMode mode)
     {
-	    return dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
+		return dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
     }
 
 
@@ -308,7 +308,7 @@ Host::~Host()
     float Host::getCPUTemperature()
     {
         float temperature = 45.0;
-		dsGetCPUTemperature(&temperature);
+        dsGetCPUTemperature(&temperature);
         return temperature;
     }
 
@@ -323,7 +323,7 @@ Host::~Host()
     uint32_t  Host::getVersion(void) 
     {
         uint32_t versionNumber;
-		dsGetVersion(&versionNumber);
+        dsGetVersion(&versionNumber);
         return versionNumber;
     }
   
