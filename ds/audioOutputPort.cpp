@@ -1798,7 +1798,7 @@ void AudioOutputPort::setMuted(const bool mute)
 	if ( (ret = dsSetAudioMute(_handle, mute)) == dsERR_NONE) {
 		_muted = mute;
 	}
-	if (ret != dsERR_NONE) throw Exception(ret);
+	if (ret != dsERR_NONE) IllegalArgumentException();
 
 }
 
