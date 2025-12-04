@@ -48,9 +48,7 @@ static void parse_std_timing(unsigned char* bytes, edid_data_t* data_ptr) {
     int idx = 0;
     // two 1 means empty block
     if (bytes[idx] == 1 && bytes[idx + 1] == 1) return;
-    if (bytes[idx] > 224) return;
     int h = ((bytes[idx]) + 31) * 8;
-    if (h == 0) return;
     int v = 0;
     switch ((bytes[idx + 1] & 0xC0) >> 6) {
         case 0: v = (h * 10) / 16; break;
@@ -673,7 +671,6 @@ edid_status_e EDID_Parse(unsigned char* bytes, size_t count, edid_data_t* data_p
     parse_serial_number(&bytes[idx + 4], data_ptr);
     parse_manufacture_week(bytes[idx + 8], data_ptr);
     parse_manufacture_year(bytes[idx + 9], data_ptr);
-    
     idx += 10;
     // EDID version (version, revision)
     parse_edid_version(bytes[idx], bytes[idx + 1], data_ptr);
