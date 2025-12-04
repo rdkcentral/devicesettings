@@ -281,7 +281,7 @@ Host::~Host()
  */
     int Host::setPreferredSleepMode(const SleepMode mode)
     {
-		return dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
+        return dsSetPreferredSleepMode((dsSleepMode_t)mode.getId());
     }
 
 
