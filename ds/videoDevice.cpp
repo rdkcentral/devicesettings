@@ -258,12 +258,7 @@ void VideoDevice::addDFC(const VideoDFC &dfc)
 
 void VideoDevice::getHDRCapabilities(int *capabilities)
 {
-
-	dsError_t ret = dsGetHDRCapabilities(_handle, capabilities);
-        if (ret != dsERR_NONE) {
-             throw Exception(ret);
-        }
-
+	dsGetHDRCapabilities(_handle, capabilities);
 }
 
 void VideoDevice::getSettopSupportedResolutions(std::list<std::string>& stbSupportedResoltuions)
@@ -300,10 +295,7 @@ dsVideoCodecInfo_t VideoDevice::getVideoCodecInfo(dsVideoCodingFormat_t format) 
 
 int VideoDevice::forceDisableHDRSupport(bool disable)
 {
-	dsError_t ret = dsForceDisableHDRSupport(_handle, disable);
-        if (ret != dsERR_NONE) {
-             throw Exception(ret);
-        }
+	dsForceDisableHDRSupport(_handle, disable);
 	return 0;
 }
 
@@ -328,7 +320,6 @@ int VideoDevice::setDisplayframerate(const char *framerate) const
         dsError_t ret;
         char buf[20] = {0};
 	    strncpy(buf, framerate, sizeof(buf)-1);
-	    buf[sizeof(buf)-1] = '\0';
 
         ret = dsSetDisplayframerate(_handle, buf);
         return 0;
@@ -339,9 +330,7 @@ int VideoDevice::getCurrentDisframerate(char *framerate) const
         dsError_t ret;
         char getframerate[20];
         ret = dsGetCurrentDisplayframerate(_handle, getframerate);
-            strncpy(framerate, getframerate, sizeof(getframerate) - 1);
-            framerate[sizeof(getframerate) - 1] = '\0';
-
+        strncpy(framerate, getframerate, 20);
 
      	return 0;
 }
