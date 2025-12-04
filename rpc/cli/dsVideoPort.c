@@ -30,7 +30,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
-#include <inttypes.h>
 #include "dsError.h"
 #include "dsUtl.h"
 #include "dsRpc.h"
@@ -83,7 +82,7 @@ dsError_t dsGetVideoPort(dsVideoPortType_t type, int index, intptr_t *handle)
 							 &param,
 							sizeof(param));
 
-	printf("%s..%d-%" PRIdPTR "\n",__func__,param.type,param.handle);
+	printf("%s..%d-%d\n",__func__,param.type,param.handle);
 
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
