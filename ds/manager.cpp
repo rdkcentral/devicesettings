@@ -184,29 +184,10 @@ void Manager::DeInitialize()
 		VideoOutputPortConfig::getInstance().release();
 		AudioOutputPortConfig::getInstance().release();
 
-		// FIX(Coverity): UNCHECKED_RETURN
-		// Reason: Check HAL termination return values and log errors
-		dsError_t ret;
-		
-		ret = dsVideoDeviceTerm();
-		if (ret != dsERR_NONE) {
-			printf("ERROR: dsVideoDeviceTerm failed with error: %d\n", ret);
-		}
-		
-		ret = dsVideoPortTerm();
-		if (ret != dsERR_NONE) {
-			printf("ERROR: dsVideoPortTerm failed with error: %d\n", ret);
-		}
-		
-		ret = dsAudioPortTerm();
-		if (ret != dsERR_NONE) {
-			printf("ERROR: dsAudioPortTerm failed with error: %d\n", ret);
-		}
-		
-		ret = dsDisplayTerm();
-		if (ret != dsERR_NONE) {
-			printf("ERROR: dsDisplayTerm failed with error: %d\n", ret);
-		}
+		dsVideoDeviceTerm();
+		dsVideoPortTerm();
+		dsAudioPortTerm();
+		dsDisplayTerm();
 	}
 	}
 	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
