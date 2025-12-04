@@ -527,7 +527,7 @@ dsError_t  dsEnableHDCP(intptr_t handle, bool contentProtect, char *hdcpKey, siz
             if(rc!=EOK)
             {
                     ERR_CHK(rc);
-		    return dsERR_INVALID_PARAM;
+		   			return dsERR_INVALID_PARAM;
             }
     } 
     
