@@ -101,7 +101,10 @@ VideoDevice & VideoDevice::getInstance(int id)
  * @param[in] id Port id.
  * @return None.
  */
-VideoDevice::VideoDevice(int id)
+// FIX(Coverity): UNINIT_MEMBER
+// Reason: Initialize all member variables in initializer list
+// Impact: Internal logic corrected. Public API unchanged.
+VideoDevice::VideoDevice(int id) : _id(-1), _handle(-1), _dfc(0), _name("")
 {
 	dsError_t ret = dsGetVideoDevice(id, &_handle);
 
