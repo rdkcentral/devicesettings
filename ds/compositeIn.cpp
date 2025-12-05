@@ -123,6 +123,7 @@ CompositeInput & CompositeInput::getInstance()
 uint8_t CompositeInput::getNumberOfInputs() const
 {
     uint8_t numCompositeInputs;
+    printf("Amit :%s:%d entry \n ",__FUNCTION__,__LINE__);
     dsError_t eError = dsCompositeInGetNumberOfInputs (&numCompositeInputs);
 
 	// Throw an exception if there was an error
@@ -130,6 +131,7 @@ uint8_t CompositeInput::getNumberOfInputs() const
 	{
 		throw Exception(eError);
 	}
+    printf("Amit :%s:%d exit \n ",__FUNCTION__,__LINE__);
 
     return (numCompositeInputs);
 }
@@ -216,6 +218,7 @@ int8_t CompositeInput::getActivePort() const
 bool CompositeInput::isPortConnected(int8_t Port) const
 {
     dsCompositeInStatus_t Status;
+    printf("Amit :%s:%d entry \n ",__FUNCTION__,__LINE__);
     dsError_t eError =  dsCompositeInGetStatus (&Status);
 
 	// Throw an exception if there was an error
@@ -223,6 +226,7 @@ bool CompositeInput::isPortConnected(int8_t Port) const
 	{
 		throw Exception(eError);
 	}
+    printf("Amit :%s:%d exit \n ",__FUNCTION__,__LINE__);
 	return (Status.isPortConnected[Port]);
 }
 

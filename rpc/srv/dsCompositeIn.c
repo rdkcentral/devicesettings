@@ -309,7 +309,7 @@ IARM_Result_t _dsCompositeInTerm(void *arg)
 IARM_Result_t _dsCompositeInGetNumberOfInputs(void *arg)
 {
     _DEBUG_ENTER();
-
+INT_INFO("[%d][%s]: entry \r\n", __LINE__, __FUNCTION__);
     dsCompositeInGetNumberOfInputsParam_t *param = (dsCompositeInGetNumberOfInputsParam_t *)arg;
 
     IARM_BUS_Lock(lock);
@@ -334,8 +334,9 @@ IARM_Result_t _dsCompositeInGetNumberOfInputs(void *arg)
             }
         }
         if(func) {
-            INT_DEBUG("%s:%d - invoking dsCompositeInGetNumberOfInputs()\n", __PRETTY_FUNCTION__,__LINE__);
+            INT_INFO("%s:%d - invoking dsCompositeInGetNumberOfInputs()\n", __PRETTY_FUNCTION__,__LINE__);
             param->result = func(&param->numCompositeInputs);
+INT_INFO("[%d][%s]: function return \r\n", __LINE__, __FUNCTION__);
         }
     }
     else
@@ -345,13 +346,14 @@ IARM_Result_t _dsCompositeInGetNumberOfInputs(void *arg)
     }
 
     IARM_BUS_Unlock(lock);
+INT_INFO("[%d][%s]: return \r\n", __LINE__, __FUNCTION__);
     return IARM_RESULT_SUCCESS;
 }
 
 IARM_Result_t _dsCompositeInGetStatus(void *arg)
 {
     _DEBUG_ENTER();
-
+INT_INFO("[%d][%s]: entry \r\n", __LINE__, __FUNCTION__);
     dsCompositeInGetStatusParam_t *param= (dsCompositeInGetStatusParam_t *)arg;
 
     IARM_BUS_Lock(lock);
@@ -375,8 +377,9 @@ IARM_Result_t _dsCompositeInGetStatus(void *arg)
             }
         }
         if(func) {
-            INT_DEBUG("%s:%d - invoking dsCompositeInGetStatus()\n", __PRETTY_FUNCTION__,__LINE__);
+            INT_INFO("%s:%d - invoking dsCompositeInGetStatus()\n", __PRETTY_FUNCTION__,__LINE__);
             param->result = func(&param->status);
+            INT_INFO("%s:%d - invoking dsCompositeInGetStatus() return\n", __PRETTY_FUNCTION__,__LINE__);
         }
     }
     else
@@ -386,7 +389,7 @@ IARM_Result_t _dsCompositeInGetStatus(void *arg)
     }
 
     IARM_BUS_Unlock(lock);
-
+INT_INFO("[%d][%s]: return \r\n", __LINE__, __FUNCTION__);
     return IARM_RESULT_SUCCESS;
 }
 

@@ -102,6 +102,7 @@ dsError_t dsHdmiInGetNumberOfInputs (uint8_t *pNumHdmiInputs)
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(pNumHdmiInputs != NULL, dsERR_INVALID_PARAM);
+    printf("Amit %s:%d - entry\n", __PRETTY_FUNCTION__,__LINE__);
 
     dsHdmiInGetNumberOfInputsParam_t param;
     param.numHdmiInputs = 0;
@@ -116,11 +117,11 @@ dsError_t dsHdmiInGetNumberOfInputs (uint8_t *pNumHdmiInputs)
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
         *pNumHdmiInputs = param.numHdmiInputs;
-        printf("%s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
+        printf(" Amit %s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
         return param.result;
 	}
 
-    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    printf("Amit %s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
 	return dsERR_GENERAL;
 }
 
@@ -128,6 +129,7 @@ dsError_t dsHdmiInGetStatus (dsHdmiInStatus_t *pStatus)
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(pStatus != NULL, dsERR_INVALID_PARAM);
+    printf("Amit %s:%d - entry\n", __PRETTY_FUNCTION__,__LINE__);
 
 
     dsHdmiInGetStatusParam_t param;
@@ -143,11 +145,11 @@ dsError_t dsHdmiInGetStatus (dsHdmiInStatus_t *pStatus)
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
         *pStatus = param.status;
-        printf("%s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
+        printf("Amit %s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
         return param.result;
 	}
 
-    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    printf("Amit %s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
 	return dsERR_GENERAL;
 }
 

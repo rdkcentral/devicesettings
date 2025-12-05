@@ -776,6 +776,7 @@ IARM_Result_t _dsHdmiInTerm(void *arg)
 IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
 {
     _DEBUG_ENTER();
+    INT_INFO("[%d][%s]: entry \r\n", __LINE__, __FUNCTION__);
 
     dsHdmiInGetNumberOfInputsParam_t *param = (dsHdmiInGetNumberOfInputsParam_t *)arg;
 
@@ -785,6 +786,7 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
         param->result = dsHdmiInGetNumberOfInputs(&param->numHdmiInputs);
+        INT_INFO("[%d][%s]: its return \r\n", __LINE__, __FUNCTION__);
     }
     else
     {
@@ -792,6 +794,7 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
         param->result = dsERR_GENERAL;
     }
     IARM_BUS_Unlock(lock);
+    INT_INFO("[%d][%s]: reutrn \r\n", __LINE__, __FUNCTION__);
 
     return IARM_RESULT_SUCCESS;
 }
@@ -799,6 +802,7 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
 IARM_Result_t _dsHdmiInGetStatus(void *arg)
 {
     _DEBUG_ENTER();
+    INT_INFO("[%d][%s]: entry \r\n", __LINE__, __FUNCTION__);
 
     dsHdmiInGetStatusParam_t *param= (dsHdmiInGetStatusParam_t *)arg;
 
@@ -808,6 +812,7 @@ IARM_Result_t _dsHdmiInGetStatus(void *arg)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
         param->result = dsHdmiInGetStatus(&param->status);
+        INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
     }
     else
     {
@@ -816,6 +821,7 @@ IARM_Result_t _dsHdmiInGetStatus(void *arg)
     }
 
     IARM_BUS_Unlock(lock);
+    INT_INFO("[%d][%s]: return \r\n", __LINE__, __FUNCTION__);
 
     return IARM_RESULT_SUCCESS;
 }
