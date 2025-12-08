@@ -23,12 +23,14 @@ endif
 	@make -C rpc/cli uninstall clean all
 	@make -C rpc/srv uninstall clean all
 	@make -C ds uninstall clean all
+	@make -C hal-configs uninstall clean all
 	#@make -C sample uninstall clean all
 
 clean:
 	@make -C rpc/srv $@ 
 	@make -C rpc/cli $@ 
 	@make -C ds $@
+	@make -C hal-configs $@
 ifneq ($(STANDALONE_BUILD_ENABLED),y)
 	@make -C hal/src $@
 endif
@@ -39,6 +41,7 @@ uninstall: clean
 	@make -C rpc/srv $@ 
 	@make -C rpc/cli $@ 
 	@make -C ds $@
+	@make -C hal-configs $@
 	@make -C hal/emu $@
 	@make -C hal/rng150 $@
 #	@make -C sample $@

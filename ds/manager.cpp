@@ -46,6 +46,7 @@
 #include <dlfcn.h>
 #include "dsHALConfig.h"
 
+#define DSHALLOCAL "/usr/lib/libdshallocal.so"
 
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -167,7 +168,8 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 
 	pthread_mutex_lock(&dsLock);
 
-		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+		//void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+		void *dllib = dlopen(DSHALLOCAL, RTLD_LAZY);
 		if (dllib) {
 			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
 			if (*pConfigVar != NULL) {
@@ -180,7 +182,7 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 			dlclose(dllib);
 		}
 		else {
-			INT_ERROR("%d:%s: Open %s failed\n", __LINE__, __func__, RDK_DSHAL_NAME);
+			INT_ERROR("%d:%s: Open %s failed\n", __LINE__, __func__, DSHALLOCAL);
 		}
 	pthread_mutex_unlock(&dsLock);
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
