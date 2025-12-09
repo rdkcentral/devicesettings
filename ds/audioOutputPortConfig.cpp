@@ -239,7 +239,7 @@ void AudioOutputPortConfig::load()
 		if ( configuration.pKConfigs != NULL && configuration.pKPorts != NULL && 
 			configuration.pKConfigSize != NULL && configuration.pKPortSize != NULL) 
 		{
-			dumpconfig(&configuration);
+			//dumpconfig(&configuration);
 			/*
 			* Initialize Audio portTypes (encodings, compressions etc.)
 			* and its port instances (db, level etc)

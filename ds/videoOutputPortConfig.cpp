@@ -446,7 +446,7 @@ void VideoOutputPortConfig::load()
 		{
 
 			#if DEBUG
-			dumpconfig(&configuration);
+			//dumpconfig(&configuration);
 			#endif
 			/* Initialize a set of supported resolutions
 		 	*
