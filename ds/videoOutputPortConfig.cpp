@@ -351,7 +351,7 @@ void dumpconfig(videoPortConfigs_t *config)
 void VideoOutputPortConfig::load()
 {
 	static int configSize, portSize, resolutionSize, invalid_size = -1;
-	videoPortConfigs_t configuration = {0};
+	static videoPortConfigs_t configuration = {0};
 	const char* searchVaribles[] = {
         "kVideoPortConfigs",
         "kVideoPortConfigs_size",
@@ -362,6 +362,7 @@ void VideoOutputPortConfig::load()
     };
 	bool ret = false;
 
+	INT_INFO("Enter function\n");
 	try {
 		/*
 		 * Load Constants First.
@@ -444,7 +445,8 @@ void VideoOutputPortConfig::load()
 		{
 
 			#if DEBUG
-			dumpconfig(&configuration);
+			//dumpconfig(&configuration);
+			INT_INFO("disable the dumpconfig()\n");
 			#endif
 			/* Initialize a set of supported resolutions
 		 	*
@@ -502,6 +504,7 @@ void VideoOutputPortConfig::load()
 		cout << "VIdeo Outport Exception Thrown. ..."<<endl;
         throw Exception("Failed to load video outport config");
 	}
+	INT_INFO("Exit function\n");
 
 }
 
