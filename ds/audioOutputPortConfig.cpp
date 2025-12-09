@@ -124,8 +124,10 @@ void dumpconfig(audioConfigs_t *config)
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
 	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
-	INT_INFO("%d:%s: pKConfigSize %p = %d \n", __LINE__, __func__, config->pKConfigSize, *(config->pKConfigSize));
-	INT_INFO("%d:%s: pKPortSize %p = %d \n", __LINE__, __func__, config->pKPortSize, *(config->pKPortSize));
+	INT_INFO("%d:%s: pKConfigSize add= %p \n", __LINE__, __func__, config->pKConfigSize);
+	INT_INFO("%d:%s: pKConfigSize value= %d \n", __LINE__, __func__, *(config->pKConfigSize));
+	INT_INFO("%d:%s: pKPortSize add= %p \n", __LINE__, __func__, config->pKPortSize);
+	INT_INFO("%d:%s: pKPortSize value = %d \n", __LINE__, __func__, *(config->pKPortSize));
 
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)

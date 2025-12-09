@@ -137,6 +137,7 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
+			std::lock_guard<std::mutex> lock(mutex);
 	    	AudioOutputPortConfig::getInstance().load();
 	    	VideoOutputPortConfig::getInstance().load();
 	    	VideoDeviceConfig::getInstance().load();
@@ -153,6 +154,7 @@ void Manager::Initialize()
 
 void Manager::load()
 {
+	std::lock_guard<std::mutex> lock(mutex);
 	printf("%d:%s load start\n", __LINE__, __FUNCTION__);
 	device::AudioOutputPortConfig::getInstance().load();
 	device::VideoOutputPortConfig::getInstance().load();

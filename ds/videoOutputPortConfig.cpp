@@ -281,11 +281,14 @@ void dumpconfig(videoPortConfigs_t *config)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
-	INT_INFO("%d:%s: pKConfigSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortConfigs_size, *(config->pKVideoPortConfigs_size));
+	INT_INFO("%d:%s: pKConfigSize pointer add = %p\n", __LINE__, __func__, config->pKVideoPortConfigs_size);
+	INT_INFO("%d:%s: pKConfigSize pointer value = %d\n", __LINE__, __func__, *(config->pKVideoPortConfigs_size));
 	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
-	INT_INFO("%d:%s: pKPortSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortPorts_size, *(config->pKVideoPortPorts_size));
+	INT_INFO("%d:%s: pKPortSize pointer add = %p\n", __LINE__, __func__, config->pKVideoPortPorts_size);
+	INT_INFO("%d:%s: pKPortSize pointer value = %d\n", __LINE__, __func__, *(config->pKVideoPortPorts_size));
 	INT_INFO("%d:%s: pKResolutionsSettings = %p\n", __LINE__, __func__, config->pKResolutionsSettings);
-	INT_INFO("%d:%s: pKResolutionsSettingsSize pointer %p = %d\n", __LINE__, __func__, config->pKResolutionsSettings_size, *(config->pKResolutionsSettings_size));
+	INT_INFO("%d:%s: pKResolutionsSettingsSize pointer %p \n", __LINE__, __func__, config->pKResolutionsSettings_size);
+	INT_INFO("%d:%s: pKResolutionsSettingsSize pointer value = %d\n", __LINE__, __func__, *(config->pKResolutionsSettings_size));
 
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(config->pKConfigs != NULL && *(config->pKVideoPortConfigs_size) != -1 && 
@@ -446,7 +449,7 @@ void VideoOutputPortConfig::load()
 		{
 
 			#if DEBUG
-			//dumpconfig(&configuration);
+			dumpconfig(&configuration);
 			#endif
 			/* Initialize a set of supported resolutions
 		 	*

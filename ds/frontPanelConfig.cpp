@@ -488,7 +488,7 @@ void FrontPanelConfig::load()
 		*(configuration.pKIndicators_size) > 0)
 	{
 		#if DEBUG
-		//dumpconfig(&configuration);
+		dumpconfig(&configuration);
 		#endif
 
 		{
