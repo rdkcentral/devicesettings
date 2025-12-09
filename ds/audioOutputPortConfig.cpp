@@ -165,7 +165,7 @@ void dumpconfig(audioConfigs_t *config)
 void AudioOutputPortConfig::load()
 {
 	static int configSize, portSize, invalidSize = -1;
-	audioConfigs_t configuration = {0};
+	static audioConfigs_t configuration = {0};
 	const char* searchVaribles[] = {
         "kAudioConfigs",
         "kAudioPorts",
@@ -173,7 +173,8 @@ void AudioOutputPortConfig::load()
         "kAudioPorts_size"
     };
 	bool ret = false;
-
+	
+	INT_INFO("%d:%s: enter function\n", __LINE__, __func__);
 	try {
 		/*
 		 * Load Constants First.
@@ -242,6 +243,7 @@ void AudioOutputPortConfig::load()
 			configuration.pKConfigSize != NULL && configuration.pKPortSize != NULL) 
 		{
 			//dumpconfig(&configuration);
+			INT_INFO("configuration.pKConfigs =%p, configuration.pKPorts =%p, *(configuration.pKConfigSize) = %d, *(configuration.pKPortSize) = %d\n", configuration.pKConfigs, configuration.pKPorts, *(configuration.pKConfigSize), *(configuration.pKPortSize));
 			/*
 			* Initialize Audio portTypes (encodings, compressions etc.)
 			* and its port instances (db, level etc)
@@ -281,6 +283,7 @@ void AudioOutputPortConfig::load()
 	catch(const Exception &e) {
 		throw e;
 	}
+	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 }
 
 void AudioOutputPortConfig::release()

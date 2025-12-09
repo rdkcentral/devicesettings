@@ -123,13 +123,13 @@ typedef struct videoDeviceConfig
 void VideoDeviceConfig::load()
 {
 	int configSize, invalid_size = -1;
-	videoDeviceConfig_t videoDeviceConfig = {0};
+	static videoDeviceConfig_t videoDeviceConfig = {0};
 	const char* searchVaribles[] = {
         "kVideoDeviceConfigs",
         "kVideoDeviceConfigs_size",
     };
 	bool ret = false;
-
+    INT_INFO("%d:%s: enter function\n", __LINE__, __func__);
 	/*
 	 * Load Constants First.
 	 */
@@ -165,7 +165,7 @@ void VideoDeviceConfig::load()
 	if (videoDeviceConfig.pKVideoDeviceConfigs != NULL && videoDeviceConfig.pKVideoDeviceConfigs_size != NULL)
 	{
 		#if DEBUG
-		dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));
+		//dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));
 		#endif
 		for (size_t i = 0; i < *(videoDeviceConfig.pKVideoDeviceConfigs_size); i++) {
 			_vDevices.push_back(VideoDevice(i));
@@ -179,6 +179,7 @@ void VideoDeviceConfig::load()
 	{
 		INT_ERROR("%d:%s:  Congigs are NULL and  config size are -1\n", __LINE__, __func__);
 	}
+	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 }
 
 void VideoDeviceConfig::release()

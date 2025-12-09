@@ -413,7 +413,7 @@ void FrontPanelConfig::load()
 	 * 2. Create Indicators.
 	 */
 	static int indicatorSize, indicatorColorSize, textDisplaySize, invalid_size = -1;
-	fpdConfigs_t configuration = {0};
+	static fpdConfigs_t configuration = {0};
 
 	const char* searchVaribles[] = {
         "kFPDIndicatorColors",
@@ -424,7 +424,7 @@ void FrontPanelConfig::load()
 		"kFPDTextDisplays_size"
     };
 	bool ret = false;
-
+	INT_INFO("%d:%s: enter function\n", __LINE__, __func__);
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
 		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKFPDIndicatorColors );
 		//ret= false;
@@ -488,7 +488,7 @@ void FrontPanelConfig::load()
 		*(configuration.pKIndicators_size) > 0)
 	{
 		#if DEBUG
-		dumpconfig(&configuration);
+		//dumpconfig(&configuration);
 		#endif
 
 		{
@@ -530,11 +530,13 @@ void FrontPanelConfig::load()
 		{
 			INT_ERROR("No valid text display configuration found\n");
 		} 
+		INT_INFO("Front Panel Configurations Loaded\n");
 	}
 	else 
 	{
 		INT_ERROR("No valid front panel configuration found\n");	
 	}
+	INT_INFO("%d:%s: exit function\n", __LINE__, __func__);
 }
 
 }
