@@ -139,8 +139,8 @@ void VideoDeviceConfig::load()
 
 	INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
 	ret = searchConfigs(searchVaribles[0], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs));
-	//ret= false;
-	//INT_INFO("make default ret = false to read fallback\n);
+	ret= false;
+	INT_INFO("make default ret = false to read fallback\n");
 	if(ret == true)
 	{
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
