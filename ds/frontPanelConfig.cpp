@@ -355,11 +355,12 @@ void dumpconfig(fpdConfigs_t *configuration)
 	// Dump the configuration details
 	INT_INFO("\n\n===========================================================================\n\n");
 	INT_INFO("Start of Front Panel Configuration Details:\n");
-	INT_INFO("configuration->pKFPDIndicatorColors_size: %d\n", *(configuration->pKFPDIndicatorColors_size));
-	INT_INFO("configuration->pKIndicators_size: %d\n", *(configuration->pKIndicators_size));
-	INT_INFO("configuration->pKTextDisplays_size: %p\n", configuration->pKTextDisplays_size);
-	INT_INFO("Dumping Front Panel Configuration Details:\n");
-	INT_INFO("Indicator Colors:\n");
+	if((configuration->pKFPDIndicatorColors !=NULL) && *(configuration->pKFPDIndicatorColors_size) != -1 && (configuration->pKIndicators != NULL) && *(configuration->pKIndicators_size) != -1)
+	{
+		INT_INFO("configuration->pKFPDIndicatorColors_size addr: %p\n", (configuration->pKFPDIndicatorColors_size));
+		INT_INFO("configuration->pKFPDIndicatorColors_size data: %d\n", *(configuration->pKFPDIndicatorColors_size));
+		INT_INFO("configuration->pKIndicators_size addr: %p\n", (configuration->pKIndicators_size));
+		INT_INFO("configuration->pKIndicators_size data: %d\n", *(configuration->pKIndicators_size));
 	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
 		INT_INFO("  Color ID: %d, color: %d\n",
 			   configuration->pKFPDIndicatorColors[i].id,
@@ -375,9 +376,12 @@ void dumpconfig(fpdConfigs_t *configuration)
 			   configuration->pKIndicators[i].levels,
 			   configuration->pKIndicators[i].colorMode);
 	}
+	}
 
 	if(configuration->pKTextDisplays != NULL && configuration->pKTextDisplays_size != NULL){
+        INT_INFO("configuration->pKTextDisplays_size: %p\n", configuration->pKTextDisplays_size);
 		INT_INFO("Text Displays:*(configuration->pKTextDisplays_size) =%d\n", *(configuration->pKTextDisplays_size));
+
 
 		for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
 			INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",

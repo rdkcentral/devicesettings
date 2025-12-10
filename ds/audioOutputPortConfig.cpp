@@ -121,6 +121,9 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 
 void dumpconfig(audioConfigs_t *config)
 {
+	INT_INFO("\n\n=========================================================================================================================\n\n");
+	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)
+	{
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
 	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
@@ -128,10 +131,6 @@ void dumpconfig(audioConfigs_t *config)
 	INT_INFO("%d:%s: pKConfigSize value = %d \n", __LINE__, __func__, *(config->pKConfigSize));
 	INT_INFO("%d:%s: pKPortSize addr = %p \n", __LINE__, __func__, config->pKPortSize);
 	INT_INFO("%d:%s: pKPortSize value = %d \n", __LINE__, __func__, *(config->pKPortSize));
-
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)
-	{
 	for (size_t i = 0; i < *(config->pKConfigSize); i++) {
 			const dsAudioTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
 			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);

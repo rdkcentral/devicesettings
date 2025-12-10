@@ -280,13 +280,6 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 void dumpconfig(videoPortConfigs_t *config)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-	INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
-	INT_INFO("%d:%s: pKConfigSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortConfigs_size, *(config->pKVideoPortConfigs_size));
-	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
-	INT_INFO("%d:%s: pKPortSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortPorts_size, *(config->pKVideoPortPorts_size));
-	INT_INFO("%d:%s: pKResolutionsSettings = %p\n", __LINE__, __func__, config->pKResolutionsSettings);
-	INT_INFO("%d:%s: pKResolutionsSettingsSize pointer %p = %d\n", __LINE__, __func__, config->pKResolutionsSettings_size, *(config->pKResolutionsSettings_size));
-
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(config->pKConfigs != NULL && *(config->pKVideoPortConfigs_size) != -1 && 
 	   config->pKPorts != NULL && *(config->pKVideoPortPorts_size) != -1 &&
@@ -294,6 +287,13 @@ void dumpconfig(videoPortConfigs_t *config)
 	{
 		INT_INFO("\n\n####################################################################### \n\n");
 		INT_INFO("%d:%s: Dumping Resolutions Settings\n", __LINE__, __func__);
+		INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
+	    INT_INFO("%d:%s: pKConfigSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortConfigs_size, *(config->pKVideoPortConfigs_size));
+	    INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
+	    INT_INFO("%d:%s: pKPortSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortPorts_size, *(config->pKVideoPortPorts_size));
+	    INT_INFO("%d:%s: pKResolutionsSettings = %p\n", __LINE__, __func__, config->pKResolutionsSettings);
+	    INT_INFO("%d:%s: pKResolutionsSettingsSize pointer %p = %d\n", __LINE__, __func__, config->pKResolutionsSettings_size, *(config->pKResolutionsSettings_size));
+
 		for (size_t i = 0; i < *(config->pKResolutionsSettings_size); i++) {
 			dsVideoPortResolution_t *resolution = &(config->pKResolutionsSettings[i]);
 			INT_INFO("%d:%s: resolution->name = %s\n", __LINE__, __func__, resolution->name);
