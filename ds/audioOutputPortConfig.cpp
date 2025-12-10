@@ -124,8 +124,10 @@ void dumpconfig(audioConfigs_t *config)
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
 	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
-	INT_INFO("%d:%s: pKConfigSize %p = %d \n", __LINE__, __func__, config->pKConfigSize, *(config->pKConfigSize));
-	INT_INFO("%d:%s: pKPortSize %p = %d \n", __LINE__, __func__, config->pKPortSize, *(config->pKPortSize));
+	INT_INFO("%d:%s: pKConfigSize addr =%p \n", __LINE__, __func__, config->pKConfigSize);
+	INT_INFO("%d:%s: pKConfigSize value = %d \n", __LINE__, __func__, *(config->pKConfigSize));
+	INT_INFO("%d:%s: pKPortSize addr = %p \n", __LINE__, __func__, config->pKPortSize);
+	INT_INFO("%d:%s: pKPortSize value = %d \n", __LINE__, __func__, *(config->pKPortSize));
 
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(config->pKConfigs != NULL && *(config->pKConfigSize) != -1)
@@ -141,7 +143,7 @@ void dumpconfig(audioConfigs_t *config)
 	}
 	else
 	{
-		INT_ERROR("%d:%s: kAudioConfigs is NULL and kConfig_size_local is -1\n", __LINE__, __func__);
+		INT_ERROR("%d:%s: kAudioConfigs is NULL and *(config->pKConfigSize) is -1\n", __LINE__, __func__);
 	}
 	if(config->pKPorts != NULL && *(config->pKPortSize) != -1)
 	{
@@ -153,7 +155,7 @@ void dumpconfig(audioConfigs_t *config)
 	}
 	else
 	{
-		INT_ERROR("%d:%s: kAudioPorts is NULL and kPort_size_local is -1\n", __LINE__, __func__);
+		INT_ERROR("%d:%s: kAudioPorts is NULL and *(config->pKPortSize) is -1\n", __LINE__, __func__);
 	}
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
@@ -238,8 +240,8 @@ void AudioOutputPortConfig::load()
 		if ( configuration.pKConfigs != NULL && configuration.pKPorts != NULL && 
 			configuration.pKConfigSize != NULL && configuration.pKPortSize != NULL) 
 		{
-			//dumpconfig(&configuration);
-			INT_INFO("disable the dumpconfig()\n");
+			dumpconfig(&configuration);
+			//INT_INFO("disable the dumpconfig()\n");
 			/*
 			* Initialize Audio portTypes (encodings, compressions etc.)
 			* and its port instances (db, level etc)
