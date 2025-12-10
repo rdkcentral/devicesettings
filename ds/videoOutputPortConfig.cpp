@@ -445,8 +445,8 @@ void VideoOutputPortConfig::load()
 		{
 
 			#if DEBUG
-			//dumpconfig(&configuration);
-			INT_INFO("disable the dumpconfig()\n");
+			dumpconfig(&configuration);
+			//INT_INFO("disable the dumpconfig()\n");
 			#endif
 			/* Initialize a set of supported resolutions
 		 	*

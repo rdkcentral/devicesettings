@@ -487,8 +487,8 @@ void FrontPanelConfig::load()
 		*(configuration.pKIndicators_size) > 0)
 	{
 		#if DEBUG
-		//dumpconfig(&configuration);
-		INT_INFO("disable the dumpconfig()\n");
+		dumpconfig(&configuration);
+		//INT_INFO("disable the dumpconfig()\n");
 		#endif
 
 		{
