@@ -44,10 +44,11 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <fstream>
 #include "dsHALConfig.h"
 
 
-static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+//static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
 
 /**
@@ -86,6 +87,62 @@ Manager::~Manager() {
 	}\
 	}
 
+std::string parse_opt_flag( std::string file_name , bool integer_check , bool debugStats )
+{
+    std::string return_buffer = "";
+    std::ifstream parse_opt_flag_file( file_name.c_str());
+
+    if (!parse_opt_flag_file)
+    {
+        if ( debugStats ){
+            INT_INFO("Failed to open [%s] file",file_name.c_str());
+        }
+    }
+    else
+    {
+        std::string line = "";
+        if (std::getline(parse_opt_flag_file, line))
+        {
+            if ( debugStats ){
+                INT_INFO("Content in [%s] is [%s]",file_name.c_str(),line.c_str());
+            }
+        }
+        else
+        {
+            if ( debugStats ){
+                INT_INFO("No Content in [%s]",file_name.c_str());
+            }
+        }
+        parse_opt_flag_file.close();
+
+        return_buffer = line;
+
+        if (integer_check)
+        {
+            if (line.empty())
+            {
+                integer_check = false;
+            }
+            else
+            {
+                for (char c : line) {
+                    if (!isdigit(c))
+                    {
+                        integer_check = false;
+                        break;
+                    }
+                }
+            }
+
+            if ( false == integer_check )
+            {
+                return_buffer = "";
+            }
+        }
+    }
+    return return_buffer;
+}
+
 /**
  * @addtogroup dssettingsmanagerapi
  * @{
@@ -113,6 +170,8 @@ Manager::~Manager() {
 void Manager::Initialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+	
+	int delay = 1;	
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
 	try {
@@ -138,9 +197,17 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
+			std::string delaystr = parse_opt_flag("/opt/delay", true, true);
+            if (!delaystr.empty())
+            {
+                INT_INFO("dealy: [%s]", delaystr.c_str());
+                delay = std::stoi(delaystr);
+			}
 	    	AudioOutputPortConfig::getInstance().load();
+			sleep(delay);
 	    	VideoOutputPortConfig::getInstance().load();
-	    	VideoDeviceConfig::getInstance().load();
+	    	sleep(delay);
+			VideoDeviceConfig::getInstance().load();
 	    }
         IsInitialized++;
     }
