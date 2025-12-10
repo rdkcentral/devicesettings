@@ -68,6 +68,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+static std::mutex gSearchMutex;
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -164,9 +165,12 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
+	INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
 
-	pthread_mutex_lock(&dsLock);
-
+	//pthread_mutex_lock(&dsLock);
+	std::lock_guard<std::mutex> lock(gSearchMutex);
+	INT_INFO("%d:%s: using lock_guard() instead pthread_mutex_lock \n", __LINE__, __func__);
+	 	dlerror(); // clear old error
 		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
 		if (dllib) {
 			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
@@ -180,9 +184,10 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 			dlclose(dllib);
 		}
 		else {
-			INT_ERROR("%d:%s: Open %s failed\n", __LINE__, __func__, RDK_DSHAL_NAME);
+			const char* err = dlerror();
+			INT_ERROR("%d:%s: Open %s failed with error err= %s\n", __LINE__, __func__, RDK_DSHAL_NAME, err ? err: "unknown");
 		}
-	pthread_mutex_unlock(&dsLock);
+	//pthread_mutex_unlock(&dsLock);
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 	return (*pConfigVar != NULL);
 }

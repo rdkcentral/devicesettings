@@ -92,12 +92,12 @@ VideoDFC & VideoDeviceConfig::getDefaultDFC()
 void dumpconfig(dsVideoConfig_t *pKVideoDeviceConfigs, int videoDeviceConfigs_size)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-	INT_INFO("%d:%s: pKVideoDeviceConfigs = %p\n", __LINE__, __func__, pKVideoDeviceConfigs);
-	INT_INFO("%d:%s: videoDeviceConfigs_size = %d\n", __LINE__, __func__, videoDeviceConfigs_size);
 
 	INT_INFO("\n\n=========================================================================================================================\n\n");
 	if(pKVideoDeviceConfigs != NULL && videoDeviceConfigs_size != -1)
 	{
+		INT_INFO("%d:%s: pKVideoDeviceConfigs = %p\n", __LINE__, __func__, pKVideoDeviceConfigs);
+		INT_INFO("%d:%s: videoDeviceConfigs_size = %d\n", __LINE__, __func__, videoDeviceConfigs_size);
 		for (int i = 0; i < videoDeviceConfigs_size; i++) {
 			INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu\n ", i, pKVideoDeviceConfigs[i].numSupportedDFCs);
 			for (int j = 0; j < pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {

@@ -129,8 +129,7 @@ void dumpconfig(audioConfigs_t *config)
 	INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
 	INT_INFO("%d:%s: pKConfigSize addr =%p \n", __LINE__, __func__, config->pKConfigSize);
 	INT_INFO("%d:%s: pKConfigSize value = %d \n", __LINE__, __func__, *(config->pKConfigSize));
-	INT_INFO("%d:%s: pKPortSize addr = %p \n", __LINE__, __func__, config->pKPortSize);
-	INT_INFO("%d:%s: pKPortSize value = %d \n", __LINE__, __func__, *(config->pKPortSize));
+
 	for (size_t i = 0; i < *(config->pKConfigSize); i++) {
 			const dsAudioTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
 			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
@@ -146,6 +145,8 @@ void dumpconfig(audioConfigs_t *config)
 	}
 	if(config->pKPorts != NULL && *(config->pKPortSize) != -1)
 	{
+		INT_INFO("%d:%s: pKPortSize addr = %p \n", __LINE__, __func__, config->pKPortSize);
+		INT_INFO("%d:%s: pKPortSize value = %d \n", __LINE__, __func__, *(config->pKPortSize));
 		for (size_t i = 0; i < *(config->pKPortSize); i++) {
 			const dsAudioPortConfig_t *port = &(config->pKPorts[i]);
 			INT_INFO("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
