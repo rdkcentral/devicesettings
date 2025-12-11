@@ -3675,7 +3675,6 @@ IARM_Result_t _dsAudioPortTerm(void *arg)
     return IARM_RESULT_SUCCESS;
 }
 
-
 IARM_Result_t _dsGetAudioFormat(void *arg)
 {
     _DEBUG_ENTER();
@@ -3689,36 +3688,37 @@ IARM_Result_t _dsGetAudioFormat(void *arg)
         if (dllib) {
             func = (dsGetAudioFormat_t) dlsym(dllib, "dsGetAudioFormat");
             if (func) {
-                INT_DEBUG("dsGetAudioFormat_t(int, dsAudioFormat_t *) is defined and loaded\r\n");
+                INT_INFO("dsGetAudioFormat_t(int, dsAudioFormat_t *) is defined and loaded\r\n");
+                dsAudioFormatParam_t *param = (dsAudioFormatParam_t *)arg;
+
+                if (func != 0 && param != NULL)
+                {
+                    dsError_t ret = dsERR_NONE;
+                    dsAudioFormat_t aFormat = dsAUDIO_FORMAT_NONE;
+                    param->audioFormat = dsAUDIO_FORMAT_NONE;
+                    ret = func(param->handle, &aFormat);
+                    if (ret == dsERR_NONE)
+                    {
+                        param->audioFormat = aFormat;
+                        result = IARM_RESULT_SUCCESS;
+                    } else {
+                        INT_ERROR("Error from DSHAL[%s] for dsGetAudioFormat ret:%d \r\n", RDK_DSHAL_NAME,ret);
+                    }
+                }
             }
             else {
-                INT_INFO("dsGetAudioFormat_t(int, dsAudioFormat_t *) is not defined\r\n");
+                INT_ERROR("dsGetAudioFormat_t(int, dsAudioFormat_t *) is not defined\r\n");
             }
             dlclose(dllib);
         }
         else {
             INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
         }
-    }
-
-    dsAudioFormatParam_t *param = (dsAudioFormatParam_t *)arg;
-
-    if (func != 0 && param != NULL)
-    {
-        dsAudioFormat_t aFormat = dsAUDIO_FORMAT_NONE;
-        param->audioFormat = dsAUDIO_FORMAT_NONE;
-
-        if (func(param->handle, &aFormat) == dsERR_NONE)
-        {
-           param->audioFormat = aFormat;
-           result = IARM_RESULT_SUCCESS;
-        }
-    }
+    } 
 
     IARM_BUS_Unlock(lock);
     return result;
 }
-
 
 IARM_Result_t _dsGetEncoding(void *arg)
 {
