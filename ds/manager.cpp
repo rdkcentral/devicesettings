@@ -173,7 +173,7 @@ void Manager::load()
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
 
-void* Manager::getDLInstance()
+void* getDLInstance()
 {
     std::lock_guard<std::mutex> lock(gDLMutex);
     dlerror(); // clear old error
@@ -184,7 +184,7 @@ void* Manager::getDLInstance()
     return gDLHandle;
 }
 
-void Manager::releaseDLInstance()
+void releaseDLInstance()
 {
     std::lock_guard<std::mutex> lock(gDLMutex);
     if (nullptr != gDLHandle) {
