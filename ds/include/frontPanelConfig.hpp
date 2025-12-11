@@ -64,8 +64,6 @@ private:
     FrontPanelConfig();
 	virtual ~FrontPanelConfig();
 
-	void load(void* pDLHandle);
-
 public:
 	static FrontPanelConfig & getInstance();
 
@@ -81,11 +79,12 @@ public:
 	List<FrontPanelIndicator> 		 getIndicators();
 	List<FrontPanelTextDisplay> 	 getTextDisplays();
 
-        /* Initialize Front Panel */
-        void fPInit();
-        /* Terminate Front Panel */
-        void fPTerm();
+    /* Initialize Front Panel */
+    void fPInit();
+    /* Terminate Front Panel */
+    void fPTerm();
 
+    void load(void* pDLHandle);
 };
 
 }

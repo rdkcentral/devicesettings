@@ -46,7 +46,7 @@
 #include <dlfcn.h>
 #include <fstream>
 #include "dsHALConfig.h"
-
+#include "frontPanelConfig.hpp"
 
 //static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -71,6 +71,50 @@ int Manager::IsInitialized = 0;   //!< Indicates the application has initialized
 static std::mutex gManagerInitMutex;
 static std::mutex gDLMutex;
 static void* gDLHandle = nullptr;
+
+void* getDLInstance()
+{
+    std::lock_guard<std::mutex> lock(gDLMutex);
+    dlerror(); // clear old error
+    if (nullptr == gDLHandle){
+        gDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+    }
+    INT_INFO("%d:%s: DL Instance '%s'\n", __LINE__, __func__, (nullptr == gDLHandle ? "NULL" : "Valid"));
+    return gDLHandle;
+}
+
+void releaseDLInstance()
+{
+    std::lock_guard<std::mutex> lock(gDLMutex);
+    if (nullptr != gDLHandle) {
+        dlclose(gDLHandle);
+        gDLHandle = nullptr;
+    }
+}
+
+bool searchConfigs(void* pDLHandle, const char *searchConfigStr, void **pConfigVar)
+{
+    bool returnValue = false;
+    INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    if ((nullptr == searchConfigStr) || (nullptr == pConfigVar) || (nullptr == pDLHandle)) {
+        INT_ERROR("%d:%s: Invalid parameters passed\n", __LINE__, __func__);
+    }
+    else {
+        INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
+        INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
+
+        *pConfigVar = (void *) dlsym(pDLHandle, searchConfigStr);
+        if (*pConfigVar != NULL) {
+            INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
+            returnValue = true;
+        }
+        else {
+            INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
+        }
+    }
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	return returnValue;
+}
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -171,50 +215,6 @@ void Manager::load()
         releaseDLInstance();
     }
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
-}
-
-void* getDLInstance()
-{
-    std::lock_guard<std::mutex> lock(gDLMutex);
-    dlerror(); // clear old error
-    if (nullptr == gDLHandle){
-        gDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-    }
-    INT_INFO("%d:%s: DL Instance '%s'\n", __LINE__, __func__, (nullptr == gDLHandle ? "NULL" : "Valid"));
-    return gDLHandle;
-}
-
-void releaseDLInstance()
-{
-    std::lock_guard<std::mutex> lock(gDLMutex);
-    if (nullptr != gDLHandle) {
-        dlclose(gDLHandle);
-        gDLHandle = nullptr;
-    }
-}
-
-bool searchConfigs(void* pDLHandle, const char *searchConfigStr, void **pConfigVar)
-{
-    bool returnValue = false;
-    INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-    if ((nullptr == searchConfigStr) || (nullptr == pConfigVar) || (nullptr == pDLHandle)) {
-        INT_ERROR("%d:%s: Invalid parameters passed\n", __LINE__, __func__);
-    }
-    else {
-        INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
-        INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
-
-        *pConfigVar = (void *) dlsym(pDLHandle, searchConfigStr);
-        if (*pConfigVar != NULL) {
-            INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
-            returnValue = true;
-        }
-        else {
-            INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
-        }
-    }
-    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
-	return returnValue;
 }
 
 /**
