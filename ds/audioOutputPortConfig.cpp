@@ -162,7 +162,7 @@ void dumpconfig(audioConfigs_t *config)
 }
 
 
-void AudioOutputPortConfig::load()
+void AudioOutputPortConfig::load(void* pDLHandle)
 {
 	static int configSize, portSize, invalidSize = -1;
 	static audioConfigs_t configuration = {0};
@@ -172,7 +172,7 @@ void AudioOutputPortConfig::load()
         "kAudioConfigs_size",
         "kAudioPorts_size"
     };
-	bool ret = false;
+    bool isDynamicConfigLoad = false;
 
 	INT_INFO("Enter function\n");
 	try {
@@ -198,34 +198,41 @@ void AudioOutputPortConfig::load()
 
 		}
 
-		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKConfigs);
-		if(ret == true)
+        if ( nullptr != pDLHandle ) {
+            bool ret = false;
+
+            INT_INFO("%d:%s: Using dynamic library handle for config loading\n", __LINE__, __func__);
+            INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
+            ret = searchConfigs(pDLHandle, searchVaribles[0], (void **)&configuration.pKConfigs);
+            if(ret == true)
+            {
+                // Considering Dynamic config loading is enabled since 1st symbol got
+                isDynamicConfigLoad = true;
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
+                ret = searchConfigs(pDLHandle, searchVaribles[2], (void **)&configuration.pKConfigSize);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[2]);
+                    configuration.pKConfigSize = &invalidSize;
+                }
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
+                ret = searchConfigs(pDLHandle, searchVaribles[1], (void **)&configuration.pKPorts);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[1]);
+                }
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
+                ret = searchConfigs(pDLHandle, searchVaribles[3], (void **)&configuration.pKPortSize);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[3]);
+                    configuration.pKPortSize = &invalidSize;
+                }
+            }   
+        }
+		if ( false == isDynamicConfigLoad)
 		{
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKConfigSize);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[2]);
-				configuration.pKConfigSize = &invalidSize;
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKPorts);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[1]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKPortSize);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[3]);
-				configuration.pKPortSize = &invalidSize;
-			}
-		}
-		else
-		{
-			INT_ERROR("Read Old Configs\n");
+			INT_INFO("%d:%s: Using OLD config loading\n", __LINE__, __func__);
 			configuration.pKConfigs = kConfigs;
 			configSize = dsUTL_DIM(kConfigs);
 			configuration.pKConfigSize = &configSize;

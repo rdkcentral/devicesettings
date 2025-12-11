@@ -160,8 +160,7 @@ using namespace std;
 namespace device {
 
 // Forward declaration for searchConfigs function
-bool searchConfigs(const char *searchConfigStr, void **pConfigVar);
-std::string parse_opt_flag( std::string file_name , bool integer_check= false , bool debugStats = true);
+bool searchConfigs(void* pDLHandle, const char *searchConfigStr, void **pConfigVar);
 
 /**
  * @class Manager

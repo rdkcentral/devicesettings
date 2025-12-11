@@ -348,7 +348,7 @@ void dumpconfig(videoPortConfigs_t *config)
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 }
 
-void VideoOutputPortConfig::load()
+void VideoOutputPortConfig::load(void* pDLHandle)
 {
 	static int configSize, portSize, resolutionSize, invalid_size = -1;
 	static videoPortConfigs_t configuration = {0};
@@ -360,6 +360,7 @@ void VideoOutputPortConfig::load()
 		"kResolutionsSettings",
 		"kResolutionsSettings_size"
     };
+    bool isDynamicConfigLoad = false;
 	bool ret = false;
 
 	INT_INFO("Enter function\n");
@@ -384,47 +385,53 @@ void VideoOutputPortConfig::load()
 			_vPortTypes.push_back(VideoOutputPortType((int)i));
 		}
 
-		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKConfigs);
-		if(ret == true)
+        if (nullptr != pDLHandle) {
+            INT_INFO("%d:%s: Using dynamic library handle for config loading\n", __LINE__, __func__);
+            INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
+            ret = searchConfigs(pDLHandle, searchVaribles[0], (void **)&configuration.pKConfigs);
+            if(ret == true)
+            {
+                // Considering Dynamic config loading is enabled since 1st symbol got
+                isDynamicConfigLoad = true;
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
+                ret = searchConfigs(pDLHandle, searchVaribles[1], (void **)&configuration.pKVideoPortConfigs_size);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[1]);
+                    configuration.pKVideoPortConfigs_size = &invalid_size;
+                }
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
+                ret = searchConfigs(pDLHandle, searchVaribles[2], (void **)&configuration.pKPorts);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[2]);
+                }
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
+                ret = searchConfigs(pDLHandle, searchVaribles[3], (void **)&configuration.pKVideoPortPorts_size);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[3]);
+                    configuration.pKVideoPortPorts_size = &invalid_size;
+                }
+                // Resolutions
+                ret = searchConfigs(pDLHandle, searchVaribles[4], (void **)&configuration.pKResolutionsSettings);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[4]);
+                }
+                INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
+                ret = searchConfigs(pDLHandle, searchVaribles[5], (void **)&configuration.pKResolutionsSettings_size);
+                if(ret == false)
+                {
+                    INT_ERROR("%s is not defined\n", searchVaribles[5]);
+                    configuration.pKResolutionsSettings_size = &invalid_size;
+                }
+            }
+        }
+
+		if ( false == isDynamicConfigLoad )
 		{
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKVideoPortConfigs_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[1]);
-				configuration.pKVideoPortConfigs_size = &invalid_size;
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKPorts);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[2]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKVideoPortPorts_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[3]);
-				configuration.pKVideoPortPorts_size = &invalid_size;
-			}
-			// Resolutions
-			ret = searchConfigs(searchVaribles[4], (void **)&configuration.pKResolutionsSettings);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[4]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
-			ret = searchConfigs(searchVaribles[5], (void **)&configuration.pKResolutionsSettings_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[5]);
-				configuration.pKResolutionsSettings_size = &invalid_size;
-			}
-		}
-		else
-		{
-			INT_ERROR("Read Old Configs\n");
+			INT_INFO("%d:%s: Using OLD config loading\n", __LINE__, __func__);
 			configuration.pKConfigs = kConfigs;
 			configSize = dsUTL_DIM(kConfigs);
 			configuration.pKVideoPortConfigs_size = &configSize;
@@ -443,11 +450,7 @@ void VideoOutputPortConfig::load()
 		   (configuration.pKPorts != NULL) && (configuration.pKVideoPortPorts_size != NULL) &&
 		   (configuration.pKResolutionsSettings != NULL) && (configuration.pKResolutionsSettings_size != NULL))
 		{
-
-			#if DEBUG
 			dumpconfig(&configuration);
-			//INT_INFO("disable the dumpconfig()\n");
-			#endif
 			/* Initialize a set of supported resolutions
 		 	*
 		 	*/
