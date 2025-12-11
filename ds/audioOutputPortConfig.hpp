@@ -66,7 +66,7 @@ public:
 	List<AudioOutputPort> 		 getPorts();
 	List<AudioOutputPortType> 	 getSupportedTypes();
 
-	void load();
+	void load(void* pDLHandle);
 	void release();
 
 };
