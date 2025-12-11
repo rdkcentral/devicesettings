@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <dlfcn.h>
 #include <fstream>
+#include <condition_variable>
 #include "dsHALConfig.h"
 
 
@@ -73,6 +74,8 @@ static std::mutex gSearchMutex;
 static void *dllib = NULL;
 int activeLoads = 0;            // reference counter
 static std::mutex gMtx;
+std::condition_variable cv;
+const int REQUIRED = 4;       // wait for 4 loads to finish
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -208,7 +211,7 @@ void Manager::Initialize()
                 delay = std::stoi(delaystr);
 			}
 			INT_INFO("Open the hal file\n");
-	    	ret = openFile();
+	    	ret = openDLFile();
 			if(ret == true)
 			{
 				INT_INFO("File opened successfully\n");
@@ -222,6 +225,7 @@ void Manager::Initialize()
 	    	VideoOutputPortConfig::getInstance().load();
 	    	//sleep(delay);
 			VideoDeviceConfig::getInstance().load();
+			waitAndClose();
 	    }
         IsInitialized++;
     }
@@ -242,7 +246,7 @@ void Manager::load()
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
 
-bool openFile()
+bool openDLFile()
 {
 	bool ret = false;
 
@@ -264,6 +268,7 @@ bool openFile()
 	return ret;
 }
 
+#if 0
 void startLoad() 
 {
     std::lock_guard<std::mutex> lock(gMtx);
@@ -273,12 +278,13 @@ void startLoad()
 
 }
 
+
 void finishLoad() 
 {
     std::lock_guard<std::mutex> lock(gMtx);
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 
-    activeLoads--;
+    activeLoads++;
 	INT_INFO("%d:%s: activeLoads = %d\n", __LINE__, __func__, activeLoads);
     if (activeLoads == 0) {
 		if (dllib) {
@@ -292,6 +298,7 @@ void finishLoad()
 	}
 	INT_INFO("%d:%s: Exiting function\n", __LINE__, __func__);
 }
+#endif
 
 bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 {
@@ -317,6 +324,29 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 	return (*pConfigVar != NULL);
 }
 
+
+void notifyLoadComplete() {
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    std::unique_lock<std::mutex> lock(gMtx);
+
+    activeLoads++;
+    // Wake waiting thread
+    cv.notify_all();
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+}
+
+void waitAndClose() {
+    std::unique_lock<std::mutex> lock(gMtx);
+    INT_INFO("%d:%s: Entering function activeLoads = %d\n", __LINE__, __func__, activeLoads);
+
+    cv.wait(lock, [&] { return activeLoads >= REQUIRED; }); // wait for 4 loads complete
+
+    if (dllib) {
+        dlclose(dllib);
+        dllib = nullptr;
+    }
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+}
 
 /**
  * @fn void Manager::DeInitialize()

@@ -160,11 +160,14 @@ using namespace std;
 namespace device {
 
 // Forward declaration for searchConfigs function
-bool openFile();
-bool closeFile();
+bool openDLFile();
+//bool closeFile();
 bool searchConfigs(const char *searchConfigStr, void **pConfigVar);
-void startLoad();
-void finishLoad();
+//void startLoad();
+//void finishLoad();
+void notifyLoadComplete();
+void waitAndClose();
+
 std::string parse_opt_flag( std::string file_name , bool integer_check= false , bool debugStats = true);
 
 /**
@@ -175,7 +178,6 @@ std::string parse_opt_flag( std::string file_name , bool integer_check= false , 
 class Manager {
 	Manager();
 	virtual ~Manager();
-	static bool fpInit;
 public:
 	static void Initialize();
 	static void DeInitialize();

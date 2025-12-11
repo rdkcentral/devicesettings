@@ -364,7 +364,7 @@ void VideoOutputPortConfig::load()
 	bool ret = false;
 
 	INT_INFO("Enter function\n");
-	startLoad();
+	//startLoad();
 	try {
 		/*
 		 * Load Constants First.
@@ -506,7 +506,7 @@ void VideoOutputPortConfig::load()
 		cout << "VIdeo Outport Exception Thrown. ..."<<endl;
         throw Exception("Failed to load video outport config");
 	}
-	finishLoad();
+	notifyLoadComplete();
 	INT_INFO("Exit function\n");
 
 }

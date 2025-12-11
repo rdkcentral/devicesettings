@@ -131,7 +131,7 @@ void VideoDeviceConfig::load()
 	bool ret = false;
 
 	INT_INFO("Enter function\n");
-	startLoad();
+	//startLoad();
 	/*
 	 * Load Constants First.
 	 */
@@ -180,7 +180,7 @@ void VideoDeviceConfig::load()
 	{
 		INT_ERROR("%d:%s:  Congigs are NULL and  config size are -1\n", __LINE__, __func__);
 	}
-	finishLoad();
+	notifyLoadComplete();
 	INT_INFO("Exit function\n");
 }
 

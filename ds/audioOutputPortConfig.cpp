@@ -176,7 +176,7 @@ void AudioOutputPortConfig::load()
 	bool ret = false;
 
 	INT_INFO("Enter function\n");
-	startLoad();
+	//startLoad();
 
 	try {
 		/*
@@ -284,7 +284,7 @@ void AudioOutputPortConfig::load()
 	catch(const Exception &e) {
 		throw e;
 	}
-	finishLoad();
+	notifyLoadComplete();
 	INT_INFO("Exit funcation\n");
 }
 
