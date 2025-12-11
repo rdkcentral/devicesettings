@@ -166,12 +166,6 @@ void AudioOutputPortConfig::load(void* pDLHandle)
 {
 	static int configSize, portSize, invalidSize = -1;
 	static audioConfigs_t configuration = {0};
-	const char* searchVaribles[] = {
-        "kAudioConfigs",
-        "kAudioPorts",
-        "kAudioConfigs_size",
-        "kAudioPorts_size"
-    };
     bool isDynamicConfigLoad = false;
 
 	INT_INFO("Enter function\n");
@@ -199,6 +193,12 @@ void AudioOutputPortConfig::load(void* pDLHandle)
 		}
 
         if ( nullptr != pDLHandle ) {
+            const char* searchVaribles[] = {
+                "kAudioConfigs",
+                "kAudioPorts",
+                "kAudioConfigs_size",
+                "kAudioPorts_size"
+            };
             bool ret = false;
 
             INT_INFO("%d:%s: Using dynamic library handle for config loading\n", __LINE__, __func__);

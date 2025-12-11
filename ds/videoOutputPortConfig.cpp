@@ -352,16 +352,7 @@ void VideoOutputPortConfig::load(void* pDLHandle)
 {
 	static int configSize, portSize, resolutionSize, invalid_size = -1;
 	static videoPortConfigs_t configuration = {0};
-	const char* searchVaribles[] = {
-        "kVideoPortConfigs",
-        "kVideoPortConfigs_size",
-        "kVideoPortPorts",
-        "kVideoPortPorts_size",
-		"kResolutionsSettings",
-		"kResolutionsSettings_size"
-    };
     bool isDynamicConfigLoad = false;
-	bool ret = false;
 
 	INT_INFO("Enter function\n");
 	try {
@@ -386,6 +377,16 @@ void VideoOutputPortConfig::load(void* pDLHandle)
 		}
 
         if (nullptr != pDLHandle) {
+            const char* searchVaribles[] = {
+                "kVideoPortConfigs",
+                "kVideoPortConfigs_size",
+                "kVideoPortPorts",
+                "kVideoPortPorts_size",
+                "kResolutionsSettings",
+                "kResolutionsSettings_size"
+            };
+            bool ret = false;
+
             INT_INFO("%d:%s: Using dynamic library handle for config loading\n", __LINE__, __func__);
             INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
             ret = searchConfigs(pDLHandle, searchVaribles[0], (void **)&configuration.pKConfigs);

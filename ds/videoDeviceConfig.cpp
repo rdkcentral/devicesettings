@@ -124,12 +124,7 @@ void VideoDeviceConfig::load(void* pDLHandle)
 {
 	int configSize, invalid_size = -1;
 	static videoDeviceConfig_t videoDeviceConfig = {0};
-	const char* searchVaribles[] = {
-        "kVideoDeviceConfigs",
-        "kVideoDeviceConfigs_size",
-    };
     bool isDynamicConfigLoad = false;
-	bool ret = false;
 
 	INT_INFO("Enter function\n");
 	/*
@@ -141,15 +136,21 @@ void VideoDeviceConfig::load(void* pDLHandle)
 
     if ( nullptr != pDLHandle )
     {
+        const char* searchVaribles[] = {
+            "kVideoDeviceConfigs",
+            "kVideoDeviceConfigs_size",
+        };
+        bool ret = false;
+
         INT_INFO("%d:%s: Using dynamic library handle for config loading\n", __LINE__, __func__);
         INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-        ret = searchConfigs(searchVaribles[0], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs));
+        ret = searchConfigs(pDLHandle, searchVaribles[0], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs));
         if(ret == true)
         {
             // Considering Dynamic config loading is enabled since 1st symbol got
             isDynamicConfigLoad = true;
             INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-            ret = searchConfigs(searchVaribles[1], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs_size));
+            ret = searchConfigs(pDLHandle, searchVaribles[1], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs_size));
             if(ret == false)
             {
                 INT_ERROR("%s is not defined\n", searchVaribles[1]);

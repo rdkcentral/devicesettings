@@ -362,28 +362,25 @@ void dumpconfig(fpdConfigs_t *configuration)
 		INT_INFO("configuration->pKFPDIndicatorColors_size data: %d\n", *(configuration->pKFPDIndicatorColors_size));
 		INT_INFO("configuration->pKIndicators_size addr: %p\n", (configuration->pKIndicators_size));
 		INT_INFO("configuration->pKIndicators_size data: %d\n", *(configuration->pKIndicators_size));
-	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
-		INT_INFO("  Color ID: %d, color: %d\n",
-			   configuration->pKFPDIndicatorColors[i].id,
-			   configuration->pKFPDIndicatorColors[i].color);
-	}
-
-	INT_INFO("Indicators:\n");
-	for (size_t i = 0; i < *(configuration->pKIndicators_size); i++) {
-		INT_INFO("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d\n",
-			   configuration->pKIndicators[i].id,
-			   configuration->pKIndicators[i].maxBrightness,
-			   configuration->pKIndicators[i].maxCycleRate,
-			   configuration->pKIndicators[i].levels,
-			   configuration->pKIndicators[i].colorMode);
-	}
+        for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
+            INT_INFO("  Color ID: %d, color: %d\n",
+                configuration->pKFPDIndicatorColors[i].id,
+                configuration->pKFPDIndicatorColors[i].color);
+        }
+        INT_INFO("Indicators:\n");
+        for (size_t i = 0; i < *(configuration->pKIndicators_size); i++) {
+            INT_INFO("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d\n",
+                configuration->pKIndicators[i].id,
+                configuration->pKIndicators[i].maxBrightness,
+                configuration->pKIndicators[i].maxCycleRate,
+                configuration->pKIndicators[i].levels,
+                configuration->pKIndicators[i].colorMode);
+        }
 	}
 
 	if(configuration->pKTextDisplays != NULL && configuration->pKTextDisplays_size != NULL){
         INT_INFO("configuration->pKTextDisplays_size: %p\n", configuration->pKTextDisplays_size);
 		INT_INFO("Text Displays:*(configuration->pKTextDisplays_size) =%d\n", *(configuration->pKTextDisplays_size));
-
-
 		for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
 			INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",
 				   configuration->pKTextDisplays[i].id,
@@ -426,18 +423,16 @@ void FrontPanelConfig::load(void* pDLHandle)
         return;
     }
 
-    if ( false == m_isFPConfigLoaded) {
-    const char* searchVaribles[] = {
-        "kFPDIndicatorColors",
-        "kFPDIndicatorColors_size",
-        "kIndicators",
-        "kIndicators_size",
-        "kFPDTextDisplays",
-        "kFPDTextDisplays_size"
-    };
-
     if (pDLHandle)
     {
+        const char* searchVaribles[] = {
+            "kFPDIndicatorColors",
+            "kFPDIndicatorColors_size",
+            "kIndicators",
+            "kIndicators_size",
+            "kFPDTextDisplays",
+            "kFPDTextDisplays_size"
+        };
         bool ret = false;
         INT_INFO("%d:%s: Using dynamic library handle for config loading\n", __LINE__, __func__);
         INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
