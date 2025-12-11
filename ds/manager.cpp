@@ -69,7 +69,8 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
-static std::mutex gSearchMutex;
+static std::mutex gDLMutex;
+static void* gDLHandle = nullptr;
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -86,62 +87,6 @@ Manager::~Manager() {
 		throw Exception(ret, "Error Initialising platform ports");\
 	}\
 	}
-
-std::string parse_opt_flag( std::string file_name , bool integer_check , bool debugStats )
-{
-    std::string return_buffer = "";
-    std::ifstream parse_opt_flag_file( file_name.c_str());
-
-    if (!parse_opt_flag_file)
-    {
-        if ( debugStats ){
-            INT_INFO("Failed to open [%s] file",file_name.c_str());
-        }
-    }
-    else
-    {
-        std::string line = "";
-        if (std::getline(parse_opt_flag_file, line))
-        {
-            if ( debugStats ){
-                INT_INFO("Content in [%s] is [%s]",file_name.c_str(),line.c_str());
-            }
-        }
-        else
-        {
-            if ( debugStats ){
-                INT_INFO("No Content in [%s]",file_name.c_str());
-            }
-        }
-        parse_opt_flag_file.close();
-
-        return_buffer = line;
-
-        if (integer_check)
-        {
-            if (line.empty())
-            {
-                integer_check = false;
-            }
-            else
-            {
-                for (char c : line) {
-                    if (!isdigit(c))
-                    {
-                        integer_check = false;
-                        break;
-                    }
-                }
-            }
-
-            if ( false == integer_check )
-            {
-                return_buffer = "";
-            }
-        }
-    }
-    return return_buffer;
-}
 
 /**
  * @addtogroup dssettingsmanagerapi
@@ -171,7 +116,6 @@ void Manager::Initialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
 	
-	int delay = 1;	
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
 	try {
@@ -197,17 +141,14 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
-			std::string delaystr = parse_opt_flag("/opt/delay", true, true);
-            if (!delaystr.empty())
-            {
-                INT_INFO("dealy: [%s]", delaystr.c_str());
-                delay = std::stoi(delaystr);
-			}
-	    	AudioOutputPortConfig::getInstance().load();
-			sleep(delay);
-	    	VideoOutputPortConfig::getInstance().load();
-	    	sleep(delay);
-			VideoDeviceConfig::getInstance().load();
+            void* pDLHandle = getDLInstance();
+	    	AudioOutputPortConfig::getInstance().load(pDLHandle);
+	    	VideoOutputPortConfig::getInstance().load(pDLHandle);
+			VideoDeviceConfig::getInstance().load(pDLHandle);
+            FrontPanelConfig::getInstance().load(pDLHandle);
+            if ( nullptr != pDLHandle ) {
+                releaseDLInstance();
+            }
 	    }
         IsInitialized++;
     }
@@ -222,43 +163,59 @@ void Manager::Initialize()
 void Manager::load()
 {
 	printf("%d:%s load start\n", __LINE__, __FUNCTION__);
-	device::AudioOutputPortConfig::getInstance().load();
-	device::VideoOutputPortConfig::getInstance().load();
-	device::VideoDeviceConfig::getInstance().load();
+    void* pDLHandle = getDLInstance();
+	device::AudioOutputPortConfig::getInstance().load(pDLHandle);
+	device::VideoOutputPortConfig::getInstance().load(pDLHandle);
+	device::VideoDeviceConfig::getInstance().load(pDLHandle);
+    if ( nullptr != pDLHandle ) {
+        releaseDLInstance();
+    }
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
 
-bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
+void* Manager::getDLInstance()
 {
-	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
-	INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
-
-	//pthread_mutex_lock(&dsLock);
-	std::lock_guard<std::mutex> lock(gSearchMutex);
-	INT_INFO("%d:%s: using lock_guard() instead pthread_mutex_lock \n", __LINE__, __func__);
-	 	dlerror(); // clear old error
-		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-		if (dllib) {
-			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
-			if (*pConfigVar != NULL) {
-				INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
-			}
-			else {
-				INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
-			}
-
-			dlclose(dllib);
-		}
-		else {
-			const char* err = dlerror();
-			INT_ERROR("%d:%s: Open %s failed with error err= %s\n", __LINE__, __func__, RDK_DSHAL_NAME, err ? err: "unknown");
-		}
-	//pthread_mutex_unlock(&dsLock);
-	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
-	return (*pConfigVar != NULL);
+    std::lock_guard<std::mutex> lock(gDLMutex);
+    dlerror(); // clear old error
+    if (nullptr == gDLHandle){
+        gDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+    }
+    INT_INFO("%d:%s: DL Instance '%s'\n", __LINE__, __func__, (nullptr == gDLHandle ? "NULL" : "Valid"));
+    return gDLHandle;
 }
 
+void Manager::releaseDLInstance()
+{
+    std::lock_guard<std::mutex> lock(gDLMutex);
+    if (nullptr != gDLHandle) {
+        dlclose(gDLHandle);
+        gDLHandle = nullptr;
+    }
+}
+
+bool searchConfigs(void* pDLHandle, const char *searchConfigStr, void **pConfigVar)
+{
+    bool returnValue = false;
+    INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    if ((nullptr == searchConfigStr) || (nullptr == pConfigVar) || (nullptr == pDLHandle)) {
+        INT_ERROR("%d:%s: Invalid parameters passed\n", __LINE__, __func__);
+    }
+    else {
+        INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
+        INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
+
+        *pConfigVar = (void *) dlsym(pDLHandle, searchConfigStr);
+        if (*pConfigVar != NULL) {
+            INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
+            returnValue = true;
+        }
+        else {
+            INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
+        }
+    }
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	return returnValue;
+}
 
 /**
  * @fn void Manager::DeInitialize()

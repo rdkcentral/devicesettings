@@ -59,11 +59,12 @@ private:
     std::vector<FrontPanelTextDisplay> 			_textDisplays;  //!< Container to hold all the FrontPanelTextDisplay instances.
     std::vector<FrontPanelIndicator::Color> 	_colors;                //!< Container to hold all the Color instances.
     bool m_isFPInitialized;
+    bool m_isFPConfigLoaded;
 
     FrontPanelConfig();
 	virtual ~FrontPanelConfig();
 
-	void load();
+	void load(void* pDLHandle);
 
 public:
 	static FrontPanelConfig & getInstance();
