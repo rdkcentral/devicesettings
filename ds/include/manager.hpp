@@ -181,8 +181,6 @@ public:
 	static void DeInitialize();
     static void load(); //!< This function is being used for loading configure in-process DSMgr.
 	static int IsInitialized;   //!< Indicates the application has initialized with devicettings modules.
-	bool setFpInit(bool init){ Manager::fpInit = init;}
-
 };
 
 }
