@@ -166,6 +166,7 @@ void AudioOutputPortConfig::load()
 {
 	static int configSize, portSize, invalidSize = -1;
 	static audioConfigs_t configuration = {0};
+
 	const char* searchVaribles[] = {
         "kAudioConfigs",
         "kAudioPorts",
@@ -175,6 +176,8 @@ void AudioOutputPortConfig::load()
 	bool ret = false;
 
 	INT_INFO("Enter function\n");
+	startLoad();
+
 	try {
 		/*
 		 * Load Constants First.
@@ -281,6 +284,7 @@ void AudioOutputPortConfig::load()
 	catch(const Exception &e) {
 		throw e;
 	}
+	finishLoad();
 	INT_INFO("Exit funcation\n");
 }
 

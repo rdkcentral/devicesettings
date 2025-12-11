@@ -430,6 +430,7 @@ void FrontPanelConfig::load()
 	bool ret = false;
 	
 	INT_INFO("Enter function\n");
+	startLoad();
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
 		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKFPDIndicatorColors );
 		if(ret == true)
@@ -539,6 +540,7 @@ void FrontPanelConfig::load()
 	{
 		INT_ERROR("No valid front panel configuration found\n");	
 	}
+	finishLoad();
 	INT_INFO("Exit function\n");
 }
 

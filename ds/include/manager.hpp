@@ -160,7 +160,11 @@ using namespace std;
 namespace device {
 
 // Forward declaration for searchConfigs function
+bool openFile();
+bool closeFile();
 bool searchConfigs(const char *searchConfigStr, void **pConfigVar);
+void startLoad();
+void finishLoad();
 std::string parse_opt_flag( std::string file_name , bool integer_check= false , bool debugStats = true);
 
 /**
@@ -171,11 +175,14 @@ std::string parse_opt_flag( std::string file_name , bool integer_check= false , 
 class Manager {
 	Manager();
 	virtual ~Manager();
+	static bool fpInit;
 public:
 	static void Initialize();
 	static void DeInitialize();
     static void load(); //!< This function is being used for loading configure in-process DSMgr.
 	static int IsInitialized;   //!< Indicates the application has initialized with devicettings modules.
+	bool setFpInit(bool init){ Manager::fpInit = init;}
+
 };
 
 }

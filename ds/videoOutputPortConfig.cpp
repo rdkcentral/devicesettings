@@ -352,6 +352,7 @@ void VideoOutputPortConfig::load()
 {
 	static int configSize, portSize, resolutionSize, invalid_size = -1;
 	static videoPortConfigs_t configuration = {0};
+
 	const char* searchVaribles[] = {
         "kVideoPortConfigs",
         "kVideoPortConfigs_size",
@@ -363,6 +364,7 @@ void VideoOutputPortConfig::load()
 	bool ret = false;
 
 	INT_INFO("Enter function\n");
+	startLoad();
 	try {
 		/*
 		 * Load Constants First.
@@ -504,6 +506,7 @@ void VideoOutputPortConfig::load()
 		cout << "VIdeo Outport Exception Thrown. ..."<<endl;
         throw Exception("Failed to load video outport config");
 	}
+	finishLoad();
 	INT_INFO("Exit function\n");
 
 }

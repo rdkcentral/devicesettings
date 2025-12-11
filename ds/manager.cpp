@@ -70,6 +70,9 @@ namespace device {
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
 static std::mutex gSearchMutex;
+static void *dllib = NULL;
+int activeLoads = 0;            // reference counter
+static std::mutex gMtx;
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -172,6 +175,7 @@ void Manager::Initialize()
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
 	
 	int delay = 1;	
+	bool ret = false;
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
 	try {
@@ -203,10 +207,20 @@ void Manager::Initialize()
                 INT_INFO("dealy: [%s]", delaystr.c_str());
                 delay = std::stoi(delaystr);
 			}
-	    	AudioOutputPortConfig::getInstance().load();
-			sleep(delay);
+			INT_INFO("Open the hal file\n");
+	    	ret = openFile();
+			if(ret == true)
+			{
+				INT_INFO("File opened successfully\n");
+			}
+			else
+			{
+				INT_ERROR("Failed to open the hal file\n");
+			}
+			AudioOutputPortConfig::getInstance().load();
+			//sleep(delay);
 	    	VideoOutputPortConfig::getInstance().load();
-	    	sleep(delay);
+	    	//sleep(delay);
 			VideoDeviceConfig::getInstance().load();
 	    }
         IsInitialized++;
@@ -228,33 +242,77 @@ void Manager::load()
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
 
+bool openFile()
+{
+	bool ret = false;
+
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+	INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
+
+	dlerror(); // clear old error
+	dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+	if (dllib) {
+		INT_INFO("open %s success", RDK_DSHAL_NAME);
+		ret = true;
+	}
+	else {
+		const char* err = dlerror();
+		INT_ERROR("%d:%s: Open %s failed with error err= %s\n", __LINE__, __func__, RDK_DSHAL_NAME, err ? err: "unknown");
+		ret = false;
+	}
+	INT_INFO("%d:%s: Exiting function\n", __LINE__, __func__);
+	return ret;
+}
+
+void startLoad() 
+{
+    std::lock_guard<std::mutex> lock(gMtx);
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    activeLoads++;
+	INT_INFO("%d:%s: Exit function. activeLoads = %d\n", __LINE__, __func__, activeLoads);
+
+}
+
+void finishLoad() 
+{
+    std::lock_guard<std::mutex> lock(gMtx);
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+
+    activeLoads--;
+	INT_INFO("%d:%s: activeLoads = %d\n", __LINE__, __func__, activeLoads);
+    if (activeLoads == 0) {
+		if (dllib) {
+			dlclose(dllib);
+			INT_INFO("%d:%s: Closed the hal file\n", __LINE__, __func__);
+			dllib = NULL;
+		}
+		else {
+			INT_ERROR("dllib is NULL\n");
+		}
+	}
+	INT_INFO("%d:%s: Exiting function\n", __LINE__, __func__);
+}
+
 bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
 	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
 	INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
 
-	//pthread_mutex_lock(&dsLock);
 	std::lock_guard<std::mutex> lock(gSearchMutex);
 	INT_INFO("%d:%s: using lock_guard() instead pthread_mutex_lock \n", __LINE__, __func__);
-	 	dlerror(); // clear old error
-		void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-		if (dllib) {
-			*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
-			if (*pConfigVar != NULL) {
-				INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
-			}
-			else {
-				INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
-			}
-
-			dlclose(dllib);
+	if (dllib) {
+		*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
+		if (*pConfigVar != NULL) {
+			INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
 		}
 		else {
-			const char* err = dlerror();
-			INT_ERROR("%d:%s: Open %s failed with error err= %s\n", __LINE__, __func__, RDK_DSHAL_NAME, err ? err: "unknown");
+			INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
 		}
-	//pthread_mutex_unlock(&dsLock);
+	}
+	else {
+		INT_ERROR("dllib is NULL\n");
+	}
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 	return (*pConfigVar != NULL);
 }
