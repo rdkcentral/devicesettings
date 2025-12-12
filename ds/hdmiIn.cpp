@@ -341,7 +341,7 @@ static std::string getResolutionStr (dsVideoResolution_t resolution)
             break;
     }
 
-    printf ("%s:%d - ResolutionStr:  %s\n", __PRETTY_FUNCTION__,__LINE__, resolutionStr.c_str());
+    INT_INFO("ResolutionStr: %s", resolutionStr.c_str());
     return resolutionStr;
 }
 
@@ -412,20 +412,20 @@ static std::string getFrameRateStr (dsVideoFrameRate_t frameRate)
             break;
     }
 
-    printf ("%s:%d - FrameRateStr: %s\n", __PRETTY_FUNCTION__,__LINE__, FrameRateStr.c_str());
+    INT_INFO("FrameRateStr: %s", FrameRateStr.c_str());
     return FrameRateStr;
 }
 
 static std::string getInterlacedStr (bool interlaced)
 {
     std::string InterlacedStr = (interlaced) ? "i" : "p";
-    printf ("%s:%d - InterlacedStr:  %s\n", __PRETTY_FUNCTION__,__LINE__, InterlacedStr.c_str());
+    INT_INFO("InterlacedStr: %s", InterlacedStr.c_str());
     return InterlacedStr;
 }
 
 static std::string CreateResolutionStr (const dsVideoPortResolution_t &resolution)
 {
-    printf("%s ---> \n", __PRETTY_FUNCTION__);
+    INT_INFO("--->");
 
     std::string resolutionStr = getResolutionStr(resolution.pixelResolution);
     if(resolutionStr.compare("unknown") != 0){
@@ -433,7 +433,7 @@ static std::string CreateResolutionStr (const dsVideoPortResolution_t &resolutio
                                 getInterlacedStr(resolution.interlaced) +
                                 getFrameRateStr(resolution.frameRate);
     }
-    printf ("%s <--- %s\n", __PRETTY_FUNCTION__, resolutionStr.c_str());
+    INT_INFO("<--- %s", resolutionStr.c_str());
     return resolutionStr;
 }
 
@@ -461,7 +461,7 @@ std::string HdmiInput::getCurrentVideoMode () const
 	}
 
     std::string resolutionStr = CreateResolutionStr (resolution);
-    printf("%s:%d - Resolution =%s\n", __PRETTY_FUNCTION__,__LINE__, resolutionStr.c_str());
+    INT_INFO("Resolution =%s", resolutionStr.c_str());
     return resolutionStr;
 }
 
@@ -478,13 +478,13 @@ void HdmiInput::getCurrentVideoModeObj (dsVideoPortResolution_t& resolution)
 		throw Exception(eError);
 	}
 
-    printf("%s:%d - pixelResolution =%d interlaced:%d frameRate:%d\n", __PRETTY_FUNCTION__, __LINE__, resolution.pixelResolution, resolution.interlaced, resolution.frameRate);
+    INT_INFO("pixelResolution =%d interlaced:%d frameRate:%d", resolution.pixelResolution, resolution.interlaced, resolution.frameRate);
 }
 
 void HdmiInput::getEDIDBytesInfo (int iHdmiPort, std::vector<uint8_t> &edidArg) const
 {
 
-    printf("HdmiInput::getEDIDBytesInfo \r\n");
+    INT_INFO("HdmiInput::getEDIDBytesInfo");
 
     dsError_t ret = dsERR_NONE;
     int length = 0;
@@ -493,10 +493,10 @@ void HdmiInput::getEDIDBytesInfo (int iHdmiPort, std::vector<uint8_t> &edidArg) 
     const char* exceptionstr = "";
     ret = dsGetEDIDBytesInfo (static_cast<dsHdmiInPort_t>(iHdmiPort), edid, &length);
 
-    printf("HdmiInput::getEDIDBytesInfo has ret %d\r\n", ret);
+    INT_INFO("HdmiInput::getEDIDBytesInfo has ret %d", ret);
     if (ret == dsERR_NONE) {
         if (length <= MAX_EDID_BYTES_LEN) {
-            printf("HdmiInput::getEDIDBytesInfo has %d bytes\r\n", length);
+            INT_INFO("HdmiInput::getEDIDBytesInfo has %d bytes", length);
             if (edid_parser::EDID_STATUS_OK == edid_parser::EDID_Verify(edid, length)) {
                 edidArg.clear();
                 edidArg.insert(edidArg.begin(), edid, edid + length);
@@ -518,17 +518,17 @@ void HdmiInput::getEDIDBytesInfo (int iHdmiPort, std::vector<uint8_t> &edidArg) 
 }
 
 void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
-    printf("HdmiInput::getHDMISPDInfo \r\n");
+    INT_INFO("HdmiInput::getHDMISPDInfo");
 
     unsigned char spdinfo[sizeof(struct dsSpd_infoframe_st)] = {0};
     const char* exceptionstr = "";
     dsError_t ret = dsGetHDMISPDInfo (static_cast<dsHdmiInPort_t>(iHdmiPort), spdinfo);
  
-    printf("HdmiInput::getHDMISPDInfo has ret %d\r\n", ret);
+    INT_INFO("HdmiInput::getHDMISPDInfo has ret %d", ret);
     data.clear();
     if (ret == dsERR_NONE) {
         if (sizeof(spdinfo) <= sizeof(struct dsSpd_infoframe_st)) {
-            printf("HdmiInput::getHDMISPDInfo has %d bytes\r\n", sizeof(spdinfo));
+            INT_INFO("HdmiInput::getHDMISPDInfo has %d bytes", sizeof(spdinfo));
                 data.insert(data.begin(), spdinfo, spdinfo + sizeof(struct dsSpd_infoframe_st));
         } else {
             ret = dsERR_OPERATION_NOT_SUPPORTED;
@@ -537,11 +537,11 @@ void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
     } else {
         exceptionstr = "getHDMISPDInfo failed";
     }
-    printf("HdmiInput::getHDMISPDInfo data: \r\n");
+    INT_INFO("HdmiInput::getHDMISPDInfo data:");
         for (int itr = 0; itr < data.size(); itr++) {
             printf("%02X ", data[itr]);
         }
-    printf("\n");
+    INT_INFO("");
 
     if (ret != dsERR_NONE) {
         throw Exception(ret, exceptionstr);
@@ -550,17 +550,17 @@ void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
 }
 
 void HdmiInput::setEdidVersion (int iHdmiPort, int iEdidVersion) {
-    printf ("HdmiInput::setEdidVersion \r\n");
+    INT_INFO("HdmiInput::setEdidVersion");
     dsError_t ret = dsSetEdidVersion (static_cast<dsHdmiInPort_t>(iHdmiPort), static_cast<tv_hdmi_edid_version_t>(iEdidVersion));
     if (ret != dsERR_NONE)
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - Set EDID Version = %d\n", __PRETTY_FUNCTION__, __LINE__, iEdidVersion);
+    INT_INFO("Set EDID Version = %d", iEdidVersion);
 }
 
 void HdmiInput::getEdidVersion (int iHdmiPort, int *iEdidVersion) {
-    printf ("HdmiInput::getEdidVersion \r\n");
+    INT_INFO("HdmiInput::getEdidVersion");
     tv_hdmi_edid_version_t EdidVersion;
     dsError_t ret = dsGetEdidVersion (static_cast<dsHdmiInPort_t>(iHdmiPort), &EdidVersion);
     if (ret != dsERR_NONE)
@@ -569,7 +569,7 @@ void HdmiInput::getEdidVersion (int iHdmiPort, int *iEdidVersion) {
     }
     int tmp = static_cast<int>(EdidVersion);
     *iEdidVersion = tmp;
-    printf ("%s:%d - EDID Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *iEdidVersion);
+    INT_INFO("EDID Version = %d", *iEdidVersion);
 }
 
 void HdmiInput::setVRRSupport(int iHdmiPort, bool vrrSupport)
@@ -579,7 +579,7 @@ void HdmiInput::setVRRSupport(int iHdmiPort, bool vrrSupport)
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - Set VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, vrrSupport);
+    INT_INFO("Set VRR Support = %d", vrrSupport);
 }
 
 void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
@@ -588,7 +588,7 @@ void HdmiInput::getVRRSupport (int iHdmiPort, bool *vrrSupport) {
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - EDID VRR Support = %d\n", __PRETTY_FUNCTION__, __LINE__, *vrrSupport);
+    INT_INFO("EDID VRR Support = %d", *vrrSupport);
 }
 
 void HdmiInput::getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus) {
@@ -597,17 +597,17 @@ void HdmiInput::getVRRStatus (int iHdmiPort, dsHdmiInVrrStatus_t *vrrStatus) {
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - VRR Type = %d , VRR FrameRate = %f\n", __FUNCTION__, __LINE__, vrrStatus->vrrType,vrrStatus->vrrAmdfreesyncFramerate_Hz);
+    INT_INFO("VRR Type = %d , VRR FrameRate = %f", vrrStatus->vrrType,vrrStatus->vrrAmdfreesyncFramerate_Hz);
 }
 
 void HdmiInput::getHdmiALLMStatus (int iHdmiPort, bool *allmStatus) {
-    printf ("HdmiInput::getHdmiALLMStatus \r\n");
+    INT_INFO("HdmiInput::getHdmiALLMStatus");
     dsError_t ret = dsGetAllmStatus (static_cast<dsHdmiInPort_t>(iHdmiPort), allmStatus);
     if (ret != dsERR_NONE)
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - ALLM Status = %d\n", __FUNCTION__, __LINE__, *allmStatus);
+    INT_INFO("ALLM Status = %d", *allmStatus);
 }
 
 void HdmiInput::getSupportedGameFeatures (std::vector<std::string> &featureList) {
@@ -629,7 +629,7 @@ void HdmiInput::getSupportedGameFeatures (std::vector<std::string> &featureList)
     }
 
     if(featureList.size() != feList.gameFeatureCount){
-        printf ("%s:%d - Number of Supported Game Features in list doesn't match with count from HAL", __FUNCTION__, __LINE__);
+        INT_ERROR("Number of Supported Game Features in list doesn't match with count from HAL");
         throw Exception(dsERR_GENERAL);
     }
 }
@@ -637,7 +637,7 @@ void HdmiInput::getSupportedGameFeatures (std::vector<std::string> &featureList)
 
 void HdmiInput::getAVLatency (int *audio_output_delay,int *video_latency) {
     dsError_t ret = dsGetAVLatency (audio_output_delay,video_latency);
-    printf ("HdmiInput::getHdmiDAL_ - VideoLatency: %d , Audio Latency:  %d \r\n",*video_latency,*audio_output_delay);
+    INT_INFO("VideoLatency: %d , Audio Latency:  %d",*video_latency,*audio_output_delay);
     if (ret != dsERR_NONE)
     {
         throw Exception(ret);
@@ -646,24 +646,24 @@ void HdmiInput::getAVLatency (int *audio_output_delay,int *video_latency) {
 
 void HdmiInput::setEdid2AllmSupport(int iHdmiPort,bool allmSupport)
 {
-    printf ("HdmiInput::setEdid2AllmSupport \r\n");
+    INT_INFO("HdmiInput::setEdid2AllmSupport");
     dsError_t ret = dsSetEdid2AllmSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), allmSupport);
     if (ret != dsERR_NONE)
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - Set EDID Allm Support = %d\n", __PRETTY_FUNCTION__, __LINE__, allmSupport);
+    INT_INFO("Set EDID Allm Support = %d", allmSupport);
 
 }
 
 void HdmiInput::getEdid2AllmSupport (int iHdmiPort, bool *allmSupport) {
-    printf ("HdmiInput::getEdid2AllmSupport \r\n");
+    INT_INFO("HdmiInput::getEdid2AllmSupport");
     dsError_t ret = dsGetEdid2AllmSupport (static_cast<dsHdmiInPort_t>(iHdmiPort), allmSupport);
     if (ret != dsERR_NONE)
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - EDID allm Support = %d\n", __PRETTY_FUNCTION__, __LINE__, *allmSupport);
+    INT_INFO("EDID allm Support = %d", *allmSupport);
 }
 
 void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *capversion) {
@@ -675,7 +675,7 @@ void HdmiInput::getHdmiVersion (int iHdmiPort, dsHdmiMaxCapabilityVersion_t *cap
         throw Exception(ret);
     }
 
-    printf ("%s:%d - HDMI Compatibility Version = %d\n", __PRETTY_FUNCTION__, __LINE__, *capversion);
+    INT_INFO("HDMI Compatibility Version = %d", *capversion);
 }
 
 dsError_t HdmiInput::getHDMIARCPortId(int &portId) {

@@ -44,6 +44,18 @@
  */
 using namespace std;
 
+typedef struct fpdConfigs
+{
+	const dsFPDColorConfig_t    *pKFPDIndicatorColors;
+	const dsFPDIndicatorConfig_t   *pKIndicators;
+	const dsFPDTextDisplayConfig_t   *pKTextDisplays;
+	int *pKFPDIndicatorColors_size;
+	int *pKIndicators_size;
+	int *pKTextDisplays_size;
+}fpdConfigs_t;
+
+#define DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS "ABCEDFG"
+
 namespace device {
 
 
@@ -84,7 +96,7 @@ public:
     /* Terminate Front Panel */
     void fPTerm();
 
-    void load(void* pDLHandle);
+    void load(fpdConfigs_t* pDLHandle);
 };
 
 }
