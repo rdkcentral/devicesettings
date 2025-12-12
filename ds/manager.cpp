@@ -225,7 +225,8 @@ void Manager::Initialize()
 	    	VideoOutputPortConfig::getInstance().load();
 	    	//sleep(delay);
 			VideoDeviceConfig::getInstance().load();
-			waitAndClose();
+			INT_INFO("disabled waitAndClose()\n");
+			//waitAndClose();
 	    }
         IsInitialized++;
     }
