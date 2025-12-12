@@ -433,6 +433,8 @@ void FrontPanelConfig::load()
 	//startLoad();
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
 		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKFPDIndicatorColors );
+		ret = false;
+		INT_INFO("disable the new FP config ret= %d	\n", ret);
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);

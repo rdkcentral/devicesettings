@@ -84,6 +84,11 @@ Manager::Manager() {
 
 Manager::~Manager() {
 	// TODO Auto-generated destructor stub
+	    // Ensure close if not already
+    if (dllib) {
+        dlclose(dllib);
+        INT_INFO("Destructor dlclose\n");
+    }
 }
 
 #define CHECK_RET_VAL(ret) {\
@@ -204,12 +209,14 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
+			#if 0
 			std::string delaystr = parse_opt_flag("/opt/delay", true, true);
             if (!delaystr.empty())
             {
                 INT_INFO("dealy: [%s]", delaystr.c_str());
                 delay = std::stoi(delaystr);
 			}
+			#endif
 			INT_INFO("Open the hal file\n");
 	    	ret = openDLFile();
 			if(ret == true)
@@ -270,6 +277,14 @@ bool openDLFile()
 }
 
 #if 0
+void EE::requestClose() {
+    std::lock_guard<std::mutex> lock(m);
+    closeRequested = true;
+    if (active == 0 && handle) {
+        dlclose(handle);
+        handle = nullptr;
+    }
+}
 void startLoad() 
 {
     std::lock_guard<std::mutex> lock(gMtx);
@@ -324,7 +339,6 @@ bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
 	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 	return (*pConfigVar != NULL);
 }
-
 
 void notifyLoadComplete() {
 	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
