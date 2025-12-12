@@ -228,21 +228,21 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
             * Initialize Audio portTypes (encodings, compressions etc.)
             * and its port instances (db, level etc)
             */
-            for (size_t i = 0; i < configSize; i++) {
+            for (int i = 0; i < configSize; i++) {
                 const dsAudioTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
                 AudioOutputPortType &aPortType = AudioOutputPortType::getInstance(typeCfg->typeId);
                 aPortType.enable();
-                for (size_t j = 0; j < typeCfg->numSupportedEncodings; j++) {
+                for (int j = 0; j < typeCfg->numSupportedEncodings; j++) {
                     const dsAudioEncoding_t* encoding = &typeCfg->encodings[j];
                     aPortType.addEncoding(AudioEncoding::getInstance(*encoding));
                     _aEncodings.at(*encoding).enable();
                 }
-                for (size_t j = 0; j < typeCfg->numSupportedCompressions; j++) {
+                for (int j = 0; j < typeCfg->numSupportedCompressions; j++) {
                     const dsAudioCompression_t* compression = &typeCfg->compressions[j];
                     aPortType.addCompression(*compression);
                     _aCompressions.at(*compression).enable();
                 }
-                for (size_t j = 0; j < typeCfg->numSupportedStereoModes; j++) {
+                for (int j = 0; j < typeCfg->numSupportedStereoModes; j++) {
                     const dsAudioStereoMode_t *stereoMode = &typeCfg->stereoModes[j];
                     aPortType.addStereoMode(*stereoMode);
                     _aStereoModes.at(*stereoMode).enable();
@@ -252,7 +252,7 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
             /*
             * set up ports based on kPorts[]
             */
-            for (size_t i = 0; i < portSize; i++) {
+            for (int i = 0; i < portSize; i++) {
                 const dsAudioPortConfig_t *portCfg = &configuration.pKPorts[i];
                 _aPorts.push_back(AudioOutputPort((portCfg->id.type), portCfg->id.index, i));
                 _aPortTypes.at(portCfg->id.type).addPort(_aPorts.at(i));

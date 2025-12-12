@@ -294,9 +294,9 @@ void dumpconfig(videoPortConfigs_t *config)
 
         INT_INFO("\n\n####################################################################### \n\n");
         INT_INFO("Dumping Video Resolutions Settings");
-        for (size_t i = 0; i < resolutionSize; i++) {
+        for (int i = 0; i < resolutionSize; i++) {
             dsVideoPortResolution_t *resolution = &(config->pKResolutionsSettings[i]);
-            INT_INFO("resolution->name = %s", (resolution->name) ? resolution->name : "NULL");
+            INT_INFO("resolution->name = %s", resolution->name);
             INT_INFO("resolution->pixelResolution= %d", resolution->pixelResolution);
             INT_INFO("resolution->aspectRatio= %d", resolution->aspectRatio);
             INT_INFO("resolution->stereoScopicMode= %d", resolution->stereoScopicMode);
@@ -306,7 +306,7 @@ void dumpconfig(videoPortConfigs_t *config)
         INT_INFO("\n\n####################################################################### \n\n");
         INT_INFO("\n\n####################################################################### \n\n");
         INT_INFO("Dumping Video Port Configurations");
-        for (size_t i = 0; i < configSize; i++)
+        for (int i = 0; i < configSize; i++)
         {
             const dsVideoPortTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
             INT_INFO("typeCfg->typeId = %d", typeCfg->typeId);
@@ -328,7 +328,7 @@ void dumpconfig(videoPortConfigs_t *config)
 
         INT_INFO("\n\n####################################################################### \n\n");
         INT_INFO("Dumping Video Port Connections");
-        for (size_t i = 0; i < portSize; i++) {
+        for (int i = 0; i < portSize; i++) {
             const dsVideoPortPortConfig_t *portCfg = &(config->pKPorts[i]);
             INT_INFO("portCfg->id.type = %d", portCfg->id.type);
             INT_INFO("portCfg->id.index = %d", portCfg->id.index);
@@ -369,7 +369,6 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
         for (size_t i = 0; i < dsVIDEO_FRAMERATE_MAX; i++) {
             _vFrameRates.push_back(FrameRate((int)i));
         }
-
         for (size_t i = 0; i < dsVIDEOPORT_TYPE_MAX; i++) {
             _vPortTypes.push_back(VideoOutputPortType((int)i));
         }
@@ -410,13 +409,10 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
             for (int i = 0; i < resolutionSize; i++) {
                 dsVideoPortResolution_t *resolution = &(configuration.pKResolutionsSettings[i]);
                 {std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
-                    if (nullptr == resolution->name) {
-                        INT_ERROR("resolution name is NULL at %d,  using empty string...", i);
-                    }
                     _supportedResolutions.push_back(
                                         VideoResolution(
                                             i, /* id */
-                                            (resolution->name) ? std::string(resolution->name) : std::string(""),
+                                            std::string(resolution->name),
                                             resolution->pixelResolution,
                                             resolution->aspectRatio,
                                             resolution->stereoScopicMode,
@@ -440,7 +436,7 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
             /*
             * set up ports based on kPorts[]
             */
-            for (size_t i = 0; i < portSize; i++) {
+            for (int i = 0; i < portSize; i++) {
                 const dsVideoPortPortConfig_t *portCfg = &(configuration.pKPorts[i]);
                 if (nullptr == portCfg->defaultResolution) {
                     INT_ERROR("defaultResolution is NULL at %d,  using empty string...", i);
