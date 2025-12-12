@@ -758,7 +758,7 @@ Host::~Host()
     {
         throw Exception(ret);
     }
-    printf ("%s:%d - Set Audio Mixer levels for audio input: %d with volume = %d\n", __PRETTY_FUNCTION__, __LINE__,aInput, volume);
+    INT_INFO("Set Audio Mixer levels for audio input: %d with volume = %d",aInput, volume);
    }
 
 DefaultImpl& Host::impl()
