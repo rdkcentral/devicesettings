@@ -156,11 +156,11 @@ void VideoDeviceConfig::load(videoDeviceConfig_t* dynamicVideoDeviceConfigs)
 	 */
 	if ( nullptr != configuration.pKVideoDeviceConfigs )
 	{
-		for (size_t i = 0; i < configSize; i++) {
+		for (int i = 0; i < configSize; i++) {
             dsVideoConfig_t* videoDeviceCfg = &configuration.pKVideoDeviceConfigs[i];
             _vDevices.push_back(VideoDevice(i));
 
-			for (size_t j = 0; j < videoDeviceCfg->numSupportedDFCs; j++) {
+			for (int j = 0; j < videoDeviceCfg->numSupportedDFCs; j++) {
 				_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceCfg->supportedDFCs[j]));
 			}
 		}
