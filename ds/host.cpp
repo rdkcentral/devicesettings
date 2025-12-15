@@ -385,6 +385,29 @@ Host::~Host()
         return std::string(socID);
    }
 
+   intptr_t Host::getAudioPortHandle()
+   {
+        try
+        {
+            if (isHDMIOutPortPresent())
+            {
+                AudioOutputPort aPort = getAudioOutputPort("HDMI0");
+                return aPort.getOutputPortHandle();
+            } 
+            else 
+            {
+                AudioOutputPort aPort = getAudioOutputPort("SPEAKER0");
+                return aPort.getOutputPortHandle();
+            }
+        }
+        catch(const std::exception& e)
+        {
+            cout << " Exception Thrown in getAudioPortHandle().. returning NULL...!\n";
+        }
+
+        return NULL;
+   }
+
    /**
     * Host::getCurrentAudioFormat(dsAudioFormat_t &audioFormat)
     * @brief
@@ -397,8 +420,8 @@ Host::~Host()
    {
        dsError_t ret = dsERR_NONE;
        dsAudioFormat_t aFormat;
-
-       ret = dsGetAudioFormat(NULL, &aFormat);
+ 
+       ret = dsGetAudioFormat(getAudioPortHandle(), &aFormat);
 
        if (ret == dsERR_NONE)
        {

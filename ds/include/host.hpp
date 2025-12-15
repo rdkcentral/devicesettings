@@ -431,6 +431,7 @@ public:
     void setSecondaryLanguage(const std::string sLang);
     void getSecondaryLanguage(std::string& sLang);
     bool isHDMIOutPortPresent();
+    intptr_t getAudioPortHandle();
     std::string getDefaultVideoPortName();
     std::string getDefaultAudioPortName();
     void getCurrentAudioFormat(dsAudioFormat_t& audioFormat);

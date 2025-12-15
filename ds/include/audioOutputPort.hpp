@@ -87,12 +87,15 @@ public:
 	static AudioOutputPort & getInstance(int id);
 	static AudioOutputPort & getInstance(const std::string &name);
 
+	
+
 	AudioOutputPort(const int type, const int index, const int id);
 	virtual ~AudioOutputPort();
 
 	const AudioOutputPortType & getType() const;
 	int getId() const {return _id;};
 	int getIndex() const {return _index; };
+	intptr_t getOutputPortHandle() const { return _handle;};
 
 
 /**
