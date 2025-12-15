@@ -392,7 +392,7 @@ void dumpconfig(fpdConfigs_t *configuration)
 			   	configuration->pKTextDisplays[i].levels,
 			   	configuration->pKTextDisplays[i].maxHorizontalIterations,
 			   	configuration->pKTextDisplays[i].maxVerticalIterations,
-			   	(fpdTextDisplayCfg->supportedCharacters) ? fpdTextDisplayCfg->supportedCharacters : "NULL",
+			   	(configuration->pKTextDisplays[i].supportedCharacters) ? configuration->pKTextDisplays[i].supportedCharacters : "NULL",
 			   	configuration->pKTextDisplays[i].colorMode);
 		}
 	}
@@ -530,7 +530,7 @@ void FrontPanelConfig::load()
                             	              configuration.pKTextDisplays[i].levels,
 											  configuration.pKTextDisplays[i].maxHorizontalIterations,
 											  configuration.pKTextDisplays[i].maxVerticalIterations,
-											  (fpdTextDisplayCfg->supportedCharacters) ? std::string(fpdTextDisplayCfg->supportedCharacters) : 
+											(configuration.pKTextDisplays[i].supportedCharacters) ? std::string(configuration.pKTextDisplays[i].supportedCharacters) : 
 					                                                                     std::string(DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS),
 										  	  configuration.pKTextDisplays[i].colorMode));
 		 }
