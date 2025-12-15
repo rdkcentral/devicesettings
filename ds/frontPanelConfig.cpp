@@ -44,6 +44,7 @@
 #include "manager.hpp"
 
 #define DEBUG 1 // Using for dumpconfig 
+#define DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS "ABCEDFG"
 
 using namespace std;
 
@@ -391,7 +392,7 @@ void dumpconfig(fpdConfigs_t *configuration)
 			   	configuration->pKTextDisplays[i].levels,
 			   	configuration->pKTextDisplays[i].maxHorizontalIterations,
 			   	configuration->pKTextDisplays[i].maxVerticalIterations,
-			   	configuration->pKTextDisplays[i].supportedCharacters,
+			   	(fpdTextDisplayCfg->supportedCharacters) ? fpdTextDisplayCfg->supportedCharacters : "NULL",
 			   	configuration->pKTextDisplays[i].colorMode);
 		}
 	}
@@ -433,8 +434,8 @@ void FrontPanelConfig::load()
 	//startLoad();
 		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
 		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKFPDIndicatorColors );
-		ret = false;
-		INT_INFO("disable the new FP config ret= %d	\n", ret);
+		//ret = false;
+		//INT_INFO("disable the new FP config ret= %d	\n", ret);
 		if(ret == true)
 		{
 			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
@@ -529,7 +530,8 @@ void FrontPanelConfig::load()
                             	              configuration.pKTextDisplays[i].levels,
 											  configuration.pKTextDisplays[i].maxHorizontalIterations,
 											  configuration.pKTextDisplays[i].maxVerticalIterations,
-											  configuration.pKTextDisplays[i].supportedCharacters,
+											  (fpdTextDisplayCfg->supportedCharacters) ? std::string(fpdTextDisplayCfg->supportedCharacters) : 
+					                                                                     std::string(DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS),
 										  	  configuration.pKTextDisplays[i].colorMode));
 		 }
 		}
