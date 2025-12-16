@@ -43,8 +43,6 @@
 #include "dslogger.h"
 #include "manager.hpp"
 
-#define DEBUG 1 // Using for dumpconfig 
-
 using namespace std;
 
 namespace device {
@@ -353,10 +351,10 @@ void dumpconfig(fpdConfigs_t *configuration)
     }
     int indicatorSize = -1;
     int indicatorColorSize = -1;
-    int textDisplaySize = (configuration->pKTextDisplays_size) ? *(configuration->pKTextDisplays_size) : -1;
+
     // Dump the configuration details
-    INT_INFO("\n\n===========================================================================\n\n");
-    INT_INFO("Starting to Dump FrontPanel Configs");
+    INT_INFO("\n\n================================== Starting to Dump FrontPanel Configs =========================================\n\n");
+
     if (( nullptr != configuration->pKFPDIndicatorColors) && ( nullptr != configuration->pKIndicators))
     {
         int indicatorSize = (configuration->pKIndicators_size) ? *(configuration->pKIndicators_size) : -1;
@@ -394,15 +392,14 @@ void dumpconfig(fpdConfigs_t *configuration)
                 fpdTextDisplayCfg->levels,
                 fpdTextDisplayCfg->maxHorizontalIterations,
                 fpdTextDisplayCfg->maxVerticalIterations,
-                (fpdTextDisplayCfg->supportedCharacters) ? fpdTextDisplayCfg->supportedCharacters : "NULL",
+                (fpdTextDisplayCfg->supportedCharacters) ? fpdTextDisplayCfg->supportedCharacters : DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS,
                 fpdTextDisplayCfg->colorMode);
         }
     }
     else {
         INT_INFO("  No Text Displays configured.");
     }
-    INT_INFO("Dump FrontPanel Configs done");
-    INT_INFO("\n\n===========================================================================\n\n");
+    INT_INFO("\n\n================================== Dump FrontPanel Configs done =========================================\n\n");
 }
 
 /**
@@ -419,7 +416,7 @@ void FrontPanelConfig::load(fpdConfigs_t* dynamicFPDConfigs)
     * 1. Create Supported Colors.
     * 2. Create Indicators.
     */
-    int indicatorSize, indicatorColorSize, textDisplaySize;
+    static int indicatorSize, indicatorColorSize, textDisplaySize;
     fpdConfigs_t configuration = {0};
     INT_INFO("Enter function");
     if (( false == m_isFPInitialized) || (true == m_isFPConfigLoaded)) {
