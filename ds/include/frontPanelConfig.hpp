@@ -96,7 +96,7 @@ public:
     /* Terminate Front Panel */
     void fPTerm();
 
-    void load(fpdConfigs_t* pDLHandle);
+    void load(fpdConfigs_t* dynamicFPDConfigs);
 };
 
 }

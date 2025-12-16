@@ -122,14 +122,10 @@ void dumpconfig(audioConfigs_t *config)
     }
 
     int configSize = -1, portSize = -1;
-    INT_INFO("\n\n====================================== Starting to Dump Audio Configs ===================================================================================\n\n");
+    INT_INFO("\n=============== Starting to Dump Audio Configs ===============\n");
     if( nullptr != config->pKConfigs )
     {
         configSize = (config->pKConfigSize) ? *(config->pKConfigSize) : -1;
-        INT_INFO("pKConfigs = %p", config->pKConfigs);
-        INT_INFO("pKPorts = %p", config->pKPorts);
-        INT_INFO("pKConfigSize addr =%p ", config->pKConfigSize);
-        INT_INFO("pKConfigSize value = %d ", configSize);
 
         for (int i = 0; i < configSize; i++) {
             const dsAudioTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
@@ -148,9 +144,6 @@ void dumpconfig(audioConfigs_t *config)
     if( nullptr != config->pKPorts )
     {
         portSize = (config->pKPortSize) ? *(config->pKPortSize) : -1;
-        INT_INFO("pKPorts = %p", config->pKPorts);
-        INT_INFO("pKPortSize addr = %p ", config->pKPortSize);
-        INT_INFO("pKPortSize value = %d ", portSize);
         for (int i = 0; i < portSize; i++) {
             const dsAudioPortConfig_t *portCfg = &(config->pKPorts[i]);
             INT_INFO("portCfg->id.type = %d", portCfg->id.type);
@@ -162,12 +155,12 @@ void dumpconfig(audioConfigs_t *config)
         INT_ERROR("kAudioPorts is NULL");
     }
 
-    INT_INFO("\n\n=================================================== Dump Audio Configs done ======================================================================\n\n");
+    INT_INFO("\n=============== Dump Audio Configs done ===============\n");
 }
 
 void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
 {
-    static int configSize = -1, portSize = -1;
+    int configSize = -1, portSize = -1;
     audioConfigs_t configuration = {0};
 
     INT_INFO("Enter function");
