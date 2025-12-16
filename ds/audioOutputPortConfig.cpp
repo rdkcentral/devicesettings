@@ -122,8 +122,7 @@ void dumpconfig(audioConfigs_t *config)
     }
 
     int configSize = -1, portSize = -1;
-    INT_INFO("\n\n=========================================================================================================================\n\n");
-    INT_INFO("Starting to Dump Audio Configs");
+    INT_INFO("\n\n====================================== Starting to Dump Audio Configs ===================================================================================\n\n");
     if( nullptr != config->pKConfigs )
     {
         configSize = (config->pKConfigSize) ? *(config->pKConfigSize) : -1;
@@ -162,13 +161,13 @@ void dumpconfig(audioConfigs_t *config)
     {
         INT_ERROR("kAudioPorts is NULL");
     }
-    INT_INFO("Dump Audio Configs done");
-    INT_INFO("\n\n=========================================================================================================================\n\n");
+
+    INT_INFO("\n\n=================================================== Dump Audio Configs done ======================================================================\n\n");
 }
 
 void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
 {
-    int configSize = -1, portSize = -1;
+    static int configSize = -1, portSize = -1;
     audioConfigs_t configuration = {0};
 
     INT_INFO("Enter function");

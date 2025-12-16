@@ -277,8 +277,8 @@ void dumpconfig(videoPortConfigs_t *config)
         INT_INFO("Dumping of Device configs is disabled");
         return;
     }
-    INT_INFO("\n\n=========================================================================================================================\n\n");
-    INT_INFO("Starting to Dump VideoPort Configs");
+    INT_INFO("\n\n============================================== Starting to Dump VideoPort Configs ===========================================================================\n\n");
+
     int configSize = -1, portSize = -1, resolutionSize = -1;
     if (( nullptr != config->pKConfigs ) && ( nullptr != config->pKPorts ) && ( nullptr != config->pKResolutionsSettings ))
     {
@@ -292,8 +292,8 @@ void dumpconfig(videoPortConfigs_t *config)
         INT_INFO("pKResolutionsSettings = %p", config->pKResolutionsSettings);
         INT_INFO("pKResolutionsSettingsSize pointer %p = %d", config->pKResolutionsSettings_size, resolutionSize);
 
-        INT_INFO("\n\n####################################################################### \n\n");
-        INT_INFO("Dumping Video Resolutions Settings");
+        INT_INFO("\n\n################################# Dumping Video Resolutions Settings ###################################### \n\n");
+
         for (int i = 0; i < resolutionSize; i++) {
             dsVideoPortResolution_t *resolution = &(config->pKResolutionsSettings[i]);
             INT_INFO("resolution->name = %s", resolution->name);
@@ -304,8 +304,8 @@ void dumpconfig(videoPortConfigs_t *config)
             INT_INFO("resolution->interlaced= %d", resolution->interlaced);
         }
         INT_INFO("\n\n####################################################################### \n\n");
-        INT_INFO("\n\n####################################################################### \n\n");
-        INT_INFO("Dumping Video Port Configurations");
+        INT_INFO("\n\n################################ Dumping Video Port Configurations ####################################### \n\n");
+
         for (int i = 0; i < configSize; i++)
         {
             const dsVideoPortTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
@@ -326,8 +326,8 @@ void dumpconfig(videoPortConfigs_t *config)
         }
         INT_INFO("\n\n####################################################################### \n\n");
 
-        INT_INFO("\n\n####################################################################### \n\n");
-        INT_INFO("Dumping Video Port Connections");
+        INT_INFO("\n\n################################## Dumping Video Port Connections ##################################### \n\n");
+
         for (int i = 0; i < portSize; i++) {
             const dsVideoPortPortConfig_t *portCfg = &(config->pKPorts[i]);
             INT_INFO("portCfg->id.type = %d", portCfg->id.type);
@@ -342,14 +342,13 @@ void dumpconfig(videoPortConfigs_t *config)
     {
         INT_ERROR("pKConfigs or pKPorts or pKResolutionsSettings is NULL");
     }
-    INT_INFO("Dump VideoPort Configs done");
-    INT_INFO("\n\n=========================================================================================================================\n\n");
+    INT_INFO("\n\n============================================= Dump VideoPort Configs done ============================================================================\n\n");
     INT_INFO("Exit function");
 }
 
 void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
 {
-    int configSize, portSize, resolutionSize;
+    static int configSize, portSize, resolutionSize;
     videoPortConfigs_t configuration = {0};
 
     INT_INFO("Enter function");
