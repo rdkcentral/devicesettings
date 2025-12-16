@@ -88,49 +88,46 @@ VideoDFC & VideoDeviceConfig::getDefaultDFC()
 	return _vDFCs.back();
 }
 
-
-void dumpconfig(dsVideoConfig_t *pKVideoDeviceConfigs, int videoDeviceConfigs_size)
+void dumpconfig(videoDeviceConfig_t *config)
 {
-	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    if (nullptr == config) {
+        INT_ERROR("Video config is NULL");
+        return;
+    }
+    if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
+        INT_INFO("Dumping of Device configs is disabled");
+        return;
+    }
 
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-	if(pKVideoDeviceConfigs != NULL && videoDeviceConfigs_size != -1)
+    INT_INFO("\n=============== Starting to Dump VideoDevice Configs ===============\n");
+
+	if( nullptr != config->pKVideoDeviceConfigs )
 	{
-		INT_INFO("%d:%s: pKVideoDeviceConfigs = %p\n", __LINE__, __func__, pKVideoDeviceConfigs);
-		INT_INFO("%d:%s: videoDeviceConfigs_size = %d\n", __LINE__, __func__, videoDeviceConfigs_size);
-		for (int i = 0; i < videoDeviceConfigs_size; i++) {
-			INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu\n ", i, pKVideoDeviceConfigs[i].numSupportedDFCs);
-			for (int j = 0; j < pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
-				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, pKVideoDeviceConfigs[i].supportedDFCs[j]);
+        int configSize = (config->pKVideoDeviceConfigs_size) ? *(config->pKVideoDeviceConfigs_size) : -1;
+		INT_INFO("pKVideoDeviceConfigs = %p", config->pKVideoDeviceConfigs);
+		INT_INFO("videoDeviceConfigs_size = %d", configSize);
+		for (int i = 0; i < configSize; i++) {
+            dsVideoConfig_t* videoDeviceConfig = &config->pKVideoDeviceConfigs[i];
+            INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu ", i, videoDeviceConfig->numSupportedDFCs);
+			for (int j = 0; j < videoDeviceConfig->numSupportedDFCs; j++) {
+				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, videoDeviceConfig->supportedDFCs[j]);
 			}
 		}
 	}
 	else
 	{
-		INT_ERROR("%d:%s:  kVideoDeviceConfigs is NULL and  videoDeviceConfigs_size is -1\n", __LINE__, __func__);
+		INT_ERROR(" kVideoDeviceConfigs is NULL");
 	}
 
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	INT_INFO("\n=============== Dump VideoDevice Configs done ===============\n");
 }
 
-typedef struct videoDeviceConfig
+void VideoDeviceConfig::load(videoDeviceConfig_t* dynamicVideoDeviceConfigs)
 {
-	dsVideoConfig_t *pKVideoDeviceConfigs;
-	int *pKVideoDeviceConfigs_size;
-}videoDeviceConfig_t;
+	int configSize = -1;
+	videoDeviceConfig_t configuration = {0};
 
-void VideoDeviceConfig::load()
-{
-	int configSize, invalid_size = -1;
-	static videoDeviceConfig_t videoDeviceConfig = {0};
-	const char* searchVaribles[] = {
-        "kVideoDeviceConfigs",
-        "kVideoDeviceConfigs_size",
-    };
-	bool ret = false;
-
-	INT_INFO("Enter function\n");
+	INT_INFO("Enter function");
 	/*
 	 * Load Constants First.
 	 */
@@ -138,48 +135,41 @@ void VideoDeviceConfig::load()
 		_vDFCs.push_back(VideoDFC(i));
 	}
 
-	INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-	ret = searchConfigs(searchVaribles[0], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs));
-	if(ret == true)
-	{
-		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-		ret = searchConfigs(searchVaribles[1], (void **)&(videoDeviceConfig.pKVideoDeviceConfigs_size));
-		if(ret == false)
-		{
-			INT_ERROR("%s is not defined\n", searchVaribles[1]);
-			videoDeviceConfig.pKVideoDeviceConfigs_size = &invalid_size;
-		}
-	}
-	else
-	{
-		INT_INFO("Read Old Configs\n");
-		videoDeviceConfig.pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
+    INT_INFO("Using '%s' config", dynamicVideoDeviceConfigs ? "dynamic" : "static");
+    if ( nullptr != dynamicVideoDeviceConfigs )
+    {
+        configuration = *dynamicVideoDeviceConfigs;
+        configSize = (configuration.pKVideoDeviceConfigs_size) ? *(configuration.pKVideoDeviceConfigs_size) : -1;
+    }
+    else {
+        configuration.pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
 		configSize = dsUTL_DIM(kConfigs);
-		videoDeviceConfig.pKVideoDeviceConfigs_size = &configSize;
-	}
+        configuration.pKVideoDeviceConfigs_size = &configSize;
+    }
+
+    INT_INFO("VideoDevice Config[%p] ConfigSize[%d]", configuration.pKVideoDeviceConfigs, configSize);
+
+    dumpconfig(&configuration);
 
 	/*
 	 * Initialize Video Devices (supported DFCs etc.)
 	 */
-	if (videoDeviceConfig.pKVideoDeviceConfigs != NULL && videoDeviceConfig.pKVideoDeviceConfigs_size != NULL)
+	if ( nullptr != configuration.pKVideoDeviceConfigs )
 	{
-		#if DEBUG
-		dumpconfig(videoDeviceConfig.pKVideoDeviceConfigs, *(videoDeviceConfig.pKVideoDeviceConfigs_size));
-		//INT_INFO("disable the dumpconfig()\n");
-		#endif
-		for (size_t i = 0; i < *(videoDeviceConfig.pKVideoDeviceConfigs_size); i++) {
-			_vDevices.push_back(VideoDevice(i));
+		for (int i = 0; i < configSize; i++) {
+            dsVideoConfig_t* videoDeviceCfg = &configuration.pKVideoDeviceConfigs[i];
+            _vDevices.push_back(VideoDevice(i));
 
-			for (size_t j = 0; j < videoDeviceConfig.pKVideoDeviceConfigs[i].numSupportedDFCs; j++) {
-				_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceConfig.pKVideoDeviceConfigs[i].supportedDFCs[j]));
+			for (int j = 0; j < videoDeviceCfg->numSupportedDFCs; j++) {
+				_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceCfg->supportedDFCs[j]));
 			}
 		}
 	}
 	else
 	{
-		INT_ERROR("%d:%s:  Congigs are NULL and  config size are -1\n", __LINE__, __func__);
+		INT_ERROR(" Configs are NULL and  config size are -1");
 	}
-	INT_INFO("Exit function\n");
+	INT_INFO("Exit function");
 }
 
 void VideoDeviceConfig::release()

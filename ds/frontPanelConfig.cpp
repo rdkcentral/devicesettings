@@ -43,19 +43,7 @@
 #include "dslogger.h"
 #include "manager.hpp"
 
-#define DEBUG 1 // Using for dumpconfig 
-
 using namespace std;
-
-typedef struct fpdConfigs
-{
-	const dsFPDColorConfig_t    *pKFPDIndicatorColors;
-	const dsFPDIndicatorConfig_t   *pKIndicators;
-	const dsFPDTextDisplayConfig_t   *pKTextDisplays;
-	int *pKFPDIndicatorColors_size;
-	int *pKIndicators_size;
-	int *pKTextDisplays_size;
-}fpdConfigs_t;
 
 namespace device {
 
@@ -69,6 +57,7 @@ namespace device {
 FrontPanelConfig::FrontPanelConfig()
 {
     m_isFPInitialized = false;
+    m_isFPConfigLoaded = false;
 }
 
 
@@ -82,6 +71,7 @@ FrontPanelConfig::~FrontPanelConfig()
 {
     //dsFPTerm();
     m_isFPInitialized = false;
+    m_isFPConfigLoaded = false;
 }
 
 
@@ -105,7 +95,6 @@ FrontPanelConfig & FrontPanelConfig::getInstance()
             errorCode = dsFPInit();
             if (dsERR_NONE == errorCode)
             {
-                _singleton.load();
                 _singleton.m_isFPInitialized = true;
                 INT_INFO("dsFPInit success\n");
             }
@@ -352,54 +341,61 @@ List<FrontPanelTextDisplay>  FrontPanelConfig::getTextDisplays()
 
 void dumpconfig(fpdConfigs_t *configuration)
 {
-	// Dump the configuration details
-	INT_INFO("\n\n===========================================================================\n\n");
-	INT_INFO("Start of Front Panel Configuration Details:\n");
-	if((configuration->pKFPDIndicatorColors !=NULL) && *(configuration->pKFPDIndicatorColors_size) != -1 && (configuration->pKIndicators != NULL) && *(configuration->pKIndicators_size) != -1)
-	{
-		INT_INFO("configuration->pKFPDIndicatorColors_size addr: %p\n", (configuration->pKFPDIndicatorColors_size));
-		INT_INFO("configuration->pKFPDIndicatorColors_size data: %d\n", *(configuration->pKFPDIndicatorColors_size));
-		INT_INFO("configuration->pKIndicators_size addr: %p\n", (configuration->pKIndicators_size));
-		INT_INFO("configuration->pKIndicators_size data: %d\n", *(configuration->pKIndicators_size));
-	for (size_t i = 0; i < *(configuration->pKFPDIndicatorColors_size); i++) {
-		INT_INFO("  Color ID: %d, color: %d\n",
-			   configuration->pKFPDIndicatorColors[i].id,
-			   configuration->pKFPDIndicatorColors[i].color);
-	}
+    if (nullptr == configuration) {
+        INT_ERROR("configuration is NULL");
+        return;
+    }
+    if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
+        INT_INFO("Dumping of Device configs is disabled");
+        return;
+    }
+    int indicatorSize = -1;
+    int indicatorColorSize = -1;
 
-	INT_INFO("Indicators:\n");
-	for (size_t i = 0; i < *(configuration->pKIndicators_size); i++) {
-		INT_INFO("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d\n",
-			   configuration->pKIndicators[i].id,
-			   configuration->pKIndicators[i].maxBrightness,
-			   configuration->pKIndicators[i].maxCycleRate,
-			   configuration->pKIndicators[i].levels,
-			   configuration->pKIndicators[i].colorMode);
-	}
-	}
+    // Dump the configuration details
+    INT_INFO("\n=============== Starting to Dump FrontPanel Configs ===============\n");
 
-	if(configuration->pKTextDisplays != NULL && configuration->pKTextDisplays_size != NULL){
-        INT_INFO("configuration->pKTextDisplays_size: %p\n", configuration->pKTextDisplays_size);
-		INT_INFO("Text Displays:*(configuration->pKTextDisplays_size) =%d\n", *(configuration->pKTextDisplays_size));
+    if (( nullptr != configuration->pKFPDIndicatorColors) && ( nullptr != configuration->pKIndicators))
+    {
+        int indicatorSize = (configuration->pKIndicators_size) ? *(configuration->pKIndicators_size) : -1;
+        int indicatorColorSize = (configuration->pKFPDIndicatorColors_size) ? *(configuration->pKFPDIndicatorColors_size) : -1;
 
+        for (int i = 0; i < indicatorColorSize; i++) {
+            const dsFPDColorConfig_t* fpdColorCfg = &configuration->pKFPDIndicatorColors[i];
+            INT_INFO("  Color ID: %d, color: %d", fpdColorCfg->id, fpdColorCfg->color);
+        }
+        INT_INFO("Indicators:");
+        for (int i = 0; i < indicatorSize; i++) {
+            const dsFPDIndicatorConfig_t* fpdIndicatorCfg = &configuration->pKIndicators[i];
+            INT_INFO("  Indicator ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Color Mode: %d",
+                fpdIndicatorCfg->id,
+                fpdIndicatorCfg->maxBrightness,
+                fpdIndicatorCfg->maxCycleRate,
+                fpdIndicatorCfg->levels,
+                fpdIndicatorCfg->colorMode);
+        }
+    }
 
-		for (size_t i = 0; i < *(configuration->pKTextDisplays_size); i++) {
-			INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d\n",
-				   configuration->pKTextDisplays[i].id,
-			   	configuration->pKTextDisplays[i].maxBrightness,
-			   	configuration->pKTextDisplays[i].maxCycleRate,
-			   	configuration->pKTextDisplays[i].levels,
-			   	configuration->pKTextDisplays[i].maxHorizontalIterations,
-			   	configuration->pKTextDisplays[i].maxVerticalIterations,
-			   	configuration->pKTextDisplays[i].supportedCharacters,
-			   	configuration->pKTextDisplays[i].colorMode);
-		}
-	}
-	else {
-		INT_INFO("  No Text Displays configured.\n");
-	}
-	INT_INFO("End of Front Panel Configuration Details.\n");
-	INT_INFO("\n\n===========================================================================\n\n");
+    if ( nullptr != configuration->pKTextDisplays) {
+        int textDisplaySize = (configuration->pKTextDisplays_size) ? *(configuration->pKTextDisplays_size) : -1;
+        INT_INFO("Text Displays: textDisplaySize =%d", textDisplaySize);
+        for (int i = 0; i < textDisplaySize; i++) {
+            const dsFPDTextDisplayConfig_t* fpdTextDisplayCfg = &configuration->pKTextDisplays[i];
+            INT_INFO("  Text Display ID: %d, Max Brightness: %d, Max Cycle Rate: %d, Levels: %d, Max Horizontal Iterations: %d, Max Vertical Iterations: %d, Supported Characters: %s, Color Mode: %d",
+                fpdTextDisplayCfg->id,
+                fpdTextDisplayCfg->maxBrightness,
+                fpdTextDisplayCfg->maxCycleRate,
+                fpdTextDisplayCfg->levels,
+                fpdTextDisplayCfg->maxHorizontalIterations,
+                fpdTextDisplayCfg->maxVerticalIterations,
+                (fpdTextDisplayCfg->supportedCharacters) ? fpdTextDisplayCfg->supportedCharacters : DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS,
+                fpdTextDisplayCfg->colorMode);
+        }
+    }
+    else {
+        INT_INFO("  No Text Displays configured.");
+    }
+    INT_INFO("\n=============== Dump FrontPanel Configs done ===============\n");
 }
 
 /**
@@ -409,137 +405,103 @@ void dumpconfig(fpdConfigs_t *configuration)
  *
  * @return None
  */
-void FrontPanelConfig::load()
+void FrontPanelConfig::load(fpdConfigs_t* dynamicFPDConfigs)
 {
-	/*
-	 * Create Indicators
-	 * 1. Create Supported Colors.
-	 * 2. Create Indicators.
-	 */
-	static int indicatorSize, indicatorColorSize, textDisplaySize, invalid_size = -1;
-	static fpdConfigs_t configuration = {0};
+    /*
+    * Create Indicators
+    * 1. Create Supported Colors.
+    * 2. Create Indicators.
+    */
+    int indicatorSize, indicatorColorSize, textDisplaySize;
+    fpdConfigs_t configuration = {0};
+    INT_INFO("Enter function");
+    if (( false == m_isFPInitialized) || (true == m_isFPConfigLoaded)) {
+        INT_ERROR("'%s'", (!m_isFPInitialized) ? "Front Panel not initialized" : "Front Panel Config already loaded");
+        return;
+    }
 
-	const char* searchVaribles[] = {
-        "kFPDIndicatorColors",
-        "kFPDIndicatorColors_size",
-        "kIndicators",
-        "kIndicators_size",
-		"kFPDTextDisplays",
-		"kFPDTextDisplays_size"
-    };
-	bool ret = false;
-	
-	INT_INFO("Enter function\n");
-		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKFPDIndicatorColors );
-		if(ret == true)
-		{
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKFPDIndicatorColors_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[1]);
-				configuration.pKFPDIndicatorColors_size = &invalid_size;
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKIndicators);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[2]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKIndicators_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[3]);
-				configuration.pKIndicators_size = &invalid_size;
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[4]);
-			ret = searchConfigs(searchVaribles[4], (void **)&configuration.pKTextDisplays);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[4]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
-			ret = searchConfigs(searchVaribles[5], (void **)&configuration.pKTextDisplays_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[5]);
-				configuration.pKTextDisplays_size = &invalid_size;
-			}
-		}
-		else
-		{
-			INT_ERROR("Read Old Configs\n");
-			configuration.pKFPDIndicatorColors = kIndicatorColors;
-			indicatorColorSize = dsUTL_DIM(kIndicatorColors);
-			configuration.pKFPDIndicatorColors_size = &indicatorColorSize;
-			configuration.pKIndicators = kIndicators;
-			indicatorSize = dsUTL_DIM(kIndicators);
-			configuration.pKIndicators_size = &indicatorSize;
-			configuration.pKTextDisplays = kTextDisplays;
-			textDisplaySize = dsUTL_DIM(kTextDisplays);
-			configuration.pKTextDisplays_size = &textDisplaySize;
+    INT_INFO("Using '%s' config", dynamicFPDConfigs ? "dynamic" : "static");
+    if ( nullptr != dynamicFPDConfigs )
+    {
+        configuration = *dynamicFPDConfigs;
+        indicatorSize = (configuration.pKIndicators_size) ? *(configuration.pKIndicators_size) : -1;
+        indicatorColorSize = (configuration.pKFPDIndicatorColors_size) ? *(configuration.pKFPDIndicatorColors_size) : -1;
+        textDisplaySize = (configuration.pKTextDisplays_size) ? *(configuration.pKTextDisplays_size) : -1;
+    }
+    else {
+        configuration.pKFPDIndicatorColors = kIndicatorColors;
+        indicatorColorSize = dsUTL_DIM(kIndicatorColors);
+        configuration.pKFPDIndicatorColors_size = &indicatorColorSize;
+        configuration.pKIndicators = kIndicators;
+        indicatorSize = dsUTL_DIM(kIndicators);
+        configuration.pKIndicators_size = &indicatorSize;
+        configuration.pKTextDisplays = kTextDisplays;
+        textDisplaySize = dsUTL_DIM(kTextDisplays);
+        configuration.pKTextDisplays_size = &textDisplaySize;
+    }
 
-			INT_INFO("configuration.pKFPDIndicatorColors =%p, *(configuration.pKFPDIndicatorColors_size) = %d\n", configuration.pKFPDIndicatorColors, *(configuration.pKFPDIndicatorColors_size));
-			INT_INFO("configuration.pKIndicators =%p, *(configuration.pKIndicators_size) = %d\n", configuration.pKIndicators, *(configuration.pKIndicators_size));
-			INT_INFO("configuration.pKTextDisplays =%p, *(configuration.pKTextDisplays_size) = %d\n", configuration.pKTextDisplays, *(configuration.pKTextDisplays_size));
-		}
-	if (configuration.pKFPDIndicatorColors != NULL && configuration.pKFPDIndicatorColors_size != NULL &&
-		*(configuration.pKFPDIndicatorColors_size) > 0 &&
-		configuration.pKIndicators != NULL && configuration.pKIndicators_size != NULL &&
-		*(configuration.pKIndicators_size) > 0)
-	{
-		#if DEBUG
-		dumpconfig(&configuration);
-		//INT_INFO("disable the dumpconfig()\n");
-		#endif
+    INT_INFO("FPD IndicatorColors[%p] IndicatorColors_size[%d] Indicators[%p] Indicators_size[%d] TextDisplays[%p] TextDisplays_size[%d]",
+            configuration.pKFPDIndicatorColors,
+            indicatorColorSize,
+            configuration.pKIndicators,
+            indicatorSize,
+            configuration.pKTextDisplays,
+            textDisplaySize);
 
-		{
-			for (size_t i = 0; i < *(configuration.pKFPDIndicatorColors_size); i++) {
-				_colors.push_back(FrontPanelIndicator::Color(configuration.pKFPDIndicatorColors[i].id));
-			}
+    dumpconfig(&configuration);
 
-			for (size_t i = 0; i < *(configuration.pKIndicators_size); i++) {
-				/* All indicators support a same set of colors */
-				_indicators.push_back(FrontPanelIndicator(configuration.pKIndicators[i].id,
-														  configuration.pKIndicators[i].maxBrightness,
-														  configuration.pKIndicators[i].maxCycleRate,
-														  configuration.pKIndicators[i].levels,
-														  configuration.pKIndicators[i].colorMode));
-				}
-		}
+    if (( nullptr != configuration.pKFPDIndicatorColors ) && ( nullptr != configuration.pKIndicators))
+    {
+        for (int i = 0; i < indicatorColorSize; i++) {
+            const dsFPDColorConfig_t* fpdColorCfg = &configuration.pKFPDIndicatorColors[i];
+            _colors.push_back(FrontPanelIndicator::Color(fpdColorCfg->id));
+        }
 
-		if(configuration.pKTextDisplays != NULL && configuration.pKTextDisplays_size != NULL)
-		{
-			/*
-		 	* Create TextDisplays
-		 	* 1. Use Supported Colors created for indicators.
-		 	* 2. Create Text Displays.
-		 	*/
-			INT_DEBUG("Text Displays \n");
-			for (size_t i = 0; i < *(configuration.pKTextDisplays_size); i++) {
-				_textDisplays.push_back(
-						FrontPanelTextDisplay(configuration.pKTextDisplays[i].id,
-											  configuration.pKTextDisplays[i].maxBrightness,
-											  configuration.pKTextDisplays[i].maxCycleRate,
-                            	              configuration.pKTextDisplays[i].levels,
-											  configuration.pKTextDisplays[i].maxHorizontalIterations,
-											  configuration.pKTextDisplays[i].maxVerticalIterations,
-											  configuration.pKTextDisplays[i].supportedCharacters,
-										  	  configuration.pKTextDisplays[i].colorMode));
-		 }
-		}
-		else
-		{
-			INT_ERROR("No valid text display configuration found\n");
-		} 
-	}
-	else 
-	{
-		INT_ERROR("No valid front panel configuration found\n");	
-	}
-	INT_INFO("Exit function\n");
+        for (int i = 0; i < indicatorSize; i++) {
+            const dsFPDIndicatorConfig_t* fpdIndicatorCfg = &configuration.pKIndicators[i];
+            /* All indicators support a same set of colors */
+            _indicators.push_back(FrontPanelIndicator(fpdIndicatorCfg->id,
+                                                    fpdIndicatorCfg->maxBrightness,
+                                                    fpdIndicatorCfg->maxCycleRate,
+                                                    fpdIndicatorCfg->levels,
+                                                    fpdIndicatorCfg->colorMode));
+        }
+    }
+    else {
+        INT_ERROR("No valid indicator configuration found\n");
+    }
+
+    if ( nullptr != configuration.pKTextDisplays )
+    {
+        /*
+        * Create TextDisplays
+        * 1. Use Supported Colors created for indicators.
+        * 2. Create Text Displays.
+        */
+        INT_DEBUG("Text Displays \n");
+        for (int i = 0; i < textDisplaySize; i++) {
+            const dsFPDTextDisplayConfig_t* fpdTextDisplayCfg = &configuration.pKTextDisplays[i];
+            if (nullptr == fpdTextDisplayCfg->supportedCharacters) {
+                INT_ERROR("supportedCharacters is NULL at %d,  using '%s' string...", i, DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS);
+            }
+            _textDisplays.push_back(
+                    FrontPanelTextDisplay(fpdTextDisplayCfg->id,
+                                        fpdTextDisplayCfg->maxBrightness,
+                                        fpdTextDisplayCfg->maxCycleRate,
+                                        fpdTextDisplayCfg->levels,
+                                        fpdTextDisplayCfg->maxHorizontalIterations,
+                                        fpdTextDisplayCfg->maxVerticalIterations,
+                                        (fpdTextDisplayCfg->supportedCharacters) ? std::string(fpdTextDisplayCfg->supportedCharacters) : std::string(DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS),
+                                        fpdTextDisplayCfg->colorMode));
+        }
+    }
+    else
+    {
+        INT_ERROR("No valid text display configuration found\n");
+    }
+    m_isFPConfigLoaded = true;
+    INT_INFO("Exit function");
+    return;
 }
 
 }

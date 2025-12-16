@@ -51,18 +51,6 @@
 #include <string.h>
 using namespace std;
 
-#define DEBUG 1 // Using for dumpconfig 
-
-typedef struct videoPortConfigs
-{
-	const dsVideoPortTypeConfig_t  *pKConfigs;
-	int *pKVideoPortConfigs_size;
-	const dsVideoPortPortConfig_t  *pKPorts;
-	int *pKVideoPortPorts_size;
-	dsVideoPortResolution_t *pKResolutionsSettings;
-	int *pKResolutionsSettings_size;
-}videoPortConfigs_t;
-
 namespace device {
 
 static VideoResolution* defaultVideoResolution;
@@ -279,233 +267,192 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 
 void dumpconfig(videoPortConfigs_t *config)
 {
-	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-	if(config->pKConfigs != NULL && *(config->pKVideoPortConfigs_size) != -1 && 
-	   config->pKPorts != NULL && *(config->pKVideoPortPorts_size) != -1 &&
-	   config->pKResolutionsSettings != NULL && *(config->pKResolutionsSettings_size) != -1	)
-	{
-		INT_INFO("\n\n####################################################################### \n\n");
-		INT_INFO("%d:%s: Dumping Resolutions Settings\n", __LINE__, __func__);
-		INT_INFO("%d:%s: pKConfigs = %p\n", __LINE__, __func__, config->pKConfigs);
-	    INT_INFO("%d:%s: pKConfigSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortConfigs_size, *(config->pKVideoPortConfigs_size));
-	    INT_INFO("%d:%s: pKPorts = %p\n", __LINE__, __func__, config->pKPorts);
-	    INT_INFO("%d:%s: pKPortSize pointer %p = %d\n", __LINE__, __func__, config->pKVideoPortPorts_size, *(config->pKVideoPortPorts_size));
-	    INT_INFO("%d:%s: pKResolutionsSettings = %p\n", __LINE__, __func__, config->pKResolutionsSettings);
-	    INT_INFO("%d:%s: pKResolutionsSettingsSize pointer %p = %d\n", __LINE__, __func__, config->pKResolutionsSettings_size, *(config->pKResolutionsSettings_size));
+    if (nullptr == config) {
+        INT_ERROR("Video config is NULL");
+        return;
+    }
+    if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
+        INT_INFO("Dumping of Device configs is disabled");
+        return;
+    }
+    INT_INFO("\n=============== Starting to Dump VideoPort Configs ===============\n");
 
-		for (size_t i = 0; i < *(config->pKResolutionsSettings_size); i++) {
-			dsVideoPortResolution_t *resolution = &(config->pKResolutionsSettings[i]);
-			INT_INFO("%d:%s: resolution->name = %s\n", __LINE__, __func__, resolution->name);
-			INT_INFO("%d:%s: resolution->pixelResolution= %d\n", __LINE__, __func__, resolution->pixelResolution);
-			INT_INFO("%d:%s: resolution->aspectRatio= %d\n", __LINE__, __func__, resolution->aspectRatio);
-			INT_INFO("%d:%s: resolution->stereoScopicMode= %d\n", __LINE__, __func__, resolution->stereoScopicMode);
-			INT_INFO("%d:%s: resolution->frameRate= %d\n", __LINE__, __func__, resolution->frameRate);
-			INT_INFO("%d:%s: resolution->interlaced= %d\n", __LINE__, __func__, resolution->interlaced);
+    int configSize = -1, portSize = -1, resolutionSize = -1;
+    if (( nullptr != config->pKConfigs ) && ( nullptr != config->pKPorts ) && ( nullptr != config->pKResolutionsSettings ))
+    {
+        configSize = (config->pKVideoPortConfigs_size) ? *(config->pKVideoPortConfigs_size) : -1;
+        portSize = (config->pKVideoPortPorts_size) ? *(config->pKVideoPortPorts_size) : -1;
+        resolutionSize = (config->pKResolutionsSettings_size) ? *(config->pKResolutionsSettings_size) : -1;
+        INT_INFO("pKConfigs = %p", config->pKConfigs);
+        INT_INFO("pKConfigSize pointer %p = %d", config->pKVideoPortConfigs_size, configSize);
+        INT_INFO("pKPorts = %p", config->pKPorts);
+        INT_INFO("pKPortSize pointer %p = %d", config->pKVideoPortPorts_size, portSize);
+        INT_INFO("pKResolutionsSettings = %p", config->pKResolutionsSettings);
+        INT_INFO("pKResolutionsSettingsSize pointer %p = %d", config->pKResolutionsSettings_size, resolutionSize);
 
-		}
-		INT_INFO("\n\n####################################################################### \n\n");
-		INT_INFO("\n\n####################################################################### \n\n");
-		INT_INFO("%d:%s: Dumping Video Port Configurations\n", __LINE__, __func__);
-		for (size_t i = 0; i < *(config->pKVideoPortConfigs_size); i++)
-		{
-			const dsVideoPortTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
+        INT_INFO("\n\n############### Dumping Video Resolutions Settings ############### \n\n");
 
-			INT_INFO("%d:%s: typeCfg->typeId = %d\n", __LINE__, __func__, typeCfg->typeId);
-			INT_INFO("%d:%s: typeCfg->name = %s\n", __LINE__, __func__, typeCfg->name);
-			INT_INFO("%d:%s: typeCfg->dtcpSupported= %d\n", __LINE__, __func__, typeCfg->dtcpSupported);
-			INT_INFO("%d:%s: typeCfg->hdcpSupported = %d\n", __LINE__, __func__, typeCfg->hdcpSupported);
-			INT_INFO("%d:%s: typeCfg->restrictedResollution = %d\n", __LINE__, __func__, typeCfg->restrictedResollution);
-			INT_INFO("%d:%s: typeCfg->numSupportedResolutions= %lu\n", __LINE__, __func__, typeCfg->numSupportedResolutions);
+        for (int i = 0; i < resolutionSize; i++) {
+            dsVideoPortResolution_t *resolution = &(config->pKResolutionsSettings[i]);
+            INT_INFO("resolution->name = %s", resolution->name);
+            INT_INFO("resolution->pixelResolution= %d", resolution->pixelResolution);
+            INT_INFO("resolution->aspectRatio= %d", resolution->aspectRatio);
+            INT_INFO("resolution->stereoScopicMode= %d", resolution->stereoScopicMode);
+            INT_INFO("resolution->frameRate= %d", resolution->frameRate);
+            INT_INFO("resolution->interlaced= %d", resolution->interlaced);
+        }
 
-			INT_INFO("%d:%s: typeCfg->supportedResolutions = %p\n", __LINE__, __func__, typeCfg->supportedResolutions);
-			INT_INFO("%d:%s: typeCfg->supportedResolutions->name = %s\n", __LINE__, __func__, typeCfg->supportedResolutions->name);
-			INT_INFO("%d:%s: typeCfg->supportedResolutions->pixelResolution= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->pixelResolution);
-			INT_INFO("%d:%s: typeCfg->supportedResolutions->aspectRatio= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->aspectRatio);
-			INT_INFO("%d:%s: typeCfg->supportedResolutions->stereoScopicMode= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->stereoScopicMode);
-			INT_INFO("%d:%s: typeCfg->supportedResolutions->frameRate= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->frameRate);
-			INT_INFO("%d:%s: typeCfg->supportedResolutions->interlaced= %d\n", __LINE__, __func__, typeCfg->supportedResolutions->interlaced);
-		}
-		INT_INFO("\n\n####################################################################### \n\n");
+        INT_INFO("\n ############### Dumping Video Port Configurations ############### \n");
 
-		INT_INFO("\n\n####################################################################### \n\n");
-		INT_INFO("%d:%s: Dumping Video Port Connections\n", __LINE__, __func__);
-		for (size_t i = 0; i < *(config->pKVideoPortPorts_size); i++) {
-			const dsVideoPortPortConfig_t *port = &(config->pKPorts[i]);
-			INT_INFO("%d:%s: port->id.type = %d\n", __LINE__, __func__, port->id.type);
-			INT_INFO("%d:%s: port->id.index = %d\n", __LINE__, __func__, port->id.index);
-			INT_INFO("%d:%s: port->connectedAOP.type = %d\n", __LINE__, __func__, port->connectedAOP.type);
-			INT_INFO("%d:%s: port->connectedAOP.index = %d\n", __LINE__, __func__, port->connectedAOP.index);
-			INT_INFO("%d:%s: port->defaultResolution = %s\n", __LINE__, __func__, port->defaultResolution);
-		}
-		INT_INFO("\n\n####################################################################### \n\n");
-	}
-	else
-	{
-		INT_ERROR("%d:%s: pKConfigs or pKPorts or pKResolutionsSettings is NULL, and pKVideoPortConfigs_size  or pKVideoPortPorts_size or  pKResolutionsSettings_size is -1\n", __LINE__, __func__);
-	}
-	INT_INFO("\n\n=========================================================================================================================\n\n");
-	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+        for (int i = 0; i < configSize; i++)
+        {
+            const dsVideoPortTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
+            INT_INFO("typeCfg->typeId = %d", typeCfg->typeId);
+            INT_INFO("typeCfg->name = %s", (typeCfg->name) ? typeCfg->name : "NULL");
+            INT_INFO("typeCfg->dtcpSupported= %d", typeCfg->dtcpSupported);
+            INT_INFO("typeCfg->hdcpSupported = %d", typeCfg->hdcpSupported);
+            INT_INFO("typeCfg->restrictedResollution = %d", typeCfg->restrictedResollution);
+            INT_INFO("typeCfg->numSupportedResolutions= %lu", typeCfg->numSupportedResolutions);
+
+            INT_INFO("typeCfg->supportedResolutions = %p", typeCfg->supportedResolutions);
+            INT_INFO("typeCfg->supportedResolutions->name = %s", (typeCfg->supportedResolutions->name) ? typeCfg->supportedResolutions->name : "NULL");
+            INT_INFO("typeCfg->supportedResolutions->pixelResolution= %d", typeCfg->supportedResolutions->pixelResolution);
+            INT_INFO("typeCfg->supportedResolutions->aspectRatio= %d", typeCfg->supportedResolutions->aspectRatio);
+            INT_INFO("typeCfg->supportedResolutions->stereoScopicMode= %d", typeCfg->supportedResolutions->stereoScopicMode);
+            INT_INFO("typeCfg->supportedResolutions->frameRate= %d", typeCfg->supportedResolutions->frameRate);
+            INT_INFO("typeCfg->supportedResolutions->interlaced= %d", typeCfg->supportedResolutions->interlaced);
+        }
+        INT_INFO("\n############### Dumping Video Port Connections ###############\n");
+
+        for (int i = 0; i < portSize; i++) {
+            const dsVideoPortPortConfig_t *portCfg = &(config->pKPorts[i]);
+            INT_INFO("portCfg->id.type = %d", portCfg->id.type);
+            INT_INFO("portCfg->id.index = %d", portCfg->id.index);
+            INT_INFO("portCfg->connectedAOP.type = %d", portCfg->connectedAOP.type);
+            INT_INFO("portCfg->connectedAOP.index = %d", portCfg->connectedAOP.index);
+            INT_INFO("portCfg->defaultResolution = %s", (portCfg->defaultResolution) ? portCfg->defaultResolution : "NULL");
+        }
+    }
+    else
+    {
+        INT_ERROR("pKConfigs or pKPorts or pKResolutionsSettings is NULL");
+    }
+    INT_INFO("\n=============== Dump VideoPort Configs done ===============\n");
+    INT_INFO("Exit function");
 }
 
-void VideoOutputPortConfig::load()
+void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
 {
-	static int configSize, portSize, resolutionSize, invalid_size = -1;
-	static videoPortConfigs_t configuration = {0};
-	const char* searchVaribles[] = {
-        "kVideoPortConfigs",
-        "kVideoPortConfigs_size",
-        "kVideoPortPorts",
-        "kVideoPortPorts_size",
-		"kResolutionsSettings",
-		"kResolutionsSettings_size"
-    };
-	bool ret = false;
+    int configSize, portSize, resolutionSize;
+    videoPortConfigs_t configuration = {0};
 
-	INT_INFO("Enter function\n");
-	try {
-		/*
-		 * Load Constants First.
-		 */
-		for (size_t i = 0; i < dsVIDEO_PIXELRES_MAX; i++) {
-			_vPixelResolutions.push_back(PixelResolution(i));
-		}
-		for (size_t i = 0; i < dsVIDEO_ASPECT_RATIO_MAX; i++) {
-			_vAspectRatios.push_back(AspectRatio(i));
-		}
-		for (size_t i = 0; i < dsVIDEO_SSMODE_MAX; i++) {
-			_vStereoScopieModes.push_back(StereoScopicMode(i));
-		}
-		for (size_t i = 0; i < dsVIDEO_FRAMERATE_MAX; i++) {
-			_vFrameRates.push_back(FrameRate((int)i));
-		}
+    INT_INFO("Enter function");
+    try {
+        /*
+        * Load Constants First.
+        */
+        for (size_t i = 0; i < dsVIDEO_PIXELRES_MAX; i++) {
+            _vPixelResolutions.push_back(PixelResolution(i));
+        }
+        for (size_t i = 0; i < dsVIDEO_ASPECT_RATIO_MAX; i++) {
+            _vAspectRatios.push_back(AspectRatio(i));
+        }
+        for (size_t i = 0; i < dsVIDEO_SSMODE_MAX; i++) {
+            _vStereoScopieModes.push_back(StereoScopicMode(i));
+        }
+        for (size_t i = 0; i < dsVIDEO_FRAMERATE_MAX; i++) {
+            _vFrameRates.push_back(FrameRate((int)i));
+        }
+        for (size_t i = 0; i < dsVIDEOPORT_TYPE_MAX; i++) {
+            _vPortTypes.push_back(VideoOutputPortType((int)i));
+        }
 
-		for (size_t i = 0; i < dsVIDEOPORT_TYPE_MAX; i++) {
-			_vPortTypes.push_back(VideoOutputPortType((int)i));
-		}
+        INT_INFO("Using '%s' config", dynamicVideoPortConfigs ? "dynamic" : "static");
+        if ( nullptr != dynamicVideoPortConfigs )
+        {
+            configuration = *dynamicVideoPortConfigs;
+            configSize = (configuration.pKVideoPortConfigs_size) ? *(configuration.pKVideoPortConfigs_size) : -1;
+            portSize = (configuration.pKVideoPortPorts_size) ? *(configuration.pKVideoPortPorts_size) : -1;
+            resolutionSize = (configuration.pKResolutionsSettings_size) ? *(configuration.pKResolutionsSettings_size) : -1;
+        }
+        else {
+            configuration.pKConfigs = kConfigs;
+            configSize = dsUTL_DIM(kConfigs);
+            configuration.pKVideoPortConfigs_size = &configSize;
+            configuration.pKPorts = kPorts;
+            portSize = dsUTL_DIM(kPorts);
+            configuration.pKVideoPortPorts_size = &portSize;
+            configuration.pKResolutionsSettings = kResolutions;
+            resolutionSize = dsUTL_DIM(kResolutions);
+            configuration.pKResolutionsSettings_size = &resolutionSize;
+        }
 
-		INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[0]);
-		ret = searchConfigs(searchVaribles[0], (void **)&configuration.pKConfigs);
-		if(ret == true)
-		{
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[1]);
-			ret = searchConfigs(searchVaribles[1], (void **)&configuration.pKVideoPortConfigs_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[1]);
-				configuration.pKVideoPortConfigs_size = &invalid_size;
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[2]);
-			ret = searchConfigs(searchVaribles[2], (void **)&configuration.pKPorts);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[2]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[3]);
-			ret = searchConfigs(searchVaribles[3], (void **)&configuration.pKVideoPortPorts_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[3]);
-				configuration.pKVideoPortPorts_size = &invalid_size;
-			}
-			// Resolutions
-			ret = searchConfigs(searchVaribles[4], (void **)&configuration.pKResolutionsSettings);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[4]);
-			}
-			INT_INFO("%d:%s: Calling  searchConfigs( %s)\n", __LINE__, __func__, searchVaribles[5]);
-			ret = searchConfigs(searchVaribles[5], (void **)&configuration.pKResolutionsSettings_size);
-			if(ret == false)
-			{
-				INT_ERROR("%s is not defined\n", searchVaribles[5]);
-				configuration.pKResolutionsSettings_size = &invalid_size;
-			}
-		}
-		else
-		{
-			INT_ERROR("Read Old Configs\n");
-			configuration.pKConfigs = kConfigs;
-			configSize = dsUTL_DIM(kConfigs);
-			configuration.pKVideoPortConfigs_size = &configSize;
-			configuration.pKPorts = kPorts;
-			portSize = dsUTL_DIM(kPorts);
-			configuration.pKVideoPortPorts_size = &portSize;
-			configuration.pKResolutionsSettings = kResolutions;
-			resolutionSize = dsUTL_DIM(kResolutions);
-			configuration.pKResolutionsSettings_size = &resolutionSize;
-			INT_INFO("configuration.pKConfigs =%p, *(configuration.pKVideoPortConfigs_size) = %d\n", configuration.pKConfigs, *(configuration.pKVideoPortConfigs_size));
-			INT_INFO("configuration.pKPorts =%p, *(configuration.pKVideoPortPorts_size) = %d\n", configuration.pKPorts, *(configuration.pKVideoPortPorts_size));
-			INT_INFO("configuration.pKResolutionsSettings =%p, *(configuration.pKResolutionsSettings_size) = %d\n", configuration.pKResolutionsSettings, *(configuration.pKResolutionsSettings_size));
-		}
+        INT_INFO("VideoPort Config[%p] ConfigSize[%d] Port[%p] PortSize[%d] Resolutions[%p] ResolutionsSize[%d]",
+            configuration.pKConfigs,
+            configSize,
+            configuration.pKPorts,
+            portSize,
+            configuration.pKResolutionsSettings,
+            resolutionSize);
 
-		if((configuration.pKConfigs != NULL) && (configuration.pKVideoPortConfigs_size != NULL) &&
-		   (configuration.pKPorts != NULL) && (configuration.pKVideoPortPorts_size != NULL) &&
-		   (configuration.pKResolutionsSettings != NULL) && (configuration.pKResolutionsSettings_size != NULL))
-		{
+        dumpconfig(&configuration);
 
-			#if DEBUG
-			dumpconfig(&configuration);
-			//INT_INFO("disable the dumpconfig()\n");
-			#endif
-			/* Initialize a set of supported resolutions
-		 	*
-		 	*/
-			for (size_t i = 0; i < *(configuration.pKResolutionsSettings_size); i++) {
-				dsVideoPortResolution_t *resolution = &(configuration.pKResolutionsSettings[i]);
-				{std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
-					_supportedResolutions.push_back(
-										VideoResolution(
-											i, /* id */
-											std::string(resolution->name),
-											resolution->pixelResolution,
-											resolution->aspectRatio,
-											resolution->stereoScopicMode,
-											resolution->frameRate,
-											resolution->interlaced));
-				}
-			}
+        if (( nullptr != configuration.pKConfigs ) && ( nullptr != configuration.pKPorts) && ( nullptr != configuration.pKResolutionsSettings))
+        {
+            /* Initialize a set of supported resolutions */
+            for (int i = 0; i < resolutionSize; i++) {
+                dsVideoPortResolution_t *resolution = &(configuration.pKResolutionsSettings[i]);
+                {std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
+                    _supportedResolutions.push_back(
+                                        VideoResolution(
+                                            i, /* id */
+                                            std::string(resolution->name),
+                                            resolution->pixelResolution,
+                                            resolution->aspectRatio,
+                                            resolution->stereoScopicMode,
+                                            resolution->frameRate,
+                                            resolution->interlaced));
+                }
+            }
 
+            /*
+            * Initialize Video portTypes (Only Enable POrts)
+            * and its port instances (curr resolution)
+            */
+            for (int i = 0; i < configSize; i++)
+            {
+                const dsVideoPortTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
+                VideoOutputPortType &vPortType = VideoOutputPortType::getInstance(typeCfg->typeId);
+                vPortType.enable();
+                vPortType.setRestrictedResolution(typeCfg->restrictedResollution);
+            }
 
-			/*
-	 		* Initialize Video portTypes (Only Enable POrts)
-	 		* and its port instances (curr resolution)
-	 		*/
-			for (size_t i = 0; i < *(configuration.pKVideoPortConfigs_size); i++)
-			{
-				const dsVideoPortTypeConfig_t *typeCfg = &(configuration.pKConfigs[i]);
-				VideoOutputPortType &vPortType = VideoOutputPortType::getInstance(typeCfg->typeId);
-				vPortType.enable();
-				vPortType.setRestrictedResolution(typeCfg->restrictedResollution);
-			}
-
-			/*
-		 	* set up ports based on kPorts[]
-		 	*/
-			for (size_t i = 0; i < *(configuration.pKVideoPortPorts_size); i++) {
-				const dsVideoPortPortConfig_t *port = &(configuration.pKPorts[i]);
-
-				_vPorts.push_back(
-						VideoOutputPort((port->id.type), port->id.index, i,
-								AudioOutputPortType::getInstance(configuration.pKPorts[i].connectedAOP.type).getPort(configuration.pKPorts[i].connectedAOP.index).getId(),
-								std::string(port->defaultResolution)));
-
-				_vPortTypes.at(port->id.type).addPort(_vPorts.at(i));
-
-			}
-		}
-		else
-		{
-			cout << "Video Outport Configs or Ports or Resolutions is NULL. ..."<<endl;
-			throw Exception("Failed to load video outport config");
-		}
-	}
-	catch (...) {
-		cout << "VIdeo Outport Exception Thrown. ..."<<endl;
+            /*
+            * set up ports based on kPorts[]
+            */
+            for (int i = 0; i < portSize; i++) {
+                const dsVideoPortPortConfig_t *portCfg = &(configuration.pKPorts[i]);
+                if (nullptr == portCfg->defaultResolution) {
+                    INT_ERROR("defaultResolution is NULL at %d,  using empty string...", i);
+                }
+                _vPorts.push_back(
+                        VideoOutputPort((portCfg->id.type), portCfg->id.index, i,
+                                AudioOutputPortType::getInstance(portCfg->connectedAOP.type).getPort(portCfg->connectedAOP.index).getId(),
+                                (portCfg->defaultResolution) ? std::string(portCfg->defaultResolution) : std::string("")));
+                _vPortTypes.at(portCfg->id.type).addPort(_vPorts.at(i));
+            }
+        }
+        else
+        {
+            cout << "Video Outport Configs or Ports or Resolutions is NULL. ..."<<endl;
+            throw Exception("Failed to load video outport config");
+        }
+    }
+    catch (...) {
+        cout << "VIdeo Outport Exception Thrown. ..."<<endl;
         throw Exception("Failed to load video outport config");
-	}
-	INT_INFO("Exit function\n");
-
+    }
+    INT_INFO("Exit function");
 }
 
 void VideoOutputPortConfig::release()

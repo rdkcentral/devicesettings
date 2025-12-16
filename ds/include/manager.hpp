@@ -150,6 +150,7 @@
 #define _DS_MANAGER_HPP_
 
 #include <string>
+#include <unistd.h>  // for access API
 
 using namespace std;
 
@@ -159,9 +160,24 @@ using namespace std;
  */
 namespace device {
 
-// Forward declaration for searchConfigs function
-bool searchConfigs(const char *searchConfigStr, void **pConfigVar);
-std::string parse_opt_flag( std::string file_name , bool integer_check= false , bool debugStats = true);
+typedef enum DeviceCapabilityTypes {
+    DEVICE_CAPABILITY_INVALID = 0x00000000,
+    DEVICE_CAPABILITY_AUDIO_PORT = 0x00000001,
+    DEVICE_CAPABILITY_VIDEO_PORT = 0x00000002,
+    DEVICE_CAPABILITY_VIDEO_DEVICE = 0x00000004,
+    DEVICE_CAPABILITY_FRONT_PANEL = 0x00000008,
+    DEVICE_CAPABILITY_MAX = 0xFFFFFFFF
+}
+DeviceCapabilityTypes;
+
+typedef struct dlSymbolLookup {
+    const char* name;
+    void** dataptr;
+}
+dlSymbolLookup;
+
+bool LoadDLSymbols(void* pDLHandle, const dlSymbolLookup* symbols, int numberOfSymbols);
+void loadDeviceCapabilities(unsigned int capabilityType);
 
 /**
  * @class Manager
@@ -175,7 +191,7 @@ public:
 	static void Initialize();
 	static void DeInitialize();
     static void load(); //!< This function is being used for loading configure in-process DSMgr.
-	static int IsInitialized;   //!< Indicates the application has initialized with devicettings modules.
+    static int IsInitialized;   //!< Indicates the application has initialized with devicettings modules.
 };
 
 }

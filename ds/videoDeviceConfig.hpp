@@ -35,6 +35,12 @@
 #include "videoDevice.hpp"
 #include <vector>
 
+typedef struct videoDeviceConfig
+{
+	dsVideoConfig_t *pKVideoDeviceConfigs;
+	int *pKVideoDeviceConfigs_size;
+}videoDeviceConfig_t;
+
 namespace device {
 
 class VideoDeviceConfig {
@@ -55,7 +61,7 @@ public:
 	VideoDFC & getDFC(int id);
 	VideoDFC & getDefaultDFC();
 
-	void load();
+	void load(videoDeviceConfig_t* dynamicVideoDeviceConfigs);
 	void release();
 
 };
