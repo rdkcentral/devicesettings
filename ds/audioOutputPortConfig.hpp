@@ -74,7 +74,7 @@ public:
 	List<AudioOutputPort> 		 getPorts();
 	List<AudioOutputPortType> 	 getSupportedTypes();
 
-	void load(audioConfigs_t* pDLHandle);
+	void load(audioConfigs_t* dynamicAudioConfigs);
 	void release();
 
 };

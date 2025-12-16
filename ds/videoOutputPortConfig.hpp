@@ -80,7 +80,7 @@ public:
 	List<VideoOutputPortType> getSupportedTypes();
 	List<VideoResolution> getSupportedResolutions(bool isIgnoreEdid=false);
 
-	void load(videoPortConfigs_t* pDLHandle);
+	void load(videoPortConfigs_t* dynamicVideoPortConfigs);
 	void release();
 
 };

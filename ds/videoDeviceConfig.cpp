@@ -99,7 +99,7 @@ void dumpconfig(videoDeviceConfig_t *config)
         return;
     }
 
-    INT_INFO("\n\n============================================== Starting to Dump VideoDevice Configs ===========================================================================\n\n");
+    INT_INFO("\n=============== Starting to Dump VideoDevice Configs ===============\n");
 
 	if( nullptr != config->pKVideoDeviceConfigs )
 	{
@@ -119,12 +119,12 @@ void dumpconfig(videoDeviceConfig_t *config)
 		INT_ERROR(" kVideoDeviceConfigs is NULL");
 	}
 
-	INT_INFO("\n\n===================================== Dump VideoDevice Configs done ====================================================================================\n\n");
+	INT_INFO("\n=============== Dump VideoDevice Configs done ===============\n");
 }
 
 void VideoDeviceConfig::load(videoDeviceConfig_t* dynamicVideoDeviceConfigs)
 {
-	static int configSize = -1;
+	int configSize = -1;
 	videoDeviceConfig_t configuration = {0};
 
 	INT_INFO("Enter function");

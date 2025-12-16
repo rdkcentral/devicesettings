@@ -61,7 +61,7 @@ public:
 	VideoDFC & getDFC(int id);
 	VideoDFC & getDefaultDFC();
 
-	void load(videoDeviceConfig_t* pDLHandle);
+	void load(videoDeviceConfig_t* dynamicVideoDeviceConfigs);
 	void release();
 
 };

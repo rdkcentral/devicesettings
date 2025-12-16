@@ -353,17 +353,13 @@ void dumpconfig(fpdConfigs_t *configuration)
     int indicatorColorSize = -1;
 
     // Dump the configuration details
-    INT_INFO("\n\n================================== Starting to Dump FrontPanel Configs =========================================\n\n");
+    INT_INFO("\n=============== Starting to Dump FrontPanel Configs ===============\n");
 
     if (( nullptr != configuration->pKFPDIndicatorColors) && ( nullptr != configuration->pKIndicators))
     {
         int indicatorSize = (configuration->pKIndicators_size) ? *(configuration->pKIndicators_size) : -1;
         int indicatorColorSize = (configuration->pKFPDIndicatorColors_size) ? *(configuration->pKFPDIndicatorColors_size) : -1;
 
-        INT_INFO("configuration->pKFPDIndicatorColors_size addr: %p", (configuration->pKFPDIndicatorColors_size));
-        INT_INFO("configuration->pKFPDIndicatorColors_size data: %d", indicatorColorSize);
-        INT_INFO("configuration->pKIndicators_size addr: %p", (configuration->pKIndicators_size));
-        INT_INFO("configuration->pKIndicators_size data: %d", indicatorSize);
         for (int i = 0; i < indicatorColorSize; i++) {
             const dsFPDColorConfig_t* fpdColorCfg = &configuration->pKFPDIndicatorColors[i];
             INT_INFO("  Color ID: %d, color: %d", fpdColorCfg->id, fpdColorCfg->color);
@@ -399,7 +395,7 @@ void dumpconfig(fpdConfigs_t *configuration)
     else {
         INT_INFO("  No Text Displays configured.");
     }
-    INT_INFO("\n\n================================== Dump FrontPanel Configs done =========================================\n\n");
+    INT_INFO("\n=============== Dump FrontPanel Configs done ===============\n");
 }
 
 /**
@@ -416,7 +412,7 @@ void FrontPanelConfig::load(fpdConfigs_t* dynamicFPDConfigs)
     * 1. Create Supported Colors.
     * 2. Create Indicators.
     */
-    static int indicatorSize, indicatorColorSize, textDisplaySize;
+    int indicatorSize, indicatorColorSize, textDisplaySize;
     fpdConfigs_t configuration = {0};
     INT_INFO("Enter function");
     if (( false == m_isFPInitialized) || (true == m_isFPConfigLoaded)) {

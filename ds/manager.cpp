@@ -273,8 +273,7 @@ void Manager::load()
     INT_INFO("Enter function");
 	loadDeviceCapabilities( device::DEVICE_CAPABILITY_VIDEO_PORT | 
                             device::DEVICE_CAPABILITY_AUDIO_PORT |
-                            device::DEVICE_CAPABILITY_VIDEO_DEVICE |
-                            device::DEVICE_CAPABILITY_FRONT_PANEL);
+                            device::DEVICE_CAPABILITY_VIDEO_DEVICE);
     INT_INFO("Exit function");
 }
 
