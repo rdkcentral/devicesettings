@@ -2554,7 +2554,7 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             }
             param->mode = stereoMode;
         }
-        else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
+        else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER && _srv_AudioSPEAKERAuto) {
             ret = dsGetStereoMode(param->handle, &param->mode);
             if(ret == dsERR_NONE) {
                 result = IARM_RESULT_SUCCESS;
@@ -2573,6 +2573,10 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC) {
                 param->mode = _srv_HDMI_ARC_Audiomode;
                 INT_INFO("The HDMI ARC Port Audio Settings Mode is %d \r\n",param->mode);
+            }
+            else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
+                param->mode = _srv_SPEAKER_Audiomode;
+                INT_INFO("The SPEAKER Port Audio Settings Mode is %d \r\n",param->mode);
             }
 
             result = IARM_RESULT_SUCCESS;
