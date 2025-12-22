@@ -2557,10 +2557,12 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             param->mode = stereoMode;
         }
         else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER && _srv_AudioSPEAKERAuto) {
-            ret = dsGetStereoMode(param->handle, &param->mode);
+            dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
+            ret = dsGetStereoMode(param->handle, &stereoMode);
             if(ret == dsERR_NONE) {
                 result = IARM_RESULT_SUCCESS;
             }
+            param->mode = stereoMode;
         }
         else {
             if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
