@@ -127,8 +127,17 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsAudioPortInit();
             CHECK_RET_VAL(err);
-	    	err = dsVideoPortInit();
+			
+			err = dsERR_GENERAL;
+			retryCount = 0;
+			do {
+	    		err = dsVideoPortInit();
+				printf ("Manager::Initialize:dsVideoPortInit result :%d retryCount :%d\n", err, retryCount);
+	    		if (dsERR_NONE == err) break;
+	    		usleep(100000);
+			} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
             CHECK_RET_VAL(err);
+			
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
 	    	AudioOutputPortConfig::getInstance().load();
