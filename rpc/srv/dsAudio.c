@@ -1624,7 +1624,7 @@ void AudioConfigInit()
 		       m_volumeLeveller.level = atoi(_volLevellerLevel.c_str());
            //SPEAKER init
                        handle = 0;
-                       INT_DEBUG("bDolbyVolumeOverrideCheck value:  %d\n", bDolbyVolumeOverrideCheck);
+                       INT_DEBUG("bDolbyVolumeOverrideCheck value:  %d\n", (int)bDolbyVolumeOverrideCheck);
                        if(bDolbyVolumeOverrideCheck && dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
                            if (dsSetVolumeLevellerFunc(handle, m_volumeLeveller) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Volume Leveller : Mode: %d, Level: %d\n","SPEAKER0", m_volumeLeveller.mode, m_volumeLeveller.level);
@@ -2357,9 +2357,14 @@ IARM_Result_t dsAudioMgr_init()
 IARM_Result_t dsAudioMgr_term()
 {
     #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
-	if(persist_audioLevel_timer_threadIsAlive){
+	IARM_BUS_Lock(lock);
+	bool shouldJoin = persist_audioLevel_timer_threadIsAlive;
+	if(shouldJoin){
 		persist_audioLevel_timer_threadIsAlive=false;
           	pthread_cond_signal(&audioLevelTimerCV);
+	}
+	IARM_BUS_Unlock(lock);
+	if(shouldJoin){
 		pthread_join(persist_audioLevel_timer_threadId,NULL);
 	}
     #endif
