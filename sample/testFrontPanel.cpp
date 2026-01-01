@@ -44,6 +44,7 @@
 
 int main(int argc, char *argv[]) 
 {
+	bool initialized = false;
 	try {
 		int i = 0;
 
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
 		IARM_Bus_Connect();
 
 		device::Manager::Initialize();
+		initialized = true;
 
 		if (argc != 2) {
 			printf("%s : <Text Message [3 Chars]>\n", argv[0]);
@@ -121,10 +123,20 @@ int main(int argc, char *argv[])
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "Exception in %s: %s\n", argv[0], e.what());
+		if (initialized) {
+			device::Manager::DeInitialize();
+			IARM_Bus_Disconnect();
+			IARM_Bus_Term();
+		}
 		return 1;
 	}
 	catch (...) {
 		fprintf(stderr, "Unknown exception in %s\n", argv[0]);
+		if (initialized) {
+			device::Manager::DeInitialize();
+			IARM_Bus_Disconnect();
+			IARM_Bus_Term();
+		}
 		return 1;
 	}
 	return 0;
