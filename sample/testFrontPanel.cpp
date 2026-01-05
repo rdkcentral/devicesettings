@@ -32,7 +32,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "manager.hpp"
-
+#include "illegalArgumentException.hpp"
 #include "frontPanelConfig.hpp"
 #include <stdlib.h>  
 
