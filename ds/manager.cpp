@@ -105,11 +105,18 @@ Manager::~Manager() {
  */
 void Manager::Initialize()
 {
-	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+	bool needInit = false;
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
+	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+	    if (IsInitialized == 0) {
+            needInit = true;
+        }
+        IsInitialized++;
+    }
+	
 	try {
-	    if (0 == IsInitialized) {	
+	    if (needInit) {
         
 	    	dsError_t err = dsERR_GENERAL;
 	    	unsigned int retryCount = 0;
@@ -134,14 +141,15 @@ void Manager::Initialize()
 	    	AudioOutputPortConfig::getInstance().load();
 	    	VideoOutputPortConfig::getInstance().load();
 	    	VideoDeviceConfig::getInstance().load();
-	    }
-        IsInitialized++;
+		}
     }
     catch(const Exception &e) {
 		cout << "Caught exception during Initialization" << e.what() << endl;
+		std::lock_guard<std::mutex> lock(gManagerInitMutex);
+        IsInitialized--;
 		throw e;
 	}
-	}
+	
 	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
 }
 
