@@ -121,6 +121,18 @@ int main(int argc, char *argv[])
 		IARM_Bus_Disconnect();
 		IARM_Bus_Term();
 	}
+	catch (const device::Exception& e)
+    {
+        fprintf(stderr, "Device exception in %s: %s\n",
+            argv[0], e.what());
+
+        if (initialized) {
+            device::Manager::DeInitialize();
+            IARM_Bus_Disconnect();
+            IARM_Bus_Term();
+        }
+        return 1;
+    }
 	catch (const std::exception& e) {
 		fprintf(stderr, "Exception in %s: %s\n", argv[0], e.what());
 		if (initialized) {
