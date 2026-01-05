@@ -877,12 +877,16 @@ IARM_Result_t _dsSetResolution(void *arg)
     
 	IARM_BUS_Lock(lock);
 
+    INT_INFO("%s:%d Entering ...\r\n",__FUNCTION__,__LINE__);
+
 	dsVideoPortSetResolutionParam_t *param = (dsVideoPortSetResolutionParam_t *)arg;
 	if (param != NULL)   //CID:82753 - Reverse_inull
         {
 		dsVideoPortType_t _VPortType = _GetVideoPortType(param->handle);
 		bool isConnected = 0;
+        INT_INFO("%s:%d _VPortType:%d  Resolution to be set::%s \n",__FUNCTION__,__LINE__,_VPortType,param->resolution.name);
 		dsIsDisplayConnected(param->handle,&isConnected);
+        INT_INFO("%s:%d isConnected:%d \n",__FUNCTION__,__LINE__,isConnected);
 		if(!isConnected)
 		{
 		    INT_INFO("Port _VPortType:%d  not connected..Ignoring Resolution Request------\r\n",_VPortType);
@@ -894,7 +898,7 @@ IARM_Result_t _dsSetResolution(void *arg)
 	
 		dsVideoPortResolution_t resolution = param->resolution;
 		std::string resolutionName(resolution.name);
-                INT_DEBUG("Resolution Requested ..%s \r\n",resolution.name);
+        INT_INFO("%s:%d Resolution Requested ..%s \r\n",__FUNCTION__,__LINE__,resolution.name);
 
 		if(force_disable_4K)
 		{
@@ -920,15 +924,15 @@ IARM_Result_t _dsSetResolution(void *arg)
                 _dsGetIgnoreEDIDStatus(&ignoreEdidParam);
 		bool IsIgnoreEdid = ignoreEdidParam.ignoreEDID;
 		IARM_BUS_Lock(lock);
-		INT_DEBUG("ResOverride _dsSetResolution IsIgnoreEdid:%d\n", IsIgnoreEdid);
+		INT_INFO("%s:%d ResOverride _dsSetResolution IsIgnoreEdid:%d\n", __FUNCTION__,__LINE__, IsIgnoreEdid);
 		dsVideoPortResolution_t platresolution;
 		memset(&platresolution,'\0',sizeof(platresolution));
 		dsGetResolution(param->handle,&platresolution);
-		INT_INFO("Resolution Requested ..%s Platform Resolution - %s\r\n",resolution.name,platresolution.name);
+		INT_INFO("%s:%d Resolution Requested ..%s Platform Resolution - %s\r\n",__FUNCTION__,__LINE__,resolution.name,platresolution.name);
 		if ((strcmp(resolution.name,platresolution.name) == 0 ))
 		{
 			
-			INT_INFO("Same Resolution ..Ignoring Resolution Request------\r\n");
+			INT_INFO("%s:%d Same Resolution ..Ignoring Resolution Request------\r\n",__FUNCTION__,__LINE__);
 			_dsHDMIResolution = platresolution.name;
 			/*!< Persist Resolution Settings */
 			persistResolution(param);
@@ -936,22 +940,32 @@ IARM_Result_t _dsSetResolution(void *arg)
 			IARM_BUS_Unlock(lock);
 			return IARM_RESULT_SUCCESS;
 		}
+        INT_INFO("%s:%d Different Resolution ..Processing Resolution Request------\r\n",__FUNCTION__,__LINE__);
 		/*!< Resolution Pre Change Event  - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE */
 		_dsVideoPortPreResolutionCall(&param->resolution);
+        INT_INFO("%s:%d After PreResolution Call ..\r\n",__FUNCTION__,__LINE__);
 
+        INT_INFO("%s:%d Before dsSetResolution Call Res::%s \r\n",__FUNCTION__,__LINE__,param->resolution.name);
 		/*!< Set Platform Resolution  */
 		ret = dsSetResolution(param->handle, &param->resolution);
+        INT_INFO("%s:%d After dsSetResolution Call ..ret=%d \r\n",__FUNCTION__,__LINE__,ret);
 		
+        INT_INFO("%s:%d Before PostResolution Call ..\r\n",__FUNCTION__,__LINE__);
 		/*!< Resolution Post Change Event  - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE */
 		_dsSendVideoPortPostResolutionCall(&param->resolution);
+        INT_INFO("%s:%d After PostResolution Call ..\r\n",__FUNCTION__,__LINE__);
 		
 		if (ret == dsERR_NONE)
 		{
+            INT_INFO("%s:%d Setting Resolution Success ..%s \r\n",__FUNCTION__,__LINE__,param->resolution.name);
 			/*!< Persist Resolution Settings */
 			persistResolution(param);
+            INT_INFO("%s:%d After persistResolution Call ..\r\n",__FUNCTION__,__LINE__);
 		}
 		param->result = ret;
 	}
+
+    INT_INFO("%s:%d Exiting ...\r\n",__FUNCTION__,__LINE__);
 		
     IARM_BUS_Unlock(lock);
 	
@@ -1354,8 +1368,11 @@ static int  _dsSendVideoPortPostResolutionCall(dsVideoPortResolution_t *resoluti
 			}
 			eventData.data.resn.width = param.width;
 			eventData.data.resn.height = param.height;
+            INT_INFO("%s:%d Before <IARM_BusDaemon_ResolutionPostchange> Call, Width:%d Height:%d \r\n",__FUNCTION__,__LINE__, param.width, param.height);
 			IARM_BusDaemon_ResolutionPostchange(param);
+            INT_INFO("%s:%d After <IARM_BusDaemon_ResolutionPostchange> Call and IARM_Bus_BroadcastEvent triggered\r\n",__FUNCTION__,__LINE__);
 			IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,(void *)&eventData, sizeof(eventData));
+            INT_INFO("%s:%d After <IARM_Bus_BroadcastEvent> Call\r\n",__FUNCTION__,__LINE__);
 		}
 	return ret;
 }
@@ -1411,8 +1428,11 @@ static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
 			}
 			eventData.data.resn.width = param.width;
 			eventData.data.resn.height = param.height;
+            INT_INFO("%s:%d Before <IARM_BusDaemon_ResolutionPrechange> Call, Width:%d Height:%d \r\n",__FUNCTION__,__LINE__, param.width, param.height);
 			IARM_BusDaemon_ResolutionPrechange(param);
+            INT_INFO("%s:%d After <IARM_BusDaemon_ResolutionPrechange> Call and IARM_Bus_BroadcastEvent triggered\r\n",__FUNCTION__,__LINE__);
 			IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,(void *)&eventData, sizeof(eventData));
+            INT_INFO("%s:%d After <IARM_Bus_BroadcastEvent> Call\r\n",__FUNCTION__,__LINE__);
 		}
 	return ret;
 }
