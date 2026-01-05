@@ -118,7 +118,12 @@ int main(int argc, char *argv[])
     	printf("Exception Caught during [%s]\r\n", argv[0]);
     }
 
-    device::Manager::DeInitialize();
+	try {
+        device::Manager::DeInitialize();
+    }
+    catch (...) {
+        printf("Unknown exception during DeInitialize\n");
+    }
 
 
 	IARM_Bus_Disconnect();
