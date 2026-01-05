@@ -2357,15 +2357,18 @@ IARM_Result_t dsAudioMgr_init()
 IARM_Result_t dsAudioMgr_term()
 {
     #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
+	bool shouldJoin = false;
+    pthread_t threadId;
 	IARM_BUS_Lock(lock);
-	bool shouldJoin = persist_audioLevel_timer_threadIsAlive;
+	shouldJoin = persist_audioLevel_timer_threadIsAlive;
 	if(shouldJoin){
 		persist_audioLevel_timer_threadIsAlive=false;
-          	pthread_cond_signal(&audioLevelTimerCV);
+		threadId = persist_audioLevel_timer_threadId; 
+        pthread_cond_signal(&audioLevelTimerCV);
 	}
 	IARM_BUS_Unlock(lock);
 	if(shouldJoin){
-		pthread_join(persist_audioLevel_timer_threadId,NULL);
+		pthread_join(threadId,NULL);
 	}
     #endif
     return IARM_RESULT_SUCCESS;
