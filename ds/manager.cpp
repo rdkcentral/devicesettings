@@ -106,9 +106,9 @@ Manager::~Manager() {
 void Manager::Initialize()
 {
 	bool needInit = false;
-	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+        printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	    if (IsInitialized == 0) {
             needInit = true;
         }
