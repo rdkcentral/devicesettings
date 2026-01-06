@@ -7230,6 +7230,7 @@ static void* persist_audioLevel_timer_threadFunc(void* arg) {
                 break;
               }
 	      // wait for 3 sec, then update the latest audio level from cache variable
+          /* coverity[sleep : FALSE] */
 	      if(audioLevel_timer_set){
                 sleep(3);
 
