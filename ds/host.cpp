@@ -396,8 +396,45 @@ Host::~Host()
             } 
             else 
             {
-                AudioOutputPort aPort = getAudioOutputPort("SPEAKER0");
-                return aPort.getOutputPortHandle();
+                //TV profiles with multiple audio output ports
+                try
+                {
+                    // Define the priority order for audio ports
+                    const std::string portPriority[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0"};
+                    
+                    // Try each port in priority order
+                    for (const auto& portName : portPriority)
+                    {
+                        try
+                        {
+                            aPort = getAudioOutputPort(portName);
+                            
+                            // Check if port is enabled and connected
+                            if (aPort.isEnabled() && aPort.isConnected())
+                            {
+                                cout << "Using audio port: " << portName << "\n";
+                                return aPort.getOutputPortHandle();
+                            }
+                        }
+                        catch(const std::exception& e)
+                        {
+                            // Port not found or error accessing it, continue to next port
+                            continue;
+                        }
+                    }
+                    
+                    // Fallback: use SPEAKER0 if no other port is suitable
+                    aPort = getAudioOutputPort("SPEAKER0");
+                    return aPort.getOutputPortHandle();
+                    
+                    cout << "No enabled and connected audio port found\n";
+                }
+                catch(const std::exception& e)
+                {
+                    cout << " Exception Thrown in getAudioPortHandle().. returning NULL...!\n";
+                }
+
+                return NULL;
             }
         }
         catch(const std::exception& e)
