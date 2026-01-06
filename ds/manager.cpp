@@ -135,7 +135,7 @@ void Manager::Initialize()
 				printf ("Manager::Initialize:dsVideoPortInit result :%d retryCount :%d\n", err, retryCount);
 	    		if (dsERR_NONE == err) break;
 	    		usleep(100000);
-			} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
+			} while(retryCount++ < 25);
             CHECK_RET_VAL(err);
 			
 	    	err = dsVideoDeviceInit();
