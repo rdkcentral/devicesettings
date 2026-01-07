@@ -407,7 +407,7 @@ Host::~Host()
                     {
                         try
                         {
-                            aPort = getAudioOutputPort(portName);
+                            AudioOutputPort aPort = getAudioOutputPort(portName);
                             
                             // Check if port is enabled and connected
                             if (aPort.isEnabled() && aPort.isConnected())
@@ -424,7 +424,7 @@ Host::~Host()
                     }
                     
                     // Fallback: use SPEAKER0 if no other port is suitable
-                    aPort = getAudioOutputPort("SPEAKER0");
+                    AudioOutputPort aPort = getAudioOutputPort("SPEAKER0");
                     return aPort.getOutputPortHandle();
                     
                     cout << "No enabled and connected audio port found\n";
