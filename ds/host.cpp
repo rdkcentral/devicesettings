@@ -408,7 +408,8 @@ Host::~Host()
                         try
                         {
                             AudioOutputPort aPort = getAudioOutputPort(portName);
-                            
+                            cout << "Checking audio port: " << portName << "\n";
+							cout << "isEnabled: " << aPort.isEnabled() << "isConnected: " << aPort.isConnected() << "\n";
                             // Check if port is enabled and connected
                             if (aPort.isEnabled() && aPort.isConnected())
                             {
@@ -424,10 +425,9 @@ Host::~Host()
                     }
                     
                     // Fallback: use SPEAKER0 if no other port is suitable
-                    AudioOutputPort aPort = getAudioOutputPort("SPEAKER0");
-                    return aPort.getOutputPortHandle();
-                    
-                    cout << "No enabled and connected audio port found\n";
+                    AudioOutputPort fallback_aPort = getAudioOutputPort("SPEAKER0");
+					cout << "Using audio port: SPEAKER0" << "\n";
+                    return fallback_aPort.getOutputPortHandle();
                 }
                 catch(const std::exception& e)
                 {
@@ -457,8 +457,8 @@ Host::~Host()
    {
        dsError_t ret = dsERR_NONE;
        dsAudioFormat_t aFormat;
- 
-       ret = dsGetAudioFormat(getAudioPortHandle(), &aFormat);
+	   intptr_t audioPortHandle = getAudioPortHandle();	
+       ret = dsGetAudioFormat(audioPortHandle, &aFormat);
 
        if (ret == dsERR_NONE)
        {
