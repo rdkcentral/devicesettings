@@ -43,6 +43,7 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <functional>
 
 /**
  * @file manager.cpp
@@ -62,6 +63,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+static dsError_t retryInitialization(const char* functionName,std::function<dsError_t()> initFunc,unsigned int maxRetries,bool checkInvalidState);
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -80,7 +82,7 @@ Manager::~Manager() {
 	}
 
 
-dsError_t Manager::retryInitialization(const char* functionName, 
+dsError_t retryInitialization(const char* functionName, 
                                    std::function<dsError_t()> initFunc, 
                                    unsigned int maxRetries = 25,
                                    bool checkInvalidState = false) 

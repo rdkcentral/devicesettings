@@ -169,7 +169,6 @@ public:
 	static void Initialize();
 	static void DeInitialize();
     static void load(); //!< This function is being used for loading configure in-process DSMgr.
-	static dsError_t retryInitialization(const char* functionName,std::function<dsError_t()> initFunc,unsigned int maxRetries,bool checkInvalidState);
 	static int IsInitialized;   //!< Indicates the application has initialized with devicettings modules.
 };
 
