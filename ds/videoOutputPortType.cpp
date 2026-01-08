@@ -36,7 +36,7 @@
 #include "illegalArgumentException.hpp"
 #include "videoOutputPortConfig.hpp"
 #include "dslogger.h"
-
+#include "dsVideoPort.h"
 
 
 #include <iostream>
@@ -209,19 +209,26 @@ void VideoOutputPortType::enabledDTCP()
  */
 void VideoOutputPortType::enabledHDCP(bool contentProtect , char *hdcpKey , size_t keySize )
 {
-  	dsError_t ret = dsERR_NONE;
-    if (device::Host::getInstance().isHDMIOutPortPresent()){
-        ret = dsEnableHDCP(dsVIDEOPORT_TYPE_HDMI, contentProtect, hdcpKey, keySize);
+    dsError_t ret = dsERR_NONE;
+    intptr_t handle = -1;
+
+    // Assuming isHDMIOutPortPresent() will only be 'true' for Source devices
+    dsVideoPortType_t portType = device::Host::getInstance().isHDMIOutPortPresent()
+                                 ? dsVIDEOPORT_TYPE_HDMI
+                                 : dsVIDEOPORT_TYPE_INTERNAL;
+    ret = dsGetVideoPort(portType, 0, &handle);
+    if ((ret == dsERR_NONE) && (handle != -1)) {
+        ret = dsEnableHDCP(handle, contentProtect, hdcpKey, keySize);
+    } else {
+        INT_ERROR("VideoOutputPortType::enabledHDCP: Error type %d, handle=%p, error code=%d", portType, (void *)handle, ret);
+        // Set ret to an error code on dsGetVideoPort failure or invalid handle to ensure exception is thrown
+        ret = dsERR_GENERAL;
     }
-    else{
-        ret = dsEnableHDCP(dsVIDEOPORT_TYPE_INTERNAL , contentProtect, hdcpKey, keySize);
+
+    if (ret != dsERR_NONE) {
+        throw IllegalArgumentException();
     }
-    
-  	if (ret != dsERR_NONE)
-  	{
-  		throw IllegalArgumentException();
-  	}
- 	_hdcpSupported = true;
+    _hdcpSupported = true;
 }
 
 
