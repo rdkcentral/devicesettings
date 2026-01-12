@@ -43,6 +43,7 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <functional>
 
 /**
  * @file manager.cpp
@@ -62,6 +63,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+static dsError_t retryInitialization(const char* functionName, std::function<dsError_t()> initFunc, unsigned int maxRetries, bool checkInvalidState);
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -72,12 +74,49 @@ Manager::~Manager() {
 	// TODO Auto-generated destructor stub
 }
 
-#define CHECK_RET_VAL(ret) {\
-	if (ret != dsERR_NONE) {\
-		cout << "**********Failed to Initialize device port*********" << endl;\
-		throw Exception(ret, "Error Initialising platform ports");\
-	}\
-	}
+/**
+ * @brief Retry initialization function with configurable retry logic.
+ * 
+ * This helper function attempts to initialize a device settings component by calling
+ * the provided initialization function. It retries the operation with a delay between
+ * attempts until either the operation succeeds, the maximum retry count is reached,
+ * or (optionally) a specific error state is encountered.
+ *
+ * @param[in] functionName Name of the initialization function being called. Used for logging
+ *                         purposes to identify which component is being initialized.
+ * @param[in] initFunc Lambda or function object that performs the actual initialization.
+ *                     Should return dsError_t indicating success (dsERR_NONE) or an error code.
+ * @param[in] maxRetries Maximum number of retry attempts. Defaults to 25. The function will
+ *                       retry up to this many times with a 100ms delay between attempts.
+ * @param[in] checkInvalidState When true, retries only on dsERR_INVALID_STATE errors, stopping
+ *                              immediately on any other error. When false (default), retries on
+ *                              any error. Set to true when waiting for an underlying service to
+ *                              become ready, where dsERR_INVALID_STATE indicates the service is
+ *                              not yet initialized.
+ *
+ * @return dsERR_NONE on successful initialization, or the last error code encountered after
+ *         all retry attempts are exhausted. When checkInvalidState is true, also returns
+ *         immediately with the error code if a non-dsERR_INVALID_STATE error occurs.
+ */
+dsError_t retryInitialization(const char* functionName, 
+                                   std::function<dsError_t()> initFunc, 
+                                   unsigned int maxRetries = 25,
+                                   bool checkInvalidState = false) 
+{
+	dsError_t err = dsERR_GENERAL;
+	unsigned int retryCount = 0;
+	
+	do {
+		err = initFunc();
+		printf("Manager::Initialize:%s result :%d retryCount :%d\n", 
+				functionName, err, retryCount);
+		if (dsERR_NONE == err) break;
+		usleep(100000);
+	} while ((checkInvalidState ? (dsERR_INVALID_STATE == err) : true) && 
+				(retryCount++ < maxRetries));
+	
+	return err;
+}
 
 /**
  * @addtogroup dssettingsmanagerapi
@@ -105,44 +144,40 @@ Manager::~Manager() {
  */
 void Manager::Initialize()
 {
-	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
-	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
-	
-	try {
-	    if (0 == IsInitialized) {	
-        
-	    	dsError_t err = dsERR_GENERAL;
-	    	unsigned int retryCount = 0;
-	    	// This retry logic will wait for the device manager initialization from the client side
-	    	// until the device manager service initialization is completed. The retry mechanism checks
-	    	// only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
-	    	// Once the service is ready, other port initializations can be called directly without any delay.
-	    	// That's why the retry logic is applied only for dsDisplayInit.
-	    	do {
-	    		err = dsDisplayInit();
-	    		printf ("Manager::Initialize: result :%d retryCount :%d\n", err, retryCount);
-	    		if (dsERR_NONE == err) break;
-	    		usleep(100000);
-	    	} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
+    {std::lock_guard<std::mutex> lock(gManagerInitMutex);
+    printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
+    
+    try {
+        if (0 == IsInitialized) {
+            dsError_t err = dsERR_GENERAL;
+            
+            // This retry logic will wait for the device manager initialization from the client side
+            // until the device manager service initialization is completed. The retry mechanism checks
+            // only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
+            err = retryInitialization("dsDisplayInit", dsDisplayInit, 25, true);
             CHECK_RET_VAL(err);
-	    	err = dsAudioPortInit();
+            
+            err = retryInitialization("dsAudioPortInit", dsAudioPortInit);
             CHECK_RET_VAL(err);
-	    	err = dsVideoPortInit();
+            
+            err = retryInitialization("dsVideoPortInit", dsVideoPortInit);
             CHECK_RET_VAL(err);
-	    	err = dsVideoDeviceInit();
-	    	CHECK_RET_VAL(err);
-	    	AudioOutputPortConfig::getInstance().load();
-	    	VideoOutputPortConfig::getInstance().load();
-	    	VideoDeviceConfig::getInstance().load();
-	    }
+            
+            err = retryInitialization("dsVideoDeviceInit", dsVideoDeviceInit);
+            CHECK_RET_VAL(err);
+            
+            AudioOutputPortConfig::getInstance().load();
+            VideoOutputPortConfig::getInstance().load();
+            VideoDeviceConfig::getInstance().load();
+        }
         IsInitialized++;
     }
     catch(const Exception &e) {
-		cout << "Caught exception during Initialization" << e.what() << endl;
-		throw e;
-	}
-	}
-	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
+        cout << "Caught exception during Initialization" << e.what() << endl;
+        throw e;
+    }
+    }
+    printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
 }
 
 void Manager::load()
