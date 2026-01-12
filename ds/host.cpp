@@ -400,7 +400,7 @@ Host::~Host()
                 //TV profile with multiple audio output ports
                 try
                 {
-                    // First check the Digital audio ports and then Analog ports. Finally fallback to SPEAKER0
+                    // First check the ports which are dynamically conected and finally fallback to SPEAKER0 which is always connected.
                     const std::string audio_ports[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0", "SPEAKER0"};
                     
                     // Try each port in priority order
