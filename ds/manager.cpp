@@ -93,8 +93,6 @@ Manager::~Manager() {
  *                         purposes to identify which component is being initialized.
  * @param[in] initFunc Lambda or function object that performs the actual initialization.
  *                     Should return dsError_t indicating success (dsERR_NONE) or an error code.
- * @param[in] maxRetries Maximum number of retry attempts. Defaults to 25. The function will
- *                       retry up to this many times with a 100ms delay between attempts.
  * @param[in] checkInvalidState When true, retries only on dsERR_INVALID_STATE errors, stopping
  *                              immediately on any other error. When false (default), retries on
  *                              any error. Set to true when waiting for an underlying service to
