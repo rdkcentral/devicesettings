@@ -63,7 +63,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
-static dsError_t retryInitialization(const char* functionName,std::function<dsError_t()> initFunc,unsigned int maxRetries,bool checkInvalidState);
+static dsError_t retryInitialization(const char* functionName, std::function<dsError_t()> initFunc, unsigned int maxRetries, bool checkInvalidState);
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
