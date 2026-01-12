@@ -63,7 +63,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
-static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc, bool checkInvalidState);
+static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc);
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -93,19 +93,13 @@ Manager::~Manager() {
  *                         purposes to identify which component is being initialized.
  * @param[in] initFunc Lambda or function object that performs the actual initialization.
  *                     Should return dsError_t indicating success (dsERR_NONE) or an error code.
- * @param[in] checkInvalidState When true, retries only on dsERR_INVALID_STATE errors, stopping
- *                              immediately on any other error. When false (default), retries on
- *                              any error. Set to true when waiting for an underlying service to
- *                              become ready, where dsERR_INVALID_STATE indicates the service is
- *                              not yet initialized.
  *
  * @return dsERR_NONE on successful initialization, or the last error code encountered after
  *         all retry attempts are exhausted. When checkInvalidState is true, also returns
  *         immediately with the error code if a non-dsERR_INVALID_STATE error occurs.
  */
 dsError_t initializeFunctionWithRetry(const char* functionName, 
-                                   std::function<dsError_t()> initFunc, 
-                                   bool checkInvalidState = false) 
+                                   std::function<dsError_t()> initFunc) 
 {
 	dsError_t err = dsERR_GENERAL;
 	unsigned int retryCount = 0;
@@ -117,8 +111,7 @@ dsError_t initializeFunctionWithRetry(const char* functionName,
 				functionName, err, retryCount);
 		if (dsERR_NONE == err) break;
 		usleep(100000);
-	} while ((checkInvalidState ? (dsERR_INVALID_STATE == err) : true) && 
-				(retryCount++ < maxRetries));
+	} while (retryCount++ < maxRetries);
 	
 	return err;
 }
@@ -155,20 +148,17 @@ void Manager::Initialize()
     try {
         if (0 == IsInitialized) {
             dsError_t err = dsERR_GENERAL;
-            
-            // This retry logic will wait for the device manager initialization from the client side
-            // until the device manager service initialization is completed. The retry mechanism checks
-            // only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
-            err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit, true);
+
+            err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit);
             CHECK_RET_VAL(err);
             
-            err = initializeFunctionWithRetry("dsAudioPortInit", dsAudioPortInit,false);
+            err = initializeFunctionWithRetry("dsAudioPortInit", dsAudioPortInit);
             CHECK_RET_VAL(err);
             
-            err = initializeFunctionWithRetry("dsVideoPortInit", dsVideoPortInit, false);
+            err = initializeFunctionWithRetry("dsVideoPortInit", dsVideoPortInit);
             CHECK_RET_VAL(err);
             
-            err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit, false);
+            err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit);
             CHECK_RET_VAL(err);
             
             AudioOutputPortConfig::getInstance().load();
