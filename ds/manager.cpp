@@ -101,9 +101,9 @@ Manager::~Manager() {
  *                              become ready, where dsERR_INVALID_STATE indicates the service is
  *                              not yet initialized.
  *
- * @return dsERR_NONE on successful initialization, or the last error code encountered if all
- *         retry attempts are exhausted or an unexpected error occurs (when checkInvalidState
- *         is true).
+ * @return dsERR_NONE on successful initialization, or the last error code encountered after
+ *         all retry attempts are exhausted. When checkInvalidState is true, also returns
+ *         immediately with the error code if a non-dsERR_INVALID_STATE error occurs.
  */
 dsError_t retryInitialization(const char* functionName, 
                                    std::function<dsError_t()> initFunc, 
