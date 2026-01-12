@@ -398,36 +398,29 @@ Host::~Host()
             else 
             {
                 //TV profile with multiple audio output ports
-                try
+                // First check the ports which are dynamically conected and finally fallback to SPEAKER0 which is always connected.
+                const std::string audio_ports[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0", "SPEAKER0"};
+                
+                // Try each port in priority order
+                for (const auto& portName : audio_ports)
                 {
-                    // First check the ports which are dynamically conected and finally fallback to SPEAKER0 which is always connected.
-                    const std::string audio_ports[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0", "SPEAKER0"};
-                    
-                    // Try each port in priority order
-                    for (const auto& portName : audio_ports)
+                    try
                     {
-                        try
+                        AudioOutputPort aPort = getAudioOutputPort(portName);
+                        cout << "Checking audio port: " << portName << " isEnabled: " << aPort.isEnabled() << " isConnected: " << aPort.isConnected() << "\n";
+                        // Check if port is enabled and connected
+                        if (aPort.isEnabled() && aPort.isConnected())
                         {
-                            AudioOutputPort aPort = getAudioOutputPort(portName);
-							cout << "Checking audio port: " << portName << " isEnabled: " << aPort.isEnabled() << " isConnected: " << aPort.isConnected() << "\n";
-                            // Check if port is enabled and connected
-                            if (aPort.isEnabled() && aPort.isConnected())
-                            {
-                                cout << "Using audio port: " << portName << "\n";
-                                return aPort.getOutputPortHandle();
-                            }
-                        }
-                        catch(const std::exception& e)
-                        {
-                            // Port not found or error accessing it, log and continue to next port
-                            cout << "Exception while accessing audio port " << portName << ": " << e.what() << "\n";
-                            continue;
+                            cout << "Using audio port: " << portName << "\n";
+                            return aPort.getOutputPortHandle();
                         }
                     }
-                }
-                catch(const std::exception& e)
-                {
-                    cout << " Exception Thrown in getAudioPortHandle()..: " << e.what() << "\n";
+                    catch(const std::exception& e)
+                    {
+                        // Port not found or error accessing it, log and continue to next port
+                        cout << "Exception while accessing audio port " << portName << ": " << e.what() << "\n";
+                        continue;
+                    }
                 }
             }
         }
