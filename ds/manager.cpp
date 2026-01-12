@@ -74,6 +74,13 @@ Manager::~Manager() {
 	// TODO Auto-generated destructor stub
 }
 
+#define CHECK_RET_VAL(ret) {\
+	if (ret != dsERR_NONE) {\
+		cout << "**********Failed to Initialize device port*********" << endl;\
+		throw Exception(ret, "Error Initialising platform ports");\
+	}\
+	}
+
 /**
  * @brief Retry initialization function with configurable retry logic.
  * 
