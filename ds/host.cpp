@@ -391,19 +391,20 @@ Host::~Host()
         {
             if (isHDMIOutPortPresent())
             {
+                //STB profile with single audio output port
                 AudioOutputPort aPort = getAudioOutputPort("HDMI0");
                 return aPort.getOutputPortHandle();
             } 
             else 
             {
-                //TV profiles with multiple audio output ports
+                //TV profile with multiple audio output ports
                 try
                 {
-                    // Define the priority order for audio ports
-                    const std::string portPriority[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0"};
+                    // First check the Digital audio ports and then Analog ports. Finally fallback to SPEAKER0
+                    const std::string audio_ports[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0", "SPEAKER0"};
                     
                     // Try each port in priority order
-                    for (const auto& portName : portPriority)
+                    for (const auto& portName : audio_ports)
                     {
                         try
                         {
@@ -423,23 +424,16 @@ Host::~Host()
                             continue;
                         }
                     }
-                    
-                    // Fallback: use SPEAKER0 if no other port is suitable
-                    AudioOutputPort fallback_aPort = getAudioOutputPort("SPEAKER0");
-					cout << "Using audio port: SPEAKER0" << "\n";
-                    return fallback_aPort.getOutputPortHandle();
                 }
                 catch(const std::exception& e)
                 {
-                    cout << " Exception Thrown in getAudioPortHandle().. returning NULL...!\n";
+                    cout << " Exception Thrown in getAudioPortHandle()..: " << e.what() << "\n";
                 }
-
-                return NULL;
             }
         }
         catch(const std::exception& e)
         {
-            cout << " Exception Thrown in getAudioPortHandle().. returning NULL...!\n";
+            cout << " Exception Thrown in getAudioPortHandle().. returning NULL...: " << e.what() << "\n";
         }
 
         return NULL;
@@ -457,7 +451,7 @@ Host::~Host()
    {
        dsError_t ret = dsERR_NONE;
        dsAudioFormat_t aFormat;
-	   intptr_t audioPortHandle = getAudioPortHandle();	
+       intptr_t audioPortHandle = getAudioPortHandle();	
        ret = dsGetAudioFormat(audioPortHandle, &aFormat);
 
        if (ret == dsERR_NONE)
