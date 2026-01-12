@@ -63,7 +63,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
-static dsError_t retryInitialization(const char* functionName, std::function<dsError_t()> initFunc, unsigned int maxRetries, bool checkInvalidState);
+static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc, bool checkInvalidState);
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -105,14 +105,14 @@ Manager::~Manager() {
  *         all retry attempts are exhausted. When checkInvalidState is true, also returns
  *         immediately with the error code if a non-dsERR_INVALID_STATE error occurs.
  */
-dsError_t retryInitialization(const char* functionName, 
+dsError_t initializeFunctionWithRetry(const char* functionName, 
                                    std::function<dsError_t()> initFunc, 
-                                   unsigned int maxRetries = 25,
                                    bool checkInvalidState = false) 
 {
 	dsError_t err = dsERR_GENERAL;
 	unsigned int retryCount = 0;
-	
+	unsigned int maxRetries = 25;
+
 	do {
 		err = initFunc();
 		printf("Manager::Initialize:%s result :%d retryCount :%d\n", 
@@ -161,16 +161,16 @@ void Manager::Initialize()
             // This retry logic will wait for the device manager initialization from the client side
             // until the device manager service initialization is completed. The retry mechanism checks
             // only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
-            err = retryInitialization("dsDisplayInit", dsDisplayInit, 25, true);
+            err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit, true);
             CHECK_RET_VAL(err);
             
-            err = retryInitialization("dsAudioPortInit", dsAudioPortInit);
+            err = initializeFunctionWithRetry("dsAudioPortInit", dsAudioPortInit,false);
             CHECK_RET_VAL(err);
             
-            err = retryInitialization("dsVideoPortInit", dsVideoPortInit);
+            err = initializeFunctionWithRetry("dsVideoPortInit", dsVideoPortInit, false);
             CHECK_RET_VAL(err);
             
-            err = retryInitialization("dsVideoDeviceInit", dsVideoDeviceInit);
+            err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit, false);
             CHECK_RET_VAL(err);
             
             AudioOutputPortConfig::getInstance().load();
