@@ -81,7 +81,30 @@ Manager::~Manager() {
 	}\
 	}
 
-
+/**
+ * @brief Retry initialization function with configurable retry logic.
+ * 
+ * This helper function attempts to initialize a device settings component by calling
+ * the provided initialization function. It retries the operation with a delay between
+ * attempts until either the operation succeeds, the maximum retry count is reached,
+ * or (optionally) a specific error state is encountered.
+ *
+ * @param[in] functionName Name of the initialization function being called. Used for logging
+ *                         purposes to identify which component is being initialized.
+ * @param[in] initFunc Lambda or function object that performs the actual initialization.
+ *                     Should return dsError_t indicating success (dsERR_NONE) or an error code.
+ * @param[in] maxRetries Maximum number of retry attempts. Defaults to 25. The function will
+ *                       retry up to this many times with a 100ms delay between attempts.
+ * @param[in] checkInvalidState When true, retries only on dsERR_INVALID_STATE errors, stopping
+ *                              immediately on any other error. When false (default), retries on
+ *                              any error. Set to true when waiting for an underlying service to
+ *                              become ready, where dsERR_INVALID_STATE indicates the service is
+ *                              not yet initialized.
+ *
+ * @return dsERR_NONE on successful initialization, or the last error code encountered if all
+ *         retry attempts are exhausted or an unexpected error occurs (when checkInvalidState
+ *         is true).
+ */
 dsError_t retryInitialization(const char* functionName, 
                                    std::function<dsError_t()> initFunc, 
                                    unsigned int maxRetries = 25,
