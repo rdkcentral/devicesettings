@@ -418,7 +418,8 @@ Host::~Host()
                         }
                         catch(const std::exception& e)
                         {
-                            // Port not found or error accessing it, continue to next port
+                            // Port not found or error accessing it, log and continue to next port
+                            cout << "Exception while accessing audio port " << portName << ": " << e.what() << "\n";
                             continue;
                         }
                     }
