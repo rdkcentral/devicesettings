@@ -408,8 +408,7 @@ Host::~Host()
                         try
                         {
                             AudioOutputPort aPort = getAudioOutputPort(portName);
-                            cout << "Checking audio port: " << portName << "\n";
-							cout << "isEnabled: " << aPort.isEnabled() << "isConnected: " << aPort.isConnected() << "\n";
+							cout << "Checking audio port: " << portName << " isEnabled: " << aPort.isEnabled() << " isConnected: " << aPort.isConnected() << "\n";
                             // Check if port is enabled and connected
                             if (aPort.isEnabled() && aPort.isConnected())
                             {
