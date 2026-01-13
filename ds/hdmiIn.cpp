@@ -528,7 +528,7 @@ void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
     data.clear();
     if (ret == dsERR_NONE) {
         if (sizeof(spdinfo) <= sizeof(struct dsSpd_infoframe_st)) {
-            printf("HdmiInput::getHDMISPDInfo has %d bytes\r\n", sizeof(spdinfo));
+            printf("HdmiInput::getHDMISPDInfo has %zu bytes\r\n", sizeof(spdinfo));
                 data.insert(data.begin(), spdinfo, spdinfo + sizeof(struct dsSpd_infoframe_st));
         } else {
             ret = dsERR_OPERATION_NOT_SUPPORTED;
