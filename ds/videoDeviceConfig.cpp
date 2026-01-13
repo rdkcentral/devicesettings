@@ -33,7 +33,9 @@
 #include "videoDFC.hpp"
 #include <iostream>
 #include "dslogger.h"
+#include "manager.hpp"
 
+#define DEBUG 1 // Using for dumpconfig 
 
 namespace device {
 
@@ -86,8 +88,46 @@ VideoDFC & VideoDeviceConfig::getDefaultDFC()
 	return _vDFCs.back();
 }
 
-void VideoDeviceConfig::load()
+void dumpconfig(videoDeviceConfig_t *config)
 {
+    if (nullptr == config) {
+        INT_ERROR("Video config is NULL");
+        return;
+    }
+    if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
+        INT_INFO("Dumping of Device configs is disabled");
+        return;
+    }
+
+    INT_INFO("\n=============== Starting to Dump VideoDevice Configs ===============\n");
+
+	if( nullptr != config->pKVideoDeviceConfigs )
+	{
+        int configSize = (config->pKVideoDeviceConfigs_size) ? *(config->pKVideoDeviceConfigs_size) : -1;
+		INT_INFO("pKVideoDeviceConfigs = %p", config->pKVideoDeviceConfigs);
+		INT_INFO("videoDeviceConfigs_size = %d", configSize);
+		for (int i = 0; i < configSize; i++) {
+            dsVideoConfig_t* videoDeviceConfig = &config->pKVideoDeviceConfigs[i];
+            INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu ", i, videoDeviceConfig->numSupportedDFCs);
+			for (int j = 0; j < videoDeviceConfig->numSupportedDFCs; j++) {
+				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, videoDeviceConfig->supportedDFCs[j]);
+			}
+		}
+	}
+	else
+	{
+		INT_ERROR(" kVideoDeviceConfigs is NULL");
+	}
+
+	INT_INFO("\n=============== Dump VideoDevice Configs done ===============\n");
+}
+
+void VideoDeviceConfig::load(videoDeviceConfig_t* dynamicVideoDeviceConfigs)
+{
+	int configSize = -1;
+	videoDeviceConfig_t configuration = {0};
+
+	INT_INFO("Enter function");
 	/*
 	 * Load Constants First.
 	 */
@@ -95,16 +135,41 @@ void VideoDeviceConfig::load()
 		_vDFCs.push_back(VideoDFC(i));
 	}
 
+    INT_INFO("Using '%s' config", dynamicVideoDeviceConfigs ? "dynamic" : "static");
+    if ( nullptr != dynamicVideoDeviceConfigs )
+    {
+        configuration = *dynamicVideoDeviceConfigs;
+        configSize = (configuration.pKVideoDeviceConfigs_size) ? *(configuration.pKVideoDeviceConfigs_size) : -1;
+    }
+    else {
+        configuration.pKVideoDeviceConfigs = (dsVideoConfig_t *)kConfigs;
+		configSize = dsUTL_DIM(kConfigs);
+        configuration.pKVideoDeviceConfigs_size = &configSize;
+    }
+
+    INT_INFO("VideoDevice Config[%p] ConfigSize[%d]", configuration.pKVideoDeviceConfigs, configSize);
+
+    dumpconfig(&configuration);
+
 	/*
 	 * Initialize Video Devices (supported DFCs etc.)
 	 */
-	for (size_t i = 0; i < dsUTL_DIM(kConfigs); i++) {
-		_vDevices.push_back(VideoDevice(i));
+	if ( nullptr != configuration.pKVideoDeviceConfigs )
+	{
+		for (int i = 0; i < configSize; i++) {
+            dsVideoConfig_t* videoDeviceCfg = &configuration.pKVideoDeviceConfigs[i];
+            _vDevices.push_back(VideoDevice(i));
 
-		for (size_t j = 0; j < kConfigs[i].numSupportedDFCs; j++) {
-			_vDevices.at(i).addDFC(VideoDFC::getInstance(kConfigs[i].supportedDFCs[j]));
+			for (int j = 0; j < videoDeviceCfg->numSupportedDFCs; j++) {
+				_vDevices.at(i).addDFC(VideoDFC::getInstance(videoDeviceCfg->supportedDFCs[j]));
+			}
 		}
 	}
+	else
+	{
+		INT_ERROR(" Configs are NULL and  config size are -1");
+	}
+	INT_INFO("Exit function");
 }
 
 void VideoDeviceConfig::release()

@@ -33,12 +33,18 @@
 
 #include "videoOutputPortType.hpp"
 #include "videoResolution.hpp"
-
-
-
-
 #include <vector>
 #include <string>
+
+typedef struct videoPortConfigs
+{
+	const dsVideoPortTypeConfig_t  *pKConfigs;
+	int *pKVideoPortConfigs_size;
+	const dsVideoPortPortConfig_t  *pKPorts;
+	int *pKVideoPortPorts_size;
+	dsVideoPortResolution_t *pKResolutionsSettings;
+	int *pKResolutionsSettings_size;
+}videoPortConfigs_t;
 
 namespace device {
 
@@ -74,7 +80,7 @@ public:
 	List<VideoOutputPortType> getSupportedTypes();
 	List<VideoResolution> getSupportedResolutions(bool isIgnoreEdid=false);
 
-	void load();
+	void load(videoPortConfigs_t* dynamicVideoPortConfigs);
 	void release();
 
 };

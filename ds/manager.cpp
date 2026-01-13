@@ -43,6 +43,13 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <fstream>
+#include "dsHALConfig.h"
+#include "frontPanelConfig.hpp"
+
+//static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 /**
  * @file manager.cpp
@@ -62,6 +69,119 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+
+bool LoadDLSymbols(void* pDLHandle, const dlSymbolLookup* symbols, int numberOfSymbols)
+{
+    int currentSymbols = 0;
+    bool isAllSymbolsLoaded = false;
+    if ((nullptr == pDLHandle) || (nullptr == symbols)) {
+        INT_ERROR("Invalid DL Handle or symbolsPtr");
+    }
+    else {
+        INT_INFO("numberOfSymbols = %d",numberOfSymbols);
+        for (int i = 0; i < numberOfSymbols; i++) {
+            if (( nullptr == symbols[i].dataptr) || ( nullptr == symbols[i].name)) {
+                INT_ERROR("Invalid symbol entry at index [%d]", i);
+                continue;
+            }
+            *(symbols[i].dataptr) = dlsym(pDLHandle, symbols[i].name);
+            if (nullptr == *(symbols[i].dataptr)) {
+                INT_ERROR("[%s] is not defined", symbols[i].name);
+            }
+            else {
+                currentSymbols++;
+                INT_INFO("[%s] is defined and loaded, data[%p]", symbols[i].name, *(symbols[i].dataptr));
+            }
+        }
+        isAllSymbolsLoaded = (numberOfSymbols) ? (currentSymbols == numberOfSymbols) : false;
+    }
+    return isAllSymbolsLoaded;
+}
+
+void loadDeviceCapabilities(unsigned int capabilityType)
+{
+    void* pDLHandle = nullptr;
+    bool isSymbolsLoaded = false;
+
+    INT_INFO("Entering capabilityType = 0x%08X", capabilityType);
+    dlerror(); // clear old error
+    pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+    INT_INFO("DL Instance '%s'", (nullptr == pDLHandle ? "NULL" : "Valid"));
+
+    // Audio Port Config
+    if (DEVICE_CAPABILITY_AUDIO_PORT & capabilityType) {
+        audioConfigs_t dynamicAudioConfigs = {0 };
+        dlSymbolLookup audioConfigSymbols[] = {
+            {"kAudioConfigs", (void**)&dynamicAudioConfigs.pKConfigs},
+            {"kAudioPorts", (void**)&dynamicAudioConfigs.pKPorts},
+            {"kAudioConfigs_size", (void**)&dynamicAudioConfigs.pKConfigSize},
+            {"kAudioPorts_size", (void**)&dynamicAudioConfigs.pKPortSize}
+        };
+
+        isSymbolsLoaded = false;
+        if (nullptr != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, audioConfigSymbols, sizeof(audioConfigSymbols)/sizeof(dlSymbolLookup));
+        }
+        AudioOutputPortConfig::getInstance().load(isSymbolsLoaded ? &dynamicAudioConfigs : nullptr);
+    }
+
+    // Video Port Config
+    if (DEVICE_CAPABILITY_VIDEO_PORT & capabilityType) {
+        videoPortConfigs_t dynamicVideoPortConfigs = {0};
+        dlSymbolLookup videoPortConfigSymbols[] = {
+            {"kVideoPortConfigs", (void**)&dynamicVideoPortConfigs.pKConfigs},
+            {"kVideoPortConfigs_size", (void**)&dynamicVideoPortConfigs.pKVideoPortConfigs_size},
+            {"kVideoPortPorts", (void**)&dynamicVideoPortConfigs.pKPorts},
+            {"kVideoPortPorts_size", (void**)&dynamicVideoPortConfigs.pKVideoPortPorts_size},
+            {"kResolutionsSettings", (void**)&dynamicVideoPortConfigs.pKResolutionsSettings},
+            {"kResolutionsSettings_size", (void**)&dynamicVideoPortConfigs.pKResolutionsSettings_size}
+        };
+
+        isSymbolsLoaded = false;
+        if (nullptr != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoPortConfigSymbols, sizeof(videoPortConfigSymbols)/sizeof(dlSymbolLookup));
+        }
+        VideoOutputPortConfig::getInstance().load(isSymbolsLoaded ? &dynamicVideoPortConfigs : nullptr);
+    }
+
+    // Video Device Config
+    if (DEVICE_CAPABILITY_VIDEO_DEVICE & capabilityType) {
+        videoDeviceConfig_t dynamicVideoDeviceConfigs = {0};
+        dlSymbolLookup videoDeviceConfigSymbols[] = {
+            {"kVideoDeviceConfigs", (void**)&dynamicVideoDeviceConfigs.pKVideoDeviceConfigs},
+            {"kVideoDeviceConfigs_size", (void**)&dynamicVideoDeviceConfigs.pKVideoDeviceConfigs_size}
+        };
+        isSymbolsLoaded = false;
+        if (nullptr != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoDeviceConfigSymbols, sizeof(videoDeviceConfigSymbols)/sizeof(dlSymbolLookup));
+        }
+        VideoDeviceConfig::getInstance().load(isSymbolsLoaded ? &dynamicVideoDeviceConfigs : nullptr);
+    }
+
+    // Front Panel Config
+    if (DEVICE_CAPABILITY_FRONT_PANEL & capabilityType) {
+        fpdConfigs_t dynamicFPDConfigs = {0};
+        dlSymbolLookup fpdConfigSymbols[] = {
+            {"kFPDIndicatorColors", (void**)&dynamicFPDConfigs.pKFPDIndicatorColors},
+            {"kFPDIndicatorColors_size", (void**)&dynamicFPDConfigs.pKFPDIndicatorColors_size},
+            {"kIndicators", (void**)&dynamicFPDConfigs.pKIndicators},
+            {"kIndicators_size", (void**)&dynamicFPDConfigs.pKIndicators_size},
+            {"kFPDTextDisplays", (void**)&dynamicFPDConfigs.pKTextDisplays},
+            {"kFPDTextDisplays_size", (void**)&dynamicFPDConfigs.pKTextDisplays_size}
+        };
+        isSymbolsLoaded = false;
+        if (nullptr != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, fpdConfigSymbols, sizeof(fpdConfigSymbols)/sizeof(dlSymbolLookup));
+        }
+        FrontPanelConfig::getInstance().load(isSymbolsLoaded ? &dynamicFPDConfigs : nullptr);
+    }
+
+    if (nullptr != pDLHandle) {
+        dlclose(pDLHandle);
+        pDLHandle = nullptr;
+    }
+    INT_INFO("Exiting ...");
+}
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -106,7 +226,8 @@ Manager::~Manager() {
 void Manager::Initialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
-	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
+	
+	INT_INFO("Entering ... count %d with thread id %lu\n",IsInitialized,pthread_self());
 	
 	try {
 	    if (0 == IsInitialized) {	
@@ -120,7 +241,7 @@ void Manager::Initialize()
 	    	// That's why the retry logic is applied only for dsDisplayInit.
 	    	do {
 	    		err = dsDisplayInit();
-	    		printf ("Manager::Initialize: result :%d retryCount :%d\n", err, retryCount);
+	    		INT_INFO("dsDisplayInit returned %d, retryCount %d", err, retryCount);
 	    		if (dsERR_NONE == err) break;
 	    		usleep(100000);
 	    	} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
@@ -131,9 +252,11 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
-	    	AudioOutputPortConfig::getInstance().load();
-	    	VideoOutputPortConfig::getInstance().load();
-	    	VideoDeviceConfig::getInstance().load();
+
+            loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT |
+                                    device::DEVICE_CAPABILITY_AUDIO_PORT |
+                                    device::DEVICE_CAPABILITY_VIDEO_DEVICE |
+                                    device::DEVICE_CAPABILITY_FRONT_PANEL);
 	    }
         IsInitialized++;
     }
@@ -142,16 +265,16 @@ void Manager::Initialize()
 		throw e;
 	}
 	}
-	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
+	INT_INFO("Exiting ... with thread id %lu",pthread_self());
 }
 
 void Manager::load()
 {
-	printf("%d:%s load start\n", __LINE__, __FUNCTION__);
-	device::AudioOutputPortConfig::getInstance().load();
-	device::VideoOutputPortConfig::getInstance().load();
-	device::VideoDeviceConfig::getInstance().load();
-	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
+    INT_INFO("Enter function");
+	loadDeviceCapabilities( device::DEVICE_CAPABILITY_VIDEO_PORT | 
+                            device::DEVICE_CAPABILITY_AUDIO_PORT |
+                            device::DEVICE_CAPABILITY_VIDEO_DEVICE);
+    INT_INFO("Exit function");
 }
 
 /**
@@ -176,7 +299,7 @@ void Manager::load()
 void Manager::DeInitialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
-	printf("Entering %s count %d with thread id: %lu\n",__FUNCTION__,IsInitialized,pthread_self());
+	INT_INFO("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
 	if(IsInitialized>0)IsInitialized--;
 	if (0 == IsInitialized) {	
 	
@@ -190,8 +313,7 @@ void Manager::DeInitialize()
 		dsDisplayTerm();
 	}
 	}
-	printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
-
+	INT_INFO("Exiting ... with thread %lu",pthread_self());
 }
 
 }

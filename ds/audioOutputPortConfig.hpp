@@ -38,6 +38,14 @@
 #include <list>
 #include <string>
 
+typedef struct audioConfigs
+{
+	const dsAudioTypeConfig_t  *pKConfigs;
+	const dsAudioPortConfig_t  *pKPorts;
+	int *pKConfigSize;
+	int *pKPortSize;
+}audioConfigs_t;
+
 namespace device {
 
 class AudioOutputPortConfig {
@@ -66,7 +74,7 @@ public:
 	List<AudioOutputPort> 		 getPorts();
 	List<AudioOutputPortType> 	 getSupportedTypes();
 
-	void load();
+	void load(audioConfigs_t* dynamicAudioConfigs);
 	void release();
 
 };
