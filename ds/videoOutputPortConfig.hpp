@@ -74,7 +74,7 @@ public:
 	List<VideoOutputPortType> getSupportedTypes();
 	List<VideoResolution> getSupportedResolutions(bool isIgnoreEdid=false);
 
-	void load();
+	void load(void* pDLHandle);
 	void release();
 
 };

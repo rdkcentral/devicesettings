@@ -43,6 +43,13 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <fstream>
+#include "dsHALConfig.h"
+#include "frontPanelConfig.hpp"
+
+//static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 /**
  * @file manager.cpp
@@ -62,6 +69,52 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+static std::mutex gDLMutex;
+static void* gDLHandle = nullptr;
+
+void* getDLInstance()
+{
+    std::lock_guard<std::mutex> lock(gDLMutex);
+    dlerror(); // clear old error
+    if (nullptr == gDLHandle){
+        gDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+    }
+    INT_INFO("%d:%s: DL Instance '%s'\n", __LINE__, __func__, (nullptr == gDLHandle ? "NULL" : "Valid"));
+    return gDLHandle;
+}
+
+void releaseDLInstance()
+{
+    std::lock_guard<std::mutex> lock(gDLMutex);
+    if (nullptr != gDLHandle) {
+        dlclose(gDLHandle);
+        gDLHandle = nullptr;
+    }
+}
+
+bool searchConfigs(void* pDLHandle, const char *searchConfigStr, void **pConfigVar)
+{
+    bool returnValue = false;
+    INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    if ((nullptr == searchConfigStr) || (nullptr == pConfigVar) || (nullptr == pDLHandle)) {
+        INT_ERROR("%d:%s: Invalid parameters passed\n", __LINE__, __func__);
+    }
+    else {
+        INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
+        INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
+
+        *pConfigVar = (void *) dlsym(pDLHandle, searchConfigStr);
+        if (*pConfigVar != NULL) {
+            INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
+            returnValue = true;
+        }
+        else {
+            INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
+        }
+    }
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	return returnValue;
+}
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -106,6 +159,7 @@ Manager::~Manager() {
 void Manager::Initialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+	
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
 	try {
@@ -131,9 +185,14 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
-	    	AudioOutputPortConfig::getInstance().load();
-	    	VideoOutputPortConfig::getInstance().load();
-	    	VideoDeviceConfig::getInstance().load();
+            void* pDLHandle = getDLInstance();
+	    	AudioOutputPortConfig::getInstance().load(pDLHandle);
+	    	VideoOutputPortConfig::getInstance().load(pDLHandle);
+			VideoDeviceConfig::getInstance().load(pDLHandle);
+            FrontPanelConfig::getInstance().load(pDLHandle);
+            if ( nullptr != pDLHandle ) {
+                releaseDLInstance();
+            }
 	    }
         IsInitialized++;
     }
@@ -148,9 +207,13 @@ void Manager::Initialize()
 void Manager::load()
 {
 	printf("%d:%s load start\n", __LINE__, __FUNCTION__);
-	device::AudioOutputPortConfig::getInstance().load();
-	device::VideoOutputPortConfig::getInstance().load();
-	device::VideoDeviceConfig::getInstance().load();
+    void* pDLHandle = getDLInstance();
+	device::AudioOutputPortConfig::getInstance().load(pDLHandle);
+	device::VideoOutputPortConfig::getInstance().load(pDLHandle);
+	device::VideoDeviceConfig::getInstance().load(pDLHandle);
+    if ( nullptr != pDLHandle ) {
+        releaseDLInstance();
+    }
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
 }
 

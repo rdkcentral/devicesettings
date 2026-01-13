@@ -55,7 +55,7 @@ public:
 	VideoDFC & getDFC(int id);
 	VideoDFC & getDefaultDFC();
 
-	void load();
+	void load(void* pDLHandle);
 	void release();
 
 };

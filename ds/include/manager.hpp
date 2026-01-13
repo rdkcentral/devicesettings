@@ -149,6 +149,9 @@
 #ifndef _DS_MANAGER_HPP_
 #define _DS_MANAGER_HPP_
 
+#include <string>
+
+using namespace std;
 
 /**
  * @file manager.hpp
@@ -156,6 +159,8 @@
  */
 namespace device {
 
+// Forward declaration for searchConfigs function
+bool searchConfigs(void* pDLHandle, const char *searchConfigStr, void **pConfigVar);
 
 /**
  * @class Manager
