@@ -82,7 +82,7 @@ dsError_t dsGetVideoPort(dsVideoPortType_t type, int index, intptr_t *handle)
 							 &param,
 							sizeof(param));
 
-	printf("%s..%d-%d\n",__func__,param.type,param.handle);
+	printf("%s..%d-%ld\n",__func__,param.type,(long)param.handle);
 
 	if (IARM_RESULT_SUCCESS == rpcRet)
 	{
@@ -530,7 +530,7 @@ dsError_t  dsEnableHDCP(intptr_t handle, bool contentProtect, char *hdcpKey, siz
             }
     } 
     
-    printf("IARM:CLI:dsEnableHDCP %d, %p, %d\r\n", contentProtect, hdcpKey, keySize);
+    printf("IARM:CLI:dsEnableHDCP %d, %p, %zu\r\n", contentProtect, hdcpKey, keySize);
 
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
     rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,

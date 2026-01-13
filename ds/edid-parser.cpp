@@ -55,7 +55,6 @@ static void parse_std_timing(unsigned char* bytes, edid_data_t* data_ptr) {
         case 1: v = (h * 3) / 4; break;
         case 2: v = (h * 4) / 5; break;
         case 3: v = (h * 9) / 16; break;
-        default: return;
     }
     int r = (bytes[idx + 1] & 0x3F) + 60;
     INT_DEBUG("STD %dx%d@%d\n", h, v, r);
@@ -381,8 +380,6 @@ static void parse_ext_timing(unsigned char* bytes, edid_data_t* data_ptr) {
                 case 6: break;
                 // 'Use Extended Tag'
                 case 7: parse_extended_db(&bytes[idx], data_ptr); break;
-                // default - unsupported
-                default: INT_DEBUG("Unsupported extension tag: 0x%X\n", tag);
             }
             idx += len + 1;
         }
