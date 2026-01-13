@@ -43,6 +43,14 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <fstream>
+#include <condition_variable>
+#include "dsHALConfig.h"
+
+
+//static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 /**
  * @file manager.cpp
@@ -62,6 +70,12 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+static std::mutex gSearchMutex;
+static void *dllib = NULL;
+int activeLoads = 0;            // reference counter
+static std::mutex gMtx;
+std::condition_variable cv;
+const int REQUIRED = 4;       // wait for 4 loads to finish
 
 Manager::Manager() {
 	// TODO Auto-generated constructor stub
@@ -70,6 +84,11 @@ Manager::Manager() {
 
 Manager::~Manager() {
 	// TODO Auto-generated destructor stub
+	    // Ensure close if not already
+    if (dllib) {
+        dlclose(dllib);
+        INT_INFO("Destructor dlclose\n");
+    }
 }
 
 #define CHECK_RET_VAL(ret) {\
@@ -78,6 +97,62 @@ Manager::~Manager() {
 		throw Exception(ret, "Error Initialising platform ports");\
 	}\
 	}
+
+std::string parse_opt_flag( std::string file_name , bool integer_check , bool debugStats )
+{
+    std::string return_buffer = "";
+    std::ifstream parse_opt_flag_file( file_name.c_str());
+
+    if (!parse_opt_flag_file)
+    {
+        if ( debugStats ){
+            INT_INFO("Failed to open [%s] file",file_name.c_str());
+        }
+    }
+    else
+    {
+        std::string line = "";
+        if (std::getline(parse_opt_flag_file, line))
+        {
+            if ( debugStats ){
+                INT_INFO("Content in [%s] is [%s]",file_name.c_str(),line.c_str());
+            }
+        }
+        else
+        {
+            if ( debugStats ){
+                INT_INFO("No Content in [%s]",file_name.c_str());
+            }
+        }
+        parse_opt_flag_file.close();
+
+        return_buffer = line;
+
+        if (integer_check)
+        {
+            if (line.empty())
+            {
+                integer_check = false;
+            }
+            else
+            {
+                for (char c : line) {
+                    if (!isdigit(c))
+                    {
+                        integer_check = false;
+                        break;
+                    }
+                }
+            }
+
+            if ( false == integer_check )
+            {
+                return_buffer = "";
+            }
+        }
+    }
+    return return_buffer;
+}
 
 /**
  * @addtogroup dssettingsmanagerapi
@@ -106,6 +181,9 @@ Manager::~Manager() {
 void Manager::Initialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+	
+	int delay = 1;	
+	bool ret = false;
 	printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
 	
 	try {
@@ -131,9 +209,31 @@ void Manager::Initialize()
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);
-	    	AudioOutputPortConfig::getInstance().load();
+			#if 0
+			std::string delaystr = parse_opt_flag("/opt/delay", true, true);
+            if (!delaystr.empty())
+            {
+                INT_INFO("dealy: [%s]", delaystr.c_str());
+                delay = std::stoi(delaystr);
+			}
+			#endif
+			INT_INFO("Open the hal file\n");
+	    	ret = openDLFile();
+			if(ret == true)
+			{
+				INT_INFO("File opened successfully\n");
+			}
+			else
+			{
+				INT_ERROR("Failed to open the hal file\n");
+			}
+			AudioOutputPortConfig::getInstance().load();
+			//sleep(delay);
 	    	VideoOutputPortConfig::getInstance().load();
-	    	VideoDeviceConfig::getInstance().load();
+	    	//sleep(delay);
+			VideoDeviceConfig::getInstance().load();
+			INT_INFO("disabled waitAndClose()\n");
+			//waitAndClose();
 	    }
         IsInitialized++;
     }
@@ -152,6 +252,115 @@ void Manager::load()
 	device::VideoOutputPortConfig::getInstance().load();
 	device::VideoDeviceConfig::getInstance().load();
 	printf("%d:%s load completed\n", __LINE__, __FUNCTION__);
+}
+
+bool openDLFile()
+{
+	bool ret = false;
+
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+	INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
+
+	dlerror(); // clear old error
+	dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+	if (dllib) {
+		INT_INFO("open %s success", RDK_DSHAL_NAME);
+		ret = true;
+	}
+	else {
+		const char* err = dlerror();
+		INT_ERROR("%d:%s: Open %s failed with error err= %s\n", __LINE__, __func__, RDK_DSHAL_NAME, err ? err: "unknown");
+		ret = false;
+	}
+	INT_INFO("%d:%s: Exiting function\n", __LINE__, __func__);
+	return ret;
+}
+
+#if 0
+void EE::requestClose() {
+    std::lock_guard<std::mutex> lock(m);
+    closeRequested = true;
+    if (active == 0 && handle) {
+        dlclose(handle);
+        handle = nullptr;
+    }
+}
+void startLoad() 
+{
+    std::lock_guard<std::mutex> lock(gMtx);
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    activeLoads++;
+	INT_INFO("%d:%s: Exit function. activeLoads = %d\n", __LINE__, __func__, activeLoads);
+
+}
+
+
+void finishLoad() 
+{
+    std::lock_guard<std::mutex> lock(gMtx);
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+
+    activeLoads++;
+	INT_INFO("%d:%s: activeLoads = %d\n", __LINE__, __func__, activeLoads);
+    if (activeLoads == 0) {
+		if (dllib) {
+			dlclose(dllib);
+			INT_INFO("%d:%s: Closed the hal file\n", __LINE__, __func__);
+			dllib = NULL;
+		}
+		else {
+			INT_ERROR("dllib is NULL\n");
+		}
+	}
+	INT_INFO("%d:%s: Exiting function\n", __LINE__, __func__);
+}
+#endif
+
+bool searchConfigs(const char *searchConfigStr, void **pConfigVar)
+{
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+	INT_INFO("%d:%s: searchConfigStr = %s\n", __LINE__, __func__, searchConfigStr);
+	INT_INFO("%d:%s: RDK_DSHAL_NAME = %s\n", __LINE__, __func__, RDK_DSHAL_NAME);
+
+	std::lock_guard<std::mutex> lock(gSearchMutex);
+	INT_INFO("%d:%s: using lock_guard() instead pthread_mutex_lock \n", __LINE__, __func__);
+	if (dllib) {
+		*pConfigVar = (void *) dlsym(dllib, searchConfigStr);
+		if (*pConfigVar != NULL) {
+			INT_INFO("%s is defined and loaded  pConfigVar= %p\r\n", searchConfigStr, *pConfigVar);
+		}
+		else {
+			INT_ERROR("%d:%s: %s is not defined\n", __LINE__, __func__, searchConfigStr);
+		}
+	}
+	else {
+		INT_ERROR("dllib is NULL\n");
+	}
+	INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+	return (*pConfigVar != NULL);
+}
+
+void notifyLoadComplete() {
+	INT_INFO("%d:%s: Entering function\n", __LINE__, __func__);
+    std::unique_lock<std::mutex> lock(gMtx);
+
+    activeLoads++;
+    // Wake waiting thread
+    cv.notify_all();
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
+}
+
+void waitAndClose() {
+    std::unique_lock<std::mutex> lock(gMtx);
+    INT_INFO("%d:%s: Entering function activeLoads = %d\n", __LINE__, __func__, activeLoads);
+
+    cv.wait(lock, [&] { return activeLoads >= REQUIRED; }); // wait for 4 loads complete
+
+    if (dllib) {
+        dlclose(dllib);
+        dllib = nullptr;
+    }
+    INT_INFO("%d:%s: Exit function\n", __LINE__, __func__);
 }
 
 /**

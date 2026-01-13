@@ -149,6 +149,9 @@
 #ifndef _DS_MANAGER_HPP_
 #define _DS_MANAGER_HPP_
 
+#include <string>
+
+using namespace std;
 
 /**
  * @file manager.hpp
@@ -156,6 +159,16 @@
  */
 namespace device {
 
+// Forward declaration for searchConfigs function
+bool openDLFile();
+//bool closeFile();
+bool searchConfigs(const char *searchConfigStr, void **pConfigVar);
+//void startLoad();
+//void finishLoad();
+void notifyLoadComplete();
+void waitAndClose();
+
+std::string parse_opt_flag( std::string file_name , bool integer_check= false , bool debugStats = true);
 
 /**
  * @class Manager
