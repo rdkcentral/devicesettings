@@ -93,6 +93,7 @@ public:
 	const AudioOutputPortType & getType() const;
 	int getId() const {return _id;};
 	int getIndex() const {return _index; };
+	intptr_t getOutputPortHandle() const { return _handle;};
 
 
 /**

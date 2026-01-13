@@ -3715,11 +3715,16 @@ IARM_Result_t _dsGetAudioFormat(void *arg)
     {
         dsAudioFormat_t aFormat = dsAUDIO_FORMAT_NONE;
         param->audioFormat = dsAUDIO_FORMAT_NONE;
-
-        if (func(param->handle, &aFormat) == dsERR_NONE)
+        dsError_t ret = dsERR_NONE;
+        ret = func(param->handle, &aFormat);
+        if (ret == dsERR_NONE)
         {
            param->audioFormat = aFormat;
            result = IARM_RESULT_SUCCESS;
+        }
+        else
+        {
+           INT_INFO("%s dsGetAudioFormat failed ret=%d\n",__FUNCTION__, ret);
         }
     }
 
