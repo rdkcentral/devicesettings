@@ -142,11 +142,18 @@ dsError_t initializeFunctionWithRetry(const char* functionName,
  */
 void Manager::Initialize()
 {
+	bool needInit = false;
+
     {std::lock_guard<std::mutex> lock(gManagerInitMutex);
-    printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
-    
+        printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
+        if (IsInitialized == 0) {
+            needInit = true;
+        }
+        IsInitialized++;
+	}
+	
     try {
-        if (0 == IsInitialized) {
+        if (needInit) {
             dsError_t err = dsERR_GENERAL;
 
             err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit);
@@ -165,13 +172,14 @@ void Manager::Initialize()
             VideoOutputPortConfig::getInstance().load();
             VideoDeviceConfig::getInstance().load();
         }
-        IsInitialized++;
     }
     catch(const Exception &e) {
         cout << "Caught exception during Initialization" << e.what() << endl;
+		std::lock_guard<std::mutex> lock(gManagerInitMutex);
+        IsInitialized--;
         throw e;
     }
-    }
+
     printf("Exiting %s with thread %lu\n",__FUNCTION__,pthread_self());
 }
 
