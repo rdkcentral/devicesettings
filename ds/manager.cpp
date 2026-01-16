@@ -82,7 +82,7 @@ Manager::~Manager() {
 	}
 
 /**
- * @brief Retry initialization function with configurable retry logic.
+ * @brief Retry initialization function.
  * 
  * This helper function attempts to initialize a device settings component by calling
  * the provided initialization function. It retries the operation with a delay between
@@ -95,8 +95,7 @@ Manager::~Manager() {
  *                     Should return dsError_t indicating success (dsERR_NONE) or an error code.
  *
  * @return dsERR_NONE on successful initialization, or the last error code encountered after
- *         all retry attempts are exhausted. When checkInvalidState is true, also returns
- *         immediately with the error code if a non-dsERR_INVALID_STATE error occurs.
+ *         all retry attempts are exhausted.
  */
 dsError_t initializeFunctionWithRetry(const char* functionName, 
                                    std::function<dsError_t()> initFunc) 
