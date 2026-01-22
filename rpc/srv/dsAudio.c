@@ -71,6 +71,7 @@ static pthread_cond_t      audioLevelTimerCV = PTHREAD_COND_INITIALIZER;
 int _srv_AudioHDMIAuto = 1;
 int _srv_AudioSPDIFAuto = 1;
 int _srv_AudioHDMIARCAuto = 1;
+int _srv_AudioSPEAKERAuto = 1;
 dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_SURROUND;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_SURROUND;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
@@ -78,11 +79,12 @@ dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_SURROUND;
 int _srv_AudioHDMIAuto = 0;
 int _srv_AudioSPDIFAuto = 0;
 int _srv_AudioHDMIARCAuto = 0;
+int _srv_AudioSPEAKERAuto = 0;
 dsAudioStereoMode_t _srv_HDMI_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
 dsAudioStereoMode_t _srv_HDMI_ARC_Audiomode = dsAUDIO_STEREO_STEREO;
 #endif
-int _srv_AudioSPEAKERAuto = 1;
+
 dsAudioStereoMode_t _srv_SPEAKER_Audiomode = dsAUDIO_STEREO_SURROUND;
 
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
@@ -2562,11 +2564,13 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             }
             param->mode = stereoMode;
         }
-        else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
-            ret = dsGetStereoMode(param->handle, &param->mode);
+        else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER && _srv_AudioSPEAKERAuto) {
+            dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
+            ret = dsGetStereoMode(param->handle, &stereoMode);
             if(ret == dsERR_NONE) {
                 result = IARM_RESULT_SUCCESS;
             }
+            param->mode = stereoMode;
         }
         else {
             if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
@@ -2581,6 +2585,10 @@ IARM_Result_t _dsGetStereoMode(void *arg)
             else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC) {
                 param->mode = _srv_HDMI_ARC_Audiomode;
                 INT_INFO("The HDMI ARC Port Audio Settings Mode is %d \r\n",param->mode);
+            }
+            else if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
+                param->mode = _srv_SPEAKER_Audiomode;
+                INT_INFO("The SPEAKER Port Audio Settings Mode is %d \r\n",param->mode);
             }
 
             result = IARM_RESULT_SUCCESS;
