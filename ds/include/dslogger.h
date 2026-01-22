@@ -49,7 +49,7 @@ static inline const char* fileName(const char* path) {
 }
 
 #ifndef DS_LOG_LEVEL
-#define DS_LOG_LEVEL ERROR_LEVEL
+#define DS_LOG_LEVEL DEBUG_LEVEL
 #endif
 
 #define INT_INFO(FORMAT, ...)       ds_log(INFO_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
