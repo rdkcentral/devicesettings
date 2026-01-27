@@ -128,6 +128,7 @@ uint8_t HdmiInput::getNumberOfInputs() const
 {
     
     uint8_t numHdmiInputs;
+    printf("Mani :%s:%d entry \n ",__FUNCTION__,__LINE__);
     dsError_t eError = dsHdmiInGetNumberOfInputs (&numHdmiInputs);
 
 	// Throw an exception if there was an error
@@ -135,6 +136,7 @@ uint8_t HdmiInput::getNumberOfInputs() const
 	{
 		throw Exception(eError);
 	}
+    printf("Mani :%s:%d exit \n ",__FUNCTION__,__LINE__);
     
     return (numHdmiInputs);
 }
@@ -224,6 +226,7 @@ int8_t HdmiInput::getActivePort() const
 bool HdmiInput::isPortConnected(int8_t Port) const
 {
     dsHdmiInStatus_t Status;
+    printf("Mani :%s:%d entry \n ",__FUNCTION__,__LINE__);
     dsError_t eError =  dsHdmiInGetStatus (&Status);
 
 	// Throw an exception if there was an error
@@ -231,6 +234,8 @@ bool HdmiInput::isPortConnected(int8_t Port) const
 	{
 		throw Exception(eError);
 	}
+
+	printf("Mani :%s:%d exit \n ",__FUNCTION__,__LINE__);
 	
 	return (Status.isPortConnected[Port]);
 }

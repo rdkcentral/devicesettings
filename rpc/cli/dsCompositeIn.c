@@ -102,6 +102,7 @@ dsError_t dsCompositeInGetNumberOfInputs (uint8_t *pNumCompositeInputs)
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(pNumCompositeInputs != NULL, dsERR_INVALID_PARAM);
 
+    printf("Mani %s:%d Entry - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
 
     dsCompositeInGetNumberOfInputsParam_t param;
     param.numCompositeInputs = 0;
@@ -116,11 +117,11 @@ dsError_t dsCompositeInGetNumberOfInputs (uint8_t *pNumCompositeInputs)
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
         *pNumCompositeInputs = param.numCompositeInputs;
-        printf("%s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
+        printf("Mani %s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
         return param.result;
 	}
 
-    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    printf("Mani %s:%d Exit - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
 	return dsERR_GENERAL;
 }
 
@@ -129,6 +130,7 @@ dsError_t dsCompositeInGetStatus (dsCompositeInStatus_t *pStatus)
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(pStatus != NULL, dsERR_INVALID_PARAM);
 
+    printf("Mani %s:%d Entry - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
 
     dsCompositeInGetStatusParam_t param;
     memset (&param, 0, sizeof(param));
@@ -143,11 +145,11 @@ dsError_t dsCompositeInGetStatus (dsCompositeInStatus_t *pStatus)
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
         *pStatus = param.status;
-        printf("%s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
+        printf("Mani %s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
         return param.result;
 	}
 
-    printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
+    printf("Mani %s:%d Exit - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
 	return dsERR_GENERAL;
 }
 
