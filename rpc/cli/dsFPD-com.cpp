@@ -43,21 +43,21 @@
 #include <core/core.h>
 #include <com/com.h>
 #include <plugins/Types.h>
-#include <interfaces/IDeviceSettingsManager.h>
+#include <interfaces/IDeviceSettingsFPD.h>
 
 using namespace WPEFramework;
 
-// Thunder callsign for DeviceSettingsManager plugin
-static constexpr const TCHAR callSign[] = _T("org.rdk.DeviceSettingsManager");
+// Thunder callsign for DeviceSettings plugin
+static constexpr const TCHAR callSign[] = _T("org.rdk.DeviceSettings");
 
 /**
  * @brief DeviceSettingsFPD class manages Thunder COM-RPC connection for FPD
  */
-class DeviceSettingsFPD : public RPC::SmartInterfaceType<Exchange::IDeviceSettingsManagerFPD> {
+class DeviceSettingsFPD : public RPC::SmartInterfaceType<Exchange::IDeviceSettingsFPD> {
 private:
-    using BaseClass = RPC::SmartInterfaceType<Exchange::IDeviceSettingsManagerFPD>;
+    using BaseClass = RPC::SmartInterfaceType<Exchange::IDeviceSettingsFPD>;
     
-    Exchange::IDeviceSettingsManagerFPD* _fpdInterface;
+    Exchange::IDeviceSettingsFPD* _fpdInterface;
     
     static DeviceSettingsFPD* _instance;
     static Core::CriticalSection _apiLock;
@@ -85,17 +85,17 @@ private:
         _apiLock.Lock();
 
         if (upAndRunning) {
-            // Communicator opened && DeviceSettingsManager is Activated
+            // Communicator opened && DeviceSettings is Activated
             if (nullptr == _fpdInterface) {
                 _fpdInterface = BaseClass::Interface();
                 if (_fpdInterface != nullptr) {
-                    printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettingsManager plugin\n");
+                    printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettings plugin\n");
                 } else {
                     fprintf(stderr, "[dsFPD-com] Failed to get interface - plugin implementation may have failed to load\n");
                 }
             }
         } else {
-            // DeviceSettingsManager is Deactivated || Communicator closed
+            // DeviceSettings is Deactivated || Communicator closed
             if (nullptr != _fpdInterface) {
                 _fpdInterface->Release();
                 _fpdInterface = nullptr;
@@ -158,7 +158,7 @@ public:
 
         if (nullptr == _fpdInterface) {
             status = Core::ERROR_NOT_EXIST;
-            printf("[dsFPD-com] DeviceSettingsManager plugin not yet operational\n");
+            printf("[dsFPD-com] DeviceSettings plugin not yet operational\n");
         }
 
         _apiLock.Unlock();
@@ -214,13 +214,13 @@ public:
     // FPD API implementations
     // Note: Thunder interface doesn't have FPDInit/FPDTerm/SetFPDText methods
 
-    Core::hresult SetFPDTime(const Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat timeFormat, 
-                             const uint32_t hour, const uint32_t minutes)
+    Core::hresult SetFPDTime(const Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat, 
+                             const uint32_t minutes, const uint32_t seconds)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
         if (_fpdInterface) {
-            result = _fpdInterface->SetFPDTime(timeFormat, hour, minutes);
+            result = _fpdInterface->SetFPDTime(timeFormat, minutes, seconds);
         }
         _apiLock.Unlock();
         return result;
@@ -238,7 +238,7 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDBlink(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
+    Core::hresult SetFPDBlink(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
                               const uint32_t blinkDuration, const uint32_t blinkIterations)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -250,7 +250,7 @@ public:
         return result;
     }
 
-    Core::hresult GetFPDBrightness(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
+    Core::hresult GetFPDBrightness(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
                                    uint32_t& brightness)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -262,7 +262,7 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDBrightness(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
+    Core::hresult SetFPDBrightness(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
                                    const uint32_t brightness, const bool persist)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -274,7 +274,7 @@ public:
         return result;
     }
 
-    Core::hresult GetFPDTextBrightness(const Exchange::IDeviceSettingsManagerFPD::FPDTextDisplay indicator, 
+    Core::hresult GetFPDTextBrightness(const Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator, 
                                        uint32_t& brightness)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -286,7 +286,7 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDTextBrightness(const Exchange::IDeviceSettingsManagerFPD::FPDTextDisplay indicator, 
+    Core::hresult SetFPDTextBrightness(const Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator, 
                                        const uint32_t brightness)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -298,7 +298,7 @@ public:
         return result;
     }
 
-    Core::hresult GetFPDColor(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
+    Core::hresult GetFPDColor(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
                               uint32_t& color)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -310,7 +310,7 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDColor(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
+    Core::hresult SetFPDColor(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
                               const uint32_t color)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
@@ -333,8 +333,8 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDState(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
-                              const Exchange::IDeviceSettingsManagerFPD::FPDState state)
+    Core::hresult SetFPDState(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
+                              const Exchange::IDeviceSettingsFPD::FPDState state)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
@@ -345,8 +345,8 @@ public:
         return result;
     }
 
-    Core::hresult GetFPDState(const Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator, 
-                              Exchange::IDeviceSettingsManagerFPD::FPDState& state)
+    Core::hresult GetFPDState(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
+                              Exchange::IDeviceSettingsFPD::FPDState& state)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
@@ -357,7 +357,7 @@ public:
         return result;
     }
 
-    Core::hresult GetFPDTimeFormat(Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat& timeFormat)
+    Core::hresult GetFPDTimeFormat(Exchange::IDeviceSettingsFPD::FPDTimeFormat& timeFormat)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
@@ -368,7 +368,7 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDTimeFormat(const Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat timeFormat)
+    Core::hresult SetFPDTimeFormat(const Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
@@ -379,7 +379,7 @@ public:
         return result;
     }
 
-    Core::hresult SetFPDMode(const Exchange::IDeviceSettingsManagerFPD::FPDMode mode)
+    Core::hresult SetFPDMode(const Exchange::IDeviceSettingsFPD::FPDMode mode)
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
@@ -436,7 +436,7 @@ dsError_t dsFPInit(void)
     
     // Wait for plugin to become operational
     if (!instance->WaitForOperational(5000)) {
-        fprintf(stderr, "[dsFPD-com] DeviceSettingsManager plugin not operational after 5 seconds\n");
+        fprintf(stderr, "[dsFPD-com] DeviceSettings plugin not operational after 5 seconds\n");
         return dsERR_GENERAL;
     }
     
@@ -477,9 +477,11 @@ dsError_t dsSetFPTime(dsFPDTimeFormat_t eTime, const unsigned int uHour, const u
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat timeFormat = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat>(eTime);
+    Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDTimeFormat>(eTime);
     
+    // Note: Interface expects minutes and seconds, but API provides hour and minutes
+    // Converting: treating uMinutes as seconds for interface compatibility
     uint32_t result = instance->SetFPDTime(timeFormat, uHour, uMinutes);
     return ConvertThunderError(result);
 }
@@ -502,8 +504,8 @@ dsError_t dsSetFPBlink(dsFPDIndicator_t eIndicator, unsigned int nBlinkDuration,
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     uint32_t result = instance->SetFPDBlink(indicator, nBlinkDuration, nBlinkIterations);
     return ConvertThunderError(result);
@@ -521,8 +523,8 @@ dsError_t dsGetFPBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBri
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     uint32_t brightness = 0;
     uint32_t result = instance->GetFPDBrightness(indicator, brightness);
@@ -557,8 +559,8 @@ dsError_t dsSetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBri
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     uint32_t result = instance->SetFPDBrightness(indicator, static_cast<uint32_t>(eBrightness), toPersist);
     return ConvertThunderError(result);
@@ -576,8 +578,8 @@ dsError_t dsGetFPTextBrightness(dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDTextDisplay indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDTextDisplay>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDTextDisplay>(eIndicator);
     
     uint32_t brightness = 0;
     uint32_t result = instance->GetFPDTextBrightness(indicator, brightness);
@@ -596,8 +598,8 @@ dsError_t dsSetFPTextBrightness(dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDTextDisplay indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDTextDisplay>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDTextDisplay>(eIndicator);
     
     uint32_t result = instance->SetFPDTextBrightness(indicator, static_cast<uint32_t>(eBrightness));
     return ConvertThunderError(result);
@@ -615,8 +617,8 @@ dsError_t dsGetFPColor(dsFPDIndicator_t eIndicator, dsFPDColor_t *pColor)
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     uint32_t color = 0;
     uint32_t result = instance->GetFPDColor(indicator, color);
@@ -640,8 +642,8 @@ dsError_t dsSetFPDColor(dsFPDIndicator_t eIndicator, dsFPDColor_t eColor, bool t
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     // Thunder interface doesn't support persist flag - ignore it
     uint32_t result = instance->SetFPDColor(indicator, static_cast<uint32_t>(eColor));
@@ -666,10 +668,10 @@ dsError_t dsSetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t state)
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
-    Exchange::IDeviceSettingsManagerFPD::FPDState fpdState = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDState>(state);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDState fpdState = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDState>(state);
     
     uint32_t result = instance->SetFPDState(indicator, fpdState);
     return ConvertThunderError(result);
@@ -687,10 +689,10 @@ dsError_t dsGetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t* state)
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDIndicator indicator = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDIndicator>(eIndicator);
+    Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
-    Exchange::IDeviceSettingsManagerFPD::FPDState fpdState;
+    Exchange::IDeviceSettingsFPD::FPDState fpdState;
     uint32_t result = instance->GetFPDState(indicator, fpdState);
     
     if (result == Core::ERROR_NONE) {
@@ -712,7 +714,7 @@ dsError_t dsGetFPTimeFormat(dsFPDTimeFormat_t *pTimeFormat)
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat timeFormat;
+    Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat;
     uint32_t result = instance->GetFPDTimeFormat(timeFormat);
     
     if (result == Core::ERROR_NONE) {
@@ -729,8 +731,8 @@ dsError_t dsSetFPTimeFormat(dsFPDTimeFormat_t eTimeFormat)
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat timeFormat = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDTimeFormat>(eTimeFormat);
+    Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDTimeFormat>(eTimeFormat);
     
     uint32_t result = instance->SetFPDTimeFormat(timeFormat);
     return ConvertThunderError(result);
@@ -743,8 +745,8 @@ dsError_t dsSetFPDMode(dsFPDMode_t eMode)
         return dsERR_GENERAL;
     }
     
-    Exchange::IDeviceSettingsManagerFPD::FPDMode mode = 
-        static_cast<Exchange::IDeviceSettingsManagerFPD::FPDMode>(eMode);
+    Exchange::IDeviceSettingsFPD::FPDMode mode = 
+        static_cast<Exchange::IDeviceSettingsFPD::FPDMode>(eMode);
     
     uint32_t result = instance->SetFPDMode(mode);
     return ConvertThunderError(result);
