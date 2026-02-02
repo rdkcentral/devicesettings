@@ -33,8 +33,8 @@ else
     OBJS += $(patsubst %.c,%.o,$(wildcard *.c))
 endif
 
-OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
-OBJS        += $(patsubst %.c,%.o,$(wildcard *.c))
+#OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+#OBJS        += $(patsubst %.c,%.o,$(wildcard *.c))
 INCLUDE     := -I$(PWD)                         \
                -I$(PWD)/hal/include             \
                -I$(PWD)/rpc/include             
