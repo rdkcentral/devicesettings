@@ -235,6 +235,8 @@ IARM_Result_t _dsSetDFC(void *arg)
     _DEBUG_ENTER();
 
     IARM_BUS_Lock(lock);
+
+    INT_INFO("Mani %d %s: Entry - _dsSetDFC \n",__LINE__, __FUNCTION__);
     
 	IARM_Bus_DSMgr_EventData_t eventData;
 	dsVideoDeviceSetDFCParam_t *param = (dsVideoDeviceSetDFCParam_t *)arg;
@@ -250,6 +252,7 @@ IARM_Result_t _dsSetDFC(void *arg)
 				eventData.data.dfc.zoomsettings = dsVIDEO_ZOOM_NONE;
 				srv_dfc = param->dfc;
 				IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS,(void *)&eventData, sizeof(eventData));
+                INT_INFO("Mani %d %s: Exit - dsVIDEO_ZOOM_NONE \n",__LINE__, __FUNCTION__);
 				device::HostPersistence::getInstance().persistHostProperty("VideoDevice.DFC","None");
 			}
 			else if(param->dfc == dsVIDEO_ZOOM_FULL)
@@ -259,6 +262,7 @@ IARM_Result_t _dsSetDFC(void *arg)
 				eventData.data.dfc.zoomsettings =  dsVIDEO_ZOOM_FULL;
 				srv_dfc = param->dfc;
 				IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS,(void *)&eventData, sizeof(eventData));
+                INT_INFO("Mani %d %s: Exit - dsVIDEO_ZOOM_FULL \n",__LINE__, __FUNCTION__);
 				device::HostPersistence::getInstance().persistHostProperty("VideoDevice.DFC","Full");
 
 			}
@@ -269,6 +273,7 @@ IARM_Result_t _dsSetDFC(void *arg)
 				eventData.data.dfc.zoomsettings =  dsVIDEO_ZOOM_FULL;
 				srv_dfc = param->dfc;
 				IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_ZOOM_SETTINGS,(void *)&eventData, sizeof(eventData));
+                INT_INFO("Mani %d %s: Exit - dsVIDEO_ZOOM_16_9_ZOOM \n",__LINE__, __FUNCTION__);
 				device::HostPersistence::getInstance().persistHostProperty("VideoDevice.DFC","Full");
 			}
 			else
@@ -290,6 +295,7 @@ IARM_Result_t _dsSetDFC(void *arg)
 	}
   
     IARM_BUS_Unlock(lock);
+    INT_INFO("Mani %d %s: Exit - _dsSetDFC \n",__LINE__, __FUNCTION__);
 	return IARM_RESULT_SUCCESS;
 }
 
@@ -652,6 +658,7 @@ static int _dsSendDisplayFrameRateStatusChangeEventCallBack(dsFramerateParam_t *
                             (IARM_EventId_t)_eventId,
                             (void *)&_eventData,
                             sizeof(_eventData));
+    printf("Mani %s:%d Exit - Framerate status change update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
     return ret;
 }
 
@@ -665,7 +672,8 @@ void _dsFramerateStatusPreChangeCB(unsigned int inputStatus)
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE,
                                 (void *)&_eventData,
                                 sizeof(_eventData));
-
+    
+    INT_INFO("Mani %s:%d Exit - Framerate status prechange update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
 }
 
 void _dsFramerateStatusPostChangeCB(unsigned int inputStatus)
@@ -678,6 +686,8 @@ void _dsFramerateStatusPostChangeCB(unsigned int inputStatus)
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE,
                                 (void *)&_eventData,
                                 sizeof(_eventData));
+
+    INT_INFO("Mani %s:%d Exit - Framerate status changed update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
 
 }
 

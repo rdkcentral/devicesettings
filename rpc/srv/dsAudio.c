@@ -2266,6 +2266,7 @@ IARM_Result_t dsAudioMgr_init()
                            (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_PORT_STATE,
                            (void *)&audio_portstate_event_data,
                            sizeof(audio_portstate_event_data));
+	        INT_INFO("Mani %d %s: Exit - AudioOutPort PortInitState \r\n",__LINE__ ,__FUNCTION__);
 
        }
 
@@ -2516,6 +2517,8 @@ IARM_Result_t _dsSetStereoMode(void *arg)
 
     IARM_BUS_Lock(lock);
 
+    INT_INFO("Mani %d %s: Entry - _dsSetStereoMode \r\n",__LINE__ ,__FUNCTION__);
+
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsError_t ret = dsERR_NONE;
     dsAudioSetStereoModeParam_t *param = (dsAudioSetStereoModeParam_t *)arg;
@@ -2562,6 +2565,8 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
 
+		        INT_INFO("Mani %d %s: Exit - Setting Audio Mode STEREO with persistent value \r\n",__LINE__ ,__FUNCTION__);
+
             }
             else if(param->mode == dsAUDIO_STEREO_SURROUND)
             {
@@ -2592,6 +2597,7 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_SURROUND;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
+		        INT_INFO("Mani %d %s: Exit - Setting Audio Mode SURROUND with persistent value \r\n",__LINE__ ,__FUNCTION__);
             }
             else if(param->mode == dsAUDIO_STEREO_DD)
             {
@@ -2607,6 +2613,7 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_DD;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
+		        INT_INFO("Mani %d %s: Exit - Setting Audio Mode Dolby Digital with persistent value \r\n",__LINE__ ,__FUNCTION__);
             }
             else if(param->mode == dsAUDIO_STEREO_DDPLUS)
             {
@@ -2622,6 +2629,7 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_DDPLUS;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
+		        INT_INFO("Mani %d %s: Exit - Setting Audio Mode Dolby Digital Plus with persistent value \r\n",__LINE__ ,__FUNCTION__);
             }
             else if(param->mode == dsAUDIO_STEREO_PASSTHRU)
             {
@@ -2650,6 +2658,7 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 eventData.data.Audioport.mode = dsAUDIO_STEREO_PASSTHRU;
                 eventData.data.Audioport.type = _APortType;
                 IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_MODE,(void *)&eventData, sizeof(eventData));
+		        INT_INFO("Mani %d %s: Exit - Setting Audio Mode PASSTHRU with persistent value \r\n",__LINE__ ,__FUNCTION__);
 
             }
 
@@ -2663,6 +2672,8 @@ IARM_Result_t _dsSetStereoMode(void *arg)
     }
 
     IARM_BUS_Unlock(lock);
+
+    INT_INFO("Mani %d %s: Exit - _dsSetStereoMode \r\n",__LINE__ ,__FUNCTION__);    
 
     return result;
 }
@@ -2769,7 +2780,7 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
     bool portEnabled = false;
     dsAudioSetDuckingParam_t *param = (dsAudioSetDuckingParam_t *)arg;
     IARM_Bus_DSMgr_EventData_t eventData;
-    INT_DEBUG("%s action : %d type :%d val :%d m_volumeLevel:%f \n",__FUNCTION__,param->action,param->type,param->level,m_volumeLevel );
+    INT_INFO("Mani %s action : %d type :%d val :%d m_volumeLevel:%f \n",__FUNCTION__,param->action,param->type,param->level,m_volumeLevel );
 
     dsError_t ret = dsIsAudioPortEnabled(param->handle, &portEnabled);
     if (ret != dsERR_NONE) {
@@ -2860,8 +2871,11 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
             INT_DEBUG(" IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED  volume:%d \n ",eventData.data.AudioLevelInfo.level);
         }
         IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED,(void *)&eventData, sizeof(eventData));
+	    INT_INFO("Mani %d %s: Exit - IARM_BUS_DSMGR_EVENT_AUDIO_LEVEL_CHANGED \r\n",__LINE__ ,__FUNCTION__);
     }
     IARM_BUS_Unlock(lock);
+
+    INT_INFO("Mani %d %s: Exit - _dsSetAudioDucking \r\n",__LINE__ ,__FUNCTION__);
 
     return IARM_RESULT_SUCCESS;
 }
@@ -5346,6 +5360,8 @@ IARM_Result_t _dsSetAssociatedAudioMixing(void *arg)
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     IARM_BUS_Lock(lock);
 
+    INT_INFO("Mani %d %s: Entry - _dsSetAssociatedAudioMixing \r\n",__LINE__ ,__FUNCTION__);
+
     typedef dsError_t (*dsSetAssociatedAudioMixing_t)(intptr_t handle, bool mixing);
     static dsSetAssociatedAudioMixing_t func = 0;
     if (func == 0) {
@@ -5383,12 +5399,14 @@ IARM_Result_t _dsSetAssociatedAudioMixing(void *arg)
                                    (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_ASSOCIATED_AUDIO_MIXING_CHANGED,
                                    (void *)&associated_audio_mixing_event_data,
                                    sizeof(associated_audio_mixing_event_data));
+	        INT_INFO("Mani %d %s: Exit - Associated Audio Mixing status changed \r\n",__LINE__ ,__FUNCTION__);
 
             result = IARM_RESULT_SUCCESS;
         }
     }
 
     IARM_BUS_Unlock(lock);
+    INT_INFO("Mani %d %s: Exit - _dsSetAssociatedAudioMixing \r\n",__LINE__ ,__FUNCTION__);
     return result;
 }
 
@@ -5447,6 +5465,8 @@ IARM_Result_t _dsSetFaderControl(void *arg)
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     IARM_BUS_Lock(lock);
 
+    INT_INFO("Mani %d %s: Entry - _dsSetFaderControl \r\n",__LINE__ ,__FUNCTION__);
+
     typedef dsError_t (*dsSetFaderControl_t)(intptr_t handle, int mixerbalance);
     static dsSetFaderControl_t func = 0;
 
@@ -5486,12 +5506,14 @@ IARM_Result_t _dsSetFaderControl(void *arg)
                                    (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_FADER_CONTROL_CHANGED,
                                    (void *)&fader_control_event_data,
                                    sizeof(fader_control_event_data));
+	        INT_INFO("Mani %d %s: Exit - Fader Control changed \r\n",__LINE__ ,__FUNCTION__);
 
             result = IARM_RESULT_SUCCESS;
         }
     }
 
     IARM_BUS_Unlock(lock);
+    INT_INFO("Mani %d %s: Exit - _dsSetFaderControl \r\n",__LINE__ ,__FUNCTION__);
     return result;
 }
 
@@ -5554,6 +5576,8 @@ IARM_Result_t _dsSetPrimaryLanguage(void *arg)
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     IARM_BUS_Lock(lock);
 
+    INT_INFO("Mani %d %s: Entry - _dsSetPrimaryLanguage \r\n",__LINE__ ,__FUNCTION__);
+
     typedef dsError_t (*dsSetPrimaryLanguage_t)(intptr_t handle, const char* pLang);
     static dsSetPrimaryLanguage_t func = 0;
     if (func == 0) {
@@ -5592,12 +5616,14 @@ IARM_Result_t _dsSetPrimaryLanguage(void *arg)
                                    (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED,
                                    (void *)&primary_language_event_data,
                                    sizeof(primary_language_event_data));
+	        INT_INFO("Mani %d %s: Exit - Primary Language changed \r\n",__LINE__ ,__FUNCTION__);
 
             result = IARM_RESULT_SUCCESS;
         }
     }
 
     IARM_BUS_Unlock(lock);
+    INT_INFO("Mani %d %s: Exit - _dsSetPrimaryLanguage \r\n",__LINE__ ,__FUNCTION__);
     return result;
 }
 
@@ -5658,6 +5684,8 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     IARM_BUS_Lock(lock);
 
+    INT_INFO("Mani %d %s: Entry - _dsSetSecondaryLanguage \r\n",__LINE__ ,__FUNCTION__);
+
     typedef dsError_t (*dsSetSecondaryLanguage_t)(intptr_t handle, const char* sLang);
     static dsSetSecondaryLanguage_t func = 0;
     if (func == 0) {
@@ -5696,12 +5724,14 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
                                    (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,
                                    (void *)&secondary_language_event_data,
                                    sizeof(secondary_language_event_data));
+	        INT_INFO("Mani %d %s: Exit - Secondary Language changed \r\n",__LINE__ ,__FUNCTION__);
 
             result = IARM_RESULT_SUCCESS;
         }
     }
 
     IARM_BUS_Unlock(lock);
+    INT_INFO("Mani %d %s: Exit - _dsSetSecondaryLanguage \r\n",__LINE__ ,__FUNCTION__);
     return result;
 }
 
@@ -6299,7 +6329,7 @@ IARM_Result_t _dsGetMS12Capabilities(void *arg)
 void _dsAudioOutPortConnectCB(dsAudioPortType_t portType, unsigned int uiPortNo, bool isPortConnected)
 {
     IARM_Bus_DSMgr_EventData_t audio_out_hpd_eventData;
-    INT_INFO("%s: AudioOutPort type:%d portNo:%d Hotplug happened\r\n", 
+    INT_INFO("Mani %s: AudioOutPort type:%d portNo:%d Hotplug happened\r\n", 
             __FUNCTION__, portType, uiPortNo);
     audio_out_hpd_eventData.data.audio_out_connect.portType = portType;
     audio_out_hpd_eventData.data.audio_out_connect.uiPortNo = uiPortNo;
@@ -6309,7 +6339,7 @@ void _dsAudioOutPortConnectCB(dsAudioPortType_t portType, unsigned int uiPortNo,
                            (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_OUT_HOTPLUG,
                            (void *)&audio_out_hpd_eventData, 
                            sizeof(audio_out_hpd_eventData));
-    INT_INFO("%s portType%d uiPortNo:%d isPortConnected:%d", 
+    INT_INFO("Mani %s: Exit - portType%d uiPortNo:%d isPortConnected:%d", 
             __FUNCTION__, portType, uiPortNo, isPortConnected);           
 }
 
@@ -6414,6 +6444,7 @@ void _dsAudioFormatUpdateCB(dsAudioFormat_t audioFormat)
                            (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE,
                            (void *)&audio_format_event_data,
                            sizeof(audio_format_event_data));
+    INT_INFO("Mani %d %s: Exit - AudioOutPort format update \r\n",__LINE__ ,__FUNCTION__);
 }
 
 static dsError_t _dsAudioFormatUpdateRegisterCB (dsAudioFormatUpdateCB_t cbFun) {
@@ -6464,6 +6495,7 @@ void _dsAudioAtmosCapsChangeCB(dsATMOSCapability_t atmosCaps, bool status)
                            (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED,
                            (void *)&atmos_caps_change_event_data,
                            sizeof(atmos_caps_change_event_data));
+    INT_INFO("Mani %d %s: Exit - Atmos caps changed \r\n",__LINE__ ,__FUNCTION__);
 }
 
 static dsError_t _dsAudioAtmosCapsChangeRegisterCB (dsAtmosCapsChangeCB_t cbFun) {

@@ -495,6 +495,7 @@ void _dsCompositeInConnectCB(dsCompositeInPort_t port, bool isPortConnected)
 	                        (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_HOTPLUG,
 	                        (void *)&composite_in_hpd_eventData,
 	                        sizeof(composite_in_hpd_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - COMPOSITE In hotplug update\r\n", __LINE__, __FUNCTION__);
 
 }
 
@@ -510,8 +511,8 @@ void _dsCompositeInSignalChangeCB(dsCompositeInPort_t port, dsCompInSignalStatus
 			        (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_SIGNAL_STATUS,
 			        (void *)&composite_in_sigStatus_eventData,
 			        sizeof(composite_in_sigStatus_eventData));
-
-    INT_DEBUG("%s <-- \n", __PRETTY_FUNCTION__);
+    INT_INFO("Mani [%d][%s]: Exit - Composite In signal change update\r\n", __LINE__, __FUNCTION__);
+  
 }
 
 void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus)
@@ -526,7 +527,7 @@ void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus)
                                 (void *)&hdmi_in_status_eventData,
                                 sizeof(hdmi_in_status_eventData));
 
-    INT_DEBUG("%s <-- \n", __PRETTY_FUNCTION__);
+    INT_INFO("Mani [%d][%s]: Exit - Composite In status change update\r\n", __LINE__, __FUNCTION__);
 }
 
 void _dsCompositeInVideoModeUpdateCB(dsCompositeInPort_t port, dsVideoPortResolution_t videoResolution)
@@ -541,6 +542,7 @@ void _dsCompositeInVideoModeUpdateCB(dsCompositeInPort_t port, dsVideoPortResolu
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_VIDEO_MODE_UPDATE,
                                 (void *)&composite_in_videoMode_eventData,
                                 sizeof(composite_in_videoMode_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - Composite In video mode info  update\r\n", __LINE__, __FUNCTION__);
 }
 
 /** @} */

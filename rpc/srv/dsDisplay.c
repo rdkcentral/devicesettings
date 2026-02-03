@@ -343,6 +343,7 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
 			
 	}
     IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)_eventId,(void *)&_eventData, sizeof(_eventData));
+    INT_INFO("Mani %d %s: Exit - _dsDisplayEventCallback \r\n",__LINE__ ,__FUNCTION__);
     if (dsDISPLAY_EVENT_CONNECTED == event) {
         dsError_t eRet = dsERR_NONE;
         if (!_hdmiVideoPortHandle){

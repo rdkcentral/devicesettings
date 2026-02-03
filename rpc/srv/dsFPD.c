@@ -723,6 +723,8 @@ IARM_Result_t _dsSetTimeFormat(void *arg)
 	    
 	    IARM_BUS_Lock(lock);
 
+		INT_INFO("Mani %d %s: Entry - _dsSetTimeFormat \r\n",__LINE__ ,__FUNCTION__);
+
 	    dsFPDTimeFormatParam_t *param = (dsFPDTimeFormatParam_t *)arg;
 
 	    if( param == NULL)
@@ -756,10 +758,12 @@ IARM_Result_t _dsSetTimeFormat(void *arg)
 	    	
 	    	IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)_eventId,(void *)&_eventData, sizeof(_eventData));
 		    
-		    INT_INFO("Sent Clock IARM_BUS_DSMGR_EVENT_TIME_FORMAT_CHANGE event ... \r\n");
+		    INT_INFO("Mani %d %s: Exit - Sent Clock IARM_BUS_DSMGR_EVENT_TIME_FORMAT_CHANGE event ... \r\n",__LINE__ ,__FUNCTION__);
 		}
 
 	    IARM_BUS_Unlock(lock);
+
+		INT_INFO("Mani %d %s: Exit - _dsSetTimeFormat \r\n",__LINE__ ,__FUNCTION__);
 
     #endif
 	

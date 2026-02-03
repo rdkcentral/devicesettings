@@ -87,7 +87,7 @@ IARM_Result_t dsHostMgr_init()
         IARM_Bus_DSMgr_EventData_t eventData = {0};
         eventData.data.sleepModeInfo.sleepMode = _SleepMode;
         IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED,(void *)&eventData, sizeof(eventData));
-        INT_INFO("Broadcast Event IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED :%d. \n",_SleepMode);
+        INT_INFO("Mani %d %s: Exit - Broadcast Event IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED :%d. \n",__LINE__, __FUNCTION__, _SleepMode);
     }
     catch(...)
     {
@@ -124,6 +124,8 @@ IARM_Result_t _dsSetPreferredSleepMode(void *arg)
     _DEBUG_ENTER();
     IARM_BUS_Lock(lock);
 
+    INT_INFO("Mani %d %s: Entry - _dsSetPreferredSleepMode \n",__LINE__, __FUNCTION__);
+
     dsPreferredSleepMode *param = (dsPreferredSleepMode *)arg;
     INT_DEBUG("_dsSetPreferredSleepMode called with the mode - %s \r\n", enumToString(param->mode).c_str());
     try{
@@ -133,7 +135,7 @@ IARM_Result_t _dsSetPreferredSleepMode(void *arg)
         IARM_Bus_DSMgr_EventData_t eventData;
         eventData.data.sleepModeInfo.sleepMode = _SleepMode;
         IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED,(void *)&eventData, sizeof(eventData));
-        INT_INFO("callaing IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED :%d \n",_SleepMode);
+        INT_INFO("Mani %d %s: Exit - callaing IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED :%d \n",__LINE__, __FUNCTION__, _SleepMode);
         ret = IARM_RESULT_SUCCESS;
     }
     catch(...)
@@ -141,6 +143,7 @@ IARM_Result_t _dsSetPreferredSleepMode(void *arg)
         INT_INFO("Error in Persisting the Power Mode\r\n");
     }
     IARM_BUS_Unlock(lock);
+    INT_INFO("Mani %d %s: Exit - _dsSetPreferredSleepMode \n",__LINE__, __FUNCTION__);
     return ret;
 }
 

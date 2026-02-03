@@ -923,7 +923,7 @@ void _dsHdmiInConnectCB(dsHdmiInPort_t port, bool isPortConnected)
 {
     IARM_Bus_DSMgr_EventData_t hdmi_in_hpd_eventData;
  
-    INT_INFO("%s:%d - HDMI In hotplug update!!!!!!..Port: %d, isPort: %d\r\n",__PRETTY_FUNCTION__,__LINE__, port, isPortConnected);
+    INT_INFO("Mani %s:%d - HDMI In hotplug update!!!!!!..Port: %d, isPort: %d\r\n",__PRETTY_FUNCTION__,__LINE__, port, isPortConnected);
     hdmi_in_hpd_eventData.data.hdmi_in_connect.port = port;
     hdmi_in_hpd_eventData.data.hdmi_in_connect.isPortConnected = isPortConnected;
 			
@@ -931,6 +931,7 @@ void _dsHdmiInConnectCB(dsHdmiInPort_t port, bool isPortConnected)
 	                        (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_HOTPLUG,
 	                        (void *)&hdmi_in_hpd_eventData, 
 	                        sizeof(hdmi_in_hpd_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In hotplug update\r\n", __LINE__, __FUNCTION__);
            
 }
 
@@ -938,7 +939,7 @@ void _dsHdmiInSignalChangeCB(dsHdmiInPort_t port, dsHdmiInSignalStatus_t sigStat
 {
     IARM_Bus_DSMgr_EventData_t hdmi_in_sigStatus_eventData;
 
-    INT_INFO("%s:%d - HDMI In signal status change update!!!!!! Port: %d, Signal Status: %d\r\n", __PRETTY_FUNCTION__,__LINE__,port, sigStatus);
+    INT_INFO("Mani %s:%d - HDMI In signal status change update!!!!!! Port: %d, Signal Status: %d\r\n", __PRETTY_FUNCTION__,__LINE__,port, sigStatus);
     hdmi_in_sigStatus_eventData.data.hdmi_in_sig_status.port = port;
     hdmi_in_sigStatus_eventData.data.hdmi_in_sig_status.status = sigStatus;
 
@@ -946,6 +947,7 @@ void _dsHdmiInSignalChangeCB(dsHdmiInPort_t port, dsHdmiInSignalStatus_t sigStat
 			        (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_SIGNAL_STATUS,
 			        (void *)&hdmi_in_sigStatus_eventData,
 			        sizeof(hdmi_in_sigStatus_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In signal status change update\r\n", __LINE__, __FUNCTION__);
 
 }
 
@@ -961,6 +963,7 @@ void _dsHdmiInStatusChangeCB(dsHdmiInStatus_t inputStatus)
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS,
                                 (void *)&hdmi_in_status_eventData,
                                 sizeof(hdmi_in_status_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In status change update\r\n", __LINE__, __FUNCTION__);
 
 }
 
@@ -979,6 +982,7 @@ void _dsHdmiInVideoModeUpdateCB(dsHdmiInPort_t port, dsVideoPortResolution_t vid
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_VIDEO_MODE_UPDATE,
                                 (void *)&hdmi_in_videoMode_eventData,
                                 sizeof(hdmi_in_videoMode_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In video mode info  update\r\n", __LINE__, __FUNCTION__);
 
 }
 
@@ -994,6 +998,7 @@ void _dsHdmiInAllmChangeCB(dsHdmiInPort_t port, bool allm_mode)
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_ALLM_STATUS,
                                 (void *)&hdmi_in_allmMode_eventData,
                                 sizeof(hdmi_in_allmMode_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In ALLM Mode update\r\n", __LINE__, __FUNCTION__);
 
 }
 void _dsHdmiInAviContentTypeChangeCB(dsHdmiInPort_t port, dsAviContentType_t avi_content_type)
@@ -1008,6 +1013,7 @@ void _dsHdmiInAviContentTypeChangeCB(dsHdmiInPort_t port, dsAviContentType_t avi
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,
                                 (void *)&hdmi_in_contentType_eventData,
                                 sizeof(hdmi_in_contentType_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In Content Type update\r\n", __LINE__, __FUNCTION__);
 }
 
 void _dsHdmiInAVLatencyChangeCB(int audio_latency, int video_latency)
@@ -1021,6 +1027,7 @@ void _dsHdmiInAVLatencyChangeCB(int audio_latency, int video_latency)
                                 (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,
                                 (void *)&hdmi_in_av_latency_eventData,
                                 sizeof(hdmi_in_av_latency_eventData));
+    INT_INFO("Mani [%d][%s]: Exit - HDMI In AV Latency update\r\n", __LINE__, __FUNCTION__);
 
 }
 

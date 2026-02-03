@@ -1359,7 +1359,9 @@ static int  _dsSendVideoPortPostResolutionCall(dsVideoPortResolution_t *resoluti
 			eventData.data.resn.width = param.width;
 			eventData.data.resn.height = param.height;
 			IARM_BusDaemon_ResolutionPostchange(param);
+            INT_INFO("Mani %s:%d Entry - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE \r\n", __PRETTY_FUNCTION__,__LINE__);
 			IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,(void *)&eventData, sizeof(eventData));
+            INT_INFO("Mani %s:%d Exit - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE \r\n", __PRETTY_FUNCTION__,__LINE__);
 		}
 	return ret;
 }
@@ -1416,7 +1418,9 @@ static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
 			eventData.data.resn.width = param.width;
 			eventData.data.resn.height = param.height;
 			IARM_BusDaemon_ResolutionPrechange(param);
+            INT_INFO("Mani %s:%d Entry - IARM_BUS_DSMGR_EVENT_RES_PRECHANGE \r\n", __PRETTY_FUNCTION__,__LINE__);
 			IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,(void *)&eventData, sizeof(eventData));
+            INT_INFO("Mani %s:%d Exit - IARM_BUS_DSMGR_EVENT_RES_PRECHANGE \r\n", __PRETTY_FUNCTION__,__LINE__);
 		}
 	return ret;
 }
@@ -1470,6 +1474,7 @@ void _dsHdcpCallback (intptr_t handle, dsHdcpStatus_t status)
 	}
 	
 	IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDCP_STATUS,(void *)&hdcp_eventData, sizeof(hdcp_eventData));
+    INT_INFO("Mani %s:%d Exit - IARM_BUS_DSMGR_EVENT_HDCP_STATUS \r\n", __PRETTY_FUNCTION__,__LINE__);
 }
 
 IARM_Result_t _dsGetHDCPStatus (void *arg)
@@ -2216,6 +2221,7 @@ void _dsVideoFormatUpdateCB(dsHDRStandard_t videoFormat)
                            (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE,
                            (void *)&video_format_event_data,
                            sizeof(video_format_event_data));
+    INT_INFO("Mani %s:%d Exit - IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE \r\n", __PRETTY_FUNCTION__,__LINE__);
 }
 
 static dsError_t _dsVideoFormatUpdateRegisterCB (dsVideoFormatUpdateCB_t cbFun) {
