@@ -76,18 +76,6 @@
 
 #include "dsInternal.h"
 
-/*
- * Platform HAL Configuration:
- * 
- * PLATFORM_NEXUS - Define this macro to enable actual platform HAL calls
- *                  If not defined, hardcoded values will be used for 3 HDMI input ports
- * 
- * Usage: 
- * - With platform HAL: #define PLATFORM_NEXUS
- * - Without platform HAL (simulation): Comment out or don't define PLATFORM_NEXUS
- */
-// #define PLATFORM_NEXUS  // Uncomment this line to enable platform HAL calls
-
 #define direct_list_top(list) ((list))
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&fpLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&fpLock)
@@ -505,12 +493,7 @@ IARM_Result_t _dsHdmiInInit(void *arg)
         if (!m_isPlatInitialized)
         {
             /* Nexus init, if any here */
-#ifdef PLATFORM_NEXUS
             dsError_t eError = dsHdmiInInit();
-#else
-            dsError_t eError = dsERR_NONE;
-            INT_INFO("Platform HAL not available, using hardcoded values for 3 HDMI input ports\n");
-#endif
         }
         m_isPlatInitialized++;
     }
@@ -520,11 +503,7 @@ IARM_Result_t _dsHdmiInInit(void *arg)
         if (PROFILE_TV == profileType)
         {
             INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
             dsHdmiInRegisterConnectCB(_dsHdmiInConnectCB);
-#else
-            INT_INFO("Platform HAL not available, callback registration skipped\n");
-#endif
 
             typedef dsError_t (*dsHdmiInRegisterSignalChangeCB_t)(dsHdmiInSignalChangeCB_t CBFunc);
             static dsHdmiInRegisterSignalChangeCB_t signalChangeCBFunc = 0;
@@ -690,7 +669,6 @@ IARM_Result_t _dsHdmiInInit(void *arg)
         int itr = 0;
         bool isARCCapable = false;
        
-#ifdef PLATFORM_NEXUS
         dsHdmiInGetNumberOfInputs(&noOfSupportedHdmiInputs);
         INT_INFO("Number of Inputs:%d \n",noOfSupportedHdmiInputs);
       
@@ -699,17 +677,6 @@ IARM_Result_t _dsHdmiInInit(void *arg)
             isHdmiARCPort (itr, &isARCCapable);
             hdmiInCap_gs.isPortArcCapable[itr] = isARCCapable; 
         }
-#else
-        // Hardcoded configuration for 3 HDMI input ports
-        noOfSupportedHdmiInputs = 3;
-        INT_INFO("Platform HAL not available, using hardcoded configuration for 3 HDMI inputs\n");
-        
-        for (itr = 0; itr < noOfSupportedHdmiInputs; itr++) {
-            // Default ARC capability for port 0, others without ARC
-            hdmiInCap_gs.isPortArcCapable[itr] = (itr == 0) ? true : false; 
-            INT_INFO("Port HDMI%d: ARC capable = %d (hardcoded)\n", itr, hdmiInCap_gs.isPortArcCapable[itr]);
-        }
-#endif
 
         // Getting the edidallmEnable value from persistence upon bootup
         std::string _EdidAllmSupport("TRUE");
@@ -789,19 +756,12 @@ IARM_Result_t _dsHdmiInInit(void *arg)
         }
 	
         for (itr = 0; itr < noOfSupportedHdmiInputs; itr++) {
-#ifdef PLATFORM_NEXUS
             if (getVRRSupport(static_cast<dsHdmiInPort_t>(itr), &m_hdmiPortVrrCaps[itr]) >= 0) {
                 INT_INFO("Port HDMI%d: VRR capability : %d\n", itr, m_hdmiPortVrrCaps[itr]);
             }
             if (setEdidVersion (static_cast<dsHdmiInPort_t>(itr), m_edidversion[itr]) >= 0) {
                 INT_INFO("Port HDMI%d: Initialized EDID Version : %d\n", itr, m_edidversion[itr]);
             }
-#else
-            // Hardcoded VRR capability and EDID version for 3 HDMI input ports
-            m_hdmiPortVrrCaps[itr] = true; // All ports support VRR
-            INT_INFO("Port HDMI%d: VRR capability : %d (hardcoded)\n", itr, m_hdmiPortVrrCaps[itr]);
-            INT_INFO("Port HDMI%d: Initialized EDID Version : %d (hardcoded)\n", itr, m_edidversion[itr]);
-#endif
         }
         m_isInitialized = 1;
     }
@@ -825,11 +785,7 @@ IARM_Result_t _dsHdmiInTerm(void *arg)
             m_isPlatInitialized--;
             if (!m_isPlatInitialized)
             {
-#ifdef PLATFORM_NEXUS
                 dsHdmiInTerm();
-#else
-                INT_INFO("Platform HAL not available, skipping dsHdmiInTerm\n");
-#endif
             }
         }
     }
@@ -850,13 +806,7 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
         param->result = dsHdmiInGetNumberOfInputs(&param->numHdmiInputs);
-#else
-        param->numHdmiInputs = 3; // Hardcoded value for 3 HDMI input ports
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded value of 3 HDMI inputs\n");
-#endif
     }
     else
     {
@@ -879,15 +829,7 @@ IARM_Result_t _dsHdmiInGetStatus(void *arg)
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
         param->result = dsHdmiInGetStatus(&param->status);
-#else
-        // Hardcoded status for 3 HDMI input ports
-        param->status.activePort = dsHDMI_IN_PORT_0;
-        param->status.isPresented = false;
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded HDMI status\n");
-#endif
     }
     else
     {
@@ -911,18 +853,7 @@ IARM_Result_t _dsHdmiInSelectPort(void *arg)
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
         param->result = dsHdmiInSelectPort(param->port,param->requestAudioMix, param->videoPlaneType,param->topMostPlane);
-#else
-        // Validate port range for 3 HDMI input ports
-        if (param->port >= dsHDMI_IN_PORT_0 && param->port < dsHDMI_IN_PORT_MAX && param->port < 3) {
-            param->result = dsERR_NONE;
-            INT_INFO("Platform HAL not available, port %d selection simulated\n", param->port);
-        } else {
-            param->result = dsERR_INVALID_PARAM;
-            INT_INFO("Invalid port %d, only 3 HDMI input ports (0-2) supported\n", param->port);
-        }
-#endif
     }
     else
     {
@@ -945,13 +876,7 @@ IARM_Result_t _dsHdmiInScaleVideo(void *arg)
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
         param->result = dsHdmiInScaleVideo(param->videoRect.x, param->videoRect.y, param->videoRect.width, param->videoRect.height);
-#else
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, video scaling (%d,%d,%d,%d) simulated\n", 
-                param->videoRect.x, param->videoRect.y, param->videoRect.width, param->videoRect.height);
-#endif
     }
     else
     {
@@ -973,12 +898,7 @@ IARM_Result_t _dsHdmiInSelectZoomMode(void *arg)
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
         param->result = dsHdmiInSelectZoomMode(param->zoomMode);
-#else
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, zoom mode %d selection simulated\n", param->zoomMode);
-#endif
     }
     else
     {
@@ -1002,16 +922,7 @@ IARM_Result_t _dsHdmiInGetCurrentVideoMode(void *arg)
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
-#ifdef PLATFORM_NEXUS
         param->result = dsHdmiInGetCurrentVideoMode(&param->resolution);
-#else
-        // Hardcoded video resolution for simulation
-        param->resolution.pixelResolution = dsVIDEO_PIXELRES_1920x1080;
-        param->resolution.interlaced = false;
-        param->resolution.frameRate = dsVIDEO_FRAMERATE_60;
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded 1080p60 resolution\n");
-#endif
     }
     else
     {
@@ -1154,23 +1065,7 @@ IARM_Result_t _dsGetEDIDBytesInfo (void *arg)
     memset (param->edid, '\0', MAX_EDID_BYTES_LEN);
     unsigned char edidArg[MAX_EDID_BYTES_LEN] = {0};
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     eRet = getEDIDBytesInfo (param->iHdmiPort, edidArg, &(param->length));
-#else
-    // Hardcoded EDID data for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        // Basic EDID header for simulation
-        unsigned char basicEdid[8] = {0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
-        param->length = 8;
-        memcpy(edidArg, basicEdid, param->length);
-        eRet = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded EDID data for port %d\n", param->iHdmiPort);
-    } else {
-        param->length = 0;
-        eRet = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     param->result = eRet;
     INT_INFO("[srv] %s: getEDIDBytesInfo eRet: %d\r\n", __FUNCTION__, param->result);
     if (eRet == dsERR_NONE && param->length > 0 && param->length <= MAX_EDID_BYTES_LEN) {//Make sure the result was true, and there is a valid length.
@@ -1196,20 +1091,7 @@ IARM_Result_t _dsGetHDMISPDInfo(void *arg)
 
     memset (param->spdInfo, '\0', sizeof(struct dsSpd_infoframe_st));
     unsigned char spdArg[sizeof(struct dsSpd_infoframe_st)] = {0};
-#ifdef PLATFORM_NEXUS
     param->result = getHDMISPDInfo(param->iHdmiPort, spdArg);
-#else
-    // Hardcoded SPD info for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        // Basic SPD info for simulation
-        memset(spdArg, 0, sizeof(struct dsSpd_infoframe_st));
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded SPD info for port %d\n", param->iHdmiPort);
-    } else {
-        param->result = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     INT_INFO("[srv] %s: dsGetHDMISPDInfo eRet: %d\r\n", __FUNCTION__, param->result);
     if (param->result == dsERR_NONE) {
             rc = memcpy_s(param->spdInfo,sizeof(param->spdInfo), spdArg, sizeof(struct dsSpd_infoframe_st));
@@ -1230,19 +1112,7 @@ IARM_Result_t _dsSetEdidVersion (void *arg)
 
     dsEdidVersionParam_t *param = (dsEdidVersionParam_t *) arg;
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     param->result = setEdidVersion (param->iHdmiPort, param->iEdidVersion);
-#else
-    // Validate port range for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, EDID version %d set for port %d (simulated)\n", 
-                param->iEdidVersion, param->iHdmiPort);
-    } else {
-        param->result = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     m_edidversion[param->iHdmiPort]=param->iEdidVersion;
     INT_INFO("[srv] %s: dsSetEdidVersion Port: %d EDID: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->iEdidVersion, param->result);
     IARM_BUS_Unlock(lock);
@@ -1256,21 +1126,8 @@ IARM_Result_t _dsGetEdidVersion (void *arg)
 
     dsEdidVersionParam_t *param = (dsEdidVersionParam_t *) arg;
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     param->result = getEdidVersion (param->iHdmiPort, &edidVer);
     param->iEdidVersion = static_cast<tv_hdmi_edid_version_t>(edidVer);
-#else
-    // Hardcoded EDID version for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        param->iEdidVersion = HDMI_EDID_VER_20; // Default to HDMI 2.0
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded EDID version 2.0 for port %d\n", param->iHdmiPort);
-    } else {
-        param->iEdidVersion = HDMI_EDID_VER_14;
-        param->result = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     INT_INFO("[srv] %s: dsGetEdidVersion edidVer: %d\r\n", __FUNCTION__, param->iEdidVersion);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
@@ -1283,21 +1140,8 @@ IARM_Result_t _dsGetAllmStatus (void *arg)
 
     dsAllmStatusParam_t *param = (dsAllmStatusParam_t *) arg;
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     param->result = getAllmStatus (param->iHdmiPort, &allmStatus);
     param->allmStatus = allmStatus;
-#else
-    // Hardcoded ALLM status for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        param->allmStatus = true; // Default ALLM support
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded ALLM status true for port %d\n", param->iHdmiPort);
-    } else {
-        param->allmStatus = false;
-        param->result = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     INT_INFO("[srv] %s: dsGetAllmStatus allmStatus: %d\r\n", __FUNCTION__, param->allmStatus);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
@@ -1310,17 +1154,9 @@ IARM_Result_t _dsGetSupportedGameFeaturesList (void *arg)
 
     dsSupportedGameFeatureListParam_t *param = (dsSupportedGameFeatureListParam_t *) arg;
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     param->result = getSupportedGameFeaturesList (&fList);
     param->featureList.gameFeatureCount = fList.gameFeatureCount;
     strncpy(param->featureList.gameFeatureList,fList.gameFeatureList,MAX_PROFILE_LIST_BUFFER_LEN);
-#else
-    // Hardcoded game features list for simulation
-    param->featureList.gameFeatureCount = 2;
-    strncpy(param->featureList.gameFeatureList, "ALLM,VRR", MAX_PROFILE_LIST_BUFFER_LEN);
-    param->result = dsERR_NONE;
-    INT_INFO("Platform HAL not available, returning hardcoded game features: ALLM,VRR\n");
-#endif
 
     INT_INFO("%s: Total number of supported game features: %d\n",__FUNCTION__, fList.gameFeatureCount);
     INT_INFO("%s: Supported Game Features List: %s\n",__FUNCTION__, fList.gameFeatureList);
@@ -1337,17 +1173,9 @@ IARM_Result_t _dsGetAVLatency (void *arg)
     dsTVAudioVideoLatencyParam_t *param = (dsTVAudioVideoLatencyParam_t *) arg;
     IARM_BUS_Lock(lock);
 
-#ifdef PLATFORM_NEXUS
     param->result = getAVLatency_hal(&audio_latency,&video_latency);
     param->video_latency = video_latency;
     param->audio_output_delay = audio_latency;
-#else
-    // Hardcoded AV latency values
-    param->video_latency = 40; // 40ms video latency
-    param->audio_output_delay = 40; // 40ms audio latency
-    param->result = dsERR_NONE;
-    INT_INFO("Platform HAL not available, returning hardcoded AV latency values (40ms each)\n");
-#endif
     INT_INFO("[srv] %s: _dsGetAVLatency AVLatency_params: %d : %d\r\n", __FUNCTION__, param->video_latency, param->audio_output_delay);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
@@ -1413,19 +1241,7 @@ IARM_Result_t _dsSetEdid2AllmSupport (void *arg)
     INT_INFO("[srv] :  In _dsSetEdid2AllmSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
     if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the allm bit in edid
     {
-#ifdef PLATFORM_NEXUS
         param->result = setEdid2AllmSupport (param->iHdmiPort, param->allmSupport);
-#else
-        // Validate port range for 3 HDMI input ports
-        if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-            param->result = dsERR_NONE;
-            INT_INFO("Platform HAL not available, ALLM support %d set for port %d (simulated)\n", 
-                    param->allmSupport, param->iHdmiPort);
-        } else {
-            param->result = dsERR_INVALID_PARAM;
-            INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-        }
-#endif
     }
     INT_INFO("[srv] %s: dsSetEdid2AllmSupport Port: %d AllmSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->allmSupport, param->result);
     if(param->result == dsERR_NONE) 
@@ -1514,19 +1330,7 @@ IARM_Result_t _dsSetVRRSupport (void *arg)
     INT_INFO("[srv] :  In _dsSetVRRSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
     if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the VRR bit in edid
     {
-#ifdef PLATFORM_NEXUS
         param->result = setVRRSupport (param->iHdmiPort, param->vrrSupport);
-#else
-        // Validate port range for 3 HDMI input ports
-        if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-            param->result = dsERR_NONE;
-            INT_INFO("Platform HAL not available, VRR support %d set for port %d (simulated)\n", 
-                    param->vrrSupport, param->iHdmiPort);
-        } else {
-            param->result = dsERR_INVALID_PARAM;
-            INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-        }
-#endif
     }
     INT_INFO("[srv] %s: dsSetVRRSupport Port: %d vrrSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->vrrSupport, param->result);
     if(param->result == dsERR_NONE && m_hdmiPortVrrCaps[param->iHdmiPort])// update the persistence only for VRR supported ports
@@ -1624,24 +1428,9 @@ IARM_Result_t _dsGetVRRStatus (void *arg)
 
     dsVRRStatusParam_t *param = (dsVRRStatusParam_t *) arg;
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     param->result = getVRRStatus (param->iHdmiPort, &vrrStatus);
     param->vrrStatus.vrrType = vrrStatus.vrrType;
     param->vrrStatus.vrrAmdfreesyncFramerate_Hz = vrrStatus.vrrAmdfreesyncFramerate_Hz;
-#else
-    // Hardcoded VRR status for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        param->vrrStatus.vrrType = dsVRR_NONE;
-        param->vrrStatus.vrrAmdfreesyncFramerate_Hz = 0.0;
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded VRR status for port %d\n", param->iHdmiPort);
-    } else {
-        param->vrrStatus.vrrType = dsVRR_NONE;
-        param->vrrStatus.vrrAmdfreesyncFramerate_Hz = 0.0;
-        param->result = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     INT_INFO("[srv] %s: dsGetVRRStatus vrrType: %d vrrAmdfreesyncFramerate_Hz: %f\r\n", __FUNCTION__, param->vrrStatus.vrrType, param->vrrStatus.vrrAmdfreesyncFramerate_Hz);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
@@ -1653,22 +1442,9 @@ IARM_Result_t _dsGetHdmiVersion (void *arg)
     dsHdmiVersionParam_t *param = (dsHdmiVersionParam_t *) arg;
     dsHdmiMaxCapabilityVersion_t capVersion;
     IARM_BUS_Lock(lock);
-#ifdef PLATFORM_NEXUS
     eRet = getHdmiVersion (param->iHdmiPort, &capVersion);
     param->iCapVersion = capVersion;
     param->result = eRet;
-#else
-    // Hardcoded HDMI version for 3 HDMI input ports
-    if (param->iHdmiPort >= dsHDMI_IN_PORT_0 && param->iHdmiPort < 3) {
-        param->iCapVersion = HDMI_COMPATIBILITY_VERSION_20; // Default to HDMI 2.0
-        param->result = dsERR_NONE;
-        INT_INFO("Platform HAL not available, returning hardcoded HDMI version 2.0 for port %d\n", param->iHdmiPort);
-    } else {
-        param->iCapVersion = HDMI_COMPATIBILITY_VERSION_14;
-        param->result = dsERR_INVALID_PARAM;
-        INT_INFO("Invalid HDMI port %d, only 3 ports (0-2) supported\n", param->iHdmiPort);
-    }
-#endif
     INT_INFO("[srv] %s: getHdmiVersion is %d, eRet: %d\r\n", __FUNCTION__,param->iCapVersion, param->result);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
