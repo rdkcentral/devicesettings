@@ -28,390 +28,39 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <chrono>
-#include <thread>
 
 #include "dsFPD.h"
 #include "dsError.h"
 #include "dsclientlogger.h"
+#include "dsConnectionManager.h"
 
 // Thunder COM-RPC includes
 #ifndef MODULE_NAME
 #define MODULE_NAME DeviceSettings_FPD_Client
 #endif
 
-#include <core/core.h>
-#include <com/com.h>
-#include <plugins/Types.h>
 #include <interfaces/IDeviceSettingsFPD.h>
 
 using namespace WPEFramework;
-
-// Thunder callsign for DeviceSettings plugin
-static constexpr const TCHAR callSign[] = _T("org.rdk.DeviceSettings");
-
-/**
- * @brief DeviceSettingsFPD class manages Thunder COM-RPC connection for FPD
- */
-class DeviceSettingsFPD : public RPC::SmartInterfaceType<Exchange::IDeviceSettingsFPD> {
-private:
-    using BaseClass = RPC::SmartInterfaceType<Exchange::IDeviceSettingsFPD>;
-    
-    Exchange::IDeviceSettingsFPD* _fpdInterface;
-    
-    static DeviceSettingsFPD* _instance;
-    static Core::CriticalSection _apiLock;
-    
-    bool _connected;
-    bool _shutdown;
-
-    DeviceSettingsFPD()
-        : BaseClass()
-        , _fpdInterface(nullptr)
-        , _connected(false)
-        , _shutdown(false)
-    {
-        (void)Connect();
-    }
-
-    ~DeviceSettingsFPD()
-    {
-        _shutdown = true;
-        BaseClass::Close(Core::infinite);
-    }
-
-    virtual void Operational(const bool upAndRunning) override
-    {
-        _apiLock.Lock();
-
-        if (upAndRunning) {
-            // Communicator opened && DeviceSettings is Activated
-            if (nullptr == _fpdInterface) {
-                _fpdInterface = BaseClass::Interface();
-                if (_fpdInterface != nullptr) {
-                    printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettings plugin\n");
-                } else {
-                    fprintf(stderr, "[dsFPD-com] Failed to get interface - plugin implementation may have failed to load\n");
-                }
-            }
-        } else {
-            // DeviceSettings is Deactivated || Communicator closed
-            if (nullptr != _fpdInterface) {
-                _fpdInterface->Release();
-                _fpdInterface = nullptr;
-            }
-        }
-        _apiLock.Unlock();
-    }
-
-    inline bool IsActivatedLocked() const
-    {
-        return (nullptr != _fpdInterface);
-    }
-
-    inline bool isConnected() const
-    {
-        return _connected;
-    }
-
-public:
-    bool IsOperational() const
-    {
-        _apiLock.Lock();
-        bool result = (isConnected() && (nullptr != _fpdInterface));
-        _apiLock.Unlock();
-        return result;
-    }
-
-    bool WaitForOperational(uint32_t timeoutMs = 5000) const
-    {
-        const uint32_t pollIntervalMs = 100;
-        uint32_t elapsedMs = 0;
-        
-        while (elapsedMs < timeoutMs) {
-            if (IsOperational()) {
-                return true;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(pollIntervalMs));
-            elapsedMs += pollIntervalMs;
-        }
-        return false;
-    }
-
-    uint32_t Connect()
-    {
-        uint32_t status = Core::ERROR_NONE;
-
-        _apiLock.Lock();
-
-        if (!isConnected()) {
-            printf("[dsFPD-com] Attempting to connect to Thunder with callsign: %s\n", callSign);
-            uint32_t res = BaseClass::Open(RPC::CommunicationTimeOut, BaseClass::Connector(), callSign);
-            if (Core::ERROR_NONE == res) {
-                _connected = true;
-                printf("[dsFPD-com] Successfully opened RPC connection to Thunder\n");
-            } else {
-                fprintf(stderr, "[dsFPD-com] Failed to open RPC connection, error: %u. Is Thunder running?\n", res);
-                status = Core::ERROR_UNAVAILABLE;
-            }
-        }
-
-        if (nullptr == _fpdInterface) {
-            status = Core::ERROR_NOT_EXIST;
-            printf("[dsFPD-com] DeviceSettings plugin not yet operational\n");
-        }
-
-        _apiLock.Unlock();
-
-        return status;
-    }
-
-    uint32_t Disconnect()
-    {
-        uint32_t status = Core::ERROR_GENERAL;
-        bool close = false;
-
-        _apiLock.Lock();
-
-        if (isConnected()) {
-            close = true;
-            _connected = false;
-        }
-
-        _apiLock.Unlock();
-
-        if (close) {
-            status = BaseClass::Close(Core::infinite);
-        }
-
-        return status;
-    }
-
-    static void Init()
-    {
-        _apiLock.Lock();
-        if (nullptr == _instance) {
-            _instance = new DeviceSettingsFPD();
-        }
-        _apiLock.Unlock();
-    }
-
-    static void Term()
-    {
-        _apiLock.Lock();
-        if (nullptr != _instance) {
-            delete _instance;
-            _instance = nullptr;
-        }
-        _apiLock.Unlock();
-    }
-
-    static DeviceSettingsFPD* Instance()
-    {
-        return _instance;
-    }
-
-    // FPD API implementations
-    // Note: Thunder interface doesn't have FPDInit/FPDTerm/SetFPDText methods
-
-    Core::hresult SetFPDTime(const Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat, 
-                             const uint32_t minutes, const uint32_t seconds)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDTime(timeFormat, minutes, seconds);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDScroll(const uint32_t scrollHoldOnDur, const uint32_t horzScrollIterations, 
-                               const uint32_t vertScrollIterations)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDScroll(scrollHoldOnDur, horzScrollIterations, vertScrollIterations);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDBlink(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                              const uint32_t blinkDuration, const uint32_t blinkIterations)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDBlink(indicator, blinkDuration, blinkIterations);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult GetFPDBrightness(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                                   uint32_t& brightness)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->GetFPDBrightness(indicator, brightness);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDBrightness(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                                   const uint32_t brightness, const bool persist)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDBrightness(indicator, brightness, persist);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult GetFPDTextBrightness(const Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator, 
-                                       uint32_t& brightness)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->GetFPDTextBrightness(indicator, brightness);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDTextBrightness(const Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator, 
-                                       const uint32_t brightness)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDTextBrightness(indicator, brightness);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult GetFPDColor(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                              uint32_t& color)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->GetFPDColor(indicator, color);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDColor(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                              const uint32_t color)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDColor(indicator, color);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult EnableFPDClockDisplay(const bool enable)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->EnableFPDClockDisplay(enable);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDState(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                              const Exchange::IDeviceSettingsFPD::FPDState state)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDState(indicator, state);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult GetFPDState(const Exchange::IDeviceSettingsFPD::FPDIndicator indicator, 
-                              Exchange::IDeviceSettingsFPD::FPDState& state)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->GetFPDState(indicator, state);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult GetFPDTimeFormat(Exchange::IDeviceSettingsFPD::FPDTimeFormat& timeFormat)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->GetFPDTimeFormat(timeFormat);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDTimeFormat(const Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDTimeFormat(timeFormat);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-
-    Core::hresult SetFPDMode(const Exchange::IDeviceSettingsFPD::FPDMode mode)
-    {
-        Core::hresult result = Core::ERROR_UNAVAILABLE;
-        _apiLock.Lock();
-        if (_fpdInterface) {
-            result = _fpdInterface->SetFPDMode(mode);
-        }
-        _apiLock.Unlock();
-        return result;
-    }
-};
-
-// Static member initialization
-DeviceSettingsFPD* DeviceSettingsFPD::_instance = nullptr;
-Core::CriticalSection DeviceSettingsFPD::_apiLock;
+using namespace DeviceSettingsClient;
 
 /**
  * @brief Convert Thunder error code to dsError_t
  */
 static dsError_t ConvertThunderError(uint32_t thunderError)
 {
-    if (thunderError == Core::ERROR_NONE) {
+    if (thunderError == WPEFramework::Core::ERROR_NONE) {
         return dsERR_NONE;
-    } else if (thunderError == Core::ERROR_UNAVAILABLE) {
+    } else if (thunderError == WPEFramework::Core::ERROR_UNAVAILABLE) {
         return dsERR_OPERATION_NOT_SUPPORTED;
-    } else if (thunderError == Core::ERROR_BAD_REQUEST) {
+    } else if (thunderError == WPEFramework::Core::ERROR_BAD_REQUEST) {
         return dsERR_INVALID_PARAM;
     } else {
         return dsERR_GENERAL;
     }
 }
 
-// C API implementations using Thunder COM-RPC
+// C API implementations using Thunder COM-RPC via ConnectionManager
 
 extern "C" {
 
@@ -421,21 +70,21 @@ dsError_t dsSetFPDColor(dsFPDIndicator_t eIndicator, dsFPDColor_t eColor, bool t
 
 dsError_t dsFPInit(void)
 {
-    printf("<<<<< Front Panel is initialized in Thunder Mode >>>>>>>>\r\n");
+    printf("<<<<< Front Panel is initialized in Thunder Mode (using ConnectionManager) >>>>>>>>\r\n");
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance) {
-        DeviceSettingsFPD::Init();
-        instance = DeviceSettingsFPD::Instance();
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr) {
+        ConnectionManager::Init();
+        connMgr = ConnectionManager::Instance();
     }
     
-    if (!instance) {
-        fprintf(stderr, "[dsFPD-com] Failed to create DeviceSettingsFPD instance\n");
+    if (!connMgr) {
+        fprintf(stderr, "[dsFPD-com] Failed to create ConnectionManager instance\n");
         return dsERR_GENERAL;
     }
     
     // Wait for plugin to become operational
-    if (!instance->WaitForOperational(5000)) {
+    if (!connMgr->WaitForOperational(5000)) {
         fprintf(stderr, "[dsFPD-com] DeviceSettings plugin not operational after 5 seconds\n");
         return dsERR_GENERAL;
     }
@@ -446,15 +95,8 @@ dsError_t dsFPInit(void)
 
 dsError_t dsFPTerm(void)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance) {
-        return dsERR_GENERAL;
-    }
-    
-    // Thunder interface doesn't have explicit Term method
-    // Terminate instance
-    DeviceSettingsFPD::Term();
-    
+    // Note: Don't terminate ConnectionManager here as other components may be using it
+    // ConnectionManager will be terminated by dsConnectionTerm() or at process exit
     return dsERR_NONE;
 }
 
@@ -472,42 +114,66 @@ dsError_t dsSetFPText(const char* pszChars)
 
 dsError_t dsSetFPTime(dsFPDTimeFormat_t eTime, const unsigned int uHour, const unsigned int uMinutes)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDTimeFormat>(eTime);
     
+    ConnectionManager::Lock();
     // Note: Interface expects minutes and seconds, but API provides hour and minutes
     // Converting: treating uMinutes as seconds for interface compatibility
-    uint32_t result = instance->SetFPDTime(timeFormat, uHour, uMinutes);
+    uint32_t result = fpdInterface->SetFPDTime(timeFormat, uHour, uMinutes);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
 dsError_t dsSetFPScroll(unsigned int nScrollHoldOnDur, unsigned int nHorzScrollIterations, unsigned int nVertScrollIterations)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
         return dsERR_GENERAL;
     }
     
-    uint32_t result = instance->SetFPDScroll(nScrollHoldOnDur, nHorzScrollIterations, nVertScrollIterations);
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
+        return dsERR_GENERAL;
+    }
+    
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDScroll(nScrollHoldOnDur, nHorzScrollIterations, nVertScrollIterations);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
 dsError_t dsSetFPBlink(dsFPDIndicator_t eIndicator, unsigned int nBlinkDuration, unsigned int nBlinkIterations)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
-    uint32_t result = instance->SetFPDBlink(indicator, nBlinkDuration, nBlinkIterations);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDBlink(indicator, nBlinkDuration, nBlinkIterations);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
@@ -518,8 +184,13 @@ dsError_t dsGetFPBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBri
         return dsERR_INVALID_PARAM;
     }
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
@@ -527,9 +198,11 @@ dsError_t dsGetFPBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBri
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     uint32_t brightness = 0;
-    uint32_t result = instance->GetFPDBrightness(indicator, brightness);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->GetFPDBrightness(indicator, brightness);
+    ConnectionManager::Unlock();
     
-    if (result == Core::ERROR_NONE) {
+    if (result == WPEFramework::Core::ERROR_NONE) {
         *pBrightness = static_cast<dsFPDBrightness_t>(brightness);
     }
     
@@ -554,15 +227,23 @@ dsError_t dsSetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBri
         return dsERR_INVALID_PARAM;
     }
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
-    uint32_t result = instance->SetFPDBrightness(indicator, static_cast<uint32_t>(eBrightness), toPersist);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDBrightness(indicator, static_cast<uint32_t>(eBrightness), toPersist);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
@@ -573,8 +254,13 @@ dsError_t dsGetFPTextBrightness(dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t
         return dsERR_INVALID_PARAM;
     }
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
@@ -582,9 +268,11 @@ dsError_t dsGetFPTextBrightness(dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t
         static_cast<Exchange::IDeviceSettingsFPD::FPDTextDisplay>(eIndicator);
     
     uint32_t brightness = 0;
-    uint32_t result = instance->GetFPDTextBrightness(indicator, brightness);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->GetFPDTextBrightness(indicator, brightness);
+    ConnectionManager::Unlock();
     
-    if (result == Core::ERROR_NONE) {
+    if (result == WPEFramework::Core::ERROR_NONE) {
         *pBrightness = static_cast<dsFPDBrightness_t>(brightness);
     }
     
@@ -593,15 +281,23 @@ dsError_t dsGetFPTextBrightness(dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t
 
 dsError_t dsSetFPTextBrightness(dsFPDTextDisplay_t eIndicator, dsFPDBrightness_t eBrightness)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDTextDisplay indicator = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDTextDisplay>(eIndicator);
     
-    uint32_t result = instance->SetFPDTextBrightness(indicator, static_cast<uint32_t>(eBrightness));
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDTextBrightness(indicator, static_cast<uint32_t>(eBrightness));
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
@@ -612,8 +308,13 @@ dsError_t dsGetFPColor(dsFPDIndicator_t eIndicator, dsFPDColor_t *pColor)
         return dsERR_INVALID_PARAM;
     }
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
@@ -621,9 +322,11 @@ dsError_t dsGetFPColor(dsFPDIndicator_t eIndicator, dsFPDColor_t *pColor)
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     uint32_t color = 0;
-    uint32_t result = instance->GetFPDColor(indicator, color);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->GetFPDColor(indicator, color);
+    ConnectionManager::Unlock();
     
-    if (result == Core::ERROR_NONE) {
+    if (result == WPEFramework::Core::ERROR_NONE) {
         *pColor = static_cast<dsFPDColor_t>(color);
     }
     
@@ -637,8 +340,13 @@ dsError_t dsSetFPColor(dsFPDIndicator_t eIndicator, dsFPDColor_t eColor)
 
 dsError_t dsSetFPDColor(dsFPDIndicator_t eIndicator, dsFPDColor_t eColor, bool toPersist)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
@@ -646,25 +354,41 @@ dsError_t dsSetFPDColor(dsFPDIndicator_t eIndicator, dsFPDColor_t eColor, bool t
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     // Thunder interface doesn't support persist flag - ignore it
-    uint32_t result = instance->SetFPDColor(indicator, static_cast<uint32_t>(eColor));
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDColor(indicator, static_cast<uint32_t>(eColor));
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
 dsError_t dsFPEnableCLockDisplay(int enable)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
         return dsERR_GENERAL;
     }
     
-    uint32_t result = instance->EnableFPDClockDisplay(enable != 0);
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
+        return dsERR_GENERAL;
+    }
+    
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->EnableFPDClockDisplay(enable != 0);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
 dsError_t dsSetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t state)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
@@ -673,7 +397,10 @@ dsError_t dsSetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t state)
     Exchange::IDeviceSettingsFPD::FPDState fpdState = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDState>(state);
     
-    uint32_t result = instance->SetFPDState(indicator, fpdState);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDState(indicator, fpdState);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
@@ -684,8 +411,13 @@ dsError_t dsGetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t* state)
         return dsERR_INVALID_PARAM;
     }
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
@@ -693,9 +425,11 @@ dsError_t dsGetFPState(dsFPDIndicator_t eIndicator, dsFPDState_t* state)
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
     Exchange::IDeviceSettingsFPD::FPDState fpdState;
-    uint32_t result = instance->GetFPDState(indicator, fpdState);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->GetFPDState(indicator, fpdState);
+    ConnectionManager::Unlock();
     
-    if (result == Core::ERROR_NONE) {
+    if (result == WPEFramework::Core::ERROR_NONE) {
         *state = static_cast<dsFPDState_t>(fpdState);
     }
     
@@ -709,15 +443,22 @@ dsError_t dsGetFPTimeFormat(dsFPDTimeFormat_t *pTimeFormat)
         return dsERR_INVALID_PARAM;
     }
     
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat;
-    uint32_t result = instance->GetFPDTimeFormat(timeFormat);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->GetFPDTimeFormat(timeFormat);
+    ConnectionManager::Unlock();
     
-    if (result == Core::ERROR_NONE) {
+    if (result == WPEFramework::Core::ERROR_NONE) {
         *pTimeFormat = static_cast<dsFPDTimeFormat_t>(timeFormat);
     }
     
@@ -726,29 +467,45 @@ dsError_t dsGetFPTimeFormat(dsFPDTimeFormat_t *pTimeFormat)
 
 dsError_t dsSetFPTimeFormat(dsFPDTimeFormat_t eTimeFormat)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDTimeFormat timeFormat = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDTimeFormat>(eTimeFormat);
     
-    uint32_t result = instance->SetFPDTimeFormat(timeFormat);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDTimeFormat(timeFormat);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
 dsError_t dsSetFPDMode(dsFPDMode_t eMode)
 {
-    DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
-    if (!instance || !instance->IsOperational()) {
+    ConnectionManager* connMgr = ConnectionManager::Instance();
+    if (!connMgr || !connMgr->IsOperational()) {
+        return dsERR_GENERAL;
+    }
+    
+    Exchange::IDeviceSettingsFPD* fpdInterface = connMgr->GetFPDInterface();
+    if (!fpdInterface) {
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDMode mode = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDMode>(eMode);
     
-    uint32_t result = instance->SetFPDMode(mode);
+    ConnectionManager::Lock();
+    uint32_t result = fpdInterface->SetFPDMode(mode);
+    ConnectionManager::Unlock();
+    
     return ConvertThunderError(result);
 }
 
