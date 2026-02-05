@@ -518,7 +518,7 @@ dsError_t dsGetHdmiVersion(dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_
     return ConvertThunderError(result);
 }
 
-dsError_t dsSetVRRSupport(dsHdmiInPort_t iHdmiPort, bool vrrSupport)
+dsError_t dsHdmiInSetVRRSupport(dsHdmiInPort_t iHdmiPort, bool vrrSupport)
 {
     ConnectionManager* connMgr = ConnectionManager::Instance();
     if (!connMgr || !connMgr->IsOperational()) {
@@ -540,7 +540,7 @@ dsError_t dsSetVRRSupport(dsHdmiInPort_t iHdmiPort, bool vrrSupport)
     return ConvertThunderError(result);
 }
 
-dsError_t dsGetVRRSupport(dsHdmiInPort_t iHdmiPort, bool* vrrSupport)
+dsError_t dsHdmiInGetVRRSupport(dsHdmiInPort_t iHdmiPort, bool* vrrSupport)
 {
     if (vrrSupport == NULL) {
         fprintf(stderr, "[dsHdmiIn-com] Invalid parameter: vrrSupport is NULL\n");
@@ -598,6 +598,21 @@ dsError_t dsHdmiInGetVRRStatus(dsHdmiInPort_t iHdmiPort, dsHdmiInVrrStatus_t* vr
     }
     
     return ConvertThunderError(result);
+}
+
+dsError_t dsGetSupportedGameFeaturesList(dsSupportedGameFeatureList_t* feature)
+{
+    if (feature == NULL) {
+        fprintf(stderr, "[dsHdmiIn-com] Invalid parameter: feature is NULL\n");
+        return dsERR_INVALID_PARAM;
+    }
+    
+    // This function is not yet implemented in Thunder COM-RPC mode
+    // For now, return empty list
+    feature->gameFeatureCount = 0;
+    feature->gameFeatureList[0] = '\0';
+    fprintf(stderr, "[dsHdmiIn-com] dsGetSupportedGameFeaturesList not fully implemented in Thunder mode\n");
+    return dsERR_OPERATION_NOT_SUPPORTED;
 }
 
 // Placeholder for unsupported APIs in Thunder mode
