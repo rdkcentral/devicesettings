@@ -22,10 +22,6 @@
 
 #ifdef USE_WPE_THUNDER_PLUGIN
 
-#ifndef MODULE_NAME
-#define MODULE_NAME DeviceSettings_ConnectionManager
-#endif
-
 #include <core/core.h>
 #include <com/com.h>
 #include <plugins/Types.h>

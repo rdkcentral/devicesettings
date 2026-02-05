@@ -267,7 +267,7 @@ dsError_t dsHdmiInGetCurrentVideoMode(dsVideoPortResolution_t* resolution)
     return ConvertThunderError(result);
 }
 
-dsError_t dsGetEDIDBytesInfo(dsHdmiInPort_t iHdmiPort, unsigned char* edid, int* length)
+dsError_t dsGetEDIDBytesInfo(int iHdmiPort, unsigned char* edid, int* length)
 {
     if (edid == NULL || length == NULL) {
         fprintf(stderr, "[dsHdmiIn-com] Invalid parameter\n");
@@ -294,7 +294,7 @@ dsError_t dsGetEDIDBytesInfo(dsHdmiInPort_t iHdmiPort, unsigned char* edid, int*
     return ConvertThunderError(result);
 }
 
-dsError_t dsGetHDMISPDInfo(dsHdmiInPort_t iHdmiPort, unsigned char* data)
+dsError_t dsGetHDMISPDInfo(int iHdmiPort, unsigned char* data)
 {
     if (data == NULL) {
         fprintf(stderr, "[dsHdmiIn-com] Invalid parameter: data is NULL\n");
@@ -323,7 +323,7 @@ dsError_t dsGetHDMISPDInfo(dsHdmiInPort_t iHdmiPort, unsigned char* data)
     return ConvertThunderError(result);
 }
 
-dsError_t dsGetEdidVersion(dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_t* edidVersion)
+dsError_t dsGetEdidVersion(int iHdmiPort, int* edidVersion)
 {
     if (edidVersion == NULL) {
         fprintf(stderr, "[dsHdmiIn-com] Invalid parameter: edidVersion is NULL\n");
@@ -349,13 +349,13 @@ dsError_t dsGetEdidVersion(dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_t* edi
     ConnectionManager::Unlock();
     
     if (result == WPEFramework::Core::ERROR_NONE) {
-        *edidVersion = static_cast<tv_hdmi_edid_version_t>(version);
+        *edidVersion = static_cast<int>(version);
     }
     
     return ConvertThunderError(result);
 }
 
-dsError_t dsSetEdidVersion(dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_t edidVersion)
+dsError_t dsSetEdidVersion(int iHdmiPort, int edidVersion)
 {
     ConnectionManager* connMgr = ConnectionManager::Instance();
     if (!connMgr || !connMgr->IsOperational()) {
@@ -486,7 +486,7 @@ dsError_t dsGetAVLatency(int* audio_latency, int* video_latency)
     return ConvertThunderError(result);
 }
 
-dsError_t dsGetHdmiVersion(dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_t* capversion)
+dsError_t dsGetHdmiVersion(dsHdmiInPort_t iHdmiPort, dsHdmiVersion_t* capversion)
 {
     if (capversion == NULL) {
         fprintf(stderr, "[dsHdmiIn-com] Invalid parameter: capversion is NULL\n");
@@ -512,7 +512,7 @@ dsError_t dsGetHdmiVersion(dsHdmiInPort_t iHdmiPort, dsHdmiMaxCapabilityVersion_
     ConnectionManager::Unlock();
     
     if (result == WPEFramework::Core::ERROR_NONE) {
-        *capversion = static_cast<dsHdmiMaxCapabilityVersion_t>(capabilityVersion);
+        *capversion = static_cast<dsHdmiVersion_t>(capabilityVersion);
     }
     
     return ConvertThunderError(result);
@@ -594,7 +594,7 @@ dsError_t dsHdmiInGetVRRStatus(dsHdmiInPort_t iHdmiPort, dsHdmiInVrrStatus_t* vr
     
     if (result == WPEFramework::Core::ERROR_NONE) {
         vrrStatus->vrrType = static_cast<dsVRRType_t>(status.vrrType);
-        vrrStatus->vrrAmdfreesyncFramerate_Hz = status.vrrFreeSyncFramerateHz;
+        vrrStatus->vrrFreeSyncFramerateHz = status.vrrFreeSyncFramerateHz;
     }
     
     return ConvertThunderError(result);
@@ -637,7 +637,7 @@ dsError_t dsHdmiInRegisterAVLatencyChangeCB(dsAVLatencyChangeCB_t CBFunc)
     return dsERR_OPERATION_NOT_SUPPORTED;
 }
 
-dsError_t dsHdmiInRegisterAviContentTypeChangeCB(dsHdmiInAviContentTypeChangeCB_t CBFunc)
+dsError_t dsHdmiInRegisterAviContentTypeChangeCB(dsAviContentTypeChangeCB_t CBFunc)
 {
     fprintf(stderr, "[dsHdmiIn-com] dsHdmiInRegisterAviContentTypeChangeCB not supported in Thunder mode\n");
     return dsERR_OPERATION_NOT_SUPPORTED;
