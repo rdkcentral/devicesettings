@@ -45,12 +45,13 @@ CFLAGS      +=   -g -fPIC -D_REENTRANT -Wall $(INCLUDE)
 
 .PHONY: $(OUTPUT)
 
-BINARIES    := $(patsubst %.cpp,%,$(wildcard *.cpp))
+# Exclude DSCliLibStandaloneApp.cpp from the automatic build pattern
+BINARIES    := $(patsubst %.cpp,%,$(filter-out DSCliLibStandaloneApp.cpp,$(wildcard *.cpp)))
 UNINSTALL   := $(patsubst %,$(PWD)/install/bin/%, $(BINARIES))
 
 #all: $(BINARIES)  install
-all: $(BINARIES)
-	@echo "Build Finished...."
+all: $(BINARIES) dsapp
+	@echo "Build Finished (including DSApp)...."
 
 #frontPanelTest:
 $(BINARIES):
@@ -69,6 +70,23 @@ uninstall:
 clean:
 	@echo "Cleaning the directory..."
 	@$(RM) $(BINARIES)
+	@$(RM) DSApp
+
+# DSApp - Device Settings Test Application
+.PHONY: dsapp dsapp-clean
+
+dsapp:
+	@if [ -f DSCliLibStandaloneApp.cpp ]; then \
+		echo "Building DSApp..."; \
+		$(CXX) $(CFLAGS) -std=c++11 DSCliLibStandaloneApp.cpp -o ../DSApp -L$(INSTALL)/lib -lds -ldshalcli -lcurl -lpthread $(LDFLAGS); \
+		echo "DSApp built successfully at devicesettings/DSApp"; \
+	else \
+		echo "DSCliLibStandaloneApp.cpp not found, skipping DSApp build"; \
+	fi
+
+dsapp-clean:
+	@echo "Cleaning DSApp..."
+	@$(RM) ../DSApp
 
 
 
