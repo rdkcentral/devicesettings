@@ -52,15 +52,15 @@ INCLUDE      += $(HAL_INCLUDE)
 CFLAGS       +=$(HAL_BUILDFLAGS)
 
 CFLAGS      += $(INCLUDE)
-
+LDFLAGS 	+= -L$(PWD)/../iarmbus/install
 
 all: install
 	@echo "Build Finished...."
 
 library: $(OBJS)
 	@echo "Building $(LIBNAMEFULL) ...."
-	$(CXX) $(OBJS) $(CFLAGS) $(DSHAL_LDFLAGS) -L$(INSTALL)/lib -lIARMBus -ldshalcli -shared -o $(LIBNAMEFULL)
-	$(CXX) $(OBJS) $(CFLAGS) -L$(INSTALL)/lib -lIARMBus -ldshalcli -shared -o $(LIBNAMECLI)
+	$(CXX) $(OBJS) $(CFLAGS) $(DSHAL_LDFLAGS) -L$(INSTALL)/lib -L$(LDFLAGS) -lIARMBus -ldshalcli -shared -o $(LIBNAMEFULL)
+	$(CXX) $(OBJS) $(CFLAGS) -L$(INSTALL)/lib -L$(LDFLAGS) -lIARMBus -ldshalcli -shared -o $(LIBNAMECLI)
 
 %.o: %.cpp
 	@echo "Building $@ ...."
