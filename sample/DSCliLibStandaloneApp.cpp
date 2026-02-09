@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 
     // Initialize libds.so (Device Settings library)
     printf("\nInitializing libds.so (Device Settings library)...\n");
-    libds_Initialize();
+//    libds_Initialize();
     printf("libds.so initialized successfully!\n");
 
     // Set application as initialized
