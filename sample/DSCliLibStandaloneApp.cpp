@@ -15,6 +15,7 @@
 // RDK specific includes - libds.so API
 #include "manager.hpp"                  // Device Settings Manager from libds.so
 #include "host.hpp"                     // Host class from libds.so
+#include "frontPanelConfig.hpp"         // FrontPanelConfig class from libds.so
 #include "frontPanelIndicator.hpp"      // FrontPanelIndicator class from libds.so
 #include "frontPanelTextDisplay.hpp"    // FrontPanelTextDisplay class from libds.so
 // #include "libIBus.h"                  // Uncomment if using IARM Bus
@@ -44,6 +45,7 @@ char* gDebugPrintBuffer = nullptr;
 // RDK specific globals
 static bool gAppInitialized = false;
 static bool gSignalHandlersSet = false;
+static device::List<device::FrontPanelIndicator> fpIndicators;
 
 // Function declarations (libds.so functions)
 void libds_Initialize();
@@ -115,7 +117,7 @@ int main(int argc, char **argv)
 
     // Initialize libds.so (Device Settings library)
     printf("\nInitializing libds.so (Device Settings library)...\n");
-//    libds_Initialize();
+    libds_Initialize();
     printf("libds.so initialized successfully!\n");
 
     // Set application as initialized
@@ -152,7 +154,18 @@ void libds_Initialize()
         
         // Initialize the Device Settings Manager
         // This will internally call dsFPInit() and other init functions from libdshalcli.so
-        device::Manager::Initialize();
+        // device::Manager::Initialize(); As of now FPD only communicate through COM-RPC
+	
+	LOGI("Initializing Front Panel from libds.so...");
+        LOGI("Front panel init");
+        fpIndicators = device::FrontPanelConfig::getInstance().getIndicators();
+
+        for (size_t i = 0; i < fpIndicators.size(); i++) {
+            std::string IndicatorName = fpIndicators.at(i).getName();
+            LOGI("Initializing Front Panel Indicator: %s", IndicatorName.c_str());
+        }
+
+        LOGI("Device Settings FPD initialized successfully");
         
         LOGI("Device Settings Manager initialized successfully");
     } catch (const std::exception& e) {
