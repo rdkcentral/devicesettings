@@ -50,8 +50,8 @@ BINARIES    := $(patsubst %.cpp,%,$(filter-out DSCliLibStandaloneApp.cpp,$(wildc
 UNINSTALL   := $(patsubst %,$(PWD)/install/bin/%, $(BINARIES))
 
 #all: $(BINARIES)  install
-all: $(BINARIES) dsapp
-	@echo "Build Finished (including DSApp)...."
+all: $(BINARIES) dsapp install
+	@echo "Build Finished and Installed (including DSApp) $(INSTALL)/bin/DSApp"
 
 #frontPanelTest:
 $(BINARIES):
@@ -60,6 +60,8 @@ $(BINARIES):
 #	@cp -f $@ $(INSTALL)/bin
 
 install:
+	@echo "INSTALL=$(INSTALL)"
+	@echo "DSApp install path: $(INSTALL)/bin/DSApp"
 	@echo "Copying the binaries to bin install folder..."
 	@cp $(BINARIES) $(INSTALL)/bin
 	@if [ -f ../DSApp ]; then \
