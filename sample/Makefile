@@ -62,6 +62,10 @@ $(BINARIES):
 install:
 	@echo "Copying the binaries to bin install folder..."
 	@cp $(BINARIES) $(INSTALL)/bin
+	@if [ -f ../DSApp ]; then \
+		echo "Installing DSApp to $(INSTALL)/bin/..."; \
+		cp ../DSApp $(INSTALL)/bin/; \
+	fi
 
 uninstall:
 	@echo "Removing bin from install folder..."
