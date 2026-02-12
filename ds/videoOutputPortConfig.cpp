@@ -217,20 +217,17 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	//If isIgnoreEdid is true isDynamicList is zero. Edid logic is skipped.
 	if (0 == isDynamicList )
 	{
-		size_t numResolutions = dsUTL_DIM(kResolutions);
-		for (size_t i = 0; i < numResolutions; i++) 
-		{
-			dsVideoPortResolution_t *resolution = &kResolutions[i];
-			tmpsupportedResolutions.push_back(
-					VideoResolution(
-					i, /* id */
-					std::string(resolution->name),
-					resolution->pixelResolution,
-					resolution->aspectRatio,
-					resolution->stereoScopicMode,
-					resolution->frameRate,
-					resolution->interlaced));
-		}
+        cout << "[DsMgr] Copying _supportedResolutions to tmpsupportedResolutions, size: " << _supportedResolutions.size() << endl;
+        for (size_t idx = 0; idx < _supportedResolutions.size(); idx++) {
+            const VideoResolution& res = _supportedResolutions[idx];
+            cout << "[DsMgr] [" << idx << "] " << res.getName() 
+                 << " pixelRes=" << res.getPixelResolution().getId()
+                 << " aspectRatio=" << res.getAspectRatio().getId()
+                 << " frameRate=" << res.getFrameRate().getId() << endl;
+        }
+        for (const VideoResolution& resolution : _supportedResolutions) {
+            tmpsupportedResolutions.push_back(resolution);
+        }
 	}
 	if (!isIgnoreEdid) {
 	    try {
@@ -259,6 +256,14 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 		_supportedResolutions.clear ();
 		for (VideoResolution resolution : tmpsupportedResolutions){
 			_supportedResolutions.push_back(resolution);
+		}
+        cout << "[DsMgr] _supportedResolutions cache after update, size: " << _supportedResolutions.size() << endl;
+		for (size_t idx = 0; idx < _supportedResolutions.size(); idx++) {
+			const VideoResolution& res = _supportedResolutions[idx];
+			cout << "[DsMgr] [" << idx << "] " << res.getName() 
+			     << " pixelRes=" << res.getPixelResolution().getId()
+			     << " aspectRatio=" << res.getAspectRatio().getId()
+			     << " frameRate=" << res.getFrameRate().getId() << endl;
 		}
 	}
 	return supportedResolutions;
@@ -455,6 +460,67 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
     INT_INFO("Exit function");
 }
 
+void VideoOutputPortConfig::getVideoPortResolutions(int *pResolutionCount, dsVideoPortResolution_t *pResolutions)
+{
+    if (nullptr == pResolutionCount) {
+        INT_ERROR("pResolutionCount is NULL");
+        return;
+    }
+    
+    std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
+    *pResolutionCount = _supportedResolutions.size();
+    
+    if (nullptr != pResolutions) {
+        // Reverse logic: Create pResolutions from _supportedResolutions
+        for (size_t i = 0; i < _supportedResolutions.size(); i++) {
+            const VideoResolution& resolution = _supportedResolutions[i];
+            
+            // Copy resolution name
+            strncpy(pResolutions[i].name, resolution.getName().c_str(), sizeof(pResolutions[i].name) - 1);
+            pResolutions[i].name[sizeof(pResolutions[i].name) - 1] = '\0';
+            
+            // Populate resolution properties
+            pResolutions[i].pixelResolution = (dsVideoResolution_t)resolution.getPixelResolution().getId();
+            pResolutions[i].aspectRatio = (dsVideoAspectRatio_t)resolution.getAspectRatio().getId();
+            pResolutions[i].stereoScopicMode = (dsVideoStereoScopicMode_t)resolution.getStereoscopicMode().getId();
+            pResolutions[i].frameRate = (dsVideoFrameRate_t)resolution.getFrameRate().getId();
+            pResolutions[i].interlaced = resolution.isInterlaced();
+        }
+        INT_INFO("Populated %zu video resolutions to pResolutions", _supportedResolutions.size());
+    }
+}
+
+void VideoOutputPortConfig::getVideoPortVPorts(int *pPortCount, dsVideoPortPortConfig_t *pPorts)
+{
+    if (nullptr == pPortCount) {
+        INT_ERROR("pPortCount is NULL");
+        return;
+    }
+    
+    *pPortCount = _vPorts.size();
+    
+    if (nullptr != pPorts) {
+        // Reverse logic: Create pPorts from _vPorts
+        for (size_t i = 0; i < _vPorts.size(); i++) {
+            VideoOutputPort& port = _vPorts.at(i);
+            
+            // Populate port ID
+            pPorts[i].id.type = (dsVideoPortType_t)port.getType().getId();
+            pPorts[i].id.index = port.getIndex();
+            
+            // Populate connected audio output port
+            AudioOutputPort& audioPort = port.getAudioOutputPort();
+            pPorts[i].connectedAOP.type = (dsAudioPortType_t)audioPort.getType().getId();
+            pPorts[i].connectedAOP.index = audioPort.getIndex();
+            
+            // Get default resolution name - pointer to persistent string in VideoResolution object
+            const VideoResolution& defaultRes = port.getDefaultResolution();
+            pPorts[i].defaultResolution = defaultRes.getName().c_str();
+        }
+        INT_INFO("Populated %zu video ports to pPorts", _vPorts.size());
+    }
+}
+
 void VideoOutputPortConfig::release()
   {
 	try {
@@ -474,6 +540,15 @@ void VideoOutputPortConfig::release()
   }
 }
 
+extern "C" void dsGetVideoPortResolutions(int *pResolutionCount, dsVideoPortResolution_t *pResolutions)
+{
+	device::VideoOutputPortConfig::getInstance().getVideoPortResolutions(pResolutionCount, pResolutions);
+}
+
+extern "C" void dsGetVideoPortVPorts(int *pPortCount, dsVideoPortPortConfig_t *pPorts)
+{
+	device::VideoOutputPortConfig::getInstance().getVideoPortVPorts(pPortCount, pPorts);
+}
 
 /** @} */
 /** @} */

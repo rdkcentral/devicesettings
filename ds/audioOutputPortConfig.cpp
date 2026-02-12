@@ -37,6 +37,7 @@
 #include <dlfcn.h>
 #include "manager.hpp"
 
+
 namespace device {
 
 //To Make the instance as thread-safe, using = default, that can request special methods from the compiler. They are Special because only compiler can create them.
@@ -261,6 +262,25 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
     INT_INFO("Exit function");
 }
 
+void AudioOutputPortConfig::getAudioConfigs(int *pPortSize, dsAudioPortConfig_t *pkAudioPorts)
+{
+    if (nullptr == pPortSize) {
+        INT_ERROR("pPortSize is NULL");
+        return;
+    }
+    
+    *pPortSize = _aPorts.size();
+    
+    if (nullptr != pkAudioPorts) {
+        // Reverse logic: Create pKPorts from _aPorts
+        for (size_t i = 0; i < _aPorts.size(); i++) {
+            pkAudioPorts[i].id.type = (dsAudioPortType_t)_aPorts[i].getType().getId();
+            pkAudioPorts[i].id.index = _aPorts[i].getIndex();
+        }
+        INT_INFO("Populated %zu audio ports to pkAudioPorts", _aPorts.size());
+    }
+}
+
 void AudioOutputPortConfig::release()
   {
 	try {
@@ -277,7 +297,10 @@ void AudioOutputPortConfig::release()
   }
 }
 
-
+extern "C" void dsGetAudioConfigs(int *pPortSize, dsAudioPortConfig_t *pkAudioPorts)
+{
+	device::AudioOutputPortConfig::getInstance().getAudioConfigs(pPortSize, pkAudioPorts);
+}
 
 /** @} */
 /** @} */

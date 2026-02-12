@@ -55,7 +55,6 @@ class  VideoOutputPortConfig {
     std::vector<PixelResolution>	 	_vPixelResolutions;
     std::vector<AspectRatio> 			_vAspectRatios;
     std::vector<StereoScopicMode> 		_vStereoScopieModes;
-    std::vector<VideoResolution> 		_supportedResolutions;
     std::vector<FrameRate> 				_vFrameRates;
     std::vector<VideoOutputPortType>	_vPortTypes;
     std::vector<VideoOutputPort>        _vPorts;
@@ -65,6 +64,7 @@ class  VideoOutputPortConfig {
 	~VideoOutputPortConfig();
 
 public:
+	std::vector<VideoResolution> 		_supportedResolutions;
 	static VideoOutputPortConfig & getInstance();
 
 	const PixelResolution 	&getPixelResolution(int id) const;
@@ -79,6 +79,8 @@ public:
 
 	List<VideoOutputPortType> getSupportedTypes();
 	List<VideoResolution> getSupportedResolutions(bool isIgnoreEdid=false);
+	void getVideoPortResolutions(int *pResolutionCount, dsVideoPortResolution_t *pResolutions);
+	void getVideoPortVPorts(int *pPortCount, dsVideoPortPortConfig_t *pPorts);
 
 	void load(videoPortConfigs_t* dynamicVideoPortConfigs);
 	void release();

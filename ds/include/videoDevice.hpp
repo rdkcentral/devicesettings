@@ -33,6 +33,7 @@
 #include "dsConstant.hpp"
 #include "videoDFC.hpp"
 #include "videoResolution.hpp"
+#include "videoOutputPortConfig.hpp"
 #include "list.hpp"
 #include <string>
 #include <list>
