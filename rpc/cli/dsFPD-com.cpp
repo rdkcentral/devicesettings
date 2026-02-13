@@ -43,6 +43,7 @@
 #include <core/core.h>
 #include <com/com.h>
 #include <plugins/Types.h>
+#include <interfaces/IDeviceSettings.h>
 #include <interfaces/IDeviceSettingsFPD.h>
 
 using namespace WPEFramework;
@@ -52,11 +53,13 @@ static constexpr const TCHAR callSign[] = _T("org.rdk.DeviceSettings");
 
 /**
  * @brief DeviceSettingsFPD class manages Thunder COM-RPC connection for FPD
+ * * Connects to main IDeviceSettings interface and queries for IDeviceSettingsFPD
  */
-class DeviceSettingsFPD : public RPC::SmartInterfaceType<Exchange::IDeviceSettingsFPD> {
+class DeviceSettingsFPD : public RPC::SmartInterfaceType<Exchange::IDeviceSettings> {
 private:
-    using BaseClass = RPC::SmartInterfaceType<Exchange::IDeviceSettingsFPD>;
+    using BaseClass = RPC::SmartInterfaceType<Exchange::IDeviceSettings>;
     
+    Exchange::IDeviceSettings* _deviceSettings;
     Exchange::IDeviceSettingsFPD* _fpdInterface;
     
     static DeviceSettingsFPD* _instance;
@@ -67,6 +70,7 @@ private:
 
     DeviceSettingsFPD()
         : BaseClass()
+        , _deviceSettings(nullptr)
         , _fpdInterface(nullptr)
         , _connected(false)
         , _shutdown(false)
@@ -86,12 +90,20 @@ private:
 
         if (upAndRunning) {
             // Communicator opened && DeviceSettings is Activated
-            if (nullptr == _fpdInterface) {
-                _fpdInterface = BaseClass::Interface();
-                if (_fpdInterface != nullptr) {
-                    printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettings plugin\n");
+            if (nullptr == _deviceSettings) {
+                _deviceSettings = BaseClass::Interface();
+                if (_deviceSettings != nullptr) {
+                    printf("[dsFPD-com] Successfully obtained IDeviceSettings interface\n");
+                    
+                    // Now QueryInterface to get IDeviceSettingsFPD from the aggregated implementation
+                    _fpdInterface = _deviceSettings->QueryInterface<Exchange::IDeviceSettingsFPD>();
+                    if (_fpdInterface != nullptr) {
+                        printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettings FPD interface\n");
+                    } else {
+                        fprintf(stderr, "[dsFPD-com] Failed to get IDeviceSettingsFPD interface - plugin implementation may have failed to load\n");
+                    }
                 } else {
-                    fprintf(stderr, "[dsFPD-com] Failed to get interface - plugin implementation may have failed to load\n");
+                    fprintf(stderr, "[dsFPD-com] Failed to get IDeviceSettings interface - plugin may not be activated\n");
                 }
             }
         } else {
@@ -99,6 +111,10 @@ private:
             if (nullptr != _fpdInterface) {
                 _fpdInterface->Release();
                 _fpdInterface = nullptr;
+            }
+            if (nullptr != _deviceSettings) {
+                _deviceSettings->Release();
+                _deviceSettings = nullptr;
             }
         }
         _apiLock.Unlock();
@@ -156,7 +172,7 @@ public:
             }
         }
 
-        if (nullptr == _fpdInterface) {
+        if (nullptr == _deviceSettings || nullptr == _fpdInterface) {
             status = Core::ERROR_NOT_EXIST;
             printf("[dsFPD-com] DeviceSettings plugin not yet operational\n");
         }
