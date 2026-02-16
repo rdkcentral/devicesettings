@@ -93,12 +93,12 @@ private:
             if (nullptr == _deviceSettings) {
                 _deviceSettings = BaseClass::Interface();
                 if (_deviceSettings != nullptr) {
-                    printf("[dsFPD-com] Successfully obtained IDeviceSettings interface\n");
+                    printf("[dsFPD-com] Successfully obtained IDeviceSettings interface [%p] \n", _deviceSettings);
                     
                     // Now QueryInterface to get IDeviceSettingsFPD from the aggregated implementation
                     _fpdInterface = _deviceSettings->QueryInterface<Exchange::IDeviceSettingsFPD>();
                     if (_fpdInterface != nullptr) {
-                        printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettings FPD interface\n");
+                        printf("[dsFPD-com] Successfully established COM-RPC connection with DeviceSettings FPD interface [%p]\n", _fpdInterface);
                     } else {
                         fprintf(stderr, "[dsFPD-com] Failed to get IDeviceSettingsFPD interface - plugin implementation may have failed to load\n");
                     }
@@ -172,9 +172,12 @@ public:
             }
         }
 
-        if (nullptr == _deviceSettings || nullptr == _fpdInterface) {
+        if (nullptr == _deviceSettings) {
             status = Core::ERROR_NOT_EXIST;
             printf("[dsFPD-com] DeviceSettings plugin not yet operational\n");
+            if (nullptr == _fpdInterface) {
+                fprintf(stderr, "[dsFPD-com] IDeviceSettingsFPD interface not available - plugin may have failed to load\n");
+            }
         }
 
         _apiLock.Unlock();
@@ -207,7 +210,9 @@ public:
     {
         _apiLock.Lock();
         if (nullptr == _instance) {
+            printf("[dsFPD-com] Initializing DeviceSettingsFPD instance\n");
             _instance = new DeviceSettingsFPD();
+            printf("[dsFPD-com] DeviceSettingsFPD instance initialized [%p]\n", _instance);
         }
         _apiLock.Unlock();
     }
@@ -216,6 +221,7 @@ public:
     {
         _apiLock.Lock();
         if (nullptr != _instance) {
+            printf("[dsFPD-com] Terminating DeviceSettingsFPD instance\n");
             delete _instance;
             _instance = nullptr;
         }
@@ -224,6 +230,7 @@ public:
 
     static DeviceSettingsFPD* Instance()
     {
+        printf("[dsFPD-com] Returning DeviceSettingsFPD instance [%p]\n", _instance);
         return _instance;
     }
 
@@ -443,6 +450,7 @@ dsError_t dsFPInit(void)
     if (!instance) {
         DeviceSettingsFPD::Init();
         instance = DeviceSettingsFPD::Instance();
+        printf("[dsFPD-com] DeviceSettingsFPD instance initialized [%p]\n", instance);
     }
     
     if (!instance) {
@@ -450,12 +458,12 @@ dsError_t dsFPInit(void)
         return dsERR_GENERAL;
     }
     
-    // Wait for plugin to become operational
+/*    // Wait for plugin to become operational
     if (!instance->WaitForOperational(5000)) {
         fprintf(stderr, "[dsFPD-com] DeviceSettings plugin not operational after 5 seconds\n");
         return dsERR_GENERAL;
     }
-    
+*/    
     // Thunder interface doesn't have explicit Init method - connection is sufficient
     return dsERR_NONE;
 }
