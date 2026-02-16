@@ -278,10 +278,12 @@ public:
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
+        fprintf(stdout, "[dsFPD-com] Getting FPD brightness for indicator %d\n", indicator);
         if (_fpdInterface) {
             result = _fpdInterface->GetFPDBrightness(indicator, brightness);
         }
         _apiLock.Unlock();
+        fprintf(stdout, "[dsFPD-com] GetFPDBrightness result for indicator %d: %d\n", indicator, result);
         return result;
     }
 
@@ -290,10 +292,12 @@ public:
     {
         Core::hresult result = Core::ERROR_UNAVAILABLE;
         _apiLock.Lock();
+        fprintf(stdout, "[dsFPD-com] Setting FPD brightness for indicator %d to %d\n", indicator, brightness);
         if (_fpdInterface) {
             result = _fpdInterface->SetFPDBrightness(indicator, brightness, persist);
         }
         _apiLock.Unlock();
+        fprintf(stdout, "[dsFPD-com] SetFPDBrightness result for indicator %d: %d\n", indicator, result);
         return result;
     }
 
@@ -541,17 +545,24 @@ dsError_t dsGetFPBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t *pBri
         fprintf(stderr, "[dsFPD-com] Invalid parameter: pBrightness is NULL\n");
         return dsERR_INVALID_PARAM;
     }
+
+    fprintf(stdout, "[dsFPD-com] dsGetFPBrightness called for indicator %d\n", eIndicator);
     
     DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
     if (!instance || !instance->IsOperational()) {
+        fprintf(stderr, "[dsFPD-com] DeviceSettingsFPD instance not operational\n");
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
+
+    fprintf(stdout, "[dsFPD-com] Getting FPD brightness for indicator %d\n", indicator);
     
     uint32_t brightness = 0;
+    fprintf(stdout, "[dsFPD-com] Calling GetFPDBrightness for indicator %d\n", indicator);
     uint32_t result = instance->GetFPDBrightness(indicator, brightness);
+    fprintf(stdout, "[dsFPD-com] GetFPDBrightness result for indicator %d: %d\n", indicator, result);
     
     if (result == Core::ERROR_NONE) {
         *pBrightness = static_cast<dsFPDBrightness_t>(brightness);
@@ -577,16 +588,19 @@ dsError_t dsSetFPDBrightness(dsFPDIndicator_t eIndicator, dsFPDBrightness_t eBri
         fprintf(stderr, "[dsFPD-com] Invalid parameter\n");
         return dsERR_INVALID_PARAM;
     }
-    
+    fprintf(stdout, "[dsFPD-com] Setting FPD brightness for indicator %d\n", eIndicator);
     DeviceSettingsFPD* instance = DeviceSettingsFPD::Instance();
     if (!instance || !instance->IsOperational()) {
+        fprintf(stderr, "[dsFPD-com] DeviceSettingsFPD instance not operational\n");
         return dsERR_GENERAL;
     }
     
     Exchange::IDeviceSettingsFPD::FPDIndicator indicator = 
         static_cast<Exchange::IDeviceSettingsFPD::FPDIndicator>(eIndicator);
     
+    fprintf(stdout, "[dsFPD-com] Setting FPD brightness for indicator %d to %d\n", indicator, eBrightness);
     uint32_t result = instance->SetFPDBrightness(indicator, static_cast<uint32_t>(eBrightness), toPersist);
+    fprintf(stdout, "[dsFPD-com] SetFPDBrightness result for indicator %d: %d\n", indicator, result);
     return ConvertThunderError(result);
 }
 
