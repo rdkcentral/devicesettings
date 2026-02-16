@@ -49,12 +49,10 @@
 #include "dsMgr.h"
 #include "hostPersistence.hpp"
 #include "dsserverlogger.h"
-#include "dsAudioSettings.h"
+//#include "dsAudioSettings.h"
+#include "dsAudioConfig.h"
 
 #include "safec_lib.h"
-
-// Forward declaration for C++ function
-extern void dsGetAudioConfigs(int *pPortSize, dsAudioPortConfig_t *pkAudioPorts);
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
@@ -3783,10 +3781,10 @@ static dsAudioPortType_t _GetAudioPortType(intptr_t handle)
     int numPorts = 0;
     int i;
     intptr_t halhandle = 0;
-    dsAudioPortConfig_t kAudioPorts[16] = {};  // Allocate enough space for audio ports
+    const dsAudioPortConfig_t *kAudioPorts = NULL;
 
     // Get audio port configurations from AudioOutputPortConfig
-    dsGetAudioConfigs(&numPorts, kAudioPorts);
+    dsGetAudioPortConfigs(&numPorts, &kAudioPorts);
     
     for(i=0; i< numPorts; i++)
     {

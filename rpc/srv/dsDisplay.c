@@ -46,16 +46,14 @@
 #include "dsMgr.h"
 #include "dsserverlogger.h"
 #include "dsVideoPort.h"
-#include "dsVideoPortSettings.h"
-#include "dsVideoResolutionSettings.h"
+//#include "dsVideoPortSettings.h"
+//#include "dsVideoResolutionSettings.h"
+#include "dsVideoPortConfig.h"
+//#include "dsConfigs.h"
 #include "dsInternal.h"
 
 #include "safec_lib.h"
 #include <string>
-
-// Forward declaration for C++ function
-extern void dsGetVideoPortResolutions(int *pResolutionCount, dsVideoPortResolution_t *pResolutions);
-extern void getVideoPortVPorts(int *pPortSize, dsVideoPortPortConfig_t *pkVideoPorts);
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
@@ -582,7 +580,7 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
 {
     errno_t rc = -1;
     dsVideoPortResolution_t *edidResn = NULL;
-    dsVideoPortResolution_t *presolution = NULL, kVidoeResolutionsSettings[16] = { } ;
+    dsVideoPortResolution_t *presolution = NULL, *kVidoeResolutionsSettings = NULL;
     dsDisplayEDID_t *edidData = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
     dsVideoPortType_t _VPortType = _GetDisplayPortType(handle);
     if (edid == NULL) {
@@ -597,7 +595,7 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
         //size_t iCount = dsUTL_DIM(kResolutions);
         int iCount = 0;
         //Get details from libds
-        dsGetVideoPortResolutions(&iCount, kVidoeResolutionsSettings);
+        dsGetVideoPortResolutions(&iCount, &kVidoeResolutionsSettings);
         
         // Print kVidoeResolutionsSettings array
         INT_INFO("[DsMgr] ========== Dumping kVidoeResolutionsSettings Array ==========\r\n");
@@ -664,16 +662,16 @@ static dsVideoPortType_t _GetDisplayPortType(intptr_t handle)
 {
     int numPorts,i;
     intptr_t halhandle = 0;
-    dsVideoPortPortConfig_t kVideoPortPorts[16] = {};
+    const dsVideoPortPortConfig_t *kVideoPortPorts = NULL;
     
     //numPorts = dsUTL_DIM(kSupportedPortTypes);
-    getVideoPortVPorts(&numPorts, kVideoPortPorts);
+    dsGetVideoPortPortConfigs(&numPorts, &kVideoPortPorts);
     
     // Print kVideoPortPorts array
     INT_INFO("[DsMgr] ========== Dumping kVideoPortPorts Array ==========\r\n");
     INT_INFO("[DsMgr] Total ports retrieved: %d\r\n", numPorts);
     for (int k = 0; k < numPorts; k++) {
-        dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
+        const dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
         INT_INFO("[DsMgr] [%d] type=%d, index=%d, connectedAOP_type=%d, connectedAOP_index=%d, defaultResolution=%s\r\n",
                  k, port->id.type, port->id.index, 
                  port->connectedAOP.type, port->connectedAOP.index, 

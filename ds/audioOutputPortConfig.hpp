@@ -73,7 +73,6 @@ public:
 	AudioOutputPort 			&getPort(const std::string &name);
 	List<AudioOutputPort> 		 getPorts();
 	List<AudioOutputPortType> 	 getSupportedTypes();
-	void getAudioConfigs(int *pPortSize, dsAudioPortConfig_t *pkAudioPorts);
 
 	void load(audioConfigs_t* dynamicAudioConfigs);
 	void release();

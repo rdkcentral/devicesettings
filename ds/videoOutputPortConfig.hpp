@@ -79,8 +79,6 @@ public:
 
 	List<VideoOutputPortType> getSupportedTypes();
 	List<VideoResolution> getSupportedResolutions(bool isIgnoreEdid=false);
-	void getVideoPortResolutions(int *pResolutionCount, dsVideoPortResolution_t *pResolutions);
-	void getVideoPortVPorts(int *pPortCount, dsVideoPortPortConfig_t *pPorts);
 
 	void load(videoPortConfigs_t* dynamicVideoPortConfigs);
 	void release();

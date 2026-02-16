@@ -41,6 +41,7 @@
 #include "hostPersistence.hpp"
 
 #include "dsInternal.h"
+#include "dsConfigs.h"
 
 profile_t profileType = PROFILE_INVALID;
 
@@ -124,6 +125,9 @@ IARM_Result_t dsMgr_init()
 	dsHostMgr_init();
 	dsHdmiInMgr_init();
 	dsCompositeInMgr_init();
+	
+	INT_INFO("[%s]: Loading device configurations\r\n", __FUNCTION__);
+	dsLoadConfigs();
 	return ret;
 }
 

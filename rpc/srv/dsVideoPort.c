@@ -51,7 +51,9 @@
 #include "hostPersistence.hpp"
 #include "dsserverlogger.h"
 #include "dsTypes.h"
-#include "dsVideoPortSettings.h"
+//#include "dsVideoPortSettings.h"
+#include "dsVideoPortConfig.h"
+//#include "dsConfigs.h"
 #include "dsInternal.h"
 #include "safec_lib.h"
 #include <vector>
@@ -78,10 +80,6 @@ static dsDisplayColorDepth_t hdmiColorDept = DEFAULT_COLOR_DEPTH;
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
-
-// Forward declaration for C++ functions
-extern void dsGetVideoPortResolutions(int *pResolutionCount, dsVideoPortResolution_t *pResolutions);
-extern void getVideoPortVPorts(int *pPortSize, dsVideoPortPortConfig_t *pkVideoPorts);
 
 IARM_Result_t _dsVideoPortInit(void *arg);
 IARM_Result_t _dsGetVideoPort(void *arg);
@@ -1705,17 +1703,17 @@ IARM_Result_t _dsSupportedTvResolutions(void *arg)
 
 static dsVideoPortType_t _GetVideoPortType(intptr_t handle)
 {
-    int numPorts,i;
+    int numPorts = 0, i;
     intptr_t halhandle = 0;
-    dsVideoPortPortConfig_t kVideoPortPorts[16] = {};
+    const dsVideoPortPortConfig_t *kVideoPortPorts = NULL;
 
-    getVideoPortVPorts(&numPorts, kVideoPortPorts);
+    dsGetVideoPortPortConfigs(&numPorts, &kVideoPortPorts);
     
     // Print kVideoPortPorts array
     INT_INFO("[DsMgr] ========== Dumping kVideoPortPorts Array in _GetVideoPortType ==========\r\n");
     INT_INFO("[DsMgr] Total ports retrieved: %d\r\n", numPorts);
     for (int k = 0; k < numPorts; k++) {
-        dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
+        const dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
         INT_INFO("[DsMgr] [%d] type=%d, index=%d, connectedAOP_type=%d, connectedAOP_index=%d, defaultResolution=%s\r\n",
                  k, port->id.type, port->id.index, 
                  port->connectedAOP.type, port->connectedAOP.index, 
@@ -1912,7 +1910,16 @@ static  std::string getCompatibleResolution(dsVideoPortResolution_t *SrcResn)
          case dsVIDEO_PIXELRES_4096x2160:
          case dsVIDEO_PIXELRES_MAX: 
          default:
-       		  return resolution.assign(kResolutions[kDefaultResIndex].name);
+       		  {
+        	      int numResolutions = 0;
+        	      dsVideoPortResolution_t* resolutions = NULL;
+        	      int defaultIndex = 0;
+        	      dsGetVideoPortResolutions(&numResolutions, &resolutions);
+        	      dsGetDefaultResolutionIndex(&defaultIndex);
+        	      if (resolutions && defaultIndex >= 0 && defaultIndex < numResolutions) {
+        	          return resolution.assign(resolutions[defaultIndex].name);
+        	      }
+       		  }
          break;
       }
    }
@@ -1934,9 +1941,9 @@ static bool  IsCompatibleResolution(dsVideoResolution_t pixelResolution1,dsVideo
 
 static dsVideoResolution_t getPixelResolution(std::string &resolution )
 {
-	dsVideoPortResolution_t kVidoeResolutionsSettings[16] = {};
+	dsVideoPortResolution_t *kVidoeResolutionsSettings = NULL;
 	int iCount = 0;
-	dsGetVideoPortResolutions(&iCount, kVidoeResolutionsSettings);
+	dsGetVideoPortResolutions(&iCount, &kVidoeResolutionsSettings);
 	
 	// Print kVidoeResolutionsSettings array
 	INT_INFO("[DsMgr] ========== Dumping kVidoeResolutionsSettings Array in getPixelResolution ==========\r\n");
@@ -2288,14 +2295,17 @@ static dsError_t _dsVideoFormatUpdateRegisterCB (dsVideoFormatUpdateCB_t cbFun) 
 bool isComponentPortPresent()
 {
     bool componentPortPresent = false;
-    int numPorts,i;
-
-    numPorts = dsUTL_DIM(kSupportedPortTypes);
-    for(i=0; i< numPorts; i++)
-    {
-        if (kSupportedPortTypes[i] == dsVIDEOPORT_TYPE_COMPONENT)
+    int numTypeConfigs = 0;
+    const dsVideoPortTypeConfig_t* typeConfigs = NULL;
+    
+    dsGetVideoPortTypeConfigs(&numTypeConfigs, &typeConfigs);
+    if (typeConfigs) {
+        for(int i=0; i< numTypeConfigs; i++)
         {
-            componentPortPresent = true;;
+            if (typeConfigs[i].typeId == dsVIDEOPORT_TYPE_COMPONENT)
+            {
+                componentPortPresent = true;
+            }
         }
     }
     INT_INFO(" componentPortPresent :%d\n",componentPortPresent);
@@ -2419,17 +2429,17 @@ void _dsSyncHdmiStatus(const std::string& key, int val) {
 
 intptr_t dsGetDefaultPortHandle()
 {
-    int numPorts,i;
+    int numPorts = 0, i;
     intptr_t halhandle = 0;
-    dsVideoPortPortConfig_t kVideoPortPorts[16] = {};
+    const dsVideoPortPortConfig_t *kVideoPortPorts = NULL;
     
-    getVideoPortVPorts(&numPorts, kVideoPortPorts);
+    dsGetVideoPortPortConfigs(&numPorts, &kVideoPortPorts);
     
     // Print kVideoPortPorts array
     INT_INFO("[DsMgr] ========== Dumping kVideoPortPorts Array in dsGetDefaultPortHandle ==========\r\n");
     INT_INFO("[DsMgr] Total ports retrieved: %d\r\n", numPorts);
     for (int k = 0; k < numPorts; k++) {
-        dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
+        const dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
         INT_INFO("[DsMgr] [%d] type=%d, index=%d, connectedAOP_type=%d, connectedAOP_index=%d, defaultResolution=%s\r\n",
                  k, port->id.type, port->id.index, 
                  port->connectedAOP.type, port->connectedAOP.index, 
