@@ -33,9 +33,9 @@
 
 typedef struct videoPortConfigs
 {
-	const dsVideoPortTypeConfig_t  *pKVideoPortConfigs;
+	dsVideoPortTypeConfig_t  *pKVideoPortConfigs;
 	int *pKVideoPortConfigs_size;
-	const dsVideoPortPortConfig_t  *pKVideoPortPorts;
+	dsVideoPortPortConfig_t  *pKVideoPortPorts;
 	int *pKVideoPortPorts_size;
 	dsVideoPortResolution_t *pKVideoPortResolutionsSettings;
 	int *pKResolutionsSettings_size;
@@ -43,17 +43,10 @@ typedef struct videoPortConfigs
 }videoPortConfigs_t;
 
 static videoPortConfigs_t videoPortConfiguration = {0};
-static dsVideoPortTypeConfig_t* allocatedVideoPortConfigs = NULL;
-static dsVideoPortPortConfig_t* allocatedVideoPortPorts = NULL;
-static dsVideoPortResolution_t* allocatedVideoPortResolutions = NULL;
-static int g_videoPortConfigSize = -1;
-static int g_videoPortPortSize = -1;
-static int g_videoPortResolutionSize = -1;
-static int g_defaultResIndex = -1;
 
-void dumpconfig(videoPortConfigs_t *config)
+void videoPortDumpconfig(videoPortConfigs_t *config)
 {
-    if (nullptr == config) {
+    if (NULL == config) {
         INT_ERROR("Video config is NULL");
         return;
     }
@@ -127,66 +120,68 @@ void dumpconfig(videoPortConfigs_t *config)
     INT_INFO("Exit function");
 }
 
-static int allocateAndCopyVideoPortConfigs(const dsVideoPortTypeConfig_t* source, int size, const char* configType)
+static int allocateAndCopyVideoPortConfigs(const dsVideoPortTypeConfig_t* source, int numElements, bool isDynamic)
 {
-    if (size <= 0) {
-        INT_ERROR("Invalid %s video port config size: %d\n", configType, size);
+    const char* configType = isDynamic ? "dynamic" : "static";
+    
+    if (numElements <= 0) {
+        INT_ERROR("Invalid %s video port config numElements: %d\n", configType, numElements);
         return -1;
     }
     
-    allocatedVideoPortConfigs = (dsVideoPortTypeConfig_t*)malloc(size * sizeof(dsVideoPortTypeConfig_t));
-    if (allocatedVideoPortConfigs == NULL) {
+    videoPortConfiguration.pKVideoPortConfigs = (dsVideoPortTypeConfig_t*)malloc(numElements * sizeof(dsVideoPortTypeConfig_t));
+    if (videoPortConfiguration.pKVideoPortConfigs == NULL) {
         INT_ERROR("Failed to allocate memory for %s video port configs\n", configType);
         return -1;
     }
     
-    memcpy(allocatedVideoPortConfigs, source, size * sizeof(dsVideoPortTypeConfig_t));
-    videoPortConfiguration.pKVideoPortConfigs = allocatedVideoPortConfigs;
-    INT_INFO("Allocated and copied %d video port configs (%s)", size, configType);
-    return size;
+    memcpy(videoPortConfiguration.pKVideoPortConfigs, source, numElements * sizeof(dsVideoPortTypeConfig_t));
+    return numElements;
 }
 
-static int allocateAndCopyVideoPortPorts(const dsVideoPortPortConfig_t* source, int size, const char* configType)
+static int allocateAndCopyVideoPortPorts(const dsVideoPortPortConfig_t* source, int numElements, bool isDynamic)
 {
-    if (size <= 0) {
-        INT_ERROR("Invalid %s video port port size: %d\n", configType, size);
+    const char* configType = isDynamic ? "dynamic" : "static";
+    
+    if (numElements <= 0) {
+        INT_ERROR("Invalid %s video port port numElements: %d\n", configType, numElements);
         return -1;
     }
     
-    allocatedVideoPortPorts = (dsVideoPortPortConfig_t*)malloc(size * sizeof(dsVideoPortPortConfig_t));
-    if (allocatedVideoPortPorts == NULL) {
+    videoPortConfiguration.pKVideoPortPorts = (dsVideoPortPortConfig_t*)malloc(numElements * sizeof(dsVideoPortPortConfig_t));
+    if (videoPortConfiguration.pKVideoPortPorts == NULL) {
         INT_ERROR("Failed to allocate memory for %s video port ports\n", configType);
         return -1;
     }
     
-    memcpy(allocatedVideoPortPorts, source, size * sizeof(dsVideoPortPortConfig_t));
-    videoPortConfiguration.pKVideoPortPorts = allocatedVideoPortPorts;
-    INT_INFO("Allocated and copied %d video port ports (%s)", size, configType);
-    return size;
+    memcpy(videoPortConfiguration.pKVideoPortPorts, source, numElements * sizeof(dsVideoPortPortConfig_t));
+    INT_INFO("Allocated and copied %d video port ports (%s)", numElements, configType);
+    return numElements;
 }
 
-static int allocateAndCopyVideoPortResolutions(const dsVideoPortResolution_t* source, int size, const char* configType)
+static int allocateAndCopyVideoPortResolutions(const dsVideoPortResolution_t* source, int numElements, bool isDynamic)
 {
-    if (size <= 0) {
-        INT_ERROR("Invalid %s video port resolution size: %d\n", configType, size);
+    const char* configType = isDynamic ? "dynamic" : "static";
+    
+    if (numElements <= 0) {
+        INT_ERROR("Invalid %s video port resolution numElements: %d\n", configType, numElements);
         return -1;
     }
     
-    allocatedVideoPortResolutions = (dsVideoPortResolution_t*)malloc(size * sizeof(dsVideoPortResolution_t));
-    if (allocatedVideoPortResolutions == NULL) {
+    videoPortConfiguration.pKVideoPortResolutionsSettings = (dsVideoPortResolution_t*)malloc(numElements * sizeof(dsVideoPortResolution_t));
+    if (videoPortConfiguration.pKVideoPortResolutionsSettings == NULL) {
         INT_ERROR("Failed to allocate memory for %s video port resolutions\n", configType);
         return -1;
     }
     
-    memcpy(allocatedVideoPortResolutions, source, size * sizeof(dsVideoPortResolution_t));
-    videoPortConfiguration.pKVideoPortResolutionsSettings = allocatedVideoPortResolutions;
-    INT_INFO("Allocated and copied %d video port resolutions (%s)", size, configType);
-    return size;
+    memcpy(videoPortConfiguration.pKVideoPortResolutionsSettings, source, numElements * sizeof(dsVideoPortResolution_t));
+    INT_INFO("Allocated and copied %d video port resolutions (%s)", numElements, configType);
+    return numElements;
 }
 
 void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs)
 {
-    int configSize = -1, portSize = -1, resolutionSize = -1;
+    int configSize = -1, portSize = -1, resolutionSize = -1, ret = -1;
 
     INT_INFO("Using '%s' config", dynamicVideoPortConfigs ? "dynamic" : "static");
     
@@ -194,21 +189,31 @@ void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfi
     {
         // Reading Video Port Type configs
         configSize = (dynamicVideoPortConfigs->pKVideoPortConfigs_size) ? *(dynamicVideoPortConfigs->pKVideoPortConfigs_size) : -1;
-        configSize = allocateAndCopyVideoPortConfigs(dynamicVideoPortConfigs->pKVideoPortConfigs, configSize, "dynamic");
-        
+        ret = allocateAndCopyVideoPortConfigs(dynamicVideoPortConfigs->pKVideoPortConfigs, configSize, true);
+        if(ret == -1)
+        {
+            INT_ERROR("failed to create dynamic memory\n");
+        }
+
         // Reading Video Port Port configs
         portSize = (dynamicVideoPortConfigs->pKVideoPortPorts_size) ? *(dynamicVideoPortConfigs->pKVideoPortPorts_size) : -1;
-        portSize = allocateAndCopyVideoPortPorts(dynamicVideoPortConfigs->pKVideoPortPorts, portSize, "dynamic");
-        
+        ret = allocateAndCopyVideoPortPorts(dynamicVideoPortConfigs->pKVideoPortPorts, portSize, true);
+        if(ret == -1)
+        {
+            INT_ERROR("failed to create dynamic memory\n");
+        }
+
         // Reading Video Port Resolutions
         resolutionSize = (dynamicVideoPortConfigs->pKResolutionsSettings_size) ? *(dynamicVideoPortConfigs->pKResolutionsSettings_size) : -1;
-        resolutionSize = allocateAndCopyVideoPortResolutions(dynamicVideoPortConfigs->pKVideoPortResolutionsSettings, resolutionSize, "dynamic");
-        
+        ret = allocateAndCopyVideoPortResolutions(dynamicVideoPortConfigs->pKVideoPortResolutionsSettings, resolutionSize, true);
+        if(ret == -1)
+        {
+            INT_ERROR("failed to create dynamic memory\n");
+        }
         // Reading Default Resolution Index
         if (dynamicVideoPortConfigs->pKDefaultResIndex != NULL) {
-            g_defaultResIndex = *(dynamicVideoPortConfigs->pKDefaultResIndex);
-            videoPortConfiguration.pKDefaultResIndex = &g_defaultResIndex;
-            INT_INFO("Read default resolution index: %d (dynamic)", g_defaultResIndex);
+            *(videoPortConfiguration.pKDefaultResIndex) = *(dynamicVideoPortConfigs->pKDefaultResIndex);
+            INT_INFO("Read default resolution index: %d (dynamic)", *(videoPortConfiguration.pKDefaultResIndex));
         } else {
             INT_INFO("Default resolution index not available in dynamic config");
         }
@@ -216,41 +221,52 @@ void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfi
     else {
         // Using static configuration
         configSize = dsUTL_DIM(kConfigs);
-        configSize = allocateAndCopyVideoPortConfigs(kConfigs, configSize, "static");
-        
+        ret = allocateAndCopyVideoPortConfigs(kConfigs, configSize, false);
+        if(ret == -1)
+        {
+            INT_ERROR("failed to create dynamic memory\n");
+        }
+
         portSize = dsUTL_DIM(kPorts);
-        portSize = allocateAndCopyVideoPortPorts(kPorts, portSize, "static");
-        
+        ret = allocateAndCopyVideoPortPorts(kPorts, portSize, false);
+        if(ret == -1)
+        {
+            INT_ERROR("failed to create dynamic memory\n");
+        }
+
         resolutionSize = dsUTL_DIM(kResolutions);
-        resolutionSize = allocateAndCopyVideoPortResolutions(kResolutions, resolutionSize, "static");
-        
+        ret = allocateAndCopyVideoPortResolutions(kResolutions, resolutionSize, false);
+        if(ret == -1)
+        {
+            INT_ERROR("failed to create dynamic memory\n");
+        }
+
         // Using static default resolution index
-        g_defaultResIndex = kDefaultResIndex;
-        videoPortConfiguration.pKDefaultResIndex = &g_defaultResIndex;
-        INT_INFO("Using static default resolution index: %d", g_defaultResIndex);
+        *(videoPortConfiguration.pKDefaultResIndex) = kDefaultResIndex;
+        INT_INFO("Using static default resolution index: %d", *(videoPortConfiguration.pKDefaultResIndex));
     }
 
     // Store sizes for getter functions
-    g_videoPortConfigSize = configSize;
-    g_videoPortPortSize = portSize;
-    g_videoPortResolutionSize = resolutionSize;
+    *(videoPortConfiguration.pKVideoPortConfigs_size) = configSize;
+    *(videoPortConfiguration.pKVideoPortPorts_size) = portSize;
+    *(videoPortConfiguration.pKResolutionsSettings_size) = resolutionSize;
 
     INT_INFO("VideoPort Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d] Resolutions[%p] ResolutionSize[%d] DefaultResIndex[%d]",
             videoPortConfiguration.pKVideoPortConfigs,
-            configSize,
+            *(videoPortConfiguration.pKVideoPortConfigs_size),
             videoPortConfiguration.pKVideoPortPorts,
-            portSize,
+            *(videoPortConfiguration.pKVideoPortPorts_size),
             videoPortConfiguration.pKVideoPortResolutionsSettings,
-            resolutionSize,
-            g_defaultResIndex);
-    dumpconfig(&videoPortConfiguration);
+            *(videoPortConfiguration.pKResolutionsSettings_size),
+            *(videoPortConfiguration.pKDefaultResIndex));
+    videoPortDumpconfig(&videoPortConfiguration);
 }
 
 // Getter functions for use across srv code
 void dsGetVideoPortTypeConfigs(int* outConfigSize, const dsVideoPortTypeConfig_t** outConfigs)
 {
     if (outConfigSize != NULL) {
-        *outConfigSize = g_videoPortConfigSize;
+        *outConfigSize = *(videoPortConfiguration.pKVideoPortConfigs_size);
     }
     if (outConfigs != NULL) {
         *outConfigs = videoPortConfiguration.pKVideoPortConfigs;
@@ -260,7 +276,7 @@ void dsGetVideoPortTypeConfigs(int* outConfigSize, const dsVideoPortTypeConfig_t
 void dsGetVideoPortPortConfigs(int* outPortSize, const dsVideoPortPortConfig_t** outPorts)
 {
     if (outPortSize != NULL) {
-        *outPortSize = g_videoPortPortSize;
+        *outPortSize = *(videoPortConfiguration.pKVideoPortPorts_size);
     }
     if (outPorts != NULL) {
         *outPorts = videoPortConfiguration.pKVideoPortPorts;
@@ -270,16 +286,18 @@ void dsGetVideoPortPortConfigs(int* outPortSize, const dsVideoPortPortConfig_t**
 void dsGetVideoPortResolutions(int* outResolutionSize, dsVideoPortResolution_t** outResolutions)
 {
     if (outResolutionSize != NULL) {
-        *outResolutionSize = g_videoPortResolutionSize;
+        *outResolutionSize = *(videoPortConfiguration.pKResolutionsSettings_size);
     }
     if (outResolutions != NULL) {
         *outResolutions = videoPortConfiguration.pKVideoPortResolutionsSettings;
     }
 }
 
-int dsGetDefaultResolutionIndex(void)
+void dsGetDefaultResolutionIndex(int* outDefaultIndex)
 {
-    return g_defaultResIndex;
+    if (outDefaultIndex != NULL) {
+        *outDefaultIndex = *(videoPortConfiguration.pKDefaultResIndex);
+    }
 }
 
 /** @} */
