@@ -283,7 +283,7 @@ public:
             result = _fpdInterface->GetFPDBrightness(indicator, brightness);
         }
         _apiLock.Unlock();
-        fprintf(stdout, "[dsFPD-com] GetFPDBrightness result for indicator %d: %d\n", indicator, result);
+        fprintf(stdout, "[dsFPD-com] GetFPDBrightness result for indicator %d: 0x%08X (error code: %u)\n", indicator, static_cast<uint32_t>(result), static_cast<uint32_t>(result));
         return result;
     }
 
@@ -297,7 +297,7 @@ public:
             result = _fpdInterface->SetFPDBrightness(indicator, brightness, persist);
         }
         _apiLock.Unlock();
-        fprintf(stdout, "[dsFPD-com] SetFPDBrightness result for indicator %d: %d\n", indicator, result);
+        fprintf(stdout, "[dsFPD-com] SetFPDBrightness result for indicator %d: 0x%08X (error code: %u)\n", indicator, static_cast<uint32_t>(result), static_cast<uint32_t>(result));
         return result;
     }
 
