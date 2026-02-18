@@ -31,6 +31,10 @@
 #include "dsTypes.h"
 #include "dsVideoPortSettings.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct videoPortConfigs
 {
 	dsVideoPortTypeConfig_t  *pKVideoPortConfigs;
@@ -299,6 +303,10 @@ void dsGetDefaultResolutionIndex(int* outDefaultIndex)
         *outDefaultIndex = *(videoPortConfiguration.pKDefaultResIndex);
     }
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} */
 /** @} */

@@ -31,6 +31,10 @@
 #include "dsTypes.h"
 #include "dsAudioSettings.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct audioConfigs
 {
 	dsAudioTypeConfig_t  *pKAudioConfigs;
@@ -203,6 +207,10 @@ void dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPort
         *outPorts = audioConfiguration.pKAudioPorts;
     }
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} */
 /** @} */

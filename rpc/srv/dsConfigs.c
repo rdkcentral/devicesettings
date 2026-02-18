@@ -33,6 +33,10 @@
 #include "dsVideoPortConfig.h"
 #include "dsVideoDeviceConfig.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef RDK_DSHAL_NAME
 #define RDK_DSHAL_NAME "libdshal.so"
 #endif
@@ -163,6 +167,10 @@ void dsLoadConfigs(void)
                           DEVICE_CAPABILITY_VIDEO_DEVICE);
     INT_INFO("Exit function");
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} */
 /** @} */

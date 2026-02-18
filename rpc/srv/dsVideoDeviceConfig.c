@@ -31,6 +31,10 @@
 #include "dsTypes.h"
 #include "dsVideoDeviceSettings.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct videoDeviceConfig
 {
 	dsVideoConfig_t *pKVideoDeviceConfigs;
@@ -138,6 +142,10 @@ void dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs)
         *outConfigs = videoDeviceConfiguration.pKVideoDeviceConfigs;
     }
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} */
 /** @} */
