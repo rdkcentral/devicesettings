@@ -34,7 +34,7 @@
 #include "dsFPD.h"
 #include "dsError.h"
 #include "dsclientlogger.h"
-#include "DeviceSettingsController.h"
+#include "dsController-com.h"
 
 using namespace WPEFramework;
 

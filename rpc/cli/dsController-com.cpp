@@ -24,7 +24,7 @@
 
 #ifndef USE_IARM
 
-#include "DeviceSettingsController.h"
+#include "dsController-com.h"
 #include <stdio.h>
 #include <chrono>
 #include <thread>
