@@ -51,6 +51,8 @@ namespace {
                         200,
                         239.79,
                         240,
+						59,
+						23,
 	};
 	const char * _names[] = {
 			"UnKnown", //unkown
@@ -68,6 +70,8 @@ namespace {
                         "200",
                         "239.79",
                         "240",
+						"59",
+						"23",
 	};
 
 	inline bool isValid(int id) {
