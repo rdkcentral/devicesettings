@@ -45,7 +45,7 @@
 #include <unistd.h>
 #include <functional>
 
-#ifndef USE_IARM
+#ifdef USE_THUNDER_PLUGIN
 #include "dsController-com.h"
 #endif
 
