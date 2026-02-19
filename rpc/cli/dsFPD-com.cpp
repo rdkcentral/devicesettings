@@ -24,6 +24,8 @@
 * @{
 **/
 
+#ifdef USE_THUNDER_PLUGIN
+
 #include <stdio.h>
 #include <string.h>
 #include <chrono>
@@ -611,6 +613,8 @@ dsError_t dsSetFPDMode(dsFPDMode_t eMode)
 }
 
 } // extern "C"
+
+#endif // USE_THUNDER_PLUGIN
 
 /** @} */
 /** @} */
