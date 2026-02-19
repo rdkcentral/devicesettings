@@ -114,7 +114,9 @@ IARM_Result_t dsMgr_init()
     profileType = searchRdkProfile();
     INT_INFO("[%s]: profileType=%d\r\n", __FUNCTION__, profileType);
 
-	device::HostPersistence::getInstance().load();
+	INT_INFO("[%s]: Loading device configurations\r\n", __FUNCTION__);
+	dsLoadConfigs();
+    device::HostPersistence::getInstance().load();
 	dsServer_Rdklogger_Init();
 	dsHostInit();
 	dsDisplayMgr_init();
@@ -125,9 +127,7 @@ IARM_Result_t dsMgr_init()
 	dsHostMgr_init();
 	dsHdmiInMgr_init();
 	dsCompositeInMgr_init();
-	
-	INT_INFO("[%s]: Loading device configurations\r\n", __FUNCTION__);
-	dsLoadConfigs();
+
 	return ret;
 }
 

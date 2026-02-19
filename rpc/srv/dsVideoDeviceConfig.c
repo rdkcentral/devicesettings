@@ -41,7 +41,7 @@ typedef struct videoDeviceConfig
 	int *pKVideoDeviceConfigs_size;
 }videoDeviceConfig_t;
 
-static videoDeviceConfig_t videoDeviceConfiguration = {0};
+static videoDeviceConfig_t videoDeviceConfiguration;
 
 void videoDeviceDumpconfig(videoDeviceConfig_t *config)
 {
@@ -123,8 +123,15 @@ void dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfig
         }
     }
 
-    // Store size for getter functions
-    *(videoDeviceConfiguration.pKVideoDeviceConfigs_size) = configSize;
+    INT_INFO("Store sizes configSize =%d\n", configSize);
+    videoDeviceConfiguration.pKVideoDeviceConfigs_size = (int*)malloc(sizeof(int));
+    if (videoDeviceConfiguration.pKVideoDeviceConfigs_size == NULL) {
+        INT_ERROR("Failed to allocate memory for pKConfigSize\n");
+    }
+    else {
+        *(videoDeviceConfiguration.pKVideoDeviceConfigs_size) = configSize;
+        INT_INFO("Store sizes *(videoDeviceConfiguration.pKVideoDeviceConfigs_size)  =%d\n", *(videoDeviceConfiguration.pKVideoDeviceConfigs_size));
+    }
 
     INT_INFO("VideoDevice Config[%p] ConfigSize[%d]",
             videoDeviceConfiguration.pKVideoDeviceConfigs,

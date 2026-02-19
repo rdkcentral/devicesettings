@@ -43,7 +43,7 @@ typedef struct audioConfigs
 	int *pKPortSize;
 }audioConfigs_t;
 
-audioConfigs_t audioConfiguration = {0};
+static audioConfigs_t audioConfiguration;
 
 void audioDumpconfig(audioConfigs_t *config)
 {
@@ -175,15 +175,29 @@ void dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
         }
     }
 
-    // Store sizes for getter functions
-    *(audioConfiguration.pKConfigSize) = configSize;
-    *(audioConfiguration.pKPortSize) = portSize;
-
+    INT_INFO("Store sizes configSize =%d, portSize =%d\n", configSize, portSize);
+    audioConfiguration.pKConfigSize = (int*)malloc(sizeof(int));
+    if (audioConfiguration.pKConfigSize == NULL) {
+        INT_ERROR("Failed to allocate memory for pKConfigSize\n");
+    }
+    else {
+        *(audioConfiguration.pKConfigSize) = configSize;
+        INT_INFO("Store sizes *(audioConfiguration.pKConfigSize)  =%d\n", *(audioConfiguration.pKConfigSize));
+    }
+    audioConfiguration.pKPortSize = (int*)malloc(sizeof(int));
+    if (audioConfiguration.pKPortSize == NULL) {
+        INT_ERROR("Failed to allocate memory for pKPortSize\n");
+    }
+    else {
+        *(audioConfiguration.pKPortSize) = configSize;
+        INT_INFO("Store sizes *(audioConfiguration.pKPortSize)  =%d\n", *(audioConfiguration.pKPortSize));
+    }
+ 
     INT_INFO("Audio Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d]",
-            audioConfiguration.pKAudioConfigs,
-            *(audioConfiguration.pKConfigSize),
-            audioConfiguration.pKAudioPorts,
-            *(audioConfiguration.pKPortSize));
+            audioConfiguration.pKAudioConfigs ? audioConfiguration.pKAudioConfigs : NULL,
+            audioConfiguration.pKConfigSize ? *(audioConfiguration.pKConfigSize) : -1,
+            audioConfiguration.pKAudioPorts? audioConfiguration.pKAudioPorts : NULL,
+            audioConfiguration.pKPortSize ? *(audioConfiguration.pKPortSize) : -1);
     audioDumpconfig(&audioConfiguration);
 }
 

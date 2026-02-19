@@ -46,7 +46,7 @@ typedef struct videoPortConfigs
 	int *pKDefaultResIndex;
 }videoPortConfigs_t;
 
-static videoPortConfigs_t videoPortConfiguration = {0};
+static videoPortConfigs_t videoPortConfiguration;
 
 void videoPortDumpconfig(videoPortConfigs_t *config)
 {
@@ -140,6 +140,7 @@ static int allocateAndCopyVideoPortConfigs(const dsVideoPortTypeConfig_t* source
     }
     
     memcpy(videoPortConfiguration.pKVideoPortConfigs, source, numElements * sizeof(dsVideoPortTypeConfig_t));
+    INT_INFO("Allocated and copied %d video port configs (%s)", numElements, configType);
     return numElements;
 }
 
@@ -216,10 +217,18 @@ void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfi
         }
         // Reading Default Resolution Index
         if (dynamicVideoPortConfigs->pKDefaultResIndex != NULL) {
-            *(videoPortConfiguration.pKDefaultResIndex) = *(dynamicVideoPortConfigs->pKDefaultResIndex);
-            INT_INFO("Read default resolution index: %d (dynamic)", *(videoPortConfiguration.pKDefaultResIndex));
+            INT_INFO("Store sizes configSize =%d, portSize =%d, resolutionSize = %d\n", configSize, portSize, resolutionSize);
+            videoPortConfiguration.pKDefaultResIndex = (int*)malloc(sizeof(int));
+            if (videoPortConfiguration.pKDefaultResIndex == NULL) {
+                INT_ERROR("Failed to allocate memory for pKConfigSize\n");
+            }
+            else
+            {
+                *(videoPortConfiguration.pKDefaultResIndex) = *(dynamicVideoPortConfigs->pKDefaultResIndex);
+                INT_INFO("Store sizes *(videoPortConfiguration.pKDefaultResIndex)  =%d (dynamic)\n", *(videoPortConfiguration.pKDefaultResIndex));
+            }
         } else {
-            INT_INFO("Default resolution index not available in dynamic config");
+            INT_INFO("Default pKDefaultResIndex not available in dynamic config");
         }
     }
     else {
@@ -246,15 +255,49 @@ void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfi
         }
 
         // Using static default resolution index
-        *(videoPortConfiguration.pKDefaultResIndex) = kDefaultResIndex;
-        INT_INFO("Using static default resolution index: %d", *(videoPortConfiguration.pKDefaultResIndex));
+        if (dynamicVideoPortConfigs->pKDefaultResIndex != NULL) {
+            INT_INFO("Store sizes configSize =%d, portSize =%d, resolutionSize = %d\n", configSize, portSize, resolutionSize);
+            videoPortConfiguration.pKDefaultResIndex = (int*)malloc(sizeof(int));
+            if (videoPortConfiguration.pKDefaultResIndex == NULL) {
+                INT_ERROR("Failed to allocate memory for pKConfigSize\n");
+            }
+            else
+            {
+                *(videoPortConfiguration.pKDefaultResIndex) = kDefaultResIndex;
+                INT_INFO("Store sizes *(videoPortConfiguration.pKDefaultResIndex)  =%d (static)\n", *(videoPortConfiguration.pKDefaultResIndex));
+            }
+        }
     }
 
-    // Store sizes for getter functions
-    *(videoPortConfiguration.pKVideoPortConfigs_size) = configSize;
-    *(videoPortConfiguration.pKVideoPortPorts_size) = portSize;
-    *(videoPortConfiguration.pKResolutionsSettings_size) = resolutionSize;
-
+    INT_INFO("Store sizes configSize =%d, portSize =%d, resolutionSize = %d\n", configSize, portSize, resolutionSize);
+    videoPortConfiguration.pKVideoPortConfigs_size = (int*)malloc(sizeof(int));
+    if (videoPortConfiguration.pKVideoPortConfigs_size == NULL) {
+        INT_ERROR("Failed to allocate memory for pKConfigSize\n");
+    }
+    else
+    {
+        *(videoPortConfiguration.pKVideoPortConfigs_size) = configSize;
+        INT_INFO("Store sizes *(videoPortConfiguration.pKVideoPortConfigs_size)  =%d\n", *(videoPortConfiguration.pKVideoPortConfigs_size));
+    }
+    videoPortConfiguration.pKVideoPortPorts_size = (int*)malloc(sizeof(int));
+    if (videoPortConfiguration.pKVideoPortPorts_size == NULL) {
+        INT_ERROR("Failed to allocate memory for pKPortSize\n");
+    }
+    else
+    {
+        *(videoPortConfiguration.pKVideoPortPorts_size) = portSize;
+        INT_INFO("Store sizes *(videoPortConfiguration.pKVideoPortPorts_size)  =%d\n", *(videoPortConfiguration.pKVideoPortPorts_size));
+    }
+    videoPortConfiguration.pKResolutionsSettings_size = (int*)malloc(sizeof(int));
+    if (videoPortConfiguration.pKResolutionsSettings_size == NULL) {
+        INT_ERROR("Failed to allocate memory for pKPortSize\n");
+    }
+    else
+    {
+       *(videoPortConfiguration.pKResolutionsSettings_size) = resolutionSize;
+       INT_INFO("Store sizes *(videoPortConfiguration.pKResolutionsSettings_size)  =%d\n", *(videoPortConfiguration.pKResolutionsSettings_size));
+    }
+ 
     INT_INFO("VideoPort Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d] Resolutions[%p] ResolutionSize[%d] DefaultResIndex[%d]",
             videoPortConfiguration.pKVideoPortConfigs,
             *(videoPortConfiguration.pKVideoPortConfigs_size),
