@@ -28,6 +28,7 @@
 
 
 #include "dsAudio.h"
+#include "dsTelemetry.h"
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -2080,7 +2081,13 @@ void AudioConfigInit()
        if (NULL != handle) {
            if (dsSetStereoMode(handle, _srv_HDMI_ARC_Audiomode) == dsERR_NONE)
            {
-              INT_INFO("dsSetStereoMode The HDMI ARC Port Audio Settings Mode is %d \r\n",_srv_HDMI_ARC_Audiomode);
+                INT_INFO("dsSetStereoMode The HDMI ARC Port Audio Settings Mode is %d \r\n",_srv_HDMI_ARC_Audiomode);
+                if(_srv_HDMI_ARC_Audiomode == dsAUDIO_STEREO_PASSTHRU)
+                {
+                    char telemetryValue[128] = {0};
+                    snprintf(telemetryValue, sizeof(telemetryValue), "dsSetStereoMode The HDMI ARC Port Audio Settings Mode is %d", _srv_HDMI_ARC_Audiomode);
+                    TELEMENTRY_EVENT_STRING("SYS_INFO_PASSTHRUENABLED", telemetryValue);
+                }
            }
       }
    }  
@@ -2741,6 +2748,12 @@ IARM_Result_t _dsSetStereoMode(void *arg)
             else if(param->mode == dsAUDIO_STEREO_PASSTHRU)
             {
                 INT_INFO("Setting Audio Mode PASSTHRU with persistent value %d \r\n",param->toPersist);
+                if(param->toPersist){
+                    char telemetryValue[128] = {0};
+                    snprintf(telemetryValue, sizeof(telemetryValue), "The HDMI Audio Mode Setting From Persistent is %d", param->toPersist);
+                    TELEMENTRY_EVENT_STRING("SYS_INFO_Userpassthruenable", telemetryValue);
+                }
+                
 
                 if (_APortType == dsAUDIOPORT_TYPE_HDMI)
                 {
@@ -6360,6 +6373,9 @@ static void _GetAudioModeFromPersistent(void *arg)
                   }
             }
             INT_INFO("The HDMI Audio Mode Setting From Persistent is %s \r\n",_AudioModeSettings.c_str());
+            char telemetryValue[128] = {0};
+            snprintf(telemetryValue, sizeof(telemetryValue), "The HDMI Audio Mode Setting From Persistent is %s", _AudioModeSettings.c_str());
+            TELEMENTRY_EVENT_STRING("hdmiAudioMode_split", telemetryValue);
         }
         else if (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC){
             _AudioModeSettings = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode",_AudioModeSettings);

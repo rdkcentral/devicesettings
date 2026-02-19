@@ -29,6 +29,7 @@
 
 #include "dsVideoPort.h"
 #include "dsDisplay.h"
+#include "dsTelemetry.h"
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -188,6 +189,13 @@ IARM_Result_t dsVideoPortMgr_init()
 		*/
 		_dsHDMIResolution = device::HostPersistence::getInstance().getProperty("HDMI0.resolution",_Resolution);
 		INT_INFO("The Persistent HDMI resolution read is %s \r\n",_dsHDMIResolution.c_str());
+        if(_dsHDMIResolution.c_str() == "2160p")
+        {
+            char telemetryValue[128] = {0};
+            snprintf(telemetryValue, sizeof(telemetryValue), "The Persistent HDMI resolution read is %s", _dsHDMIResolution.c_str());
+            TELEMENTRY_EVENT_STRING("SYST_INFO_4KResolution", telemetryValue);
+        }
+        
 		#ifdef HAS_ONLY_COMPOSITE
            if (PROFILE_TV == profileType)
            {
