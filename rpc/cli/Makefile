@@ -24,12 +24,12 @@ INSTALL     := $(PWD)/install
 
 # Conditional compilation: Thunder vs IARM
 ifdef USE_WPE_THUNDER_PLUGIN
-    # Thunder mode - use dsFPD-com.cpp, exclude dsFPD.c
+    # Thunder mode - use dsFPD-com.cpp and dsController-com.cpp, exclude dsFPD.c
     OBJS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJS += $(patsubst %.c,%.o,$(filter-out dsFPD.c,$(wildcard *.c)))
 else
-    # IARM mode - use dsFPD.c, exclude dsFPD-com.cpp
-    OBJS := $(patsubst %.cpp,%.o,$(filter-out dsFPD-com.cpp,$(wildcard *.cpp)))
+    # IARM mode - use dsFPD.c, exclude both dsFPD-com.cpp and dsController-com.cpp
+    OBJS := $(patsubst %.cpp,%.o,$(filter-out dsFPD-com.cpp dsController-com.cpp,$(wildcard *.cpp)))
     OBJS += $(patsubst %.c,%.o,$(wildcard *.c))
 endif
 
