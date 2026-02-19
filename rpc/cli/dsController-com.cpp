@@ -22,7 +22,7 @@
 * @brief Implementation of central controller for DeviceSettings COM-RPC connections
 */
 
-#ifndef USE_IARM
+#ifdef USE_THUNDER_PLUGIN
 
 #include "dsController-com.h"
 #include <stdio.h>
@@ -46,13 +46,13 @@ DeviceSettingsController::DeviceSettingsController()
     : BaseClass()
     , _deviceSettings(nullptr)
     , _fpdInterface(nullptr)
-    , _hdmiInInterface(nullptr)
-    , _audioInterface(nullptr)
-    , _displayInterface(nullptr)
-    , _videoPortInterface(nullptr)
-    , _videoDeviceInterface(nullptr)
-    , _hostInterface(nullptr)
-    , _compositeInInterface(nullptr)
+//    , _hdmiInInterface(nullptr)
+//    , _audioInterface(nullptr)
+//    , _displayInterface(nullptr)
+//    , _videoPortInterface(nullptr)
+//    , _videoDeviceInterface(nullptr)
+//    , _hostInterface(nullptr)
+//    , _compositeInInterface(nullptr)
     , _connected(false)
     , _shutdown(false)
 {
@@ -67,7 +67,7 @@ DeviceSettingsController::~DeviceSettingsController()
     // Release all component interfaces
     _lock.Lock();
     
-    if (_compositeInInterface) {
+/*    if (_compositeInInterface) {
         _compositeInInterface->Release();
         _compositeInInterface = nullptr;
     }
@@ -95,6 +95,7 @@ DeviceSettingsController::~DeviceSettingsController()
         _hdmiInInterface->Release();
         _hdmiInInterface = nullptr;
     }
+*/
     if (_fpdInterface) {
         _fpdInterface->Release();
         _fpdInterface = nullptr;
@@ -129,7 +130,7 @@ void DeviceSettingsController::Operational(const bool upAndRunning)
         printf("[DeviceSettingsController] Plugin is not operational - releasing all interfaces\n");
         
         // Release all component interfaces
-        if (_compositeInInterface) {
+    /*   if (_compositeInInterface) {
             _compositeInInterface->Release();
             _compositeInInterface = nullptr;
         }
@@ -157,6 +158,7 @@ void DeviceSettingsController::Operational(const bool upAndRunning)
             _hdmiInInterface->Release();
             _hdmiInInterface = nullptr;
         }
+    */
         if (_fpdInterface) {
             _fpdInterface->Release();
             _fpdInterface = nullptr;
@@ -336,7 +338,7 @@ void DeviceSettingsController::FetchAndInitializeInterfaces()
         loadedCount++;
     }
     
-    if (controller->GetAudioInterface() != nullptr) {
+/*    if (controller->GetAudioInterface() != nullptr) {
         printf("[DeviceSettingsController] Audio interface available\n");
         loadedCount++;
     }
@@ -370,7 +372,7 @@ void DeviceSettingsController::FetchAndInitializeInterfaces()
         printf("[DeviceSettingsController] CompositeIn interface available\n");
         loadedCount++;
     }
-    
+*/
     printf("[DeviceSettingsController] Interface initialization complete: %u interfaces loaded\n", 
            loadedCount);
 }
@@ -441,7 +443,7 @@ bool DeviceSettingsController::IsComponentAvailable(DeviceSettingsComponent comp
         case DeviceSettingsComponent::FPD:
             available = (_fpdInterface != nullptr);
             break;
-        case DeviceSettingsComponent::HDMIIn:
+    /*    case DeviceSettingsComponent::HDMIIn:
             available = (_hdmiInInterface != nullptr);
             break;
         case DeviceSettingsComponent::Audio:
@@ -462,6 +464,7 @@ bool DeviceSettingsController::IsComponentAvailable(DeviceSettingsComponent comp
         case DeviceSettingsComponent::CompositeIn:
             available = (_compositeInInterface != nullptr);
             break;
+    */
     }
     
     _lock.Unlock();
@@ -511,67 +514,77 @@ Exchange::IDeviceSettingsFPD* DeviceSettingsController::GetFPDInterface()
 
 Exchange::IDeviceSettingsHDMIIn* DeviceSettingsController::GetHDMIInInterface()
 {
-    _lock.Lock();
+/*    _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsHDMIIn>(_hdmiInInterface, "IDeviceSettingsHDMIIn");
     Exchange::IDeviceSettingsHDMIIn* result = _hdmiInInterface;
     _lock.Unlock();
     return result;
+*/
 }
 
 Exchange::IDeviceSettingsAudio* DeviceSettingsController::GetAudioInterface()
 {
-    _lock.Lock();
+/*    _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsAudio>(_audioInterface, "IDeviceSettingsAudio");
     Exchange::IDeviceSettingsAudio* result = _audioInterface;
     _lock.Unlock();
     return result;
+*/
 }
 
 Exchange::IDeviceSettingsDisplay* DeviceSettingsController::GetDisplayInterface()
 {
-    _lock.Lock();
+/*    _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsDisplay>(_displayInterface, "IDeviceSettingsDisplay");
     Exchange::IDeviceSettingsDisplay* result = _displayInterface;
     _lock.Unlock();
     return result;
-}
+*/}
 
 Exchange::IDeviceSettingsVideoPort* DeviceSettingsController::GetVideoPortInterface()
 {
+/*
     _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsVideoPort>(_videoPortInterface, "IDeviceSettingsVideoPort");
     Exchange::IDeviceSettingsVideoPort* result = _videoPortInterface;
     _lock.Unlock();
     return result;
+*/
 }
 
 Exchange::IDeviceSettingsVideoDevice* DeviceSettingsController::GetVideoDeviceInterface()
 {
+/*
     _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsVideoDevice>(_videoDeviceInterface, "IDeviceSettingsVideoDevice");
     Exchange::IDeviceSettingsVideoDevice* result = _videoDeviceInterface;
     _lock.Unlock();
     return result;
+*/
 }
 
 Exchange::IDeviceSettingsHost* DeviceSettingsController::GetHostInterface()
 {
+/*
     _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsHost>(_hostInterface, "IDeviceSettingsHost");
     Exchange::IDeviceSettingsHost* result = _hostInterface;
     _lock.Unlock();
     return result;
+*/
 }
 
 Exchange::IDeviceSettingsCompositeIn* DeviceSettingsController::GetCompositeInInterface()
 {
+/*
     _lock.Lock();
     QueryComponentInterface<Exchange::IDeviceSettingsCompositeIn>(_compositeInInterface, "IDeviceSettingsCompositeIn");
     Exchange::IDeviceSettingsCompositeIn* result = _compositeInInterface;
     _lock.Unlock();
     return result;
+*/
 }
 
 } // namespace WPEFramework
 
-#endif // USE_IARM
+#endif // USE_THUNDER_PLUGIN

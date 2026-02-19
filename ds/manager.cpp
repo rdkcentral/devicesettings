@@ -160,7 +160,7 @@ void Manager::Initialize()
         if (needInit) {
             dsError_t err = dsERR_GENERAL;
 
-	    #ifndef USE_IARM
+	    #ifdef USE_THUNDER_PLUGIN
 		// For Thunder COM-RPC mode, initialize the DeviceSettingsController
 		if (WPEFramework::DeviceSettingsController::Initialize() != WPEFramework::Core::ERROR_NONE) {
 			fprintf(stderr, "[Manager] Failed to initialize DeviceSettingsController\n");

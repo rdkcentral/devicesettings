@@ -24,7 +24,7 @@
 * @{
 **/
 
-#ifndef USE_IARM
+#ifdef USE_THUNDER_PLUGIN
 
 #include <stdio.h>
 #include <string.h>
@@ -614,7 +614,7 @@ dsError_t dsSetFPDMode(dsFPDMode_t eMode)
 
 } // extern "C"
 
-#endif // USE_IARM
+#endif // USE_THUNDER_PLUGIN
 
 /** @} */
 /** @} */

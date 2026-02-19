@@ -28,7 +28,7 @@
 
 #pragma once
 
-#ifndef USE_IARM
+#ifdef USE_THUNDER_PLUGIN
 
 #ifndef MODULE_NAME
 #define MODULE_NAME DeviceSettings_Client
@@ -258,4 +258,4 @@ public:
 
 } // namespace WPEFramework
 
-#endif // USE_IARM
+#endif // USE_THUNDER_PLUGIN
