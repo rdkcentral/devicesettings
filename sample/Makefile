@@ -91,7 +91,7 @@ clean:
 dsapp:
 	@if [ -f DSCliLibStandaloneApp.cpp ]; then \
 		echo "Building DSApp..."; \
-		$(CXX) $(CFLAGS) -std=c++11 DSCliLibStandaloneApp.cpp -o ../DSApp -L$(INSTALL)/lib -lds -ldshalcli -lcurl -lpthread $(LDFLAGS); \
+		$(CXX) $(CFLAGS) -std=c++11 DSCliLibStandaloneApp.cpp -o ../DSApp -L$(INSTALL)/lib -lds -Wl,--no-as-needed -ldshalcli -Wl,--as-needed -lcurl -lpthread $(LDFLAGS); \
 		echo "DSApp built successfully at devicesettings/DSApp"; \
 	else \
 		echo "DSCliLibStandaloneApp.cpp not found, skipping DSApp build"; \
