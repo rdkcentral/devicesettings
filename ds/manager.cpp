@@ -45,6 +45,10 @@
 #include <unistd.h>
 #include <functional>
 
+#ifdef USE_WPE_THUNDER_PLUGIN
+#include "dsController-com.h"
+#endif
+
 /**
  * @file manager.cpp
  * @brief RDK Device Settings module is a cross-platform device for controlling the following hardware configurations:
@@ -155,6 +159,15 @@ void Manager::Initialize()
     try {
         if (needInit) {
             dsError_t err = dsERR_GENERAL;
+
+	    #ifdef USE_WPE_THUNDER_PLUGIN
+		// For Thunder COM-RPC mode, initialize the DeviceSettingsController
+		if (WPEFramework::DeviceSettingsController::Initialize() != WPEFramework::Core::ERROR_NONE) {
+			fprintf(stderr, "[Manager] Failed to initialize DeviceSettingsController\n");
+			throw std::runtime_error("DeviceSettingsController initialization failed");
+		}
+		printf("[Manager] DeviceSettingsController initialized successfully\n");
+	    #endif
 
             err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit);
             CHECK_RET_VAL(err);
