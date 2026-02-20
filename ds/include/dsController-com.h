@@ -28,7 +28,7 @@
 
 #pragma once
 
-#ifdef USE_THUNDER_PLUGIN
+#ifdef USE_WPE_THUNDER_PLUGIN
 
 #ifndef MODULE_NAME
 #define MODULE_NAME DeviceSettings_Client
@@ -258,4 +258,4 @@ public:
 
 } // namespace WPEFramework
 
-#endif // USE_THUNDER_PLUGIN
+#endif // USE_WPE_THUNDER_PLUGIN

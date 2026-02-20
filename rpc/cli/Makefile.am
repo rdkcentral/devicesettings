@@ -30,7 +30,7 @@ libdshalcli_la_CPPFLAGS = $(INCLUDE_FILES)
 libdshalcli_la_CFLAGS = -g -fPIC -D_REENTRANT -Wall
 
 # Conditional compilation for Thunder COM-RPC
-if USE_THUNDER_PLUGIN
+if USE_WPE_THUNDER_PLUGIN
     FPD_SOURCE = dsController-com.cpp dsFPD-com.cpp
     THUNDER_LIBS = -lWPEFrameworkCore -lWPEFrameworkCOM
 else

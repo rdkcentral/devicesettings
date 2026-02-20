@@ -56,7 +56,7 @@ AC_ARG_ENABLE([thunder-plugin],
     [enable_thunder_plugin=$enableval],
     [enable_thunder_plugin=no])
 
-AM_CONDITIONAL([USE_THUNDER_PLUGIN], [test "x$enable_thunder_plugin" = "xyes"])
+AM_CONDITIONAL([USE_WPE_THUNDER_PLUGIN], [test "x$enable_thunder_plugin" = "xyes"])
 
 AS_IF([test "x$enable_thunder_plugin" = "xyes"],
     [AC_DEFINE([USE_WPE_THUNDER_PLUGIN], [1], [Define to 1 to enable Thunder COM-RPC plugin support])

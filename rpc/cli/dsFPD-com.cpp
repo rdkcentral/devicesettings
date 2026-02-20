@@ -24,7 +24,7 @@
 * @{
 **/
 
-#ifdef USE_THUNDER_PLUGIN
+#ifdef USE_WPE_THUNDER_PLUGIN
 
 #include <stdio.h>
 #include <string.h>
@@ -614,7 +614,7 @@ dsError_t dsSetFPDMode(dsFPDMode_t eMode)
 
 } // extern "C"
 
-#endif // USE_THUNDER_PLUGIN
+#endif // USE_WPE_THUNDER_PLUGIN
 
 /** @} */
 /** @} */

@@ -22,7 +22,7 @@
 * @brief Implementation of central controller for DeviceSettings COM-RPC connections
 */
 
-#ifdef USE_THUNDER_PLUGIN
+#ifdef USE_WPE_THUNDER_PLUGIN
 
 #include "dsController-com.h"
 #include <stdio.h>
@@ -587,4 +587,4 @@ Exchange::IDeviceSettingsCompositeIn* DeviceSettingsController::GetCompositeInIn
 
 } // namespace WPEFramework
 
-#endif // USE_THUNDER_PLUGIN
+#endif // USE_WPE_THUNDER_PLUGIN

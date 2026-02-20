@@ -45,7 +45,7 @@
 #include <unistd.h>
 #include <functional>
 
-#ifdef USE_THUNDER_PLUGIN
+#ifdef USE_WPE_THUNDER_PLUGIN
 #include "dsController-com.h"
 #endif
 
@@ -160,7 +160,7 @@ void Manager::Initialize()
         if (needInit) {
             dsError_t err = dsERR_GENERAL;
 
-	    #ifdef USE_THUNDER_PLUGIN
+	    #ifdef USE_WPE_THUNDER_PLUGIN
 		// For Thunder COM-RPC mode, initialize the DeviceSettingsController
 		if (WPEFramework::DeviceSettingsController::Initialize() != WPEFramework::Core::ERROR_NONE) {
 			fprintf(stderr, "[Manager] Failed to initialize DeviceSettingsController\n");
