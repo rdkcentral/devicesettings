@@ -50,7 +50,7 @@ typedef struct videoPortConfigs
  * 
  * @param[in] dynamicVideoPortConfigs Pointer to dynamic video port configuration, or NULL for static config
  */
-int dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
+void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
 
 /**
  * @brief Get video port type configurations
@@ -82,6 +82,11 @@ void dsGetVideoPortResolutions(int* outResolutionSize, dsVideoPortResolution_t**
  * @param[out] outDefaultIndex Pointer to store the default resolution index, or NULL
  */
 void dsGetDefaultResolutionIndex(int* outDefaultIndex);
+
+/**
+ * @brief Free video port configuration resources
+ */
+void dsVideoPortConfigFree(void);
 
 #ifdef __cplusplus
 }

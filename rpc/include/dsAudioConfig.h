@@ -47,7 +47,7 @@ typedef struct audioConfigs
  * 
  * @param[in] dynamicAudioConfigs Pointer to dynamic audio configuration, or NULL for static config
  */
-void dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs);
+int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs);
 
 /**
  * @brief Get audio type configurations
@@ -64,6 +64,11 @@ void dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outCo
  * @param[out] outPorts Pointer to store the audio port configs array, or NULL
  */
 void dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts);
+
+/**
+ * @brief Free audio configuration resources
+ */
+void dsAudioConfigFree(void);
 
 #ifdef __cplusplus
 }

@@ -55,6 +55,11 @@ void dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfig
  */
 void dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs);
 
+/**
+ * @brief Free video device configuration resources
+ */
+void dsVideoDeviceConfigFree(void);
+
 #ifdef __cplusplus
 }
 #endif
