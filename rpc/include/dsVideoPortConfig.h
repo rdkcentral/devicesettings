@@ -50,7 +50,7 @@ typedef struct videoPortConfigs
  * 
  * @param[in] dynamicVideoPortConfigs Pointer to dynamic video port configuration, or NULL for static config
  */
-void dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
+int dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
 
 /**
  * @brief Get video port type configurations

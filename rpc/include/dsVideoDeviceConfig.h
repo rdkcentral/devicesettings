@@ -45,7 +45,7 @@ typedef struct videoDeviceConfig
  * 
  * @param[in] dynamicVideoDeviceConfigs Pointer to dynamic video device configuration, or NULL for static config
  */
-void dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs);
+int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs);
 
 /**
  * @brief Get video device configurations
