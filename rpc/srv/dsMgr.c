@@ -143,6 +143,13 @@ IARM_Result_t dsMgr_term()
 	dsHostMgr_term();
 	dsHdmiInMgr_term();
 	dsCompositeInMgr_term();
+
+    // Free dynamically allocated configuration memory
+	INT_INFO("Freeing device configuration resources\n");
+	dsAudioConfigFree();
+	dsVideoDeviceConfigFree();
+	dsVideoPortConfigFree();
+
 	return ret;
 }
 

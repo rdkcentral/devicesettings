@@ -29,28 +29,29 @@
 #include <string.h>
 #include "dsserverlogger.h"
 #include "dsTypes.h"
+#include "dsVideoDeviceConfig.h"
 #include "dsVideoDeviceSettings.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct videoDeviceConfig
+typedef struct videoDeviceConfigLocal
 {
 	dsVideoConfig_t *pKVideoDeviceConfigs;
-	int *pKVideoDeviceConfigs_size;
-}videoDeviceConfig_t;
+	int kVideoDeviceConfigs_size;
+}videoDeviceConfigLocal_t;
 
-static videoDeviceConfig_t videoDeviceConfiguration;
+static videoDeviceConfigLocal_t videoDeviceConfiguration = {0};
 
-void videoDeviceDumpconfig(videoDeviceConfig_t *config)
+void videoDeviceDumpconfig(videoDeviceConfigLocal_t *config)
 {
     if (NULL == config) {
-        INT_ERROR("Video config is NULL");
+        INT_ERROR("Video config is NULL\n");
         return;
     }
     if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
-        INT_INFO("Dumping of Device configs is disabled");
+        INT_INFO("Dumping of Device configs is disabled\n");
         return;
     }
 
@@ -58,20 +59,20 @@ void videoDeviceDumpconfig(videoDeviceConfig_t *config)
 
 	if( NULL != config->pKVideoDeviceConfigs )
 	{
-        int configSize = (config->pKVideoDeviceConfigs_size) ? *(config->pKVideoDeviceConfigs_size) : -1;
-		INT_INFO("pKVideoDeviceConfigs = %p", config->pKVideoDeviceConfigs);
-		INT_INFO("videoDeviceConfigs_size = %d", configSize);
+        int configSize = config->kVideoDeviceConfigs_size;
+		INT_INFO("pKVideoDeviceConfigs = %p\n", config->pKVideoDeviceConfigs);
+		INT_INFO("videoDeviceConfigs_size = %d\n", configSize);
 		for (int i = 0; i < configSize; i++) {
             dsVideoConfig_t* videoDeviceConfig = &config->pKVideoDeviceConfigs[i];
-            INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu ", i, videoDeviceConfig->numSupportedDFCs);
+            INT_INFO("pKVideoDeviceConfigs[%d].numSupportedDFCs = %lu\n", i, videoDeviceConfig->numSupportedDFCs);
 			for (int j = 0; j < videoDeviceConfig->numSupportedDFCs; j++) {
-				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d", i, j, videoDeviceConfig->supportedDFCs[j]);
+				INT_INFO(" Address of pKVideoDeviceConfigs[%d].supportedDFCs[%d] = %d\n", i, j, videoDeviceConfig->supportedDFCs[j]);
 			}
 		}
 	}
 	else
 	{
-		INT_ERROR(" kVideoDeviceConfigs is NULL");
+		INT_ERROR(" kVideoDeviceConfigs is NULL\n");
 	}
 
 	INT_INFO("\n=============== Dump VideoDevice Configs done ===============\n");
@@ -93,61 +94,72 @@ static int allocateAndCopyVideoDeviceConfigs(const dsVideoConfig_t* source, int 
     }
     
     memcpy(videoDeviceConfiguration.pKVideoDeviceConfigs, source, numElements * sizeof(dsVideoConfig_t));
-    INT_INFO("Allocated and copied %d video device configs (%s)", numElements, configType);
+    INT_INFO("Allocated and copied %d video device configs (%s)\n", numElements, configType);
     return numElements;
 }
 
-void dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs)
+int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs)
 {
-    int configSize = -1, ret = -1;
+    int configSize;
+    const dsVideoConfig_t* videoConfigs;
+    bool isDynamic;
 
-    INT_INFO("Using '%s' config", dynamicVideoDeviceConfigs ? "dynamic" : "static");
+    INT_INFO("Using '%s' config\n", dynamicVideoDeviceConfigs ? "dynamic" : "static");
     
-    if (NULL != dynamicVideoDeviceConfigs)
-    {
-        // Reading Video Device configs
-        configSize = (dynamicVideoDeviceConfigs->pKVideoDeviceConfigs_size) ? *(dynamicVideoDeviceConfigs->pKVideoDeviceConfigs_size) : -1;
-        ret = allocateAndCopyVideoDeviceConfigs(dynamicVideoDeviceConfigs->pKVideoDeviceConfigs, configSize, true);
-        if(ret == -1)
-        {
-            INT_ERROR("failed to create dynamic memory\n");
-        }
-    }
-    else {
-        // Using static configuration
+    // Set up parameters based on config source
+    if (NULL != dynamicVideoDeviceConfigs) {
+        configSize = *(dynamicVideoDeviceConfigs->pKVideoDeviceConfigs_size);
+        videoConfigs = dynamicVideoDeviceConfigs->pKVideoDeviceConfigs;
+        isDynamic = true;
+    } else {
         configSize = dsUTL_DIM(kConfigs);
-        ret = allocateAndCopyVideoDeviceConfigs(kConfigs, configSize, false);
-        if(ret == -1)
-        {
-            INT_ERROR("failed to create dynamic memory\n");
-        }
+        videoConfigs = kConfigs;
+        isDynamic = false;
+    }
+
+    // Allocate and copy video device configs
+    if (allocateAndCopyVideoDeviceConfigs(videoConfigs, configSize, isDynamic) == -1) {
+        INT_ERROR("Failed to allocate video device configs\n");
+        return;
     }
 
     INT_INFO("Store sizes configSize =%d\n", configSize);
-    videoDeviceConfiguration.pKVideoDeviceConfigs_size = (int*)malloc(sizeof(int));
-    if (videoDeviceConfiguration.pKVideoDeviceConfigs_size == NULL) {
-        INT_ERROR("Failed to allocate memory for pKConfigSize\n");
-    }
-    else {
-        *(videoDeviceConfiguration.pKVideoDeviceConfigs_size) = configSize;
-        INT_INFO("Store sizes *(videoDeviceConfiguration.pKVideoDeviceConfigs_size)  =%d\n", *(videoDeviceConfiguration.pKVideoDeviceConfigs_size));
-    }
+    videoDeviceConfiguration.kVideoDeviceConfigs_size = configSize;
+    INT_INFO("Store sizes videoDeviceConfiguration.kVideoDeviceConfigs_size = %d\n", videoDeviceConfiguration.kVideoDeviceConfigs_size);
 
-    INT_INFO("VideoDevice Config[%p] ConfigSize[%d]",
+    INT_INFO("VideoDevice Config[%p] ConfigSize[%d]\n",
             videoDeviceConfiguration.pKVideoDeviceConfigs,
-            *(videoDeviceConfiguration.pKVideoDeviceConfigs_size));
+            videoDeviceConfiguration.kVideoDeviceConfigs_size);
     videoDeviceDumpconfig(&videoDeviceConfiguration);
+    return 0;
 }
 
 // Getter functions for use across srv code
 void dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs)
 {
     if (outConfigSize != NULL) {
-        *outConfigSize = *(videoDeviceConfiguration.pKVideoDeviceConfigs_size);
+        *outConfigSize = videoDeviceConfiguration.kVideoDeviceConfigs_size;
     }
     if (outConfigs != NULL) {
         *outConfigs = videoDeviceConfiguration.pKVideoDeviceConfigs;
     }
+}
+
+void dsVideoDeviceConfigFree(void)
+{
+    INT_INFO("Freeing VideoDevice configuration resources\n");
+    
+    // Free video device configs
+    if (videoDeviceConfiguration.pKVideoDeviceConfigs != NULL) {
+        free(videoDeviceConfiguration.pKVideoDeviceConfigs);
+        videoDeviceConfiguration.pKVideoDeviceConfigs = NULL;
+        INT_INFO("Freed pKVideoDeviceConfigs\n");
+    }
+    
+    // Reset size variable
+    videoDeviceConfiguration.kVideoDeviceConfigs_size = 0;
+    
+    INT_INFO("VideoDevice configuration freed successfully\n");
 }
 
 #ifdef __cplusplus

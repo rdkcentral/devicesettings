@@ -29,30 +29,32 @@
 #include <string.h>
 #include "dsserverlogger.h"
 #include "dsTypes.h"
+#include "dsAudioConfig.h"
 #include "dsAudioSettings.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct audioConfigs
+typedef struct audioConfigsLocal
 {
 	dsAudioTypeConfig_t  *pKAudioConfigs;
 	dsAudioPortConfig_t  *pKAudioPorts;
-	int *pKConfigSize;
-	int *pKPortSize;
-}audioConfigs_t;
+	int kConfigSize;
+	int kPortSize;
+}audioConfigsLocal_t;
 
-static audioConfigs_t audioConfiguration;
+static audioConfigsLocal_t audioConfiguration = {0};
 
-void audioDumpconfig(audioConfigs_t *config)
+void audioDumpconfig(audioConfigsLocal_t *config)
 {
     if (nullptr == config) {
-        INT_ERROR("Audio config is NULL");
+        INT_ERROR("Audio config is NULL\n");
         return;
     }
     if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
-        INT_INFO("Dumping of Device configs is disabled");
+        INT_INFO("Dumping of Device configs is disabled\n");
         return;
     }
 
@@ -60,34 +62,34 @@ void audioDumpconfig(audioConfigs_t *config)
     INT_INFO("\n=============== Starting to Dump Audio Configs ===============\n");
     if( NULL != config->pKAudioConfigs )
     {
-        configSize = (config->pKConfigSize) ? *(config->pKConfigSize) : -1;
+        configSize = config->kConfigSize;
 
         for (int i = 0; i < configSize; i++) {
             const dsAudioTypeConfig_t *typeCfg = &(config->pKAudioConfigs[i]);
-            INT_INFO("typeCfg->typeId = %d", typeCfg->typeId);
-            INT_INFO("typeCfg->name = %s", typeCfg->name);
-            INT_INFO("typeCfg->numSupportedEncodings = %zu", typeCfg->numSupportedEncodings);
-            INT_INFO("typeCfg->numSupportedCompressions = %zu", typeCfg->numSupportedCompressions);
-            INT_INFO("typeCfg->numSupportedStereoModes = %zu", typeCfg->numSupportedStereoModes);
+            INT_INFO("typeCfg->typeId = %d\n", typeCfg->typeId);
+            INT_INFO("typeCfg->name = %s\n", typeCfg->name);
+            INT_INFO("typeCfg->numSupportedEncodings = %zu\n", typeCfg->numSupportedEncodings);
+            INT_INFO("typeCfg->numSupportedCompressions = %zu\n", typeCfg->numSupportedCompressions);
+            INT_INFO("typeCfg->numSupportedStereoModes = %zu\n", typeCfg->numSupportedStereoModes);
         }
     }
     else
     {
-        INT_ERROR("kAudioConfigs is NULL");
+        INT_ERROR("kAudioConfigs is NULL\n");
     }
 
     if( NULL != config->pKAudioPorts )
     {
-        portSize = (config->pKPortSize) ? *(config->pKPortSize) : -1;
+        portSize = config->kPortSize;
         for (int i = 0; i < portSize; i++) {
             const dsAudioPortConfig_t *portCfg = &(config->pKAudioPorts[i]);
-            INT_INFO("portCfg->id.type = %d", portCfg->id.type);
-            INT_INFO("portCfg->id.index = %d", portCfg->id.index);
+            INT_INFO("portCfg->id.type = %d\n", portCfg->id.type);
+            INT_INFO("portCfg->id.index = %d\n", portCfg->id.index);
         }
     }
     else
     {
-        INT_ERROR("kAudioPorts is NULL");
+        INT_ERROR("kAudioPorts is NULL\n");
     }
 
     INT_INFO("\n=============== Dump Audio Configs done ===============\n");
@@ -133,71 +135,60 @@ static int allocateAndCopyAudioPorts(const dsAudioPortConfig_t* source, int numE
     return numElements;
 }
 
-void dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
+int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
 {
-    int configSize = -1, portSize = -1;
-    int ret = -1;
+    int configSize, portSize;
+    const dsAudioTypeConfig_t* audioConfigs;
+    const dsAudioPortConfig_t* audioPorts;
+    bool isDynamic;
 
-    INT_INFO("Using '%s' config", dynamicAudioConfigs ? "dynamic" : "static");
+    INT_INFO("Using '%s' config\n", dynamicAudioConfigs ? "dynamic" : "static");
     
-    if (NULL != dynamicAudioConfigs)
-    {
-        // Reading Audio type configs
-        configSize = (dynamicAudioConfigs->pKConfigSize) ? *(dynamicAudioConfigs->pKConfigSize) : -1;
-        ret = allocateAndCopyAudioConfigs(dynamicAudioConfigs->pKAudioConfigs, configSize, true);
-        if(ret == -1)
-        {
-            INT_ERROR("failed to create dynamic memory\n");
-        }
-        
-        // Reading Audio port configs
-        portSize = (dynamicAudioConfigs->pKPortSize) ? *(dynamicAudioConfigs->pKPortSize) : -1;
-        ret = allocateAndCopyAudioPorts(dynamicAudioConfigs->pKAudioPorts, portSize, true);
-        if(ret == -1)
-        {
-            INT_ERROR("failed to create dynamic memory\n");
-        }
-    }
-    else {
-        // Using static configuration
+    // Set up parameters based on config source
+    if (NULL != dynamicAudioConfigs) {
+        configSize = *(dynamicAudioConfigs->pKConfigSize);
+        portSize = *(dynamicAudioConfigs->pKPortSize);
+        audioConfigs = dynamicAudioConfigs->pKAudioConfigs;
+        audioPorts = dynamicAudioConfigs->pKAudioPorts;
+        isDynamic = true;
+    } else {
         configSize = dsUTL_DIM(kConfigs);
-        ret = allocateAndCopyAudioConfigs(kConfigs, configSize, false);
-        if(ret == -1)
-        {
-            INT_ERROR("failed to create dynamic memory\n");
-        }
-
         portSize = dsUTL_DIM(kPorts);
-        ret = allocateAndCopyAudioPorts(kPorts, portSize, false);
-        if(ret == -1)
-        {
-            INT_ERROR("failed to create dynamic memory\n");
+        audioConfigs = kConfigs;
+        audioPorts = kPorts;
+        isDynamic = false;
+    }
+
+    // Allocate and copy audio type configs
+    if (allocateAndCopyAudioConfigs(audioConfigs, configSize, isDynamic) == -1) {
+        INT_ERROR("Failed to allocate audio type configs\n");
+        return;
+    }
+    
+    // Allocate and copy audio port configs
+    if (allocateAndCopyAudioPorts(audioPorts, portSize, isDynamic) == -1) {
+        INT_ERROR("Failed to allocate audio port configs\n");
+        // Clean up previously allocated memory
+        if (audioConfiguration.pKAudioConfigs != NULL) {
+            free(audioConfiguration.pKAudioConfigs);
+            audioConfiguration.pKAudioConfigs = NULL;
         }
+        return;
     }
 
     INT_INFO("Store sizes configSize =%d, portSize =%d\n", configSize, portSize);
-    audioConfiguration.pKConfigSize = (int*)malloc(sizeof(int));
-    if (audioConfiguration.pKConfigSize == NULL) {
-        INT_ERROR("Failed to allocate memory for pKConfigSize\n");
-    }
-    else {
-        *(audioConfiguration.pKConfigSize) = configSize;
-        INT_INFO("Store sizes *(audioConfiguration.pKConfigSize)  =%d\n", *(audioConfiguration.pKConfigSize));
-    }
-    audioConfiguration.pKPortSize = (int*)malloc(sizeof(int));
-    if (audioConfiguration.pKPortSize == NULL) {
-        INT_ERROR("Failed to allocate memory for pKPortSize\n");
-    }
-    else {
-        *(audioConfiguration.pKPortSize) = configSize;
-        INT_INFO("Store sizes *(audioConfiguration.pKPortSize)  =%d\n", *(audioConfiguration.pKPortSize));
-    }
+
+    audioConfiguration.kConfigSize = configSize;
+    audioConfiguration.kPortSize = portSize;
+    INT_INFO("Store sizes audioConfiguration.kConfigSize = %d\n", audioConfiguration.kConfigSize);
+    INT_INFO("Store sizes audioConfiguration.kPortSize = %d\n", audioConfiguration.kPortSize);
  
-    INT_INFO("Audio Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d]",
+    INT_INFO("Audio Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d]\n",
             audioConfiguration.pKAudioConfigs ? audioConfiguration.pKAudioConfigs : NULL,
-            audioConfiguration.pKConfigSize ? *(audioConfiguration.pKConfigSize) : -1,
+            audioConfiguration.kConfigSize,
             audioConfiguration.pKAudioPorts? audioConfiguration.pKAudioPorts : NULL,
-            audioConfiguration.pKPortSize ? *(audioConfiguration.pKPortSize) : -1);
+            audioConfiguration.kPortSize);
+
     audioDumpconfig(&audioConfiguration);
 }
 
@@ -205,7 +196,7 @@ void dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
 void dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outConfigs)
 {
     if (outConfigSize != NULL) {
-        *outConfigSize = *(audioConfiguration.pKConfigSize);
+        *outConfigSize = audioConfiguration.kConfigSize;
     }
     if (outConfigs != NULL) {
         *outConfigs = audioConfiguration.pKAudioConfigs;
@@ -215,11 +206,36 @@ void dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outCo
 void dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts)
 {
     if (outPortSize != NULL) {
-        *outPortSize = *(audioConfiguration.pKPortSize);
+        *outPortSize = audioConfiguration.kPortSize;
     }
     if (outPorts != NULL) {
         *outPorts = audioConfiguration.pKAudioPorts;
     }
+}
+
+void dsAudioConfigFree(void)
+{
+    INT_INFO("Freeing Audio configuration resources\n");
+    
+    // Free audio configs
+    if (audioConfiguration.pKAudioConfigs != NULL) {
+        free(audioConfiguration.pKAudioConfigs);
+        audioConfiguration.pKAudioConfigs = NULL;
+        INT_INFO("Freed pKAudioConfigs\n");
+    }
+    
+    // Free audio ports
+    if (audioConfiguration.pKAudioPorts != NULL) {
+        free(audioConfiguration.pKAudioPorts);
+        audioConfiguration.pKAudioPorts = NULL;
+        INT_INFO("Freed pKAudioPorts\n");
+    }
+    
+    // Reset size variables
+    audioConfiguration.kConfigSize = 0;
+    audioConfiguration.kPortSize = 0;
+    
+    INT_INFO("Audio configuration freed successfully\n");
 }
 
 #ifdef __cplusplus

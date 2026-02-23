@@ -58,23 +58,23 @@ static int LoadDLSymbols(void* pDLHandle, const dlSymbolLookup_t* symbols, int n
     int isAllSymbolsLoaded = 0;
     
     if ((NULL == pDLHandle) || (NULL == symbols)) {
-        INT_ERROR("Invalid DL Handle or symbolsPtr");
+        INT_ERROR("Invalid DL Handle or symbolsPtr\n");
         return 0;
     }
     
-    INT_INFO("numberOfSymbols = %d", numberOfSymbols);
+    INT_INFO("numberOfSymbols = %d\n", numberOfSymbols);
     for (int i = 0; i < numberOfSymbols; i++) {
         if ((NULL == symbols[i].dataptr) || (NULL == symbols[i].name)) {
-            INT_ERROR("Invalid symbol entry at index [%d]", i);
+            INT_ERROR("Invalid symbol entry at index [%d]\n", i);
             continue;
         }
         *(symbols[i].dataptr) = dlsym(pDLHandle, symbols[i].name);
         if (NULL == *(symbols[i].dataptr)) {
-            INT_ERROR("[%s] is not defined", symbols[i].name);
+            INT_ERROR("[%s] is not defined\n", symbols[i].name);
         }
         else {
             currentSymbols++;
-            INT_INFO("[%s] is defined and loaded, data[%p]", symbols[i].name, *(symbols[i].dataptr));
+            INT_INFO("[%s] is defined and loaded, data[%p]\n", symbols[i].name, *(symbols[i].dataptr));
         }
     }
     isAllSymbolsLoaded = (numberOfSymbols) ? (currentSymbols == numberOfSymbols) : 0;
@@ -86,10 +86,10 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
     void* pDLHandle = NULL;
     int isSymbolsLoaded = 0;
 
-    INT_INFO("Entering capabilityType = 0x%08X", capabilityType);
+    INT_INFO("Entering capabilityType = 0x%08X\n", capabilityType);
     dlerror(); /* clear old error */
     pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
-    INT_INFO("DL Instance '%s'", (NULL == pDLHandle ? "NULL" : "Valid"));
+    INT_INFO("DL Instance '%s'\n", (NULL == pDLHandle ? "NULL" : "Valid"));
 
     /* Audio Port Config */
     if (DEVICE_CAPABILITY_AUDIO_PORT & capabilityType) {
@@ -156,16 +156,16 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
         dlclose(pDLHandle);
         pDLHandle = NULL;
     }
-    INT_INFO("Exiting ...");
+    INT_INFO("Exiting ...\n");
 }
 
 void dsLoadConfigs(void)
 {
-    INT_INFO("Enter function");
+    INT_INFO("Enter function\n");
     loadDeviceCapabilities(DEVICE_CAPABILITY_VIDEO_PORT | 
                           DEVICE_CAPABILITY_AUDIO_PORT |
                           DEVICE_CAPABILITY_VIDEO_DEVICE);
-    INT_INFO("Exit function");
+    INT_INFO("Exit function\n");
 }
 
 #ifdef __cplusplus
