@@ -120,7 +120,7 @@ int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs
     // Allocate and copy video device configs
     if (allocateAndCopyVideoDeviceConfigs(videoConfigs, configSize, isDynamic) == -1) {
         INT_ERROR("Failed to allocate video device configs\n");
-        return;
+        return -1;
     }
 
     INT_INFO("Store sizes configSize =%d\n", configSize);

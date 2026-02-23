@@ -84,7 +84,7 @@ static int LoadDLSymbols(void* pDLHandle, const dlSymbolLookup_t* symbols, int n
 static void loadDeviceCapabilities(unsigned int capabilityType)
 {
     void* pDLHandle = NULL;
-    int isSymbolsLoaded = 0;
+    int isSymbolsLoaded = 0, ret = -1;
 
     INT_INFO("Entering capabilityType = 0x%08X\n", capabilityType);
     dlerror(); /* clear old error */
@@ -108,7 +108,11 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
             isSymbolsLoaded = LoadDLSymbols(pDLHandle, audioConfigSymbols, 
                                            sizeof(audioConfigSymbols)/sizeof(dlSymbolLookup_t));
         }
-        dsLoadAudioOutputPortConfig(isSymbolsLoaded ? &dynamicAudioConfigs : NULL);
+        ret = dsLoadAudioOutputPortConfig(isSymbolsLoaded ? &dynamicAudioConfigs : NULL);
+        if(ret == -1)
+        {
+            INT_ERROR("dsLoadAudioOutputPortConfig() failed");
+        }
     }
 
     /* Video Port Config */
@@ -131,7 +135,11 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
             isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoPortConfigSymbols, 
                                            sizeof(videoPortConfigSymbols)/sizeof(dlSymbolLookup_t));
         }
-        dsLoadVideoOutputPortConfig(isSymbolsLoaded ? &dynamicVideoPortConfigs : NULL);
+        ret = dsLoadVideoOutputPortConfig(isSymbolsLoaded ? &dynamicVideoPortConfigs : NULL);
+        if(ret == -1)
+        {
+            INT_ERROR("dsLoadVideoOutputPortConfig() failed");
+        }
     }
 
     /* Video Device Config */
@@ -149,7 +157,11 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
             isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoDeviceConfigSymbols, 
                                            sizeof(videoDeviceConfigSymbols)/sizeof(dlSymbolLookup_t));
         }
-        dsLoadVideoDeviceConfig(isSymbolsLoaded ? &dynamicVideoDeviceConfigs : NULL);
+        ret = dsLoadVideoDeviceConfig(isSymbolsLoaded ? &dynamicVideoDeviceConfigs : NULL);
+        if(ret == -1)
+        {
+            INT_ERROR("dsLoadVideoDeviceConfig() failed");
+        }        
     }
 
     if (NULL != pDLHandle) {
@@ -166,6 +178,15 @@ void dsLoadConfigs(void)
                           DEVICE_CAPABILITY_AUDIO_PORT |
                           DEVICE_CAPABILITY_VIDEO_DEVICE);
     INT_INFO("Exit function\n");
+}
+
+void dsFreeConfig()
+{
+    // Free dynamically allocated configuration memory
+	INT_INFO("Freeing device configuration resources\n");
+	dsAudioConfigFree();
+	dsVideoDeviceConfigFree();
+	dsVideoPortConfigFree();
 }
 
 #ifdef __cplusplus

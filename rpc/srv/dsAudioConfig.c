@@ -162,7 +162,7 @@ int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
     // Allocate and copy audio type configs
     if (allocateAndCopyAudioConfigs(audioConfigs, configSize, isDynamic) == -1) {
         INT_ERROR("Failed to allocate audio type configs\n");
-        return;
+        return -1;
     }
     
     // Allocate and copy audio port configs
@@ -173,7 +173,7 @@ int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
             free(audioConfiguration.pKAudioConfigs);
             audioConfiguration.pKAudioConfigs = NULL;
         }
-        return;
+        return -1;
     }
 
     INT_INFO("Store sizes configSize =%d, portSize =%d\n", configSize, portSize);
@@ -190,6 +190,7 @@ int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
             audioConfiguration.kPortSize);
 
     audioDumpconfig(&audioConfiguration);
+    return 0;
 }
 
 // Getter functions for use across srv code

@@ -68,6 +68,11 @@ typedef struct videoDeviceConfig
  */
 void dsLoadConfigs(void);
 
+/** 
+ * Free the config dynamic pointers
+ */
+void dsFreeConfig();
+
 #ifdef __cplusplus
 }
 #endif
