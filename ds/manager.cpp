@@ -69,6 +69,7 @@ namespace device {
 
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
+static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc);
 
 bool LoadDLSymbols(void* pDLHandle, const dlSymbolLookup* symbols, int numberOfSymbols)
 {
@@ -200,6 +201,41 @@ Manager::~Manager() {
 	}
 
 /**
+ * @brief Retry initialization function with configurable retry logic.
+ * 
+ * This helper function attempts to initialize a device settings component by calling
+ * the provided initialization function. It retries the operation with a delay between
+ * attempts until either the operation succeeds, the maximum retry count is reached,
+ * or (optionally) a specific error state is encountered.
+ *
+ * @param[in] functionName Name of the initialization function being called. Used for logging
+ *                         purposes to identify which component is being initialized.
+ * @param[in] initFunc Lambda or function object that performs the actual initialization.
+ *                     Should return dsError_t indicating success (dsERR_NONE) or an error code.
+ *
+ * @return dsERR_NONE on successful initialization, or the last error code encountered after
+ *         all retry attempts are exhausted. When checkInvalidState is true, also returns
+ *         immediately with the error code if a non-dsERR_INVALID_STATE error occurs.
+ */
+dsError_t initializeFunctionWithRetry(const char* functionName, 
+                                   std::function<dsError_t()> initFunc) 
+{
+	dsError_t err = dsERR_GENERAL;
+	unsigned int retryCount = 0;
+	unsigned int maxRetries = 25;
+
+	do {
+		err = initFunc();
+		printf("Manager::Initialize:%s result :%d retryCount :%d\n", 
+				functionName, err, retryCount);
+		if (dsERR_NONE == err) break;
+		usleep(100000);
+	} while (retryCount++ < maxRetries);
+	
+	return err;
+}
+
+/**
  * @addtogroup dssettingsmanagerapi
  * @{
  */
@@ -246,9 +282,11 @@ void Manager::Initialize()
 	    		usleep(100000);
 	    	} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
             CHECK_RET_VAL(err);
-	    	err = dsAudioPortInit();
+            
+            err = initializeFunctionWithRetry("dsAudioPortInit", dsAudioPortInit);
             CHECK_RET_VAL(err);
-	    	err = dsVideoPortInit();
+            
+            err = initializeFunctionWithRetry("dsVideoPortInit", dsVideoPortInit);
             CHECK_RET_VAL(err);
 	    	err = dsVideoDeviceInit();
 	    	CHECK_RET_VAL(err);

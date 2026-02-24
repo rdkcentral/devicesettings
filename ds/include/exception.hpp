@@ -64,7 +64,7 @@ public:
  *
  * @return None
  */
-	Exception(const char *msg = "No Message for this exception") throw() : _msg(msg) {
+	Exception(const char *msg = "No Message for this exception") throw() : _err(0), _msg(msg) {
 	}
 
 

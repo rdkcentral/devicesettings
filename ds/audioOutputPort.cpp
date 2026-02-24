@@ -131,7 +131,7 @@ AudioOutputPort::AudioOutputPort(const int type, const int index, const int id) 
 		out << getType().getName() << _index;
 		_name = out.str();
         }  
-        printf ("\nAudioOutputPort init: _type:%d _index:%d _handle:%d\n", _type, _index, _handle);
+        printf ("\nAudioOutputPort init: _type:%d _index:%d _handle:%ld\n", _type, _index, (long)_handle);
         if (dsERR_NONE == ret) {
 		//dsGetAudioCompression	(_handle, (dsAudioCompression_t *)&_compression);
 		dsGetAudioEncoding		(_handle, (dsAudioEncoding_t *)&_encoding);
@@ -184,7 +184,7 @@ dsError_t AudioOutputPort::reInitializeAudioOutputPort()
           _name = out.str();
        }
      
-       printf ("\nAudioOutputPort init: _type:%d _index:%d _handle:%d\n", _type, _index, _handle);
+       printf ("\nAudioOutputPort init: _type:%d _index:%d _handle:%ld\n", _type, _index,(long)_handle);
        if (dsERR_NONE == ret) {
           //dsGetAudioCompression>(_handle, (dsAudioCompression_t *)&_compression);
            dsGetAudioEncoding(_handle, (dsAudioEncoding_t *)&_encoding);
@@ -1422,11 +1422,11 @@ void AudioOutputPort::setAudioDelay(const uint32_t audioDelayMs)
 	dsError_t ret = dsERR_NONE;
 	uint32_t ms = audioDelayMs;
 
-	INT_INFO("AudioOutputPort [%s], setting delay to [%lu] ms\n", _name.c_str(), audioDelayMs);
+	INT_INFO("AudioOutputPort [%s], setting delay to [%u] ms\n", _name.c_str(), audioDelayMs);
 
 	if (ms > audioDelayMsMax)
 	{
-		INT_ERROR("AudioOutputPort [%s], delay [%lu] ms, exceeds max [%lu]. Setting Max \n",
+		INT_ERROR("AudioOutputPort [%s], delay [%u] ms, exceeds max [%u]. Setting Max \n",
 			_name.c_str(),
 			audioDelayMs,
 			audioDelayMsMax);

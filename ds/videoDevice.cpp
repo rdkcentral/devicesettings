@@ -102,7 +102,7 @@ VideoDevice & VideoDevice::getInstance(int id)
  * @param[in] id Port id.
  * @return None.
  */
-VideoDevice::VideoDevice(int id)
+VideoDevice::VideoDevice(int id): _dfc(0)
 {
 	dsError_t ret = dsGetVideoDevice(id, &_handle);
 

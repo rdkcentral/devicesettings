@@ -385,6 +385,53 @@ Host::~Host()
         return std::string(socID);
    }
 
+   intptr_t Host::getAudioPortHandle()
+   {
+        try
+        {
+            if (isHDMIOutPortPresent())
+            {
+                //STB profile with single audio output port
+                AudioOutputPort aPort = getAudioOutputPort("HDMI0");
+                return aPort.getOutputPortHandle();
+            } 
+            else 
+            {
+                //TV profile with multiple audio output ports
+                // First check the ports which are dynamically conected and finally fallback to SPEAKER0 which is always connected.
+                const std::string audio_ports[] = {"HDMI_ARC0", "HEADPHONE0", "SPDIF0", "SPEAKER0"};
+                
+                // Try each port in priority order
+                for (const auto& portName : audio_ports)
+                {
+                    try
+                    {
+                        AudioOutputPort aPort = getAudioOutputPort(portName);
+                        cout << "Checking audio port: " << portName << " isEnabled: " << aPort.isEnabled() << " isConnected: " << aPort.isConnected() << "\n";
+                        // Check if port is enabled and connected
+                        if (aPort.isEnabled() && aPort.isConnected())
+                        {
+                            cout << "Using audio port: " << portName << "\n";
+                            return aPort.getOutputPortHandle();
+                        }
+                    }
+                    catch(const std::exception& e)
+                    {
+                        // Port not found or error accessing it, log and continue to next port
+                        cout << "Exception while accessing audio port " << portName << ": " << e.what() << "\n";
+                        continue;
+                    }
+                }
+            }
+        }
+        catch(const std::exception& e)
+        {
+            cout << " Exception Thrown in getAudioPortHandle().. returning NULL...: " << e.what() << "\n";
+        }
+
+        return NULL;
+   }
+
    /**
     * Host::getCurrentAudioFormat(dsAudioFormat_t &audioFormat)
     * @brief
@@ -397,8 +444,8 @@ Host::~Host()
    {
        dsError_t ret = dsERR_NONE;
        dsAudioFormat_t aFormat;
-
-       ret = dsGetAudioFormat(NULL, &aFormat);
+       intptr_t audioPortHandle = getAudioPortHandle();	
+       ret = dsGetAudioFormat(audioPortHandle, &aFormat);
 
        if (ret == dsERR_NONE)
        {
