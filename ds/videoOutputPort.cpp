@@ -465,12 +465,21 @@ bool VideoOutputPort::isDynamicResolutionSupported() const
  */
 void VideoOutputPort::setResolution(const std::string &resolutionName, bool persist/* = true*/, bool isIgnoreEdid/* = false*/)
 {
+	    printf("Aishwarya [DEBUG] Enter setResolution()\n");
         printf("ResOverride VideoOutputPort::setResolution resolutionName:%s persist:%d isIgnoreEdid:%d line:%d\r\n", resolutionName.c_str(), persist, isIgnoreEdid, __LINE__);
 	if (0 && resolutionName.compare(_resolution) == 0) {
+		printf("Aishwarya [DEBUG] Resolution already set (%s). Skipping.\n", _resolution.c_str());
 		return;
 	}
+	printf("Aishwarya [DEBUG] Getting VideoResolution instance...\n");
 
 	VideoResolution newResolution = VideoResolution::getInstance(resolutionName, isIgnoreEdid);
+	printf("Aishwarya [DEBUG] VideoResolution created successfully\n");
+    printf("Aishwarya[DEBUG] AspectRatio: %d\n", newResolution.getAspectRatio().getId());
+    printf("Aishwarya[DEBUG] FrameRate: %d\n", newResolution.getFrameRate().getId());
+    printf("Aishwarya[DEBUG] Interlaced: %d\n", newResolution.isInterlaced());
+    printf("Aishwarya[DEBUG] PixelResolution: %d\n", newResolution.getPixelResolution().getId());
+    printf("Aishwarya[DEBUG] StereoMode: %d\n", newResolution.getStereoscopicMode().getId());
 
 	dsVideoPortResolution_t resolution;
         memset(&resolution, 0, sizeof(resolution));
