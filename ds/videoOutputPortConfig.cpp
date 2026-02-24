@@ -123,12 +123,21 @@ VideoOutputPort &VideoOutputPortConfig::getPort(int id)
 
 VideoOutputPort &VideoOutputPortConfig::getPort(const std::string & name)
 {
+	printf("\n Aishwarya [DEBUG] Enter VideoOutputPortConfig::getPort()\n");
+    printf("Aishwarya [DEBUG] Requested port name: %s\n", name.c_str());
+    printf("Aishwarya [DEBUG] Total available ports: %zu\n", _vPorts.size());
 	for (size_t i = 0; i < _vPorts.size(); i++) {
+		printf("Aishwarya [DEBUG] Checking index %zu\n", i);
+        printf("Aishwarya [DEBUG] Port name: %s\n", _vPorts.at(i).getName().c_str());
 		if (name.compare(_vPorts.at(i).getName()) == 0) {
+			printf("Aishwarya [DEBUG] Match found at index %zu for name: %s\n", i, name.c_str());
 			return _vPorts.at(i);
 		}
 	}
+	printf("Aishwarya [ERROR] No matching port found for name: %s\n", name.c_str());
+    printf("Aishwarya [DEBUG] Throwing IllegalArgumentException\n");
 
+ 
 	throw IllegalArgumentException();
 }
 
