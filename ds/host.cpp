@@ -217,7 +217,11 @@ Host::~Host()
  */
     VideoOutputPort &Host::getVideoOutputPort(int id)
     {
+		printf("Aishwarya [DEBUG] Enter Host::getVideoOutputPort()\n");
+        printf("Aishwarya [DEBUG] Requested port name: %s\n", name.c_str());
+        printf("Aishwarya [DEBUG] Calling VideoOutputPortConfig::getPort()...\n");
         return VideoOutputPortConfig::getInstance().getPort(id);
+		printf("Aishwarya [DEBUG] getPort() returned successfully for: %s\n", name.c_str());
     }
 
 
