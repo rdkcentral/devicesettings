@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2026 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ typedef struct {
     void** dataptr;
 } dlSymbolLookup_t;
 
+static int configsLoaded = 0;
+
 
 static int LoadDLSymbols(void* pDLHandle, const dlSymbolLookup_t* symbols, int numberOfSymbols)
 {
@@ -81,10 +83,11 @@ static int LoadDLSymbols(void* pDLHandle, const dlSymbolLookup_t* symbols, int n
     return isAllSymbolsLoaded;
 }
 
-static void loadDeviceCapabilities(unsigned int capabilityType)
+static dsError_t loadDeviceCapabilities(unsigned int capabilityType)
 {
     void* pDLHandle = NULL;
-    int isSymbolsLoaded = 0, ret = -1;
+    int isSymbolsLoaded = 0;
+    dsError_t ret = dsERR_GENERAL, audioRet = dsERR_GENERAL, videoRet = dsERR_GENERAL, videoPortRet = dsERR_GENERAL;
 
     INT_INFO("Entering capabilityType = 0x%08X\n", capabilityType);
     dlerror(); /* clear old error */
@@ -108,8 +111,8 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
             isSymbolsLoaded = LoadDLSymbols(pDLHandle, audioConfigSymbols, 
                                            sizeof(audioConfigSymbols)/sizeof(dlSymbolLookup_t));
         }
-        ret = dsLoadAudioOutputPortConfig(isSymbolsLoaded ? &dynamicAudioConfigs : NULL);
-        if(ret == -1)
+        audioRet = dsLoadAudioOutputPortConfig(isSymbolsLoaded ? &dynamicAudioConfigs : NULL);
+        if(audioRet == dsERR_GENERAL)
         {
             INT_ERROR("dsLoadAudioOutputPortConfig() failed");
         }
@@ -135,8 +138,8 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
             isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoPortConfigSymbols, 
                                            sizeof(videoPortConfigSymbols)/sizeof(dlSymbolLookup_t));
         }
-        ret = dsLoadVideoOutputPortConfig(isSymbolsLoaded ? &dynamicVideoPortConfigs : NULL);
-        if(ret == -1)
+        videoPortRet = dsLoadVideoOutputPortConfig(isSymbolsLoaded ? &dynamicVideoPortConfigs : NULL);
+        if(videoPortRet == dsERR_GENERAL)
         {
             INT_ERROR("dsLoadVideoOutputPortConfig() failed");
         }
@@ -157,8 +160,8 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
             isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoDeviceConfigSymbols, 
                                            sizeof(videoDeviceConfigSymbols)/sizeof(dlSymbolLookup_t));
         }
-        ret = dsLoadVideoDeviceConfig(isSymbolsLoaded ? &dynamicVideoDeviceConfigs : NULL);
-        if(ret == -1)
+        videoRet = dsLoadVideoDeviceConfig(isSymbolsLoaded ? &dynamicVideoDeviceConfigs : NULL);
+        if(videoRet == dsERR_GENERAL)
         {
             INT_ERROR("dsLoadVideoDeviceConfig() failed");
         }        
@@ -168,25 +171,56 @@ static void loadDeviceCapabilities(unsigned int capabilityType)
         dlclose(pDLHandle);
         pDLHandle = NULL;
     }
+
+    if(audioRet == dsERR_GENERAL || videoRet == dsERR_GENERAL || videoPortRet == dsERR_GENERAL)
+    {
+        INT_ERROR("Failed to load device capabilities: audioRet=%d, videoRet=%d, videoPortRet=%d\n", audioRet, videoRet, videoPortRet);
+        return dsERR_GENERAL;
+    }
     INT_INFO("Exiting ...\n");
+    return dsERR_NONE;
 }
 
-void dsLoadConfigs(void)
+dsError_t dsLoadConfigs(void)
 {
+    dsError_t ret = dsERR_GENERAL;
+
     INT_INFO("Enter function\n");
-    loadDeviceCapabilities(DEVICE_CAPABILITY_VIDEO_PORT | 
+    
+    // Check if configs are already loaded
+    if (configsLoaded) {
+        INT_INFO("Configs already loaded, skipping reload\n");
+        return dsERR_NONE;
+    }
+    
+    //TODO:Add the mutex lock handel in future
+    ret = loadDeviceCapabilities(DEVICE_CAPABILITY_VIDEO_PORT | 
                           DEVICE_CAPABILITY_AUDIO_PORT |
                           DEVICE_CAPABILITY_VIDEO_DEVICE);
+    if (ret == dsERR_GENERAL)
+    {
+        INT_ERROR("[srv] load failed\n ");
+        return ret;
+    }
+    
+    // Mark configs as loaded
+    configsLoaded = 1;
     INT_INFO("Exit function\n");
+    return dsERR_NONE;
 }
 
-void dsFreeConfig()
+dsError_t dsFreeConfig()
 {
     // Free dynamically allocated configuration memory
 	INT_INFO("Freeing device configuration resources\n");
 	dsAudioConfigFree();
 	dsVideoDeviceConfigFree();
 	dsVideoPortConfigFree();
+	
+	// Reset loaded flag so configs can be reloaded if needed
+	configsLoaded = 0;
+	INT_INFO("Config freed and reload flag reset\n");
+	return dsERR_NONE;
 }
 
 #ifdef __cplusplus

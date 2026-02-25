@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2026 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 #include <string.h>
 #include "dsserverlogger.h"
 #include "dsTypes.h"
+#include "dsError.h"
 #include "dsAudioConfig.h"
 #include "dsAudioSettings.h"
 
@@ -135,13 +136,14 @@ static int allocateAndCopyAudioPorts(const dsAudioPortConfig_t* source, int numE
     return numElements;
 }
 
-int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
+dsError_t dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
 {
     int configSize, portSize;
     const dsAudioTypeConfig_t* audioConfigs;
     const dsAudioPortConfig_t* audioPorts;
     bool isDynamic;
 
+    
     INT_INFO("Using '%s' config\n", dynamicAudioConfigs ? "dynamic" : "static");
     
     // Set up parameters based on config source
@@ -162,7 +164,7 @@ int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
     // Allocate and copy audio type configs
     if (allocateAndCopyAudioConfigs(audioConfigs, configSize, isDynamic) == -1) {
         INT_ERROR("Failed to allocate audio type configs\n");
-        return -1;
+        return dsERR_GENERAL;
     }
     
     // Allocate and copy audio port configs
@@ -173,7 +175,7 @@ int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
             free(audioConfiguration.pKAudioConfigs);
             audioConfiguration.pKAudioConfigs = NULL;
         }
-        return -1;
+        return dsERR_GENERAL;
     }
 
     INT_INFO("Store sizes configSize =%d, portSize =%d\n", configSize, portSize);
@@ -190,28 +192,45 @@ int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
             audioConfiguration.kPortSize);
 
     audioDumpconfig(&audioConfiguration);
-    return 0;
+    return dsERR_NONE;
 }
 
 // Getter functions for use across srv code
-void dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outConfigs)
+dsError_t _dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outConfigs)
 {
+    
+    if((outConfigSize == NULL) && (outConfigs == NULL))
+    {
+        INT_ERROR("Invalid argument pointer\n");
+        return dsERR_GENERAL;
+    }
+
     if (outConfigSize != NULL) {
         *outConfigSize = audioConfiguration.kConfigSize;
     }
     if (outConfigs != NULL) {
         *outConfigs = audioConfiguration.pKAudioConfigs;
     }
+
+    return dsERR_NONE;
 }
 
-void dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts)
+dsError_t _dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts)
 {
+    
+    if((outPortSize == NULL) && (outPorts == NULL))
+    {
+        INT_ERROR("Invalid argument pointer\n");
+        return dsERR_GENERAL;
+    }
     if (outPortSize != NULL) {
         *outPortSize = audioConfiguration.kPortSize;
     }
     if (outPorts != NULL) {
         *outPorts = audioConfiguration.pKAudioPorts;
     }
+    
+    return dsERR_NONE;
 }
 
 void dsAudioConfigFree(void)

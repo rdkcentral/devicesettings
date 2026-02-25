@@ -28,32 +28,29 @@
 #define _DS_VIDEO_DEVICE_CONFIG_H_
 
 #include "dsTypes.h"
-//#include "dsVideoDeviceSettings.h"
+#include "dsError.h"
+#include "dsConfigs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct videoDeviceConfig
-{
-	dsVideoConfig_t *pKVideoDeviceConfigs;
-	int *pKVideoDeviceConfigs_size;
-}videoDeviceConfig_t;
-
 /**
  * @brief Load video device configuration
  * 
  * @param[in] dynamicVideoDeviceConfigs Pointer to dynamic video device configuration, or NULL for static config
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs);
+dsError_t dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs);
 
 /**
  * @brief Get video device configurations
  * 
  * @param[out] outConfigSize Pointer to store the number of video device configs, or NULL
  * @param[out] outConfigs Pointer to store the video device configs array, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs);
+dsError_t _dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs);
 
 /**
  * @brief Free video device configuration resources

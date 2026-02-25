@@ -28,60 +28,56 @@
 #define _DS_VIDEO_PORT_CONFIG_H_
 
 #include "dsTypes.h"
-//#include "dsVideoPortSettings.h"
+#include "dsError.h"
+#include "dsConfigs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct videoPortConfigs
-{
-	const dsVideoPortTypeConfig_t  *pKVideoPortConfigs;
-	int *pKVideoPortConfigs_size;
-	const dsVideoPortPortConfig_t  *pKVideoPortPorts;
-	int *pKVideoPortPorts_size;
-	dsVideoPortResolution_t *pKVideoPortResolutionsSettings;
-	int *pKResolutionsSettings_size;
-	int *pKDefaultResIndex;
-}videoPortConfigs_t;
 
 /**
  * @brief Load video output port configuration
  * 
  * @param[in] dynamicVideoPortConfigs Pointer to dynamic video port configuration, or NULL for static config
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-int dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
+dsError_t dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
 
 /**
  * @brief Get video port type configurations
  * 
  * @param[out] outConfigSize Pointer to store the number of video port type configs, or NULL
  * @param[out] outConfigs Pointer to store the video port type configs array, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetVideoPortTypeConfigs(int* outConfigSize, const dsVideoPortTypeConfig_t** outConfigs);
+dsError_t _dsGetVideoPortTypeConfigs(int* outConfigSize, const dsVideoPortTypeConfig_t** outConfigs);
 
 /**
  * @brief Get video port port configurations
  * 
  * @param[out] outPortSize Pointer to store the number of video port port configs, or NULL
  * @param[out] outPorts Pointer to store the video port port configs array, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetVideoPortPortConfigs(int* outPortSize, const dsVideoPortPortConfig_t** outPorts);
+dsError_t _dsGetVideoPortPortConfigs(int* outPortSize, const dsVideoPortPortConfig_t** outPorts);
 
 /**
  * @brief Get video port resolutions
  * 
  * @param[out] outResolutionSize Pointer to store the number of video port resolutions, or NULL
  * @param[out] outResolutions Pointer to store the video port resolutions array, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetVideoPortResolutions(int* outResolutionSize, dsVideoPortResolution_t** outResolutions);
+dsError_t _dsGetVideoPortResolutions(int* outResolutionSize, dsVideoPortResolution_t** outResolutions);
 
 /**
  * @brief Get default resolution index
  * 
  * @param[out] outDefaultIndex Pointer to store the default resolution index, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetDefaultResolutionIndex(int* outDefaultIndex);
+dsError_t _dsGetDefaultResolutionIndex(int* outDefaultIndex);
 
 /**
  * @brief Free video port configuration resources

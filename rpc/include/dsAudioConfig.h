@@ -28,42 +28,39 @@
 #define _DS_AUDIO_CONFIG_H_
 
 #include "dsTypes.h"
-//#include "dsAudioSettings.h"
+#include "dsError.h"
+#include "dsConfigs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct audioConfigs
-{
-	const dsAudioTypeConfig_t  *pKAudioConfigs;
-	const dsAudioPortConfig_t  *pKAudioPorts;
-	int *pKConfigSize;
-	int *pKPortSize;
-}audioConfigs_t;
 
 /**
  * @brief Load audio output port configuration
  * 
  * @param[in] dynamicAudioConfigs Pointer to dynamic audio configuration, or NULL for static config
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-int dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs);
+dsError_t dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs);
 
 /**
  * @brief Get audio type configurations
  * 
  * @param[out] outConfigSize Pointer to store the number of audio type configs, or NULL
  * @param[out] outConfigs Pointer to store the audio type configs array, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outConfigs);
+dsError_t _dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outConfigs);
 
 /**
  * @brief Get audio port configurations
  * 
  * @param[out] outPortSize Pointer to store the number of audio port configs, or NULL
  * @param[out] outPorts Pointer to store the audio port configs array, or NULL
+ * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-void dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts);
+dsError_t _dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts);
 
 /**
  * @brief Free audio configuration resources

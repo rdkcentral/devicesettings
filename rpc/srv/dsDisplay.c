@@ -46,10 +46,7 @@
 #include "dsMgr.h"
 #include "dsserverlogger.h"
 #include "dsVideoPort.h"
-//#include "dsVideoPortSettings.h"
-//#include "dsVideoResolutionSettings.h"
 #include "dsVideoPortConfig.h"
-//#include "dsConfigs.h"
 #include "dsInternal.h"
 
 #include "safec_lib.h"
@@ -580,7 +577,7 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
 {
     errno_t rc = -1;
     dsVideoPortResolution_t *edidResn = NULL;
-    dsVideoPortResolution_t *presolution = NULL, *kVidoeResolutionsSettings = NULL;
+    dsVideoPortResolution_t *presolution = NULL, *pVideoResolutionsSettings = NULL;
     dsDisplayEDID_t *edidData = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
     dsVideoPortType_t _VPortType = _GetDisplayPortType(handle);
     if (edid == NULL) {
@@ -592,22 +589,12 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
     if(_VPortType == dsVIDEOPORT_TYPE_HDMI)
     { 
         INT_DEBUG("EDID for HDMI Port\r\n");    
-        //size_t iCount = dsUTL_DIM(kResolutions);
         int iCount = 0;
         //Get details from libds
-        dsGetVideoPortResolutions(&iCount, &kVidoeResolutionsSettings);
-        
-        // Print kVidoeResolutionsSettings array
-        INT_INFO("[DsMgr] ========== Dumping kVidoeResolutionsSettings Array ==========\r\n");
-        INT_INFO("[DsMgr] Total resolutions retrieved: %d\r\n", iCount);
-        for (int k = 0; k < iCount; k++) {
-            dsVideoPortResolution_t *res = &kVidoeResolutionsSettings[k];
-            INT_INFO("[DsMgr] [%d] name=%s, pixelRes=%d, aspectRatio=%d, stereoMode=%d, frameRate=%d, interlaced=%d\r\n",
-                     k, res->name, res->pixelResolution, res->aspectRatio, 
-                     res->stereoScopicMode, res->frameRate, res->interlaced);
+        if (_dsGetVideoPortResolutions(&iCount, &pVideoResolutionsSettings) != dsERR_NONE) {
+            INT_ERROR("Failed to get video port resolutions\n");
         }
-        INT_INFO("[DsMgr] ========== End of kVidoeResolutionsSettings Dump ==========\r\n");
-        
+
         /*Initialize the struct*/
         memset(edidData,0,sizeof(*edidData));
         /*Copy the content */
@@ -620,14 +607,14 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
         edid->numOfSupportedResolution = 0;
         for (size_t i = 0; i < iCount; i++)
         {
-            presolution = &kVidoeResolutionsSettings[i];
+            presolution = &pVideoResolutionsSettings[i];
             for (size_t j = 0; j < edidData->numOfSupportedResolution; j++)
             {    
                 edidResn = &(edidData->suppResolutionList[j]);
                 
                 if (0 == (strcmp(presolution->name,edidResn->name)))
                 {
-                    edid->suppResolutionList[edid->numOfSupportedResolution] = kVidoeResolutionsSettings[i];
+                    edid->suppResolutionList[edid->numOfSupportedResolution] = pVideoResolutionsSettings[i];
                     edid->numOfSupportedResolution++;
                     numOfSupportedResolution++;
                     INT_DEBUG("[DsMgr] presolution->name : %s, resolution count : %d\r\n",presolution->name,numOfSupportedResolution);
@@ -662,29 +649,19 @@ static dsVideoPortType_t _GetDisplayPortType(intptr_t handle)
 {
     int numPorts,i;
     intptr_t halhandle = 0;
-    const dsVideoPortPortConfig_t *kVideoPortPorts = NULL;
+    const dsVideoPortPortConfig_t *pVideoPortPorts = NULL;
     
-    //numPorts = dsUTL_DIM(kSupportedPortTypes);
-    dsGetVideoPortPortConfigs(&numPorts, &kVideoPortPorts);
-    
-    // Print kVideoPortPorts array
-    INT_INFO("[DsMgr] ========== Dumping kVideoPortPorts Array ==========\r\n");
-    INT_INFO("[DsMgr] Total ports retrieved: %d\r\n", numPorts);
-    for (int k = 0; k < numPorts; k++) {
-        const dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
-        INT_INFO("[DsMgr] [%d] type=%d, index=%d, connectedAOP_type=%d, connectedAOP_index=%d, defaultResolution=%s\r\n",
-                 k, port->id.type, port->id.index, 
-                 port->connectedAOP.type, port->connectedAOP.index, 
-                 port->defaultResolution);
+    if (_dsGetVideoPortPortConfigs(&numPorts, &pVideoPortPorts) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port port configurations\n");
+        return dsVIDEOPORT_TYPE_MAX;
     }
-    INT_INFO("[DsMgr] ========== End of kVideoPortPorts Dump ==========\r\n");
-    
+
     for(i=0; i< numPorts; i++)
     {
-        dsGetDisplay(kVideoPortPorts[i].id.type, kVideoPortPorts[i].id.index, &halhandle);
+        dsGetDisplay(pVideoPortPorts[i].id.type, pVideoPortPorts[i].id.index, &halhandle);
         if (handle == halhandle)
         {
-            return kVideoPortPorts[i].id.type;
+            return pVideoPortPorts[i].id.type;
         }
     }
     INT_INFO("Error: The Requested Display is not part of Platform Port Configuration \r\n");

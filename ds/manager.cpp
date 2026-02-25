@@ -43,10 +43,12 @@
 #include "exception.hpp"
 #include <pthread.h>
 #include <unistd.h>
+#include <functional>
 #include <dlfcn.h>
 #include <fstream>
 #include "dsHALConfig.h"
 #include "frontPanelConfig.hpp"
+
 
 //static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -261,26 +263,21 @@ dsError_t initializeFunctionWithRetry(const char* functionName,
  */
 void Manager::Initialize()
 {
-	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
+    bool needInit = false;
+
+    {std::lock_guard<std::mutex> lock(gManagerInitMutex);
+        printf("Entering %s count %d with thread id %lu\n",__FUNCTION__,IsInitialized,pthread_self());
+        if (IsInitialized == 0) {
+            needInit = true;
+        }
+        IsInitialized++;
+	}
 	
-	INT_INFO("Entering ... count %d with thread id %lu\n",IsInitialized,pthread_self());
-	
-	try {
-	    if (0 == IsInitialized) {	
-        
-	    	dsError_t err = dsERR_GENERAL;
-	    	unsigned int retryCount = 0;
-	    	// This retry logic will wait for the device manager initialization from the client side
-	    	// until the device manager service initialization is completed. The retry mechanism checks
-	    	// only for dsERR_INVALID_STATE, which is reported if the underlying service is not ready.
-	    	// Once the service is ready, other port initializations can be called directly without any delay.
-	    	// That's why the retry logic is applied only for dsDisplayInit.
-	    	do {
-	    		err = dsDisplayInit();
-	    		INT_INFO("dsDisplayInit returned %d, retryCount %d", err, retryCount);
-	    		if (dsERR_NONE == err) break;
-	    		usleep(100000);
-	    	} while(( dsERR_INVALID_STATE == err) && (retryCount++ < 25));
+    try {
+        if (needInit) {
+            dsError_t err = dsERR_GENERAL;
+
+            err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit);
             CHECK_RET_VAL(err);
             
             err = initializeFunctionWithRetry("dsAudioPortInit", dsAudioPortInit);
@@ -288,21 +285,23 @@ void Manager::Initialize()
             
             err = initializeFunctionWithRetry("dsVideoPortInit", dsVideoPortInit);
             CHECK_RET_VAL(err);
-	    	err = dsVideoDeviceInit();
-	    	CHECK_RET_VAL(err);
-
+            
+            err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit);
+            CHECK_RET_VAL(err);
+            
             loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT |
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
                                     device::DEVICE_CAPABILITY_VIDEO_DEVICE |
                                     device::DEVICE_CAPABILITY_FRONT_PANEL);
-	    }
-        IsInitialized++;
+        }
     }
     catch(const Exception &e) {
-		cout << "Caught exception during Initialization" << e.what() << endl;
-		throw e;
-	}
-	}
+        cout << "Caught exception during Initialization" << e.what() << endl;
+		std::lock_guard<std::mutex> lock(gManagerInitMutex);
+        IsInitialized--;
+        throw e;
+    }
+
 	INT_INFO("Exiting ... with thread id %lu",pthread_self());
 }
 

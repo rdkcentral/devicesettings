@@ -30,22 +30,30 @@
 #define _DS_SERVER_LOGGER_H_
 
 #include <stdio.h>
+#include <string.h>
 #include "dsserverregisterlog.h"
 
 int ds_server_log(int priority,const char *format, ...);
+// Helper to extract filename from full path
+// E.g. "/path/to/file.cpp" -> "file.cpp"
+// IMPORTANT: This will work for Unix style paths only
+static inline const char* fileName(const char* path) {
+    const char* slash = strrchr(path, '/');
+    return slash ? slash + 1 : path;
+}
 
 #if (defined(DSMGR_LOGGER_ENABLED))
 #include "rdk_debug.h"
 
 void dsServer_Rdklogger_Init();
 
-#define INT_ERROR(FORMAT, ...)       LOG_ERROR(PREFIX(FORMAT), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define INT_WARNING(FORMAT,  ...)       LOG_WARNING(PREFIX(FORMAT),  __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define INT_INFO(FORMAT,  ...)       LOG_INFO(PREFIX(FORMAT),  __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define INT_DEBUG(FORMAT, ...)       LOG_DEBUG(PREFIX(FORMAT), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define INT_TRACE(FORMAT, ...)       LOG_TRACE(PREFIX(FORMAT), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define INT_ERROR(FORMAT, ...)       LOG_ERROR(PREFIX(FORMAT), fileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define INT_WARNING(FORMAT,  ...)    LOG_WARNING(PREFIX(FORMAT), fileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define INT_INFO(FORMAT,  ...)       LOG_INFO(PREFIX(FORMAT),  fileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define INT_DEBUG(FORMAT, ...)       LOG_DEBUG(PREFIX(FORMAT), fileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define INT_TRACE(FORMAT, ...)       LOG_TRACE(PREFIX(FORMAT), fileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
-#define PREFIX(FORMAT)  "%d\t: %s - " FORMAT
+#define PREFIX(FORMAT)  "[%s:%d] %s: " FORMAT
 
 extern int b_rdk_logger_enabled;
 

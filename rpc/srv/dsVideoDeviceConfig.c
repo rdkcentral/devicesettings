@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2016 RDK Management
+ * Copyright 2026 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 #include <string.h>
 #include "dsserverlogger.h"
 #include "dsTypes.h"
+#include "dsError.h"
 #include "dsVideoDeviceConfig.h"
 #include "dsVideoDeviceSettings.h"
 
@@ -93,12 +94,48 @@ static int allocateAndCopyVideoDeviceConfigs(const dsVideoConfig_t* source, int 
         return -1;
     }
     
+    /* First copy the structures themselves. Pointer fields (such as 'supportedDFCs') will be
+     * fixed up below to avoid shallow copies into HAL-owned memory. */
     memcpy(videoDeviceConfiguration.pKVideoDeviceConfigs, source, numElements * sizeof(dsVideoConfig_t));
+    
+    /* Deep copy the 'supportedDFCs' array for each config so it does not reference
+     * memory owned by the HAL library, which may be unloaded. */
+    for (int i = 0; i < numElements; ++i)
+    {
+        if (source[i].supportedDFCs != NULL && source[i].numSupportedDFCs > 0)
+        {
+            size_t dfcArraySize = source[i].numSupportedDFCs * sizeof(dsVideoZoom_t);
+            dsVideoZoom_t *dupDFCs = (dsVideoZoom_t*)malloc(dfcArraySize);
+            if (dupDFCs == NULL)
+            {
+                INT_ERROR("Failed to duplicate %s video device config supportedDFCs at index %d\n", configType, i);
+                /* Clean up any DFCs already duplicated and the configs array itself. */
+                for (int j = 0; j < i; ++j)
+                {
+                    if (videoDeviceConfiguration.pKVideoDeviceConfigs[j].supportedDFCs != NULL)
+                    {
+                        free((void*)videoDeviceConfiguration.pKVideoDeviceConfigs[j].supportedDFCs);
+                        videoDeviceConfiguration.pKVideoDeviceConfigs[j].supportedDFCs = NULL;
+                    }
+                }
+                free(videoDeviceConfiguration.pKVideoDeviceConfigs);
+                videoDeviceConfiguration.pKVideoDeviceConfigs = NULL;
+                return -1;
+            }
+            memcpy(dupDFCs, source[i].supportedDFCs, dfcArraySize);
+            videoDeviceConfiguration.pKVideoDeviceConfigs[i].supportedDFCs = dupDFCs;
+        }
+        else
+        {
+            videoDeviceConfiguration.pKVideoDeviceConfigs[i].supportedDFCs = NULL;
+        }
+    }
+    
     INT_INFO("Allocated and copied %d video device configs (%s)\n", numElements, configType);
     return numElements;
 }
 
-int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs)
+dsError_t dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs)
 {
     int configSize;
     const dsVideoConfig_t* videoConfigs;
@@ -120,7 +157,7 @@ int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs
     // Allocate and copy video device configs
     if (allocateAndCopyVideoDeviceConfigs(videoConfigs, configSize, isDynamic) == -1) {
         INT_ERROR("Failed to allocate video device configs\n");
-        return -1;
+        return dsERR_GENERAL;
     }
 
     INT_INFO("Store sizes configSize =%d\n", configSize);
@@ -131,18 +168,26 @@ int dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceConfigs
             videoDeviceConfiguration.pKVideoDeviceConfigs,
             videoDeviceConfiguration.kVideoDeviceConfigs_size);
     videoDeviceDumpconfig(&videoDeviceConfiguration);
-    return 0;
+    return dsERR_NONE;
 }
 
 // Getter functions for use across srv code
-void dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs)
+dsError_t _dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs)
 {
+
+    if((outConfigSize == NULL) && (outConfigs == NULL))
+    {
+        INT_ERROR("Invalid argument pointer\n");
+        return dsERR_GENERAL;
+    }
     if (outConfigSize != NULL) {
         *outConfigSize = videoDeviceConfiguration.kVideoDeviceConfigs_size;
     }
     if (outConfigs != NULL) {
         *outConfigs = videoDeviceConfiguration.pKVideoDeviceConfigs;
     }
+
+    return dsERR_NONE;
 }
 
 void dsVideoDeviceConfigFree(void)
@@ -151,6 +196,14 @@ void dsVideoDeviceConfigFree(void)
     
     // Free video device configs
     if (videoDeviceConfiguration.pKVideoDeviceConfigs != NULL) {
+        // Free each supportedDFCs array
+        for (int i = 0; i < videoDeviceConfiguration.kVideoDeviceConfigs_size; ++i) {
+            if (videoDeviceConfiguration.pKVideoDeviceConfigs[i].supportedDFCs != NULL) {
+                free((void*)videoDeviceConfiguration.pKVideoDeviceConfigs[i].supportedDFCs);
+                videoDeviceConfiguration.pKVideoDeviceConfigs[i].supportedDFCs = NULL;
+                INT_INFO("Freed pKVideoDeviceConfigs[%d].supportedDFCs\n", i);
+            }
+        }
         free(videoDeviceConfiguration.pKVideoDeviceConfigs);
         videoDeviceConfiguration.pKVideoDeviceConfigs = NULL;
         INT_INFO("Freed pKVideoDeviceConfigs\n");

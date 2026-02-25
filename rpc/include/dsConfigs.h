@@ -28,9 +28,7 @@
 #define _DS_CONFIGS_H_
 
 #include "dsTypes.h"
-//#include "dsAudioSettings.h"
-//#include "dsVideoPortSettings.h"
-//#include "dsVideoDeviceSettings.h"
+#include "dsError.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,13 +63,15 @@ typedef struct videoDeviceConfig
  * @brief Load all device settings configurations
  * 
  * Loads audio, video port, and video device configurations from HAL library
+ * @return dsERR_NONE on success, dsERR_GENERAL on failure
  */
-void dsLoadConfigs(void);
+dsError_t dsLoadConfigs(void);
 
 /** 
  * Free the config dynamic pointers
+ * @return dsERR_NONE on success, dsERR_GENERAL on failure
  */
-void dsFreeConfig();
+dsError_t dsFreeConfig();
 
 #ifdef __cplusplus
 }

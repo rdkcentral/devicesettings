@@ -51,9 +51,7 @@
 #include "hostPersistence.hpp"
 #include "dsserverlogger.h"
 #include "dsTypes.h"
-//#include "dsVideoPortSettings.h"
 #include "dsVideoPortConfig.h"
-//#include "dsConfigs.h"
 #include "dsInternal.h"
 #include "safec_lib.h"
 #include <vector>
@@ -1705,28 +1703,19 @@ static dsVideoPortType_t _GetVideoPortType(intptr_t handle)
 {
     int numPorts = 0, i;
     intptr_t halhandle = 0;
-    const dsVideoPortPortConfig_t *kVideoPortPorts = NULL;
+    const dsVideoPortPortConfig_t *pVideoPortPorts = NULL;
 
-    dsGetVideoPortPortConfigs(&numPorts, &kVideoPortPorts);
-    
-    // Print kVideoPortPorts array
-    INT_INFO("[DsMgr] ========== Dumping kVideoPortPorts Array in _GetVideoPortType ==========\r\n");
-    INT_INFO("[DsMgr] Total ports retrieved: %d\r\n", numPorts);
-    for (int k = 0; k < numPorts; k++) {
-        const dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
-        INT_INFO("[DsMgr] [%d] type=%d, index=%d, connectedAOP_type=%d, connectedAOP_index=%d, defaultResolution=%s\r\n",
-                 k, port->id.type, port->id.index, 
-                 port->connectedAOP.type, port->connectedAOP.index, 
-                 port->defaultResolution ? port->defaultResolution : "NULL");
+    if (_dsGetVideoPortPortConfigs(&numPorts, &pVideoPortPorts) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port port configurations\n");
+        return dsVIDEOPORT_TYPE_MAX;
     }
-    INT_INFO("[DsMgr] ========== End of kVideoPortPorts Dump ==========\r\n");
-    
+
     for(i=0; i< numPorts; i++)
     {
-		dsGetVideoPort(kVideoPortPorts[i].id.type, kVideoPortPorts[i].id.index, &halhandle);
+		dsGetVideoPort(pVideoPortPorts[i].id.type, pVideoPortPorts[i].id.index, &halhandle);
 		if (handle == halhandle)
 		{
-			return kVideoPortPorts[i].id.type;
+			return pVideoPortPorts[i].id.type;
 		}
 	}
 	INT_ERROR("Error: The Requested Video Port is not part of Platform Port Configuration \r\n");
@@ -1914,9 +1903,15 @@ static  std::string getCompatibleResolution(dsVideoPortResolution_t *SrcResn)
         	      int numResolutions = 0;
         	      dsVideoPortResolution_t* resolutions = NULL;
         	      int defaultIndex = 0;
-        	      dsGetVideoPortResolutions(&numResolutions, &resolutions);
-        	      dsGetDefaultResolutionIndex(&defaultIndex);
-        	      if (resolutions && defaultIndex >= 0 && defaultIndex < numResolutions) {
+        	      if (_dsGetVideoPortResolutions(&numResolutions, &resolutions) != dsERR_NONE) {
+        	          INT_ERROR("Failed to get video port resolutions\n");
+        	          break;
+        	      }
+        	      if (_dsGetDefaultResolutionIndex(&defaultIndex) != dsERR_NONE) {
+        	          INT_ERROR("Failed to get default resolution index\n");
+        	          break;
+        	      }
+        	      if ((resolutions != NULL) && (defaultIndex >= 0) && (defaultIndex < numResolutions)) {
         	          return resolution.assign(resolutions[defaultIndex].name);
         	      }
        		  }
@@ -1941,26 +1936,23 @@ static bool  IsCompatibleResolution(dsVideoResolution_t pixelResolution1,dsVideo
 
 static dsVideoResolution_t getPixelResolution(std::string &resolution )
 {
-	dsVideoPortResolution_t *kVidoeResolutionsSettings = NULL;
+	dsVideoPortResolution_t *pVidoeResolutionsSettings = NULL;
 	int iCount = 0;
-	dsGetVideoPortResolutions(&iCount, &kVidoeResolutionsSettings);
-	
-	// Print kVidoeResolutionsSettings array
-	INT_INFO("[DsMgr] ========== Dumping kVidoeResolutionsSettings Array in getPixelResolution ==========\r\n");
-	INT_INFO("[DsMgr] Total resolutions retrieved: %d\r\n", iCount);
-	for (int k = 0; k < iCount; k++) {
-		dsVideoPortResolution_t *res = &kVidoeResolutionsSettings[k];
-		INT_INFO("[DsMgr] [%d] name=%s, pixelRes=%d, aspectRatio=%d, stereoMode=%d, frameRate=%d, interlaced=%d\r\n",
-				 k, res->name, res->pixelResolution, res->aspectRatio, 
-				 res->stereoScopicMode, res->frameRate, res->interlaced);
+	if (_dsGetVideoPortResolutions(&iCount, &pVidoeResolutionsSettings) != dsERR_NONE) {
+		INT_ERROR("Failed to get video port resolutions\n");
+		return dsVIDEO_PIXELRES_MAX;
 	}
-	INT_INFO("[DsMgr] ========== End of kVidoeResolutionsSettings Dump ==========\r\n");
+
+	if (iCount <= 0 || pVidoeResolutionsSettings == NULL) {
+		INT_ERROR("_dsGetVideoPortResolutions returned invalid values (iCount=%d, pVidoeResolutionsSettings=%p)\n", iCount, pVidoeResolutionsSettings);
+		return dsVIDEO_PIXELRES_MAX;
+	}
 	
-  	dsVideoPortResolution_t *Resn = &kVidoeResolutionsSettings[0]; 
-	
+  	dsVideoPortResolution_t *Resn = &pVidoeResolutionsSettings[0]; 
+
 	for (int i = 0; i < iCount; i++)
 	{
-		Resn = &kVidoeResolutionsSettings[i];
+		Resn = &pVidoeResolutionsSettings[i];
 		if (resolution.compare(Resn->name) == 0 )
 		{
 			break;
@@ -2298,7 +2290,10 @@ bool isComponentPortPresent()
     int numTypeConfigs = 0;
     const dsVideoPortTypeConfig_t* typeConfigs = NULL;
     
-    dsGetVideoPortTypeConfigs(&numTypeConfigs, &typeConfigs);
+    if (_dsGetVideoPortTypeConfigs(&numTypeConfigs, &typeConfigs) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port type configurations\n");
+        return false;
+    }
     if (typeConfigs) {
         for(int i=0; i< numTypeConfigs; i++)
         {
@@ -2431,27 +2426,18 @@ intptr_t dsGetDefaultPortHandle()
 {
     int numPorts = 0, i;
     intptr_t halhandle = 0;
-    const dsVideoPortPortConfig_t *kVideoPortPorts = NULL;
+    const dsVideoPortPortConfig_t *pVideoPortPorts = NULL;
     
-    dsGetVideoPortPortConfigs(&numPorts, &kVideoPortPorts);
-    
-    // Print kVideoPortPorts array
-    INT_INFO("[DsMgr] ========== Dumping kVideoPortPorts Array in dsGetDefaultPortHandle ==========\r\n");
-    INT_INFO("[DsMgr] Total ports retrieved: %d\r\n", numPorts);
-    for (int k = 0; k < numPorts; k++) {
-        const dsVideoPortPortConfig_t *port = &kVideoPortPorts[k];
-        INT_INFO("[DsMgr] [%d] type=%d, index=%d, connectedAOP_type=%d, connectedAOP_index=%d, defaultResolution=%s\r\n",
-                 k, port->id.type, port->id.index, 
-                 port->connectedAOP.type, port->connectedAOP.index, 
-                 port->defaultResolution ? port->defaultResolution : "NULL");
+    if (_dsGetVideoPortPortConfigs(&numPorts, &pVideoPortPorts) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port port configurations\n");
+        return NULL;
     }
-    INT_INFO("[DsMgr] ========== End of kVideoPortPorts Dump ==========\r\n");
     
     for(i=0; i< numPorts; i++)
     {
-        dsGetVideoPort(kVideoPortPorts[i].id.type, kVideoPortPorts[i].id.index, &halhandle);
-        if (dsVIDEOPORT_TYPE_HDMI == kVideoPortPorts[i].id.type ||
-             dsVIDEOPORT_TYPE_INTERNAL == kVideoPortPorts[i].id.type)
+        dsGetVideoPort(pVideoPortPorts[i].id.type, pVideoPortPorts[i].id.index, &halhandle);
+        if (dsVIDEOPORT_TYPE_HDMI == pVideoPortPorts[i].id.type ||
+             dsVIDEOPORT_TYPE_INTERNAL == pVideoPortPorts[i].id.type)
         {
             return halhandle;
         }

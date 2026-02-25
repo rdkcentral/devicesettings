@@ -115,7 +115,10 @@ IARM_Result_t dsMgr_init()
     INT_INFO("[%s]: profileType=%d\r\n", __FUNCTION__, profileType);
 
 	INT_INFO("[%s]: Loading device configurations\r\n", __FUNCTION__);
-	dsLoadConfigs();
+	if (dsLoadConfigs() != dsERR_NONE) {
+		INT_ERROR("[%s]: Failed to load device configurations\r\n", __FUNCTION__);
+		return IARM_RESULT_INVALID_STATE;
+	}
     device::HostPersistence::getInstance().load();
 	dsServer_Rdklogger_Init();
 	dsHostInit();
@@ -144,7 +147,10 @@ IARM_Result_t dsMgr_term()
 	dsHdmiInMgr_term();
 	dsCompositeInMgr_term();
 
-    dsFreeConfig();
+    if (dsFreeConfig() != dsERR_NONE) {
+		INT_ERROR("[%s]: Failed to free device configurations\r\n", __FUNCTION__);
+		ret = IARM_RESULT_INVALID_STATE;
+	}
 
 	return ret;
 }
