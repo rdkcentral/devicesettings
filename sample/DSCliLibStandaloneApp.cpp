@@ -18,8 +18,11 @@
 #include "frontPanelConfig.hpp"         // FrontPanelConfig class from libds.so
 #include "frontPanelIndicator.hpp"      // FrontPanelIndicator class from libds.so
 #include "frontPanelTextDisplay.hpp"    // FrontPanelTextDisplay class from libds.so
+#include "hdmiIn.hpp"                   // HdmiInput class from libds.so
 // #include "libIBus.h"                  // Uncomment if using IARM Bus
 // #include "libIBusDaemon.h"            // Uncomment if using IARM Bus daemon
+
+#include "dsController-com.h"
 
 using namespace std;
 using namespace device;  // For libds.so classes
@@ -154,7 +157,13 @@ void libds_Initialize()
         
         // Initialize the Device Settings Manager
         // This will internally call dsFPInit() and other init functions from libdshalcli.so
-        // device::Manager::Initialize(); As of now FPD only communicate through COM-RPC
+        // device::Manager::Initialize();
+
+    if (WPEFramework::DeviceSettingsController::Initialize() != WPEFramework::Core::ERROR_NONE) {
+			LOGE("[DSApp] Failed to initialize DeviceSettingsController");
+			throw std::runtime_error("DeviceSettingsController initialization failed");
+		}
+		LOGI("[DSApp] DeviceSettingsController initialized successfully\n");
 	
 	LOGI("Initializing Front Panel from libds.so...");
         LOGI("Front panel init");
@@ -166,6 +175,11 @@ void libds_Initialize()
         }
 
         LOGI("Device Settings FPD initialized successfully");
+
+    LOGI("Initializing HDMI Input from libds.so...");
+        LOGI("HDMI Input init");
+        device::HdmiInput::getInstance();  // Get singleton instance (will call dsHdmiInInit internally)
+        LOGI("Device Settings HDMI Input initialized successfully");
         
         LOGI("Device Settings Manager initialized successfully");
     } catch (const std::exception& e) {
@@ -709,24 +723,327 @@ void handleHDMIInModule() {
     do {
         clearScreen();
         printf("\n=== HDMI Input Module ===\n");
-        printf("1. DeviceSettings_GetHDMIInput\n");
-        printf("2. DeviceSettings_SetHDMIInput\n");
-        printf("3. DeviceSettings_GetHDMIInputStatus\n");
-        printf("4. DeviceSettings_GetHDMIInputSignalStatus\n");
+        printf("Using libds.so → libdshalcli.so → COM-RPC → DeviceSettings plugin\n");
+        printf("1. Get Number of HDMI Inputs\n");
+        printf("2. Check if HDMI Input is Presented\n");
+        printf("3. Get Active HDMI Port\n");
+        printf("4. Check Port Connection Status\n");
+        printf("5. Select HDMI Port\n");
+        printf("6. Scale Video\n");
+        printf("7. Select Zoom Mode\n");
+        printf("8. Get Current Video Mode\n");
+        printf("9. Get EDID Bytes\n");
+        printf("10. Get HDMI SPD Info\n");
+        printf("11. Get/Set EDID Version\n");
+        printf("12. Get ALLM Status\n");
+        printf("13. Get Supported Game Features\n");
+        printf("14. Get AV Latency\n");
+        printf("15. Get/Set VRR Support\n");
         printf("0. Back to Main Menu\n");
         printf("==========================\n");
 
         choice = getUserChoice();
         
         switch (choice) {
-            case 1:
-                printf("\nCalling DeviceSettings_GetHDMIInput()...\n");
-                // TODO: Add actual function call
-                printf("Function called successfully!\n");
+            case 1: {
+                try {
+                    printf("\nCalling HdmiInput::getNumberOfInputs()...\n");
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    uint8_t numInputs = hdmiInput.getNumberOfInputs();
+                    printf("SUCCESS: Number of HDMI Inputs: %d\n", numInputs);
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
                 printf("Press Enter to continue...");
                 getchar(); getchar();
                 break;
-            // Add more cases as needed
+            }
+            case 2: {
+                try {
+                    printf("\nCalling HdmiInput::isPresented()...\n");
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    bool presented = hdmiInput.isPresented();
+                    printf("SUCCESS: HDMI Input Presented: %s\n", presented ? "YES" : "NO");
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 3: {
+                try {
+                    printf("\nCalling HdmiInput::getActivePort()...\n");
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    int8_t activePort = hdmiInput.getActivePort();
+                    if (activePort == HDMI_IN_PORT_NONE) {
+                        printf("SUCCESS: No active HDMI port\n");
+                    } else {
+                        printf("SUCCESS: Active HDMI Port: %d\n", activePort);
+                    }
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 4: {
+                int port;
+                printf("\nEnter HDMI port number (0-3): ");
+                if (scanf("%d", &port) == 1) {
+                    try {
+                        printf("Calling HdmiInput::isPortConnected(%d)...\n", port);
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        bool connected = hdmiInput.isPortConnected(port);
+                        printf("SUCCESS: HDMI Port %d is %s\n", port, connected ? "CONNECTED" : "NOT CONNECTED");
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 5: {
+                int port;
+                printf("\nEnter HDMI port to select (0-3): ");
+                if (scanf("%d", &port) == 1) {
+                    try {
+                        printf("Calling HdmiInput::selectPort(%d)...\n", port);
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        hdmiInput.selectPort(port, false, dsVideoPlane_PRIMARY, false);
+                        printf("SUCCESS: HDMI Port %d selected\n", port);
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 6: {
+                int x, y, width, height;
+                printf("\nEnter video scaling parameters:\n");
+                printf("X coordinate: ");
+                scanf("%d", &x);
+                printf("Y coordinate: ");
+                scanf("%d", &y);
+                printf("Width: ");
+                scanf("%d", &width);
+                printf("Height: ");
+                scanf("%d", &height);
+                try {
+                    printf("Calling HdmiInput::scaleVideo(%d, %d, %d, %d)...\n", x, y, width, height);
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    hdmiInput.scaleVideo(x, y, width, height);
+                    printf("SUCCESS: Video scaled to position (%d,%d) size %dx%d\n", x, y, width, height);
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 7: {
+                int zoomMode;
+                printf("\nEnter zoom mode (0=None, 1=Full, 2=LLetterBox, 3=PillarBox, 4=Platform): ");
+                if (scanf("%d", &zoomMode) == 1) {
+                    try {
+                        printf("Calling HdmiInput::selectZoomMode(%d)...\n", zoomMode);
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        hdmiInput.selectZoomMode(zoomMode);
+                        printf("SUCCESS: Zoom mode set to %d\n", zoomMode);
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 8: {
+                try {
+                    printf("\nCalling HdmiInput::getCurrentVideoMode()...\n");
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    std::string videoMode = hdmiInput.getCurrentVideoMode();
+                    printf("SUCCESS: Current Video Mode: %s\n", videoMode.c_str());
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 9: {
+                int port;
+                printf("\nEnter HDMI port (0-3): ");
+                if (scanf("%d", &port) == 1) {
+                    try {
+                        printf("Calling HdmiInput::getEDIDBytesInfo(%d)...\n", port);
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        std::vector<uint8_t> edid;
+                        hdmiInput.getEDIDBytesInfo(port, edid);
+                        printf("SUCCESS: EDID bytes read: %zu bytes\n", edid.size());
+                        if (edid.size() > 0) {
+                            printf("First 16 bytes: ");
+                            for (size_t i = 0; i < std::min(edid.size(), (size_t)16); i++) {
+                                printf("%02X ", edid[i]);
+                            }
+                            printf("\n");
+                        }
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 10: {
+                int port;
+                printf("\nEnter HDMI port (0-3): ");
+                if (scanf("%d", &port) == 1) {
+                    try {
+                        printf("Calling HdmiInput::getHDMISPDInfo(%d)...\n", port);
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        std::vector<uint8_t> spdData;
+                        hdmiInput.getHDMISPDInfo(port, spdData);
+                        printf("SUCCESS: SPD Info bytes read: %zu bytes\n", spdData.size());
+                        if (spdData.size() > 0) {
+                            printf("SPD Data: ");
+                            for (size_t i = 0; i < spdData.size(); i++) {
+                                printf("%02X ", spdData[i]);
+                            }
+                            printf("\n");
+                        }
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 11: {
+                int port, action;
+                printf("\nEnter HDMI port (0-3): ");
+                scanf("%d", &port);
+                printf("1. Get EDID Version\n2. Set EDID Version\nChoice: ");
+                if (scanf("%d", &action) == 1) {
+                    try {
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        if (action == 1) {
+                            int version;
+                            hdmiInput.getEdidVersion(port, &version);
+                            printf("SUCCESS: EDID Version for port %d: %d (0=1.4, 1=2.0)\n", port, version);
+                        } else if (action == 2) {
+                            int version;
+                            printf("Enter EDID version (0=1.4, 1=2.0): ");
+                            scanf("%d", &version);
+                            hdmiInput.setEdidVersion(port, version);
+                            printf("SUCCESS: EDID Version set to %d for port %d\n", version, port);
+                        }
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 12: {
+                int port;
+                printf("\nEnter HDMI port (0-3): ");
+                if (scanf("%d", &port) == 1) {
+                    try {
+                        printf("Calling HdmiInput::getHdmiALLMStatus(%d)...\n", port);
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        bool allmStatus;
+                        hdmiInput.getHdmiALLMStatus(port, &allmStatus);
+                        printf("SUCCESS: ALLM Status for port %d: %s\n", port, allmStatus ? "ENABLED" : "DISABLED");
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 13: {
+                try {
+                    printf("\nCalling HdmiInput::getSupportedGameFeatures()...\n");
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    std::vector<std::string> featureList;
+                    hdmiInput.getSupportedGameFeatures(featureList);
+                    printf("SUCCESS: Supported Game Features (%zu features):\n", featureList.size());
+                    for (size_t i = 0; i < featureList.size(); i++) {
+                        printf("  %zu. %s\n", i+1, featureList[i].c_str());
+                    }
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 14: {
+                try {
+                    printf("\nCalling HdmiInput::getAVLatency()...\n");
+                    device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                    int audioLatency, videoLatency;
+                    hdmiInput.getAVLatency(&audioLatency, &videoLatency);
+                    printf("SUCCESS: AV Latency - Audio: %d ms, Video: %d ms\n", audioLatency, videoLatency);
+                } catch (const std::exception& e) {
+                    printf("ERROR: %s\n", e.what());
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
+            case 15: {
+                int port, action;
+                printf("\nEnter HDMI port (0-3): ");
+                scanf("%d", &port);
+                printf("1. Get VRR Support\n2. Set VRR Support\nChoice: ");
+                if (scanf("%d", &action) == 1) {
+                    try {
+                        device::HdmiInput& hdmiInput = device::HdmiInput::getInstance();
+                        if (action == 1) {
+                            bool vrrSupport;
+                            hdmiInput.getVRRSupport(port, &vrrSupport);
+                            printf("SUCCESS: VRR Support for port %d: %s\n", port, vrrSupport ? "ENABLED" : "DISABLED");
+                        } else if (action == 2) {
+                            int support;
+                            printf("Enable VRR (0=No, 1=Yes): ");
+                            scanf("%d", &support);
+                            hdmiInput.setVRRSupport(port, support != 0);
+                            printf("SUCCESS: VRR Support %s for port %d\n", support ? "ENABLED" : "DISABLED", port);
+                        }
+                    } catch (const std::exception& e) {
+                        printf("ERROR: %s\n", e.what());
+                    }
+                } else {
+                    printf("Invalid input!\n");
+                }
+                printf("Press Enter to continue...");
+                getchar(); getchar();
+                break;
+            }
             case 0:
                 printf("\nReturning to main menu...\n");
                 break;

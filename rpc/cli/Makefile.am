@@ -32,11 +32,13 @@ libdshalcli_la_CFLAGS = -g -fPIC -D_REENTRANT -Wall
 # Conditional compilation for Thunder COM-RPC
 if USE_WPE_THUNDER_PLUGIN
     FPD_SOURCE = dsController-com.cpp dsFPD-com.cpp
+    HDMIIN_SOURCE = dsHdmiIn-com.cpp
     THUNDER_LIBS = -lWPEFrameworkCore -lWPEFrameworkCOM
 else
     FPD_SOURCE = dsFPD.c
+    HDMIIN_SOURCE = dsHdmiIn.c
     THUNDER_LIBS =
 endif
 
-libdshalcli_la_SOURCES = dsAudio.c dsclientlogger.c dsDisplay.c $(FPD_SOURCE) dsHost.cpp dsVideoDevice.c dsVideoPort.c
+libdshalcli_la_SOURCES = dsAudio.c dsclientlogger.c dsDisplay.c $(FPD_SOURCE) $(HDMIIN_SOURCE) dsHost.cpp dsVideoDevice.c dsVideoPort.c
 libdshalcli_la_LIBADD = $(THUNDER_LIBS)
