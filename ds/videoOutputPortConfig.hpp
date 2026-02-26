@@ -65,6 +65,7 @@ class  VideoOutputPortConfig {
 
 public:
 	std::vector<VideoResolution> 		_supportedResolutions;
+	std::vector<VideoResolution> 		_originalSupportedResolutions;
 	static VideoOutputPortConfig & getInstance();
 
 	const PixelResolution 	&getPixelResolution(int id) const;

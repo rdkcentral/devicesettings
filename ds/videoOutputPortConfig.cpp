@@ -217,14 +217,6 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	//If isIgnoreEdid is true isDynamicList is zero. Edid logic is skipped.
 	if (0 == isDynamicList )
 	{
-        cout << "[DsMgr] Copying _supportedResolutions to tmpsupportedResolutions, size: " << _supportedResolutions.size() << endl;
-        for (size_t idx = 0; idx < _supportedResolutions.size(); idx++) {
-            const VideoResolution& res = _supportedResolutions[idx];
-            cout << "[DsMgr] [" << idx << "] " << res.getName() 
-                 << " pixelRes=" << res.getPixelResolution().getId()
-                 << " aspectRatio=" << res.getAspectRatio().getId()
-                 << " frameRate=" << res.getFrameRate().getId() << endl;
-        }
         for (const VideoResolution& resolution : _supportedResolutions) {
             tmpsupportedResolutions.push_back(resolution);
         }
@@ -256,14 +248,6 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 		_supportedResolutions.clear ();
 		for (VideoResolution resolution : tmpsupportedResolutions){
 			_supportedResolutions.push_back(resolution);
-		}
-		cout << "[DsMgr] _supportedResolutions cache after update, size: " << _supportedResolutions.size() << endl;
-		for (size_t idx = 0; idx < _supportedResolutions.size(); idx++) {
-			const VideoResolution& res = _supportedResolutions[idx];
-			cout << "[DsMgr] [" << idx << "] " << res.getName() 
-			     << " pixelRes=" << res.getPixelResolution().getId()
-			     << " aspectRatio=" << res.getAspectRatio().getId()
-			     << " frameRate=" << res.getFrameRate().getId() << endl;
 		}
 	}
 	return supportedResolutions;
@@ -407,17 +391,20 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
             /* Initialize a set of supported resolutions */
             for (int i = 0; i < resolutionSize; i++) {
                 dsVideoPortResolution_t *resolution = &(configuration.pKResolutionsSettings[i]);
-                {std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
-                    _supportedResolutions.push_back(
-                                        VideoResolution(
+                VideoResolution vidRes = VideoResolution(
                                             i, /* id */
                                             std::string(resolution->name),
                                             resolution->pixelResolution,
                                             resolution->aspectRatio,
                                             resolution->stereoScopicMode,
                                             resolution->frameRate,
-                                            resolution->interlaced));
+                                            resolution->interlaced);
+                {std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
+                    _supportedResolutions.push_back(vidRes);
+                    _originalSupportedResolutions.push_back(vidRes);
                 }
+                INT_INFO("[DsMgr] Loaded resolution[%d]: name='%s' pixelRes=%d aspectRatio=%d frameRate=%d",
+                         i, resolution->name, resolution->pixelResolution, resolution->aspectRatio, resolution->frameRate);
             }
 
             /*

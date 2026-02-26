@@ -35,8 +35,6 @@
 #include "dslogger.h"
 #include "manager.hpp"
 
-#define DEBUG 1 // Using for dumpconfig 
-
 namespace device {
 
 VideoDeviceConfig::VideoDeviceConfig() {

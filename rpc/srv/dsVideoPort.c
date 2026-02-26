@@ -1937,7 +1937,8 @@ static bool  IsCompatibleResolution(dsVideoResolution_t pixelResolution1,dsVideo
 static dsVideoResolution_t getPixelResolution(std::string &resolution )
 {
 	dsVideoPortResolution_t *pVidoeResolutionsSettings = NULL;
-	int iCount = 0;
+    dsVideoPortResolution_t *Resn = NULL;
+	int iCount = 0, defaultIndex = 0;
 	if (_dsGetVideoPortResolutions(&iCount, &pVidoeResolutionsSettings) != dsERR_NONE) {
 		INT_ERROR("Failed to get video port resolutions\n");
 		return dsVIDEO_PIXELRES_MAX;
@@ -1947,8 +1948,18 @@ static dsVideoResolution_t getPixelResolution(std::string &resolution )
 		INT_ERROR("_dsGetVideoPortResolutions returned invalid values (iCount=%d, pVidoeResolutionsSettings=%p)\n", iCount, pVidoeResolutionsSettings);
 		return dsVIDEO_PIXELRES_MAX;
 	}
-	
-  	dsVideoPortResolution_t *Resn = &pVidoeResolutionsSettings[0]; 
+
+    if (_dsGetDefaultResolutionIndex(&defaultIndex) != dsERR_NONE) {
+        INT_ERROR("Failed to get default resolution index using first element of array\n");
+    }
+
+    if ((defaultIndex >= 0) && (defaultIndex < iCount)) {
+  	    Resn = &pVidoeResolutionsSettings[defaultIndex]; 
+    }
+    else
+    {
+        Resn = &pVidoeResolutionsSettings[0];
+    }
 
 	for (int i = 0; i < iCount; i++)
 	{
