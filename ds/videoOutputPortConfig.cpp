@@ -217,7 +217,8 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	//If isIgnoreEdid is true isDynamicList is zero. Edid logic is skipped.
 	if (0 == isDynamicList )
 	{
-        for (const VideoResolution& resolution : _supportedResolutions) {
+        INT_INFO("_originalSupportedResolutions size: %zu", _originalSupportedResolutions.size());
+        for (const VideoResolution& resolution : _originalSupportedResolutions) {
             tmpsupportedResolutions.push_back(resolution);
         }
 	}
