@@ -45,13 +45,8 @@
 #include <unistd.h>
 #include <functional>
 #include <dlfcn.h>
-#include <fstream>
 #include "dsHALConfig.h"
 #include "frontPanelConfig.hpp"
-
-
-//static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
-
 
 /**
  * @file manager.cpp
@@ -109,6 +104,15 @@ void loadDeviceCapabilities(unsigned int capabilityType)
     INT_INFO("Entering capabilityType = 0x%08X", capabilityType);
     dlerror(); // clear old error
     pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+    
+    if (nullptr == pDLHandle) {
+        const char* dlError = dlerror();
+        INT_WARN("Failed to dlopen '%s': %s - Falling back to static configurations", 
+                 RDK_DSHAL_NAME, dlError ? dlError : "Unknown error");
+    } else {
+        INT_INFO("Successfully opened dynamic library '%s'", RDK_DSHAL_NAME);
+    }
+    
     INT_INFO("DL Instance '%s'", (nullptr == pDLHandle ? "NULL" : "Valid"));
 
     // Audio Port Config

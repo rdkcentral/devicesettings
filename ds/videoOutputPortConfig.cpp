@@ -100,7 +100,7 @@ const VideoResolution &VideoOutputPortConfig::getVideoResolution (int id) const
 		return _supportedResolutions.at(id);
 	}
 	else {
-		cout<<"returns default resolution 720p"<<endl;
+		INT_WARN("Resolution id %d not found, returning default resolution 720p", id);
 		//If id not found return the 720p default resolution.
 		return  *defaultVideoResolution;
 	}
@@ -165,7 +165,7 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	intptr_t _handle = 0;  //CID:98922 - Uninit
 	bool force_disable_4K = true;
 	
-	printf ("\nResOverride VideoOutputPortConfig::getSupportedResolutions isIgnoreEdid:%d\n", isIgnoreEdid);
+	INT_INFO("VideoOutputPortConfig::getSupportedResolutions isIgnoreEdid=%d", isIgnoreEdid);
 	if (!isIgnoreEdid) {
 	    try {
                 std::string strVideoPort = device::Host::getInstance().getDefaultVideoPortName();
@@ -185,11 +185,11 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 			dsError = dsGetEDID(_handle, edid);
 			if(dsError != dsERR_NONE)
 			{
-				cout <<" dsGetEDID failed so setting edid->numOfSupportedResolution to 0"<< endl;
+				INT_ERROR("dsGetEDID failed with error %d, setting edid->numOfSupportedResolution to 0", dsError);
 				edid->numOfSupportedResolution = 0;
 			}
 	
-			cout <<" EDID Num of Resolution ......."<< edid->numOfSupportedResolution << endl;	
+			INT_INFO("EDID reports %d supported resolutions", edid->numOfSupportedResolution);	
 			for (size_t i = 0; i < edid->numOfSupportedResolution; i++)
 			{
 				dsVideoPortResolution_t *resolution = &edid->suppResolutionList[i];
@@ -211,7 +211,7 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	    }catch (...)
 		{
 			isDynamicList = 0;
-			cout << "VideoOutputPortConfig::getSupportedResolutions Thrown. Exception..."<<endl;
+			INT_ERROR("Exception in VideoOutputPortConfig::getSupportedResolutions, falling back to original resolutions");
 		}
 	}
 	//If isIgnoreEdid is true isDynamicList is zero. Edid logic is skipped.
@@ -228,7 +228,7 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	    }
 	    catch(...)
 	    {
-		cout<<"Failed to get status of forceDisable4K!"<<endl;
+		INT_WARN("Failed to get status of forceDisable4K");
 	    }
 	    for (std::vector<VideoResolution>::iterator it = tmpsupportedResolutions.begin(); it != tmpsupportedResolutions.end(); it++) {
 		if (it->isEnabled()) {
@@ -245,7 +245,7 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 	    }
 	}
 	{std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
-		cout<<"_supportedResolutions cache updated"<<endl;
+		INT_INFO("_supportedResolutions cache updated with %zu resolutions", tmpsupportedResolutions.size());
 		_supportedResolutions.clear ();
 		for (VideoResolution resolution : tmpsupportedResolutions){
 			_supportedResolutions.push_back(resolution);
@@ -304,13 +304,22 @@ void dumpconfig(videoPortConfigs_t *config)
             INT_INFO("typeCfg->restrictedResollution = %d", typeCfg->restrictedResollution);
             INT_INFO("typeCfg->numSupportedResolutions= %lu", typeCfg->numSupportedResolutions);
 
-            INT_INFO("typeCfg->supportedResolutions = %p", typeCfg->supportedResolutions);
-            INT_INFO("typeCfg->supportedResolutions->name = %s", (typeCfg->supportedResolutions->name) ? typeCfg->supportedResolutions->name : "NULL");
-            INT_INFO("typeCfg->supportedResolutions->pixelResolution= %d", typeCfg->supportedResolutions->pixelResolution);
-            INT_INFO("typeCfg->supportedResolutions->aspectRatio= %d", typeCfg->supportedResolutions->aspectRatio);
-            INT_INFO("typeCfg->supportedResolutions->stereoScopicMode= %d", typeCfg->supportedResolutions->stereoScopicMode);
-            INT_INFO("typeCfg->supportedResolutions->frameRate= %d", typeCfg->supportedResolutions->frameRate);
-            INT_INFO("typeCfg->supportedResolutions->interlaced= %d", typeCfg->supportedResolutions->interlaced);
+            if ((typeCfg->supportedResolutions != NULL) && (typeCfg->numSupportedResolutions > 0))
+            {
+                INT_INFO("typeCfg->supportedResolutions = %p", typeCfg->supportedResolutions);
+                INT_INFO("typeCfg->supportedResolutions->name = %s", (typeCfg->supportedResolutions->name) ? typeCfg->supportedResolutions->name : "NULL");
+                INT_INFO("typeCfg->supportedResolutions->pixelResolution= %d", typeCfg->supportedResolutions->pixelResolution);
+                INT_INFO("typeCfg->supportedResolutions->aspectRatio= %d", typeCfg->supportedResolutions->aspectRatio);
+                INT_INFO("typeCfg->supportedResolutions->stereoScopicMode= %d", typeCfg->supportedResolutions->stereoScopicMode);
+                INT_INFO("typeCfg->supportedResolutions->frameRate= %d", typeCfg->supportedResolutions->frameRate);
+                INT_INFO("typeCfg->supportedResolutions->interlaced= %d", typeCfg->supportedResolutions->interlaced);
+            }
+            else
+            {
+                INT_INFO("typeCfg has no supportedResolutions entries to dump (pointer is %p, numSupportedResolutions = %lu)",
+                         typeCfg->supportedResolutions,
+                         typeCfg->numSupportedResolutions);
+            }
         }
         INT_INFO("\n############### Dumping Video Port Connections ###############\n");
 
@@ -328,7 +337,6 @@ void dumpconfig(videoPortConfigs_t *config)
         INT_ERROR("pKConfigs or pKPorts or pKResolutionsSettings is NULL");
     }
     INT_INFO("\n=============== Dump VideoPort Configs done ===============\n");
-    INT_INFO("Exit function");
 }
 
 void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
@@ -336,7 +344,6 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
     int configSize, portSize, resolutionSize;
     videoPortConfigs_t configuration = {0};
 
-    INT_INFO("Enter function");
     try {
         /*
         * Load Constants First.
@@ -437,15 +444,14 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
         }
         else
         {
-            cout << "Video Outport Configs or Ports or Resolutions is NULL. ..."<<endl;
+            INT_ERROR("Video output port configs, ports, or resolutions is NULL");
             throw Exception("Failed to load video outport config");
         }
     }
     catch (...) {
-        cout << "VIdeo Outport Exception Thrown. ..."<<endl;
+        INT_ERROR("Exception thrown while loading video output port config");
         throw Exception("Failed to load video outport config");
     }
-    INT_INFO("Exit function");
 }
 
 void VideoOutputPortConfig::release()

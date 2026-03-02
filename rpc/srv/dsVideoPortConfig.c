@@ -176,7 +176,7 @@ static int allocateAndCopyVideoPortConfigs(const dsVideoPortTypeConfig_t* source
                     if (videoPortConfiguration.pKVideoPortConfigs[j].name != NULL)
                     {
                         free((void*)videoPortConfiguration.pKVideoPortConfigs[j].name);
-                        videoPortConfiguration.pKVideoPortConfigs[j].name = "NULL";
+                        videoPortConfiguration.pKVideoPortConfigs[j].name = NULL;
                     }
                 }
                 free(videoPortConfiguration.pKVideoPortConfigs);
@@ -313,11 +313,6 @@ dsError_t dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPort
         INT_ERROR("Failed to allocate video port configs\n");
         // Clean up previously allocated memory
         if (videoPortConfiguration.pKVideoPortResolutionsSettings != NULL) {
-            for (int i = 0; i < videoPortConfiguration.kResolutionsSettings_size; ++i) {
-                if (videoPortConfiguration.pKVideoPortResolutionsSettings[i].name != NULL) {
-                    free(videoPortConfiguration.pKVideoPortResolutionsSettings[i].name);
-                }
-            }
             free(videoPortConfiguration.pKVideoPortResolutionsSettings);
             videoPortConfiguration.pKVideoPortResolutionsSettings = NULL;
         }
@@ -348,18 +343,12 @@ dsError_t dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPort
             videoPortConfiguration.pKVideoPortConfigs = NULL;
         }
         if (videoPortConfiguration.pKVideoPortResolutionsSettings != NULL) {
-            for (int i = 0; i < resolutionSize; ++i) {
-                if (videoPortConfiguration.pKVideoPortResolutionsSettings[i].name != NULL) {
-                    free(videoPortConfiguration.pKVideoPortResolutionsSettings[i].name);
-                }
-            }
             free(videoPortConfiguration.pKVideoPortResolutionsSettings);
             videoPortConfiguration.pKVideoPortResolutionsSettings = NULL;
         }
         return dsERR_GENERAL;
     }
 
-    INT_INFO("Store sizes configSize =%d, portSize =%d, resolutionSize = %d\n", configSize, portSize, resolutionSize);
     videoPortConfiguration.kDefaultResIndex = defaultResIndex;
     INT_INFO("Store sizes videoPortConfiguration.kDefaultResIndex = %d\n", videoPortConfiguration.kDefaultResIndex);
 
@@ -386,54 +375,42 @@ dsError_t dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPort
 // Getter functions for use across srv code
 dsError_t _dsGetVideoPortTypeConfigs(int* outConfigSize, const dsVideoPortTypeConfig_t** outConfigs)
 {
-
-    if((outConfigSize == NULL) && (outConfigs == NULL))
+    if((outConfigSize == NULL) || (outConfigs == NULL))
     {
         INT_ERROR("Invalid argument pointer\n");
         return dsERR_GENERAL;
-    }    
-    if (outConfigSize != NULL) {
-        *outConfigSize = videoPortConfiguration.kVideoPortConfigs_size;
     }
-    if (outConfigs != NULL) {
-        *outConfigs = videoPortConfiguration.pKVideoPortConfigs;
-    }
+    
+    *outConfigSize = videoPortConfiguration.kVideoPortConfigs_size;
+    *outConfigs = videoPortConfiguration.pKVideoPortConfigs;
 
     return dsERR_NONE;
 }
 
 dsError_t _dsGetVideoPortPortConfigs(int* outPortSize, const dsVideoPortPortConfig_t** outPorts)
 {
-
-    if((outPortSize == NULL) && (outPorts == NULL))
+    if((outPortSize == NULL) || (outPorts == NULL))
     {
         INT_ERROR("Invalid argument pointer\n");
         return dsERR_GENERAL;
     }
-    if (outPortSize != NULL) {
-        *outPortSize = videoPortConfiguration.kVideoPortPorts_size;
-    }
-    if (outPorts != NULL) {
-        *outPorts = videoPortConfiguration.pKVideoPortPorts;
-    }
+    
+    *outPortSize = videoPortConfiguration.kVideoPortPorts_size;
+    *outPorts = videoPortConfiguration.pKVideoPortPorts;
 
     return dsERR_NONE;
 }
 
 dsError_t _dsGetVideoPortResolutions(int* outResolutionSize, dsVideoPortResolution_t** outResolutions)
 {
-
-    if((outResolutionSize == NULL) && (outResolutions == NULL))
+    if((outResolutionSize == NULL) || (outResolutions == NULL))
     {
         INT_ERROR("Invalid argument pointer\n");
         return dsERR_GENERAL;
     }
-    if (outResolutionSize != NULL) {
-        *outResolutionSize = videoPortConfiguration.kResolutionsSettings_size;
-    }
-    if (outResolutions != NULL) {
-        *outResolutions = videoPortConfiguration.pKVideoPortResolutionsSettings;
-    }
+    
+    *outResolutionSize = videoPortConfiguration.kResolutionsSettings_size;
+    *outResolutions = videoPortConfiguration.pKVideoPortResolutionsSettings;
 
     return dsERR_NONE;
 }
@@ -447,9 +424,7 @@ dsError_t _dsGetDefaultResolutionIndex(int* outDefaultIndex)
         return dsERR_GENERAL;
     }
 
-    if (outDefaultIndex != NULL) {
-        *outDefaultIndex = videoPortConfiguration.kDefaultResIndex;
-    }
+    *outDefaultIndex = videoPortConfiguration.kDefaultResIndex;
 
     return dsERR_NONE;
 }
@@ -457,21 +432,34 @@ dsError_t _dsGetDefaultResolutionIndex(int* outDefaultIndex)
 void dsVideoPortConfigFree(void)
 {
     INT_INFO("Freeing VideoPort configuration resources\n");
-    // Free video port configs
+    
+    // Free video port configs and their allocated name strings
     if (videoPortConfiguration.pKVideoPortConfigs != NULL) {
+        for (int i = 0; i < videoPortConfiguration.kVideoPortConfigs_size; ++i) {
+            if (videoPortConfiguration.pKVideoPortConfigs[i].name != NULL) {
+                free((void*)videoPortConfiguration.pKVideoPortConfigs[i].name);
+                videoPortConfiguration.pKVideoPortConfigs[i].name = NULL;
+            }
+        }
         free(videoPortConfiguration.pKVideoPortConfigs);
         videoPortConfiguration.pKVideoPortConfigs = NULL;
         INT_INFO("Freed pKVideoPortConfigs\n");
     }
     
-    // Free video port ports
+    // Free video port ports and their allocated defaultResolution strings
     if (videoPortConfiguration.pKVideoPortPorts != NULL) {
+        for (int i = 0; i < videoPortConfiguration.kVideoPortPorts_size; ++i) {
+            if (videoPortConfiguration.pKVideoPortPorts[i].defaultResolution != NULL) {
+                free((void*)videoPortConfiguration.pKVideoPortPorts[i].defaultResolution);
+                videoPortConfiguration.pKVideoPortPorts[i].defaultResolution = NULL;
+            }
+        }
         free(videoPortConfiguration.pKVideoPortPorts);
         videoPortConfiguration.pKVideoPortPorts = NULL;
         INT_INFO("Freed pKVideoPortPorts\n");
     }
     
-    // Free video port resolutions
+    // Free video port resolutions (name is embedded array, not allocated)
     if (videoPortConfiguration.pKVideoPortResolutionsSettings != NULL) {
         free(videoPortConfiguration.pKVideoPortResolutionsSettings);
         videoPortConfiguration.pKVideoPortResolutionsSettings = NULL;

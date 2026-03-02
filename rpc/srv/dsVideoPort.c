@@ -1936,16 +1936,16 @@ static bool  IsCompatibleResolution(dsVideoResolution_t pixelResolution1,dsVideo
 
 static dsVideoResolution_t getPixelResolution(std::string &resolution )
 {
-	dsVideoPortResolution_t *pVidoeResolutionsSettings = NULL;
+	dsVideoPortResolution_t *pVideoResolutionsSettings = NULL;
     dsVideoPortResolution_t *Resn = NULL;
 	int iCount = 0, defaultIndex = 0;
-	if (_dsGetVideoPortResolutions(&iCount, &pVidoeResolutionsSettings) != dsERR_NONE) {
+	if (_dsGetVideoPortResolutions(&iCount, &pVideoResolutionsSettings) != dsERR_NONE) {
 		INT_ERROR("Failed to get video port resolutions\n");
 		return dsVIDEO_PIXELRES_MAX;
 	}
 
-	if (iCount <= 0 || pVidoeResolutionsSettings == NULL) {
-		INT_ERROR("_dsGetVideoPortResolutions returned invalid values (iCount=%d, pVidoeResolutionsSettings=%p)\n", iCount, pVidoeResolutionsSettings);
+	if (iCount <= 0 || pVideoResolutionsSettings == NULL) {
+		INT_ERROR("_dsGetVideoPortResolutions returned invalid values (iCount=%d, pVideoResolutionsSettings=%p)\n", iCount, pVideoResolutionsSettings);
 		return dsVIDEO_PIXELRES_MAX;
 	}
 
@@ -1954,16 +1954,16 @@ static dsVideoResolution_t getPixelResolution(std::string &resolution )
     }
 
     if ((defaultIndex >= 0) && (defaultIndex < iCount)) {
-  	    Resn = &pVidoeResolutionsSettings[defaultIndex]; 
+  	    Resn = &pVideoResolutionsSettings[defaultIndex]; 
     }
     else
     {
-        Resn = &pVidoeResolutionsSettings[0];
+        Resn = &pVideoResolutionsSettings[0];
     }
 
 	for (int i = 0; i < iCount; i++)
 	{
-		Resn = &pVidoeResolutionsSettings[i];
+		Resn = &pVideoResolutionsSettings[i];
 		if (resolution.compare(Resn->name) == 0 )
 		{
 			break;
@@ -2294,7 +2294,7 @@ static dsError_t _dsVideoFormatUpdateRegisterCB (dsVideoFormatUpdateCB_t cbFun) 
     return eRet;
 }
 
-//This funcation does not have any caller.
+//This function does not have any caller.
 bool isComponentPortPresent()
 {
     bool componentPortPresent = false;

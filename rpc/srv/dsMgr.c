@@ -148,7 +148,7 @@ IARM_Result_t dsMgr_term()
 	dsCompositeInMgr_term();
 
     if (dsFreeConfig() != dsERR_NONE) {
-		INT_ERROR("[%s]: Failed to free device configurations\r\n", __FUNCTION__);
+		INT_ERROR("Failed to free device configurations\r\n");
 		ret = IARM_RESULT_INVALID_STATE;
 	}
 

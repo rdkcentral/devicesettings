@@ -174,18 +174,14 @@ dsError_t dsLoadVideoDeviceConfig(const videoDeviceConfig_t* dynamicVideoDeviceC
 // Getter functions for use across srv code
 dsError_t _dsGetVideoDeviceConfigs(int* outConfigSize, dsVideoConfig_t** outConfigs)
 {
-
-    if((outConfigSize == NULL) && (outConfigs == NULL))
+    if((outConfigSize == NULL) || (outConfigs == NULL))
     {
         INT_ERROR("Invalid argument pointer\n");
         return dsERR_GENERAL;
     }
-    if (outConfigSize != NULL) {
-        *outConfigSize = videoDeviceConfiguration.kVideoDeviceConfigs_size;
-    }
-    if (outConfigs != NULL) {
-        *outConfigs = videoDeviceConfiguration.pKVideoDeviceConfigs;
-    }
+    
+    *outConfigSize = videoDeviceConfiguration.kVideoDeviceConfigs_size;
+    *outConfigs = videoDeviceConfiguration.pKVideoDeviceConfigs;
 
     return dsERR_NONE;
 }

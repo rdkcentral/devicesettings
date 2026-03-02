@@ -50,7 +50,7 @@ static audioConfigsLocal_t audioConfiguration = {0};
 
 void audioDumpconfig(audioConfigsLocal_t *config)
 {
-    if (nullptr == config) {
+    if (NULL == config) {
         INT_ERROR("Audio config is NULL\n");
         return;
     }
@@ -199,7 +199,7 @@ dsError_t dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
 dsError_t _dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t** outConfigs)
 {
     
-    if((outConfigSize == NULL) && (outConfigs == NULL))
+    if((outConfigSize == NULL) || (outConfigs == NULL))
     {
         INT_ERROR("Invalid argument pointer\n");
         return dsERR_GENERAL;
@@ -218,7 +218,7 @@ dsError_t _dsGetAudioTypeConfigs(int* outConfigSize, const dsAudioTypeConfig_t**
 dsError_t _dsGetAudioPortConfigs(int* outPortSize, const dsAudioPortConfig_t** outPorts)
 {
     
-    if((outPortSize == NULL) && (outPorts == NULL))
+    if((outPortSize == NULL) || (outPorts == NULL))
     {
         INT_ERROR("Invalid argument pointer\n");
         return dsERR_GENERAL;
