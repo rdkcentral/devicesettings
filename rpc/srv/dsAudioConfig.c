@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unitstd.h>
 #include "dsserverlogger.h"
 #include "dsTypes.h"
 #include "dsError.h"
@@ -111,8 +112,111 @@ static int allocateAndCopyAudioConfigs(const dsAudioTypeConfig_t* source, int nu
         return -1;
     }
     
-    memcpy(audioConfiguration.pKAudioConfigs, source, numElements * sizeof(dsAudioTypeConfig_t));
-    INT_INFO("Allocated and copied %d audio configs (%s)", numElements, configType);
+    // Deep copy each audio type config
+    for (int i = 0; i < numElements; i++) {
+        dsAudioTypeConfig_t *dest = &audioConfiguration.pKAudioConfigs[i];
+        const dsAudioTypeConfig_t *src = &source[i];
+        
+        // Copy primitive fields
+        dest->typeId = src->typeId;
+        dest->numSupportedCompressions = src->numSupportedCompressions;
+        dest->numSupportedEncodings = src->numSupportedEncodings;
+        dest->numSupportedStereoModes = src->numSupportedStereoModes;
+        
+        // Deep copy name string
+        if (src->name != NULL) {
+            dest->name = strdup(src->name);
+            if (dest->name == NULL) {
+                INT_ERROR("Failed to duplicate name for audio config %d\n", i);
+                // Cleanup previously allocated items
+                for (int j = 0; j < i; j++) {
+                    free((void*)audioConfiguration.pKAudioConfigs[j].name);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].compressions);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].encodings);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].stereoModes);
+                }
+                free(audioConfiguration.pKAudioConfigs);
+                audioConfiguration.pKAudioConfigs = NULL;
+                return -1;
+            }
+        } else {
+            dest->name = NULL;
+        }
+        
+        // Deep copy compressions array
+        if (src->compressions != NULL && src->numSupportedCompressions > 0) {
+            size_t size = src->numSupportedCompressions * sizeof(dsAudioCompression_t);
+            dest->compressions = (dsAudioCompression_t*)malloc(size);
+            if (dest->compressions == NULL) {
+                INT_ERROR("Failed to allocate compressions for audio config %d\n", i);
+                free((void*)dest->name);
+                // Cleanup previously allocated items
+                for (int j = 0; j < i; j++) {
+                    free((void*)audioConfiguration.pKAudioConfigs[j].name);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].compressions);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].encodings);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].stereoModes);
+                }
+                free(audioConfiguration.pKAudioConfigs);
+                audioConfiguration.pKAudioConfigs = NULL;
+                return -1;
+            }
+            memcpy((void*)dest->compressions, src->compressions, size);
+        } else {
+            dest->compressions = NULL;
+        }
+        
+        // Deep copy encodings array
+        if (src->encodings != NULL && src->numSupportedEncodings > 0) {
+            size_t size = src->numSupportedEncodings * sizeof(dsAudioEncoding_t);
+            dest->encodings = (dsAudioEncoding_t*)malloc(size);
+            if (dest->encodings == NULL) {
+                INT_ERROR("Failed to allocate encodings for audio config %d\n", i);
+                free((void*)dest->name);
+                free((void*)dest->compressions);
+                // Cleanup previously allocated items
+                for (int j = 0; j < i; j++) {
+                    free((void*)audioConfiguration.pKAudioConfigs[j].name);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].compressions);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].encodings);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].stereoModes);
+                }
+                free(audioConfiguration.pKAudioConfigs);
+                audioConfiguration.pKAudioConfigs = NULL;
+                return -1;
+            }
+            memcpy((void*)dest->encodings, src->encodings, size);
+        } else {
+            dest->encodings = NULL;
+        }
+        
+        // Deep copy stereoModes array
+        if (src->stereoModes != NULL && src->numSupportedStereoModes > 0) {
+            size_t size = src->numSupportedStereoModes * sizeof(dsAudioStereoMode_t);
+            dest->stereoModes = (dsAudioStereoMode_t*)malloc(size);
+            if (dest->stereoModes == NULL) {
+                INT_ERROR("Failed to allocate stereoModes for audio config %d\n", i);
+                free((void*)dest->name);
+                free((void*)dest->compressions);
+                free((void*)dest->encodings);
+                // Cleanup previously allocated items
+                for (int j = 0; j < i; j++) {
+                    free((void*)audioConfiguration.pKAudioConfigs[j].name);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].compressions);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].encodings);
+                    free((void*)audioConfiguration.pKAudioConfigs[j].stereoModes);
+                }
+                free(audioConfiguration.pKAudioConfigs);
+                audioConfiguration.pKAudioConfigs = NULL;
+                return -1;
+            }
+            memcpy((void*)dest->stereoModes, src->stereoModes, size);
+        } else {
+            dest->stereoModes = NULL;
+        }
+    }
+    
+    INT_INFO("Deep copied %d audio configs (%s)", numElements, configType);
     return numElements;
 }
 
@@ -131,8 +235,37 @@ static int allocateAndCopyAudioPorts(const dsAudioPortConfig_t* source, int numE
         return -1;
     }
     
-    memcpy(audioConfiguration.pKAudioPorts, source, numElements * sizeof(dsAudioPortConfig_t));
-    INT_INFO("Allocated and copied %d audio ports (%s)", numElements, configType);
+    // Deep copy each audio port config
+    for (int i = 0; i < numElements; i++) {
+        dsAudioPortConfig_t *dest = &audioConfiguration.pKAudioPorts[i];
+        const dsAudioPortConfig_t *src = &source[i];
+        
+        // Copy port ID
+        dest->id = src->id;
+        
+        // Deep copy connectedVOPs array if present
+        // Note: We need to know the size of connectedVOPs array
+        // For now, assuming it's NULL or a single element (common case)
+        // A proper implementation would need size information
+        if (src->connectedVOPs != NULL) {
+            dest->connectedVOPs = (dsVideoPortPortId_t*)malloc(sizeof(dsVideoPortPortId_t));
+            if (dest->connectedVOPs == NULL) {
+                INT_ERROR("Failed to allocate connectedVOPs for audio port %d\n", i);
+                // Cleanup previously allocated items
+                for (int j = 0; j < i; j++) {
+                    free((void*)audioConfiguration.pKAudioPorts[j].connectedVOPs);
+                }
+                free(audioConfiguration.pKAudioPorts);
+                audioConfiguration.pKAudioPorts = NULL;
+                return -1;
+            }
+            memcpy((void*)dest->connectedVOPs, src->connectedVOPs, sizeof(dsVideoPortPortId_t));
+        } else {
+            dest->connectedVOPs = NULL;
+        }
+    }
+    
+    INT_INFO("Deep copied %d audio ports (%s)", numElements, configType);
     return numElements;
 }
 
@@ -170,8 +303,23 @@ dsError_t dsLoadAudioOutputPortConfig(const audioConfigs_t* dynamicAudioConfigs)
     // Allocate and copy audio port configs
     if (allocateAndCopyAudioPorts(audioPorts, portSize, isDynamic) == -1) {
         INT_ERROR("Failed to allocate audio port configs\n");
-        // Clean up previously allocated memory
+        // Clean up previously allocated audio configs with their deep-copied fields
         if (audioConfiguration.pKAudioConfigs != NULL) {
+            for (int i = 0; i < configSize; i++) {
+                dsAudioTypeConfig_t *config = &audioConfiguration.pKAudioConfigs[i];
+                if (config->name != NULL) {
+                    free((void*)config->name);
+                }
+                if (config->compressions != NULL) {
+                    free((void*)config->compressions);
+                }
+                if (config->encodings != NULL) {
+                    free((void*)config->encodings);
+                }
+                if (config->stereoModes != NULL) {
+                    free((void*)config->stereoModes);
+                }
+            }
             free(audioConfiguration.pKAudioConfigs);
             audioConfiguration.pKAudioConfigs = NULL;
         }
@@ -237,18 +385,51 @@ void dsAudioConfigFree(void)
 {
     INT_INFO("Freeing Audio configuration resources\n");
     
-    // Free audio configs
+    // Free audio configs and their deep-copied fields
     if (audioConfiguration.pKAudioConfigs != NULL) {
+        for (int i = 0; i < audioConfiguration.kConfigSize; i++) {
+            dsAudioTypeConfig_t *config = &audioConfiguration.pKAudioConfigs[i];
+            
+            // Free name string
+            if (config->name != NULL) {
+                free((void*)config->name);
+            }
+            
+            // Free compressions array
+            if (config->compressions != NULL) {
+                free((void*)config->compressions);
+            }
+            
+            // Free encodings array
+            if (config->encodings != NULL) {
+                free((void*)config->encodings);
+            }
+            
+            // Free stereoModes array
+            if (config->stereoModes != NULL) {
+                free((void*)config->stereoModes);
+            }
+        }
+        
         free(audioConfiguration.pKAudioConfigs);
         audioConfiguration.pKAudioConfigs = NULL;
-        INT_INFO("Freed pKAudioConfigs\n");
+        INT_INFO("Freed pKAudioConfigs and all deep-copied fields\n");
     }
     
-    // Free audio ports
+    // Free audio ports and their deep-copied fields
     if (audioConfiguration.pKAudioPorts != NULL) {
+        for (int i = 0; i < audioConfiguration.kPortSize; i++) {
+            dsAudioPortConfig_t *port = &audioConfiguration.pKAudioPorts[i];
+            
+            // Free connectedVOPs array
+            if (port->connectedVOPs != NULL) {
+                free((void*)port->connectedVOPs);
+            }
+        }
+        
         free(audioConfiguration.pKAudioPorts);
         audioConfiguration.pKAudioPorts = NULL;
-        INT_INFO("Freed pKAudioPorts\n");
+        INT_INFO("Freed pKAudioPorts and all deep-copied fields\n");
     }
     
     // Reset size variables

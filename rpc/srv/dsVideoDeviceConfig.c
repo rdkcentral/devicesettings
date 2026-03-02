@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unitstd.h>
 #include "dsserverlogger.h"
 #include "dsTypes.h"
 #include "dsError.h"
