@@ -264,11 +264,11 @@ void VideoDevice::getSettopSupportedResolutions(std::list<std::string>& stbSuppo
 {
 	stbSupportedResoltuions.clear();
 	
-	// Get cached supported resolutions directly from _originalSupportedResolutions
-	const std::vector<VideoResolution>& resolutions = VideoOutputPortConfig::getInstance()._originalSupportedResolutions;
+	// Get cached supported resolutions through const accessor
+	List<VideoResolution> resolutions = VideoOutputPortConfig::getInstance().getOriginalSupportedResolutions();
 	
-	for (const VideoResolution& resolution : resolutions) {
-		stbSupportedResoltuions.push_back(resolution.getName());
+	for (size_t i = 0; i < resolutions.size(); i++) {
+		stbSupportedResoltuions.push_back(resolutions.at(i).getName());
 	}
 }
 

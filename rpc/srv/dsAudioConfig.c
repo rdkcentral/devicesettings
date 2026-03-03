@@ -243,12 +243,10 @@ static int allocateAndCopyAudioPorts(const dsAudioPortConfig_t* source, int numE
         // Copy port ID
         dest->id = src->id;
         
-        // Deep copy connectedVOPs array if present
-        // Note: We need to know the size of connectedVOPs array
-        // For now, assuming it's NULL or a single element (common case)
-        // A proper implementation would need size information
+        // Deep copy connectedVOPs array - it's an array of size dsVIDEOPORT_TYPE_MAX
         if (src->connectedVOPs != NULL) {
-            dest->connectedVOPs = (dsVideoPortPortId_t*)malloc(sizeof(dsVideoPortPortId_t));
+            size_t arraySize = dsVIDEOPORT_TYPE_MAX * sizeof(dsVideoPortPortId_t);
+            dest->connectedVOPs = (dsVideoPortPortId_t*)malloc(arraySize);
             if (dest->connectedVOPs == NULL) {
                 INT_ERROR("Failed to allocate connectedVOPs for audio port %d\n", i);
                 // Cleanup previously allocated items
@@ -259,7 +257,7 @@ static int allocateAndCopyAudioPorts(const dsAudioPortConfig_t* source, int numE
                 audioConfiguration.pKAudioPorts = NULL;
                 return -1;
             }
-            memcpy((void*)dest->connectedVOPs, src->connectedVOPs, sizeof(dsVideoPortPortId_t));
+            memcpy((void*)dest->connectedVOPs, src->connectedVOPs, arraySize);
         } else {
             dest->connectedVOPs = NULL;
         }
