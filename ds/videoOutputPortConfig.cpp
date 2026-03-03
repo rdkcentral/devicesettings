@@ -156,15 +156,6 @@ List<VideoOutputPortType>  VideoOutputPortConfig::getSupportedTypes()
 	return supportedTypes;
 }
 
-List<VideoResolution> VideoOutputPortConfig::getOriginalSupportedResolutions() const
-{
-	List<VideoResolution> resolutions;
-	for (const VideoResolution& res : _originalSupportedResolutions) {
-		resolutions.push_back(res);
-	}
-	return resolutions;
-}
-
 List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgnoreEdid)
 {
 	List<VideoResolution> supportedResolutions;
