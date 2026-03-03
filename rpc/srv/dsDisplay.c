@@ -578,12 +578,19 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
     errno_t rc = -1;
     dsVideoPortResolution_t *edidResn = NULL;
     dsVideoPortResolution_t *presolution = NULL, *pVideoResolutionsSettings = NULL;
-    dsDisplayEDID_t *edidData = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
-    dsVideoPortType_t _VPortType = _GetDisplayPortType(handle);
+    
     if (edid == NULL) {
-        free(edidData);
-    	return; // Handle malloc failure
+        INT_ERROR("Invalid EDID parameter\n");
+        return;
     }
+
+    dsVideoPortType_t _VPortType = _GetDisplayPortType(handle);
+    dsDisplayEDID_t *edidData = (dsDisplayEDID_t*)malloc(sizeof(dsDisplayEDID_t));
+    if (edidData == NULL) {
+        INT_ERROR("Failed to allocate memory for EDID data\n");
+    	return;
+    }
+
     int numOfSupportedResolution = 0;
 
     if(_VPortType == dsVIDEOPORT_TYPE_HDMI)
@@ -592,7 +599,9 @@ static void filterEDIDResolution(intptr_t handle, dsDisplayEDID_t *edid)
         int iCount = 0;
         //Get details from libds
         if (_dsGetVideoPortResolutions(&iCount, &pVideoResolutionsSettings) != dsERR_NONE) {
-            INT_ERROR("Failed to get video port resolutions\n");
+            INT_ERROR("Failed to get video port resolutions, leaving EDID unchanged\n");
+            free(edidData);
+            return;
         }
 
         /*Initialize the struct*/

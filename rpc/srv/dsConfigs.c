@@ -87,7 +87,7 @@ static dsError_t loadDeviceCapabilities(unsigned int capabilityType)
 {
     void* pDLHandle = NULL;
     int isSymbolsLoaded = 0;
-    dsError_t ret = dsERR_GENERAL, audioRet = dsERR_GENERAL, videoRet = dsERR_GENERAL, videoPortRet = dsERR_GENERAL;
+    dsError_t ret = dsERR_GENERAL, audioRet = dsERR_NONE, videoRet = dsERR_NONE, videoPortRet = dsERR_NONE;
 
     INT_INFO("Entering capabilityType = 0x%08X\n", capabilityType);
     dlerror(); /* clear old error */
@@ -172,7 +172,10 @@ static dsError_t loadDeviceCapabilities(unsigned int capabilityType)
         pDLHandle = NULL;
     }
 
-    if(audioRet == dsERR_GENERAL || videoRet == dsERR_GENERAL || videoPortRet == dsERR_GENERAL)
+    // Only check error codes for capabilities that were requested
+    if (((capabilityType & DEVICE_CAPABILITY_AUDIO_PORT) && (audioRet == dsERR_GENERAL)) ||
+        ((capabilityType & DEVICE_CAPABILITY_VIDEO_DEVICE) && (videoRet == dsERR_GENERAL)) ||
+        ((capabilityType & DEVICE_CAPABILITY_VIDEO_PORT) && (videoPortRet == dsERR_GENERAL)))
     {
         INT_ERROR("Failed to load device capabilities: audioRet=%d, videoRet=%d, videoPortRet=%d\n", audioRet, videoRet, videoPortRet);
         return dsERR_GENERAL;

@@ -2441,7 +2441,7 @@ intptr_t dsGetDefaultPortHandle()
     
     if (_dsGetVideoPortPortConfigs(&numPorts, &pVideoPortPorts) != dsERR_NONE) {
         INT_ERROR("Failed to get video port port configurations\n");
-        return NULL;
+        return halhandle;
     }
     
     for(i=0; i< numPorts; i++)
