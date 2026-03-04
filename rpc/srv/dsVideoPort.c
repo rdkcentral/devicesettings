@@ -779,6 +779,7 @@ IARM_Result_t _dsEnableVideoPort(void *arg)
     IARM_BUS_Lock(lock);
    
 	dsVideoPortSetEnabledParam_t *param = (dsVideoPortSetEnabledParam_t *)arg;
+	INT_INFO("[%d][%s]: enable :%d \n", __LINE__, __FUNCTION__,param->enabled);
     dsEnableVideoPort(param->handle, param->enabled);
    
     IARM_BUS_Unlock(lock);
