@@ -634,7 +634,7 @@ static void dumpEDIDInformation( dsDisplayEDID_t *edid)
     printf("[DsMgr]dumpEDIDInformation tags: Product, SN, Year, Week, Monitor, Type, Repeater\n");
     printf("[DsMgr]dumpEDIDInformation values:%x,%x,%d,%d,%s,%s,%x\n",edid->productCode,edid->serialNumber,edid->manufactureYear,edid->manufactureWeek,edid->monitorName,edid->hdmiDeviceType?"HDMI":"DVI",edid->isRepeater);
     char telemetryValue[512] = {0};
-    snprintf(telemetryValue, sizeof(telemetryValue), "[DsMgr]dumpEDIDInformation values Produce Code:%x, Serial Number:%x, Manufacture Year:%d, Manufacture Week:%d, Monitor Name:%s, Device Type:%s, IsRepeater:%x",
+    snprintf(telemetryValue, sizeof(telemetryValue), "[DsMgr]dumpEDIDInformation values Product Code:%x, Serial Number:%x, Manufacture Year:%d, Manufacture Week:%d, Monitor Name:%s, Device Type:%s, IsRepeater:%x",
              edid->productCode, edid->serialNumber, edid->manufactureYear, edid->manufactureWeek,
              edid->monitorName, edid->hdmiDeviceType ? "HDMI" : "DVI", edid->isRepeater);
     TELEMENTRY_EVENT_STRING("SYST_INFO_TVData_split", telemetryValue);
