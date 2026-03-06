@@ -67,7 +67,6 @@ int stringToNumber (std::string text)
     return number;
 }
 
-
 namespace {
 	const char *_colorNames[] = {
 			"Blue",
@@ -99,7 +98,6 @@ namespace {
 			"RfByPass",
 
 	};
-
 
 	inline bool isIndicatorValid(int id) {
 		return dsFPDIndicator_isValid(id);

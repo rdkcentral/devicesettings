@@ -49,7 +49,7 @@
 #include "dsMgr.h"
 #include "hostPersistence.hpp"
 #include "dsserverlogger.h"
-#include "dsAudioSettings.h"
+#include "dsAudioConfig.h"
 
 #include "safec_lib.h"
 
@@ -3790,17 +3790,23 @@ IARM_Result_t _dsGetEncoding(void *arg)
 
 static dsAudioPortType_t _GetAudioPortType(intptr_t handle)
 {
-    int numPorts,i;
+    int numPorts = 0;
+    int i;
     intptr_t halhandle = 0;
+    const dsAudioPortConfig_t *pAudioPorts = NULL;
 
-    numPorts = dsUTL_DIM(kSupportedPortTypes);
+    // Get audio port configurations from AudioOutputPortConfig
+    if (_dsGetAudioPortConfigs(&numPorts, &pAudioPorts) != dsERR_NONE) {
+        INT_ERROR("Failed to get audio port configurations\n");
+        return dsAUDIOPORT_TYPE_MAX;
+    }
     
     for(i=0; i< numPorts; i++)
     {
-        if(dsGetAudioPort (kPorts[i].id.type, kPorts[i].id.index, &halhandle) == dsERR_NONE) {
+        if(dsGetAudioPort (pAudioPorts[i].id.type, pAudioPorts[i].id.index, &halhandle) == dsERR_NONE) {
             if (handle == halhandle)
             {
-                return kPorts[i].id.type;
+                return pAudioPorts[i].id.type;
             }
         }
     }

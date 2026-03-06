@@ -128,7 +128,7 @@ VideoOutputPort::VideoOutputPort(const int type, const int index, const int id, 
 										_resolution(resolution),
 										_display(*this)
 {
-	dsError_t ret = dsGetVideoPort((dsVideoPortType_t)_type, _index, &_handle);
+    dsError_t ret = dsGetVideoPort((dsVideoPortType_t)_type, _index, &_handle);
 
 	{
 		std::stringstream out;
@@ -138,25 +138,25 @@ VideoOutputPort::VideoOutputPort(const int type, const int index, const int id, 
 
 	if (ret == dsERR_NONE) {
 		bool enabled = false;
-		ret = dsIsVideoPortEnabled(_handle, &enabled);
+        ret = dsIsVideoPortEnabled(_handle, &enabled);
 		if (ret == dsERR_NONE) {
 			_enabled = enabled;
 			_contentProtected = false;
 
 			bool connected = false;
-			ret = dsIsDisplayConnected(_handle, &connected);
+            ret = dsIsDisplayConnected(_handle, &connected);
 			if (ret == dsERR_NONE) {
-				_displayConnected = connected;
+                _displayConnected = connected;
 			}
 			else {
-				throw IllegalArgumentException();
+                throw IllegalArgumentException();
 			}
 		}
 		else {
 		}
 	}
 	else {
-		throw IllegalArgumentException();
+        throw IllegalArgumentException();
 	}
 }
 
@@ -465,7 +465,7 @@ bool VideoOutputPort::isDynamicResolutionSupported() const
  */
 void VideoOutputPort::setResolution(const std::string &resolutionName, bool persist/* = true*/, bool isIgnoreEdid/* = false*/)
 {
-        printf("ResOverride VideoOutputPort::setResolution resolutionName:%s persist:%d isIgnoreEdid:%d line:%d\r\n", resolutionName.c_str(), persist, isIgnoreEdid, __LINE__);
+    INT_INFO("ResOverride VideoOutputPort::setResolution resolutionName:%s persist:%d isIgnoreEdid:%d", resolutionName.c_str(), persist, isIgnoreEdid);
 	if (0 && resolutionName.compare(_resolution) == 0) {
 		return;
 	}
