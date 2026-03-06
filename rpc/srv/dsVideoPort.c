@@ -193,7 +193,7 @@ IARM_Result_t dsVideoPortMgr_init()
         {
             char telemetryValue[128] = {0};
             snprintf(telemetryValue, sizeof(telemetryValue), "The Persistent HDMI resolution read is %s", _dsHDMIResolution.c_str());
-            TELEMENTRY_EVENT_STRING("SYST_INFO_4KResolution", telemetryValue);
+            TELEMETRY_EVENT_STRING("SYST_INFO_4KResolution", telemetryValue);
         }
         
 		#ifdef HAS_ONLY_COMPOSITE

@@ -544,7 +544,7 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
 
         case dsDISPLAY_RXSENSE_OFF:
             INT_INFO("Rx Sense Status OFF !!!!!!!! ..\r\n");
-            TELEMENTRY_EVENT_STRING("HDMI_INFO_tv_off", "Rx Sense Status OFF");
+            TELEMETRY_EVENT_STRING("HDMI_INFO_tv_off", "Rx Sense Status OFF");
             _eventData.data.hdmi_rxsense.status =  dsDISPLAY_RXSENSE_OFF ;
             _eventId = IARM_BUS_DSMGR_EVENT_RX_SENSE;
             break;    
@@ -637,7 +637,7 @@ static void dumpEDIDInformation( dsDisplayEDID_t *edid)
     snprintf(telemetryValue, sizeof(telemetryValue), "[DsMgr]dumpEDIDInformation values Produce Code:%x, Serial Number:%x, Manufacture Year:%d, Manufacture Week:%d, Monitor Name:%s, Device Type:%s, IsRepeater:%x",
              edid->productCode, edid->serialNumber, edid->manufactureYear, edid->manufactureWeek,
              edid->monitorName, edid->hdmiDeviceType ? "HDMI" : "DVI", edid->isRepeater);
-    TELEMENTRY_EVENT_STRING("SYST_INFO_TVData_split", telemetryValue);
+    TELEMETRY_EVENT_STRING("SYST_INFO_TVData_split", telemetryValue);
     printf("Supported resolutions: ");
     for (size_t j = 0; j < edid->numOfSupportedResolution; j++)
     {
