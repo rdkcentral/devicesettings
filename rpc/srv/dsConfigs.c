@@ -1,0 +1,234 @@
+/*
+ * If not stated otherwise in this file or this component's LICENSE file the
+ * following copyright and licenses apply:
+ *
+ * Copyright 2026 RDK Management
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
+/**
+* @defgroup devicesettings
+* @{
+* @defgroup rpc
+* @{
+**/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dlfcn.h>
+#include "dsserverlogger.h"
+#include "dsAudioConfig.h"
+#include "dsVideoPortConfig.h"
+#include "dsVideoDeviceConfig.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef RDK_DSHAL_NAME
+#define RDK_DSHAL_NAME "libdshal.so"
+#endif
+
+#define DEVICE_CAPABILITY_VIDEO_PORT    0x01
+#define DEVICE_CAPABILITY_AUDIO_PORT    0x02
+#define DEVICE_CAPABILITY_VIDEO_DEVICE  0x04
+#define DEVICE_CAPABILITY_FRONT_PANEL   0x08
+
+typedef struct {
+    const char* name;
+    void** dataptr;
+} dlSymbolLookup_t;
+
+static int configsLoaded = 0;
+
+
+static int LoadDLSymbols(void* pDLHandle, const dlSymbolLookup_t* symbols, int numberOfSymbols)
+{
+    int currentSymbols = 0;
+    int isAllSymbolsLoaded = 0;
+    
+    if ((NULL == pDLHandle) || (NULL == symbols)) {
+        INT_ERROR("Invalid DL Handle or symbolsPtr\n");
+        return 0;
+    }
+    
+    INT_INFO("numberOfSymbols = %d\n", numberOfSymbols);
+    for (int i = 0; i < numberOfSymbols; i++) {
+        if ((NULL == symbols[i].dataptr) || (NULL == symbols[i].name)) {
+            INT_ERROR("Invalid symbol entry at index [%d]\n", i);
+            continue;
+        }
+        *(symbols[i].dataptr) = dlsym(pDLHandle, symbols[i].name);
+        if (NULL == *(symbols[i].dataptr)) {
+            INT_ERROR("[%s] is not defined\n", symbols[i].name);
+        }
+        else {
+            currentSymbols++;
+            INT_INFO("[%s] is defined and loaded, data[%p]\n", symbols[i].name, *(symbols[i].dataptr));
+        }
+    }
+    isAllSymbolsLoaded = (numberOfSymbols) ? (currentSymbols == numberOfSymbols) : 0;
+    return isAllSymbolsLoaded;
+}
+
+static dsError_t loadDeviceCapabilities(unsigned int capabilityType)
+{
+    void* pDLHandle = NULL;
+    int isSymbolsLoaded = 0;
+    dsError_t ret = dsERR_GENERAL, audioRet = dsERR_NONE, videoRet = dsERR_NONE, videoPortRet = dsERR_NONE;
+
+    INT_INFO("Entering capabilityType = 0x%08X\n", capabilityType);
+    dlerror(); /* clear old error */
+    pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+    INT_INFO("DL Instance '%s'\n", (NULL == pDLHandle ? "NULL" : "Valid"));
+
+    /* Audio Port Config */
+    if (DEVICE_CAPABILITY_AUDIO_PORT & capabilityType) {
+        audioConfigs_t dynamicAudioConfigs;
+        memset(&dynamicAudioConfigs, 0, sizeof(audioConfigs_t));
+        
+        dlSymbolLookup_t audioConfigSymbols[] = {
+            {"kAudioConfigs", (void**)&dynamicAudioConfigs.pKAudioConfigs},
+            {"kAudioPorts", (void**)&dynamicAudioConfigs.pKAudioPorts},
+            {"kAudioConfigs_size", (void**)&dynamicAudioConfigs.pKConfigSize},
+            {"kAudioPorts_size", (void**)&dynamicAudioConfigs.pKPortSize}
+        };
+
+        isSymbolsLoaded = 0;
+        if (NULL != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, audioConfigSymbols, 
+                                           sizeof(audioConfigSymbols)/sizeof(dlSymbolLookup_t));
+        }
+        audioRet = dsLoadAudioOutputPortConfig(isSymbolsLoaded ? &dynamicAudioConfigs : NULL);
+        if(audioRet == dsERR_GENERAL)
+        {
+            INT_ERROR("dsLoadAudioOutputPortConfig() failed");
+        }
+    }
+
+    /* Video Port Config */
+    if (DEVICE_CAPABILITY_VIDEO_PORT & capabilityType) {
+        videoPortConfigs_t dynamicVideoPortConfigs;
+        memset(&dynamicVideoPortConfigs, 0, sizeof(videoPortConfigs_t));
+        
+        dlSymbolLookup_t videoPortConfigSymbols[] = {
+            {"kVideoPortConfigs", (void**)&dynamicVideoPortConfigs.pKVideoPortConfigs},
+            {"kVideoPortConfigs_size", (void**)&dynamicVideoPortConfigs.pKVideoPortConfigs_size},
+            {"kVideoPortPorts", (void**)&dynamicVideoPortConfigs.pKVideoPortPorts},
+            {"kVideoPortPorts_size", (void**)&dynamicVideoPortConfigs.pKVideoPortPorts_size},
+            {"kResolutionsSettings", (void**)&dynamicVideoPortConfigs.pKVideoPortResolutionsSettings},
+            {"kResolutionsSettings_size", (void**)&dynamicVideoPortConfigs.pKResolutionsSettings_size},
+            {"kDefaultResIndex", (void**)&dynamicVideoPortConfigs.pKDefaultResIndex}
+        };
+
+        isSymbolsLoaded = 0;
+        if (NULL != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoPortConfigSymbols, 
+                                           sizeof(videoPortConfigSymbols)/sizeof(dlSymbolLookup_t));
+        }
+        videoPortRet = dsLoadVideoOutputPortConfig(isSymbolsLoaded ? &dynamicVideoPortConfigs : NULL);
+        if(videoPortRet == dsERR_GENERAL)
+        {
+            INT_ERROR("dsLoadVideoOutputPortConfig() failed");
+        }
+    }
+
+    /* Video Device Config */
+    if (DEVICE_CAPABILITY_VIDEO_DEVICE & capabilityType) {
+        videoDeviceConfig_t dynamicVideoDeviceConfigs;
+        memset(&dynamicVideoDeviceConfigs, 0, sizeof(videoDeviceConfig_t));
+        
+        dlSymbolLookup_t videoDeviceConfigSymbols[] = {
+            {"kVideoDeviceConfigs", (void**)&dynamicVideoDeviceConfigs.pKVideoDeviceConfigs},
+            {"kVideoDeviceConfigs_size", (void**)&dynamicVideoDeviceConfigs.pKVideoDeviceConfigs_size}
+        };
+        
+        isSymbolsLoaded = 0;
+        if (NULL != pDLHandle) {
+            isSymbolsLoaded = LoadDLSymbols(pDLHandle, videoDeviceConfigSymbols, 
+                                           sizeof(videoDeviceConfigSymbols)/sizeof(dlSymbolLookup_t));
+        }
+        videoRet = dsLoadVideoDeviceConfig(isSymbolsLoaded ? &dynamicVideoDeviceConfigs : NULL);
+        if(videoRet == dsERR_GENERAL)
+        {
+            INT_ERROR("dsLoadVideoDeviceConfig() failed");
+        }        
+    }
+
+    if (NULL != pDLHandle) {
+        dlclose(pDLHandle);
+        pDLHandle = NULL;
+    }
+
+    // Only check error codes for capabilities that were requested
+    if (((capabilityType & DEVICE_CAPABILITY_AUDIO_PORT) && (audioRet == dsERR_GENERAL)) ||
+        ((capabilityType & DEVICE_CAPABILITY_VIDEO_DEVICE) && (videoRet == dsERR_GENERAL)) ||
+        ((capabilityType & DEVICE_CAPABILITY_VIDEO_PORT) && (videoPortRet == dsERR_GENERAL)))
+    {
+        INT_ERROR("Failed to load device capabilities: audioRet=%d, videoRet=%d, videoPortRet=%d\n", audioRet, videoRet, videoPortRet);
+        return dsERR_GENERAL;
+    }
+    INT_INFO("Exiting ...\n");
+    return dsERR_NONE;
+}
+
+dsError_t dsLoadConfigs(void)
+{
+    dsError_t ret = dsERR_GENERAL;
+
+    INT_INFO("Enter function\n");
+    
+    // Check if configs are already loaded
+    if (configsLoaded) {
+        INT_INFO("Configs already loaded, skipping reload\n");
+        return dsERR_NONE;
+    }
+    
+    //TODO:Add the mutex lock handel in future
+    ret = loadDeviceCapabilities(DEVICE_CAPABILITY_VIDEO_PORT | 
+                          DEVICE_CAPABILITY_AUDIO_PORT |
+                          DEVICE_CAPABILITY_VIDEO_DEVICE);
+    if (ret == dsERR_GENERAL)
+    {
+        INT_ERROR("[srv] load failed\n ");
+        return ret;
+    }
+    
+    // Mark configs as loaded
+    configsLoaded = 1;
+    INT_INFO("Exit function\n");
+    return dsERR_NONE;
+}
+
+dsError_t dsFreeConfig()
+{
+    // Free dynamically allocated configuration memory
+	INT_INFO("Freeing device configuration resources\n");
+	dsAudioConfigFree();
+	dsVideoDeviceConfigFree();
+	dsVideoPortConfigFree();
+	
+	// Reset loaded flag so configs can be reloaded if needed
+	configsLoaded = 0;
+	INT_INFO("Config freed and reload flag reset\n");
+	return dsERR_NONE;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+/** @} */
+/** @} */

@@ -30,8 +30,12 @@
 
 #include "dslogger.h"
 
+#include <sys/syscall.h>   // for SYS_gettid
+#include <unistd.h>        // for syscall
+
 #define unlikely(x) (__builtin_expect(!!(x), 0))
-#define MAX_LOG_BUFF 512
+#define MAX_LOG_BUFF 1024
+#define kFormatMessageSize (MAX_LOG_BUFF - 128)
 
 DS_LogCb logCb = NULL;
 
@@ -40,29 +44,34 @@ void DS_RegisterForLog(DS_LogCb cb)
     logCb = cb;
 }
 
-int ds_log(int priority, const char* fileName, int lineNum, const char *format, ...)
+int ds_log(LogLevel priority, const char* fileName, int lineNum, const char *func, const char *format, ...)
 {
-    char tmp_buff[MAX_LOG_BUFF] = {'\0'};
+    char formatted[MAX_LOG_BUFF] = {'\0'};
+    enum LogLevel {INFO_LEVEL = 0, WARN_LEVEL, ERROR_LEVEL, DEBUG_LEVEL, TRACE_LEVEL};
+    const char *levelMap[] = { "INFO", "WARN", "ERROR", "DEBUG", "TRACE"};
 
-    int offset = snprintf(tmp_buff, MAX_LOG_BUFF, "[%s:%d] ", fileName, lineNum);
-
-    // formatting error
-    if (unlikely(offset < 0)) {
-        offset = 0;
-        tmp_buff[0] = '\0'; // Ensure buffer is null-terminated if snprintf fails
+    if (!func || !fileName || !format)
+    {
+        return -1;
     }
 
-    va_list args;
-    va_start(args, format);
-    vsnprintf(tmp_buff + offset, MAX_LOG_BUFF - offset, format, args);
-    va_end(args);
+    va_list argptr;
+    va_start(argptr, format);
+    vsnprintf(formatted, kFormatMessageSize, format, argptr);
+    va_end(argptr);
 
     if (nullptr != logCb) {
-        logCb(priority, tmp_buff);
+        logCb(priority, formatted);
     } else {
-        return printf("%s\n", tmp_buff);
+        fprintf(stderr, "[DS][%d] %s [%s:%d] %s: %s \n",
+                (int)syscall(SYS_gettid),
+                levelMap[static_cast<int>(priority)],
+                fileName,
+                lineNum,
+                func,
+                formatted);
+        fflush(stderr);
     }
-
     return 0;
 }
 
