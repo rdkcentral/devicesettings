@@ -29,4 +29,5 @@ lib_LTLIBRARIES = libdshalsrv.la
 libdshalsrv_la_CPPFLAGS = $(INCLUDE_FILES)
 libdshalsrv_la_CXXFLAGS= -std=c++0x -g -fPIC -D_REENTRANT -Wall
 libdshalsrv_la_CFLAGS = -x c++ -g -fPIC -D_REENTRANT -Wall
+libdshalsrv_la_LIBADD = -ltelemetry_msgsender
 libdshalsrv_la_SOURCES = dsHost.cpp hostPersistence.cpp dsAudio.c dsDisplay.c dsFPD.c dsMgr.c dsVideoDevice.c dsVideoPort.c dsserverlogger.c
