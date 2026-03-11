@@ -65,6 +65,7 @@ class VideoOutputPortType : public DSConstant {
 	List<VideoResolution> _supportedResolutions;
 	List<VideoOutputPort> _vPorts;
 	//std::map<VideoResolution , VideoResolution> _dynamicResolutionMappins;
+	bool _hdcpenable(void);
 
 public:
 	static const int kRF;

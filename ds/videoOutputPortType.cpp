@@ -26,6 +26,12 @@
 * @{
 **/
 
+#include <iostream>
+#include <string.h>
+#include <sstream>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #include "videoOutputPortType.hpp"
 #include "videoOutputPort.hpp"
@@ -46,9 +52,7 @@
 
 
 
-#include <iostream>
-#include <string.h>
-#include <sstream>
+
 
 /**
  * @file videoOutputPortType.cpp
@@ -142,7 +146,7 @@ VideoOutputPortType & VideoOutputPortType::getInstance(const std::string &name)
 	throw IllegalArgumentException();
 }
 
-VideoOutputPortType::_hdcpenable()
+bool VideoOutputPortType::_hdcpenable()
 {
     INT_INFO("Enter function");
     int keySize = 0;
@@ -207,16 +211,16 @@ VideoOutputPortType::_hdcpenable()
 	}while(false == IsMfrDataRead);	
 
 	try {
-	    INT_INFO("Setting HDCP [%s]", enabled);
+	    INT_INFO("Setting HDCP true");
 		if(0 == keySize){
 			INT_ERROR("Ignoring request, invalid parameters ");
 		}else{
-	        device::VideoOutputPortType::getInstance(device::VideoOutputPortType::kHDMI).enabledHDCP(protectContent, hdcpKey, keySize);
+	        device::VideoOutputPortType::getInstance(device::VideoOutputPortType::kHDMI).enabledHDCP(true, hdcpKey, keySize);
 	        INT_INFO("Setting  HDCP done");
         }
     }
     catch (...) {
-	    INT_ERROR("Exception Caught during [%s]\r", argv[0]);
+	    INT_ERROR("Exception Caught during [%s]\r", __FUNCTION__);
     }
 
     
