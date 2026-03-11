@@ -36,7 +36,7 @@
 #include <stdio.h> 
 #include <string.h>
 #include "dsserverlogger.h"
-#include "dsTelemetry.h"
+#include <telemetry_busmessage_sender.h>
 
 #include <iostream>
 #include "hostPersistence.hpp"
