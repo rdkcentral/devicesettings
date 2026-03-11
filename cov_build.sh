@@ -21,6 +21,7 @@ export IARM_PATH=$IARMBUS_PATH
 export IARMMGRS_PATH=$ROOT/iarmmgrs
 export RDKLOGGER_PATH=$ROOT/rdk_logger
 export TELEMETRY_PATH=$ROOT/telemetry
+export ENTSERVICES_TF_PATH=$ROOT/entservices-testframework
 export DS_PATH=$ROOT/devicesettings
 export DS_IF_PATH=$ROOT/rdk-halif-device_settings
 export POWER_IF_PATH=$ROOT/rdk-halif-power_manager
@@ -33,12 +34,14 @@ cd $WORKDIR
 cd ./stubs
 g++ -fPIC -shared -o libIARMBus.so iarm_stubs.cpp -I$WORKDIR/stubs -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I$IARMBUS_PATH/core -I$IARMBUS_PATH/core/include -fpermissive
 g++ -fPIC -shared -o libWPEFrameworkPowerController.so powerctrl_stubs.cpp  -I$WORKDIR/stubs -I${POWER_IF_PATH}/include -fpermissive
+g++ -fPIC -shared -o libtelemetry_msgsender.so ${ENTSERVICES_TF_PATH}/Tests/mocks/MockProxy/TelemetryProxy.cpp -I${ENTSERVICES_TF_PATH}/Tests/mocks
 
 gcc -fPIC -shared -o libdshal.so dshal_stubs.c -I${DS_IF_PATH}/include -I$WORKDIR/mfr/include
 #g++ -fPIC -shared -o libdshalsrv.so dshalsrv_stubs.c -I${DS_IF_PATH}/include -I${DS_PATH}/rpc/include
 #g++ -fPIC -shared -o libds.so ds_stubs.cpp -I${DS_IF_PATH}/include/ -I${DS_PATH}/ds/include -I${DS_PATH}/rpc/include
 
 cp libIARMBus.so /usr/local/lib/
+cp libtelemetry_msgsender.so /usr/local/lib/
 cp libWPEFrameworkPowerController.so /usr/local/lib/libWPEFrameworkPowerController.so
 
 #cp libds.so /usr/local/lib/
@@ -69,4 +72,4 @@ find $WORKDIR -iname "*.o" -exec rm -v {} \;
 find $WORKDIR -iname "*.so*" -exec rm -v {} \;
 
 echo "##### Triggering make"
-make CFLAGS+='-fPIC -DDSMGR_LOGGER_ENABLED=ON -DRDK_DSHAL_NAME=\"libdshal.so\" -I${DS_IF_PATH}/include -I${DS_HAL_PATH} -I${DS_MGRS}/stubs -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include -I${IARM_MGRS}/sysmgr/include -I${DS_MGRS}/ds/include -I${DS_MGRS}/rpc/include -I${POWER_IF_PATH}/include/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${IARM_MGRS}/mfr/include/ -I${IARM_MGRS}/mfr/common -I${DEEPSLEEP_IF_PATH}/include -I${IARM_MGRS}/hal/include -I${IARM_MGRS}/power -I${IARM_MGRS}/power/include' LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/lib -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -ldshal"
+make CFLAGS+='-fPIC -DDSMGR_LOGGER_ENABLED=ON -DRDK_DSHAL_NAME=\"libdshal.so\" -I${DS_IF_PATH}/include -I${DS_HAL_PATH} -I${DS_MGRS}/stubs -I${ENTSERVICES_TF_PATH}/Tests/mocks -I${IARMBUS_PATH}/core -I${IARMBUS_PATH}/core/include -I${IARM_MGRS}/sysmgr/include -I${DS_MGRS}/ds/include -I${DS_MGRS}/rpc/include -I${POWER_IF_PATH}/include/ -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I${IARM_MGRS}/mfr/include/ -I${IARM_MGRS}/mfr/common -I${DEEPSLEEP_IF_PATH}/include -I${IARM_MGRS}/hal/include -I${IARM_MGRS}/power -I${IARM_MGRS}/power/include' LDFLAGS="-L/usr/lib/x86_64-linux-gnu/ -L/usr/local/lib -lglib-2.0 -lIARMBus -lWPEFrameworkPowerController -ldshal -ltelemetry_msgsender"
