@@ -48,6 +48,11 @@ extern "C" {
         t2_event_s((char*)marker, (char*)value); \
     } while(0)
 
+#define TELEMETRY_EVENT_FLOAT(marker, value) \
+    do { \
+        t2_event_f((char*)marker, (double)value); \
+    } while(0)
+
 #define TELEMETRY_EVENT_INT(marker, value) \
     do { \
         t2_event_d((char*)marker, (int)value); \
