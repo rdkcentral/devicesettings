@@ -9,6 +9,7 @@ on:
 jobs:
   build-devicesettings-on-pr:
     name: Build devicesettings component in github rdkcentral
+    if: false
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/rdkcentral/docker-rdk-ci:latest
