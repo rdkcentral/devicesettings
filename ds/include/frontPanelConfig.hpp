@@ -44,6 +44,18 @@
  */
 using namespace std;
 
+typedef struct fpdConfigs
+{
+	const dsFPDColorConfig_t    *pKFPDIndicatorColors;
+	const dsFPDIndicatorConfig_t   *pKIndicators;
+	const dsFPDTextDisplayConfig_t   *pKTextDisplays;
+	int *pKFPDIndicatorColors_size;
+	int *pKIndicators_size;
+	int *pKTextDisplays_size;
+}fpdConfigs_t;
+
+#define DEFAULT_FPD_TEXT_DISPLAY_SUPPORTED_CHARACTERS "ABCEDFG"
+
 namespace device {
 
 
@@ -59,11 +71,10 @@ private:
     std::vector<FrontPanelTextDisplay> 			_textDisplays;  //!< Container to hold all the FrontPanelTextDisplay instances.
     std::vector<FrontPanelIndicator::Color> 	_colors;                //!< Container to hold all the Color instances.
     bool m_isFPInitialized;
+    bool m_isFPConfigLoaded;
 
     FrontPanelConfig();
 	virtual ~FrontPanelConfig();
-
-	void load();
 
 public:
 	static FrontPanelConfig & getInstance();
@@ -80,11 +91,12 @@ public:
 	List<FrontPanelIndicator> 		 getIndicators();
 	List<FrontPanelTextDisplay> 	 getTextDisplays();
 
-        /* Initialize Front Panel */
-        void fPInit();
-        /* Terminate Front Panel */
-        void fPTerm();
+    /* Initialize Front Panel */
+    void fPInit();
+    /* Terminate Front Panel */
+    void fPTerm();
 
+    void load(fpdConfigs_t* dynamicFPDConfigs);
 };
 
 }

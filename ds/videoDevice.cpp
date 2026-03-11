@@ -33,6 +33,7 @@
 #include "illegalArgumentException.hpp"
 #include "exception.hpp"
 #include "videoDeviceConfig.hpp"
+#include "videoOutputPortConfig.hpp"
 #include "dsVideoResolutionSettings.h"
 #include "host.hpp"
 
@@ -258,16 +259,16 @@ void VideoDevice::getHDRCapabilities(int *capabilities)
     dsGetHDRCapabilities(_handle, capabilities);
 }
 
+
 void VideoDevice::getSettopSupportedResolutions(std::list<std::string>& stbSupportedResoltuions)
 {
-	size_t numResolutions = dsUTL_DIM(kResolutions);
-	for (size_t i = 0; i < numResolutions; i++)
-	{
-		dsVideoPortResolution_t *resolution = &kResolutions[i];
-		stbSupportedResoltuions.push_back(std::string(resolution->name));
+	stbSupportedResoltuions.clear();
+	
+	const std::vector<VideoResolution>& resolutions = VideoOutputPortConfig::getInstance()._originalSupportedResolutions;
+	
+	for (const VideoResolution& res : resolutions) {
+		stbSupportedResoltuions.push_back(res.getName());
 	}
-
-	return;
 }
 
 unsigned int VideoDevice::getSupportedVideoCodingFormats() const

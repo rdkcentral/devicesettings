@@ -52,7 +52,7 @@
 #include "hostPersistence.hpp"
 #include "dsserverlogger.h"
 #include "dsTypes.h"
-#include "dsVideoPortSettings.h"
+#include "dsVideoPortConfig.h"
 #include "dsInternal.h"
 #include "safec_lib.h"
 #include <vector>
@@ -1709,16 +1709,21 @@ IARM_Result_t _dsSupportedTvResolutions(void *arg)
 
 static dsVideoPortType_t _GetVideoPortType(intptr_t handle)
 {
-    int numPorts,i;
+    int numPorts = 0, i;
     intptr_t halhandle = 0;
-    
-    numPorts = dsUTL_DIM(kSupportedPortTypes);
+    const dsVideoPortPortConfig_t *pVideoPortPorts = NULL;
+
+    if (_dsGetVideoPortPortConfigs(&numPorts, &pVideoPortPorts) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port port configurations\n");
+        return dsVIDEOPORT_TYPE_MAX;
+    }
+
     for(i=0; i< numPorts; i++)
     {
-		dsGetVideoPort(kPorts[i].id.type, kPorts[i].id.index, &halhandle);
+		dsGetVideoPort(pVideoPortPorts[i].id.type, pVideoPortPorts[i].id.index, &halhandle);
 		if (handle == halhandle)
 		{
-			return kPorts[i].id.type;
+			return pVideoPortPorts[i].id.type;
 		}
 	}
 	INT_ERROR("Error: The Requested Video Port is not part of Platform Port Configuration \r\n");
@@ -1902,7 +1907,22 @@ static  std::string getCompatibleResolution(dsVideoPortResolution_t *SrcResn)
          case dsVIDEO_PIXELRES_4096x2160:
          case dsVIDEO_PIXELRES_MAX: 
          default:
-       		  return resolution.assign(kResolutions[kDefaultResIndex].name);
+       		  {
+        	      int numResolutions = 0;
+        	      dsVideoPortResolution_t* resolutions = NULL;
+        	      int defaultIndex = 0;
+        	      if (_dsGetVideoPortResolutions(&numResolutions, &resolutions) != dsERR_NONE) {
+        	          INT_ERROR("Failed to get video port resolutions\n");
+        	          break;
+        	      }
+        	      if (_dsGetDefaultResolutionIndex(&defaultIndex) != dsERR_NONE) {
+        	          INT_ERROR("Failed to get default resolution index\n");
+        	          break;
+        	      }
+        	      if ((resolutions != NULL) && (defaultIndex >= 0) && (defaultIndex < numResolutions)) {
+        	          return resolution.assign(resolutions[defaultIndex].name);
+        	      }
+       		  }
          break;
       }
    }
@@ -1924,11 +1944,34 @@ static bool  IsCompatibleResolution(dsVideoResolution_t pixelResolution1,dsVideo
 
 static dsVideoResolution_t getPixelResolution(std::string &resolution )
 {
-  	dsVideoPortResolution_t *Resn = &kResolutions[kDefaultResIndex]; 
-	
-	for (unsigned int i = 0; i < dsUTL_DIM(kResolutions); i++)
+	dsVideoPortResolution_t *pVideoResolutionsSettings = NULL;
+    dsVideoPortResolution_t *Resn = NULL;
+	int iCount = 0, defaultIndex = 0;
+	if (_dsGetVideoPortResolutions(&iCount, &pVideoResolutionsSettings) != dsERR_NONE) {
+		INT_ERROR("Failed to get video port resolutions\n");
+		return dsVIDEO_PIXELRES_MAX;
+	}
+
+	if (iCount <= 0 || pVideoResolutionsSettings == NULL) {
+		INT_ERROR("_dsGetVideoPortResolutions returned invalid values (iCount=%d, pVideoResolutionsSettings=%p)\n", iCount, pVideoResolutionsSettings);
+		return dsVIDEO_PIXELRES_MAX;
+	}
+
+    if (_dsGetDefaultResolutionIndex(&defaultIndex) != dsERR_NONE) {
+        INT_ERROR("Failed to get default resolution index using first element of array\n");
+    }
+
+    if ((defaultIndex >= 0) && (defaultIndex < iCount)) {
+  	    Resn = &pVideoResolutionsSettings[defaultIndex]; 
+    }
+    else
+    {
+        Resn = &pVideoResolutionsSettings[0];
+    }
+
+	for (int i = 0; i < iCount; i++)
 	{
-		Resn = &kResolutions[i];
+		Resn = &pVideoResolutionsSettings[i];
 		if (resolution.compare(Resn->name) == 0 )
 		{
 			break;
@@ -2259,17 +2302,24 @@ static dsError_t _dsVideoFormatUpdateRegisterCB (dsVideoFormatUpdateCB_t cbFun) 
     return eRet;
 }
 
+//This function does not have any caller.
 bool isComponentPortPresent()
 {
     bool componentPortPresent = false;
-    int numPorts,i;
-
-    numPorts = dsUTL_DIM(kSupportedPortTypes);
-    for(i=0; i< numPorts; i++)
-    {
-        if (kSupportedPortTypes[i] == dsVIDEOPORT_TYPE_COMPONENT)
+    int numTypeConfigs = 0;
+    const dsVideoPortTypeConfig_t* typeConfigs = NULL;
+    
+    if (_dsGetVideoPortTypeConfigs(&numTypeConfigs, &typeConfigs) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port type configurations\n");
+        return false;
+    }
+    if (typeConfigs) {
+        for(int i=0; i< numTypeConfigs; i++)
         {
-            componentPortPresent = true;;
+            if (typeConfigs[i].typeId == dsVIDEOPORT_TYPE_COMPONENT)
+            {
+                componentPortPresent = true;
+            }
         }
     }
     INT_INFO(" componentPortPresent :%d\n",componentPortPresent);
@@ -2393,14 +2443,20 @@ void _dsSyncHdmiStatus(const std::string& key, int val) {
 
 intptr_t dsGetDefaultPortHandle()
 {
-    int numPorts,i;
+    int numPorts = 0, i;
     intptr_t halhandle = 0;
-    numPorts = dsUTL_DIM(kSupportedPortTypes);
+    const dsVideoPortPortConfig_t *pVideoPortPorts = NULL;
+    
+    if (_dsGetVideoPortPortConfigs(&numPorts, &pVideoPortPorts) != dsERR_NONE) {
+        INT_ERROR("Failed to get video port port configurations\n");
+        return halhandle;
+    }
+    
     for(i=0; i< numPorts; i++)
     {
-        dsGetVideoPort(kPorts[i].id.type, kPorts[i].id.index, &halhandle);
-        if (dsVIDEOPORT_TYPE_HDMI == kPorts[i].id.type ||
-             dsVIDEOPORT_TYPE_INTERNAL == kPorts[i].id.type)
+        dsGetVideoPort(pVideoPortPorts[i].id.type, pVideoPortPorts[i].id.index, &halhandle);
+        if (dsVIDEOPORT_TYPE_HDMI == pVideoPortPorts[i].id.type ||
+             dsVIDEOPORT_TYPE_INTERNAL == pVideoPortPorts[i].id.type)
         {
             return halhandle;
         }

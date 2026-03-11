@@ -42,6 +42,7 @@
 #include "hostPersistence.hpp"
 
 #include "dsInternal.h"
+#include "dsConfigs.h"
 
 profile_t profileType = PROFILE_INVALID;
 
@@ -115,7 +116,12 @@ IARM_Result_t dsMgr_init()
     profileType = searchRdkProfile();
     INT_INFO("[%s]: profileType=%d\r\n", __FUNCTION__, profileType);
 
-	device::HostPersistence::getInstance().load();
+	INT_INFO("[%s]: Loading device configurations\r\n", __FUNCTION__);
+	if (dsLoadConfigs() != dsERR_NONE) {
+		INT_ERROR("[%s]: Failed to load device configurations\r\n", __FUNCTION__);
+		return IARM_RESULT_INVALID_STATE;
+	}
+    device::HostPersistence::getInstance().load();
 	dsServer_Rdklogger_Init();
 	dsHostInit();
 	dsDisplayMgr_init();
@@ -126,6 +132,7 @@ IARM_Result_t dsMgr_init()
 	dsHostMgr_init();
 	dsHdmiInMgr_init();
 	dsCompositeInMgr_init();
+
 	return ret;
 }
 
@@ -141,6 +148,12 @@ IARM_Result_t dsMgr_term()
 	dsHostMgr_term();
 	dsHdmiInMgr_term();
 	dsCompositeInMgr_term();
+
+    if (dsFreeConfig() != dsERR_NONE) {
+		INT_ERROR("Failed to free device configurations\r\n");
+		ret = IARM_RESULT_INVALID_STATE;
+	}
+
 	TELEMETRY_UNINIT();
 	return ret;
 }

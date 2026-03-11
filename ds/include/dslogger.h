@@ -33,12 +33,9 @@
 
 #include "dsregisterlog.h"
 
-int ds_log(int priority, const char* fileName, int lineNum, const char *format, ...);
+enum LogLevel {INFO_LEVEL = 0, WARN_LEVEL, ERROR_LEVEL, DEBUG_LEVEL, TRACE_LEVEL};
 
-#define INFO_LEVEL   0
-#define WARN_LEVEL   1
-#define ERROR_LEVEL  2
-#define DEBUG_LEVEL  3
+int ds_log(LogLevel level, const char* fileName, int lineNum, const char *func, const char *format, ...);
 
 // Helper to extract filename from full path
 // E.g. "/path/to/file.cpp" -> "file.cpp"
@@ -52,13 +49,13 @@ static inline const char* fileName(const char* path) {
 #define DS_LOG_LEVEL ERROR_LEVEL
 #endif
 
-#define INT_INFO(FORMAT, ...)       ds_log(INFO_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
-#define INT_WARN(FORMAT, ...)       ds_log(WARN_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
-#define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+#define INT_INFO(FORMAT, ...)       ds_log(INFO_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
+#define INT_WARN(FORMAT, ...)       ds_log(WARN_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
+#define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
 
 // conditionally enable debug logs, based on DS_LOG_LEVEL
 #if DS_LOG_LEVEL >= DEBUG_LEVEL
-#define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, FORMAT,  ##__VA_ARGS__ )
+#define INT_DEBUG(FORMAT, ...)      ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
 #else
 #define INT_DEBUG(FORMAT, ...)      ((void)0)
 #endif
