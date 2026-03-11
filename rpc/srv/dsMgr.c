@@ -111,7 +111,6 @@ IARM_Result_t dsMgr_init()
 {
     IARM_Result_t ret = IARM_RESULT_SUCCESS;
 
-	TELEMETRY_INIT("devicesettings");
 	INT_INFO("[%s]: Calling searchRdkProfile()\r\n", __FUNCTION__);
     profileType = searchRdkProfile();
     INT_INFO("[%s]: profileType=%d\r\n", __FUNCTION__, profileType);
@@ -154,7 +153,6 @@ IARM_Result_t dsMgr_term()
 		ret = IARM_RESULT_INVALID_STATE;
 	}
 
-	TELEMETRY_UNINIT();
 	return ret;
 }
 
