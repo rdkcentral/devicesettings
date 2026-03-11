@@ -38,6 +38,13 @@
 #include "dslogger.h"
 #include "dsVideoPort.h"
 
+#include "libIBus.h"
+#include "mfrMgr.h"
+
+//#include "iarmUtil.h"
+//#include "libIARM.h"
+
+
 
 #include <iostream>
 #include <string.h>
@@ -135,6 +142,88 @@ VideoOutputPortType & VideoOutputPortType::getInstance(const std::string &name)
 	throw IllegalArgumentException();
 }
 
+VideoOutputPortType::_hdcpenable()
+{
+    INT_INFO("Enter function");
+    int keySize = 0;
+    char *hdcpKey = 0;
+	int IsMfrDataRead = false;
+    IARM_Bus_MFRLib_GetSerializedData_Param_t param_, *param = &param_;
+
+	do
+	{	
+		IsMfrDataRead = false;
+		/*Initialize the struct */
+		memset(param, 0, sizeof(*param));
+
+		/* Get Key */
+		param->type = mfrSERIALIZED_TYPE_HDMIHDCP;
+		param->bufLen = MAX_SERIALIZED_BUF;
+		
+		int ret = IARM_Bus_Call(IARM_BUS_MFRLIB_NAME,IARM_BUS_MFRLIB_API_GetSerializedData,
+			(void *)param, sizeof(IARM_Bus_MFRLib_GetSerializedData_Param_t));
+
+		if(ret != IARM_RESULT_SUCCESS)
+		{
+			INT_ERROR("Call failed for %s: error code:%d\n","IARM_BUS_MFR_SERIALIZED_TYPE_HDMIHDCP",ret);
+			/**Sleep for 2 sec - wait for MFR data to be ready*/
+			sleep(2);
+		}
+		else
+		{
+				keySize = param->bufLen;
+				hdcpKey = param->buffer;
+
+				if(0 == keySize){
+				break;
+				}
+			
+			if ((hdcpKey[0] == 0) &&
+				(hdcpKey[1] == 0) &&
+				(hdcpKey[2] == 0) &&
+				(hdcpKey[3] == 0) &&
+				(hdcpKey[4] == 0) &&
+				(hdcpKey[5] == 0) 
+				)
+			{
+				INT_ERROR("Invalid MFR Data !! Wait for MFR data to be ready..Retry after 10 sec");
+				/**Sleep for 10 sec - wait for MFR data to be ready*/
+				sleep(10);
+			}
+			else
+			{
+				INT_INFO("Call succeed for %s: [%d]\n","IARM_BUS_MFR_SERIALIZED_TYPE_HDMIHDCP", param->bufLen);
+				IsMfrDataRead = true;
+			}
+						
+			#if 1
+			    INT_INFO(" HDCP Key: ");
+				for (int i = 0; i < keySize; i++) {
+				INT_INFO(" %02X", (unsigned char)hdcpKey[i]);
+				}
+				INT_INFO("\r");
+			#endif
+		}
+	}while(false == IsMfrDataRead);	
+
+	try {
+	    INT_INFO("Setting HDCP [%s]", enabled);
+		if(0 == keySize){
+			INT_ERROR("Ignoring request, invalid parameters ");
+		}else{
+	        device::VideoOutputPortType::getInstance(device::VideoOutputPortType::kHDMI).enabledHDCP(protectContent, hdcpKey, keySize);
+	        INT_INFO("Setting  HDCP done");
+        }
+    }
+    catch (...) {
+	    INT_ERROR("Exception Caught during [%s]\r", argv[0]);
+    }
+
+    
+    INT_INFO("Exit function");
+    return true;
+}
+
 
 /*
  * @fn VideoOutputPortType::VideoOutputPortType(const int id)
@@ -154,8 +243,11 @@ VideoOutputPortType::VideoOutputPortType(const int id)
 	if (::isValid(id)) {
 		_id = id;
 		_name = std::string(_names[id]);
-	}
-	else {
+		if(_id == dsVIDEOPORT_TYPE_HDMI) {
+			_hdcpSupported = true;
+			_hdcpenable();
+		}
+	} else {
 		throw IllegalArgumentException();
 	}
 
