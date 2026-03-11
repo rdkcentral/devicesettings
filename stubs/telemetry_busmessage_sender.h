@@ -17,49 +17,19 @@
  * limitations under the License.
 */
 
-#ifndef __DS_TELEMETRY_H__
-#define __DS_TELEMETRY_H__
-
 /**
-* @defgroup devicesettings
-* @{
-* @defgroup dsTelemetry
-* @{
-**/
+ * @file telemetry_busmessage_sender.h
+ * @brief Stub for native/CI builds. Delegates to the T2 mock from
+ *        entservices-testframework (Tests/mocks/Telemetry.h).
+ *        Production (Yocto) builds use the real header supplied by the
+ *        telemetry package via DEPENDS = " telemetry" in the .bb recipe.
+ */
 
-#include <telemetry_busmessage_sender.h>
+#ifndef __TELEMETRY_BUSMESSAGE_SENDER_H__
+#define __TELEMETRY_BUSMESSAGE_SENDER_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* Pull in T2ERROR enum + t2_init / t2_uninit / t2_event_s / t2_event_d
+ * function-pointer declarations from the shared testframework mock. */
+#include "Telemetry.h"
 
-#define TELEMETRY_INIT(component) \
-    do { \
-        t2_init((char*)component); \
-    } while(0)
-
-#define TELEMETRY_UNINIT() \
-    do { \
-        t2_uninit(); \
-    } while(0)
-
-#define TELEMETRY_EVENT_STRING(marker, value) \
-    do { \
-        t2_event_s((char*)marker, (char*)value); \
-    } while(0)
-
-#define TELEMETRY_EVENT_INT(marker, value) \
-    do { \
-        t2_event_d((char*)marker, (int)value); \
-    } while(0)
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __DS_TELEMETRY_H__ */
-
-/**
-* @}
-* @}
-**/
+#endif /* __TELEMETRY_BUSMESSAGE_SENDER_H__ */
