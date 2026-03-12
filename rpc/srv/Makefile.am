@@ -31,4 +31,4 @@ libdshalsrv_la_CXXFLAGS= -std=c++0x -g -fPIC -D_REENTRANT -Wall
 libdshalsrv_la_CFLAGS = -x c++ -g -fPIC -D_REENTRANT -Wall
 libdshalsrv_la_SOURCES = dsHost.cpp hostPersistence.cpp dsAudio.c dsDisplay.c dsFPD.c dsMgr.c dsVideoDevice.c dsVideoPort.c dsserverlogger.c \
                          dsConfigs.c dsAudioConfig.c dsVideoPortConfig.c dsVideoDeviceConfig.c dsCompositeIn.c dsHdmiIn.c
-libdshalsrv_la_LIBADD = -ldl
+libdshalsrv_la_LIBADD = -ldl -ltelemetry_msgsender
