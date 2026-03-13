@@ -38,3 +38,15 @@ package_ipk:
 	rm -rf $(IPK_GEN_PATH)/data.tar.gz
 	rm -rf $(IPK_GEN_PATH)/control.tar.gz
 	rm -rf $(IPK_GEN_STAGING_DIR)
+
+# DSApp - Device Settings Test Application
+.PHONY: dsapp dsapp-clean
+
+dsapp:
+	@echo "Building DSApp..."
+	$(MAKE) -C sample dsapp
+	@echo "DSApp executable: $(abs_top_builddir)/DSApp"
+
+dsapp-clean:
+	@echo "Cleaning DSApp..."
+	$(MAKE) -C sample dsapp-clean
