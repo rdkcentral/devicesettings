@@ -66,6 +66,8 @@ cd ${RDK_SOURCE_PATH}
 export STANDALONE_BUILD_ENABLED=y
 export DS_MGRS=$WORKDIR
 
+export USE_WPE_THUNDER_PLUGIN=y
+
 find $WORKDIR -iname "*.o" -exec rm -v {} \;
 find $WORKDIR -iname "*.so*" -exec rm -v {} \;
 

@@ -28,4 +28,21 @@ INCLUDE_FILES = -I=$(includedir)/rdk/halif/ds-hal \
 lib_LTLIBRARIES = libdshalcli.la
 libdshalcli_la_CPPFLAGS = $(INCLUDE_FILES)
 libdshalcli_la_CFLAGS = -g -fPIC -D_REENTRANT -Wall
-libdshalcli_la_SOURCES = dsAudio.c dsclientlogger.c dsDisplay.c dsFPD.c dsHost.cpp dsVideoDevice.c dsVideoPort.c
+
+# Conditional compilation for Thunder COM-RPC
+if USE_THUNDER_PLUGIN
+    FPD_SOURCE = dsFPD-com.cpp
+    HDMIIN_SOURCE = dsHdmiIn-com.cpp
+    COMPOSITEIN_SOURCE =
+    THUNDER_SOURCES = dsConnectionManager.cpp
+    THUNDER_LIBS = -lWPEFrameworkCore -lWPEFrameworkCOM
+else
+    FPD_SOURCE = dsFPD.c
+    HDMIIN_SOURCE = dsHdmiIn.c
+    COMPOSITEIN_SOURCE = dsCompositeIn.c
+    THUNDER_SOURCES =
+    THUNDER_LIBS =
+endif
+
+libdshalcli_la_SOURCES = dsAudio.c dsclientlogger.c dsDisplay.c $(FPD_SOURCE) $(HDMIIN_SOURCE) $(COMPOSITEIN_SOURCE) $(THUNDER_SOURCES) dsHost.cpp dsVideoDevice.c dsVideoPort.c
+libdshalcli_la_LIBADD = $(THUNDER_LIBS)
