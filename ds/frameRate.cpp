@@ -138,7 +138,7 @@ FrameRate::FrameRate(float value) : _value(value)
 	_id = found;
 	_value = _values[_id]; // normalize to canonical table value
 	_name = std::string(_names[_id]);
- }
+}
 
 FrameRate::~FrameRate() {
 	// TODO Auto-generated destructor stub
