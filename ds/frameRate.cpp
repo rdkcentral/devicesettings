@@ -79,6 +79,11 @@ namespace {
 namespace device {
 static_assert(dsUTL_DIM(_values) == dsUTL_DIM(_names),"Frame rate values/names table size mismatch");
 
+namespace {
+	inline bool isKnownTableId(int id) {
+		return id >= 0 && static_cast<size_t>(id) < dsUTL_DIM(_values);
+	}
+}
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;
 const int FrameRate::k25 			= dsVIDEO_FRAMERATE_25;
@@ -92,7 +97,7 @@ const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
 const FrameRate & FrameRate::getInstance(int id)
 {
-	if (::isValid(id)) {
+	if (::isValid(id) && ::isKnownTableId(id)) {
 		return VideoOutputPortConfig::getInstance().getFrameRate(id);
 	}
 	else {
