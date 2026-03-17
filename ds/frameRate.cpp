@@ -33,6 +33,7 @@
 #include "dsTypes.h"
 #include "dsUtl.h"
 #include "dslogger.h"
+#include <cmath>
 
 namespace {
 	const float _values[] = {
