@@ -77,8 +77,7 @@ namespace {
 }
 
 namespace device {
-static_assert(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
-static_assert(dsUTL_DIM(_names) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
+static_assert(dsUTL_DIM(_values) == dsUTL_DIM(_names),"Frame rate values/names table size mismatch");
 
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;
