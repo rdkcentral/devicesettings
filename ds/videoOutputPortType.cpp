@@ -183,7 +183,7 @@ bool VideoOutputPortType::_hdcpenable()
     char *hdcpKey = 0;
 	int IsMfrDataRead = false;
 
-	IARM_Bus_Init("enableHDCPclient");
+	IARM_Bus_Init("tenableHDCP");
     IARM_Bus_Connect();
 
     IARM_Bus_MFRLib_GetSerializedData_Param_t param_, *param = &param_;
@@ -259,7 +259,7 @@ bool VideoOutputPortType::_hdcpenable()
 
     IARM_Bus_Disconnect();
     IARM_Bus_Term();
-	
+
     INT_INFO("Exit function");
     return true;
 }
