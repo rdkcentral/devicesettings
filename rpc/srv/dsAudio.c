@@ -330,6 +330,7 @@ void AudioConfigInit()
         dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
         if (dllib) {
             dsSetAudioLevelFunc = (dsSetAudioLevel_t) dlsym(dllib, "dsSetAudioLevel");
+                INT_DEBUG("YESH: dsSetAudioLevelFunc %d \r\n", dsSetAudioLevelFunc);
             if (dsSetAudioLevelFunc) {
                 INT_DEBUG("dsSetAudioLevel_t(int, float ) is defined and loaded\r\n");
                 std::string _AudioLevel("0");
@@ -337,6 +338,7 @@ void AudioConfigInit()
 //SPDIF init
                 handle = 0;
                 if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                    INT_DEBUG("YESH: dsGetAudioPort of dsAUDIOPORT_TYPE_SPDIF handle received \r\n");
                     try {
                         _AudioLevel = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Level");
                     }

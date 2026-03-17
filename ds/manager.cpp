@@ -73,22 +73,22 @@ bool LoadDLSymbols(void* pDLHandle, const dlSymbolLookup* symbols, int numberOfS
     int currentSymbols = 0;
     bool isAllSymbolsLoaded = false;
     if ((nullptr == pDLHandle) || (nullptr == symbols)) {
-        INT_ERROR("Invalid DL Handle or symbolsPtr");
+        printf("Invalid DL Handle or symbolsPtr");
     }
     else {
-        INT_INFO("numberOfSymbols = %d",numberOfSymbols);
+        printf("numberOfSymbols = %d",numberOfSymbols);
         for (int i = 0; i < numberOfSymbols; i++) {
             if (( nullptr == symbols[i].dataptr) || ( nullptr == symbols[i].name)) {
-                INT_ERROR("Invalid symbol entry at index [%d]", i);
+                printf("Invalid symbol entry at index [%d]", i);
                 continue;
             }
             *(symbols[i].dataptr) = dlsym(pDLHandle, symbols[i].name);
             if (nullptr == *(symbols[i].dataptr)) {
-                INT_ERROR("[%s] is not defined", symbols[i].name);
+                printf("[%s] is not defined", symbols[i].name);
             }
             else {
                 currentSymbols++;
-                INT_INFO("[%s] is defined and loaded, data[%p]", symbols[i].name, *(symbols[i].dataptr));
+                printf("[%s] is defined and loaded, data[%p]", symbols[i].name, *(symbols[i].dataptr));
             }
         }
         isAllSymbolsLoaded = (numberOfSymbols) ? (currentSymbols == numberOfSymbols) : false;
@@ -101,7 +101,7 @@ void loadDeviceCapabilities(unsigned int capabilityType)
     void* pDLHandle = nullptr;
     bool isSymbolsLoaded = false;
 
-    INT_INFO("Entering capabilityType = 0x%08X", capabilityType);
+    printf("Entering capabilityType = 0x%08X", capabilityType);
     dlerror(); // clear old error
     pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
     
@@ -110,10 +110,10 @@ void loadDeviceCapabilities(unsigned int capabilityType)
         INT_WARN("Failed to dlopen '%s': %s - Falling back to static configurations", 
                  RDK_DSHAL_NAME, dlError ? dlError : "Unknown error");
     } else {
-        INT_INFO("Successfully opened dynamic library '%s'", RDK_DSHAL_NAME);
+        printf("Successfully opened dynamic library '%s'", RDK_DSHAL_NAME);
     }
     
-    INT_INFO("DL Instance '%s'", (nullptr == pDLHandle ? "NULL" : "Valid"));
+    printf("DL Instance '%s'", (nullptr == pDLHandle ? "NULL" : "Valid"));
 
     // Audio Port Config
     if (DEVICE_CAPABILITY_AUDIO_PORT & capabilityType) {
@@ -187,7 +187,7 @@ void loadDeviceCapabilities(unsigned int capabilityType)
         dlclose(pDLHandle);
         pDLHandle = nullptr;
     }
-    INT_INFO("Exiting ...");
+    printf("Exiting ...");
 }
 
 Manager::Manager() {
@@ -306,16 +306,16 @@ void Manager::Initialize()
         throw e;
     }
 
-	INT_INFO("Exiting ... with thread id %lu",pthread_self());
+	printf("Exiting ... with thread id %lu",pthread_self());
 }
 
 void Manager::load()
 {
-    INT_INFO("Enter function");
+    printf("Enter function");
 	loadDeviceCapabilities( device::DEVICE_CAPABILITY_VIDEO_PORT | 
                             device::DEVICE_CAPABILITY_AUDIO_PORT |
                             device::DEVICE_CAPABILITY_VIDEO_DEVICE);
-    INT_INFO("Exit function");
+    printf("Exit function");
 }
 
 /**
@@ -340,7 +340,7 @@ void Manager::load()
 void Manager::DeInitialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
-	INT_INFO("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
+	printf("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
 	if(IsInitialized>0)IsInitialized--;
 	if (0 == IsInitialized) {	
 	
@@ -354,7 +354,7 @@ void Manager::DeInitialize()
 		dsDisplayTerm();
 	}
 	}
-	INT_INFO("Exiting ... with thread %lu",pthread_self());
+	printf("Exiting ... with thread %lu",pthread_self());
 }
 
 }
