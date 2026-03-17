@@ -98,7 +98,7 @@ const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
 const FrameRate & FrameRate::getInstance(int id)
 {
-	if (::isValid(id) && ::isKnownTableId(id)) {
+	if (::isValid(id) && isKnownTableId(id)) {
 		return VideoOutputPortConfig::getInstance().getFrameRate(id);
 	}
 	else {
@@ -108,7 +108,7 @@ const FrameRate & FrameRate::getInstance(int id)
 
 FrameRate::FrameRate(int id)
 {
-	if (::isValid(id) && ::isKnownTableId(id)) {
+	if (::isValid(id) && isKnownTableId(id)) {
 		_value = _values[id];
 		_name = std::string(_names[id]);
 		_id = id;
