@@ -107,7 +107,7 @@ const FrameRate & FrameRate::getInstance(int id)
 
 FrameRate::FrameRate(int id)
 {
-	if (::isValid(id)) {
+	if (::isValid(id) && ::isKnownTableId(id)) {
 		_value = _values[id];
 		_name = std::string(_names[id]);
 		_id = id;
@@ -118,41 +118,26 @@ FrameRate::FrameRate(int id)
 
 }
 
-FrameRate::FrameRate(float value) : _value(value){
-	if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_24;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_25;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_30;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_60;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_60;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_23dot98;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_29dot97;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_50;
-	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_59dot94;
-	}
-	else {
-		throw IllegalArgumentException();
+FrameRate::FrameRate(float value) : _value(value)
+{
+	constexpr float kEpsilon = 0.01f;
+	int found = -1;
+
+	for (size_t i = 0; i < dsUTL_DIM(_values); ++i) {
+		if (std::fabs(_values[i] - _value) < kEpsilon) {
+			found = static_cast<int>(i);
+			break;
+		}
 	}
 
+	if (found < 0) {
+ 		throw IllegalArgumentException();
+ 	}
+ 
+	_id = found;
+	_value = _values[_id]; // normalize to canonical table value
 	_name = std::string(_names[_id]);
-}
-
+ }
 
 FrameRate::~FrameRate() {
 	// TODO Auto-generated destructor stub
