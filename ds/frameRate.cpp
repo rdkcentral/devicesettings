@@ -75,16 +75,16 @@ namespace {
 		return dsVideoPortFrameRate_isValid(id);
 	}
 
+	inline bool isKnownTableId(int id) {
+		return id >= 0 && static_cast<size_t>(id) < dsUTL_DIM(_values);
+	}
+
 }
 
 namespace device {
 static_assert(dsUTL_DIM(_values) == dsUTL_DIM(_names),"Frame rate values/names table size mismatch");
 
-namespace {
-	inline bool isKnownTableId(int id) {
-		return id >= 0 && static_cast<size_t>(id) < dsUTL_DIM(_values);
-	}
-}
+
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;
 const int FrameRate::k25 			= dsVIDEO_FRAMERATE_25;
