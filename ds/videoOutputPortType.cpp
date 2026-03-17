@@ -32,6 +32,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <mutex>
+#include <thread>
 
 #include "videoOutputPortType.hpp"
 #include "videoOutputPort.hpp"
@@ -81,6 +83,9 @@ namespace {
 			"Internal",
 			"SCART",
 	};
+
+    std::mutex gHDCPEnableThreadMutex;
+    bool gHDCPEnableThreadRunning = false;
 
 	inline bool isValid(int id) {
 		return dsVideoPortType_isValid(id);
@@ -145,6 +150,31 @@ VideoOutputPortType & VideoOutputPortType::getInstance(const std::string &name)
 	}
 	throw IllegalArgumentException();
 }
+
+void VideoOutputPortType::enableHDCPAsync()
+{
+    std::lock_guard<std::mutex> lock(gHDCPEnableThreadMutex);
+
+    if (gHDCPEnableThreadRunning) {
+        INT_INFO("HDCP enable thread already running");
+        return;
+    }
+
+    gHDCPEnableThreadRunning = true;
+
+    std::thread([]() {
+        try {
+            VideoOutputPortType::getInstance(VideoOutputPortType::kHDMI)._hdcpenable();
+        }
+        catch (...) {
+            INT_ERROR("Exception caught during async HDCP enable");
+        }
+
+        std::lock_guard<std::mutex> lock(gHDCPEnableThreadMutex);
+        gHDCPEnableThreadRunning = false;
+    }).detach();
+}
+
 
 bool VideoOutputPortType::_hdcpenable()
 {
@@ -247,10 +277,6 @@ VideoOutputPortType::VideoOutputPortType(const int id)
 	if (::isValid(id)) {
 		_id = id;
 		_name = std::string(_names[id]);
-		if(_id == dsVIDEOPORT_TYPE_HDMI) {
-			_hdcpSupported = true;
-			_hdcpenable();
-		}
 	} else {
 		throw IllegalArgumentException();
 	}
@@ -426,3 +452,4 @@ const List<VideoResolution >  VideoOutputPortType::getSupportedResolutions() con
 
 /** @} */
 /** @} */
+

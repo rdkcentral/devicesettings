@@ -82,7 +82,7 @@ public:
 
 	static VideoOutputPortType & getInstance(const int id);
 	static VideoOutputPortType & getInstance(const std::string &name);
-
+	static void enableHDCPAsync();
 
 	VideoOutputPortType(const int id);
 	virtual ~VideoOutputPortType();

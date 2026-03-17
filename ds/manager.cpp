@@ -31,6 +31,7 @@
 #include <iostream>
 #include "audioOutputPortConfig.hpp"
 #include "videoOutputPortConfig.hpp"
+#include "videoOutputPortType.hpp"
 #include "host.hpp"
 #include "videoDeviceConfig.hpp"
 #include "dsVideoPort.h"
@@ -297,6 +298,7 @@ void Manager::Initialize()
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
                                     device::DEVICE_CAPABILITY_VIDEO_DEVICE |
                                     device::DEVICE_CAPABILITY_FRONT_PANEL);
+            VideoOutputPortType::enableHDCPAsync();
         }
     }
     catch(const Exception &e) {
@@ -315,6 +317,7 @@ void Manager::load()
 	loadDeviceCapabilities( device::DEVICE_CAPABILITY_VIDEO_PORT | 
                             device::DEVICE_CAPABILITY_AUDIO_PORT |
                             device::DEVICE_CAPABILITY_VIDEO_DEVICE);
+    VideoOutputPortType::enableHDCPAsync();
     INT_INFO("Exit function");
 }
 
@@ -363,3 +366,4 @@ void Manager::DeInitialize()
 
 /** @} */
 /** @} */
+
