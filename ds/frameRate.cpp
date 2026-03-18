@@ -51,6 +51,8 @@ namespace {
                         200,
                         239.79,
                         240,
+						59,
+						23,
 	};
 	const char * _names[] = {
 			"UnKnown", //unkown
@@ -68,6 +70,8 @@ namespace {
                         "200",
                         "239.79",
                         "240",
+						"59",
+						"23",
 	};
 
 	inline bool isValid(int id) {
@@ -77,8 +81,6 @@ namespace {
 }
 
 namespace device {
-static_assert(dsUTL_DIM(_values) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
-static_assert(dsUTL_DIM(_names) == dsVIDEO_FRAMERATE_MAX, "Frame rate values array size mismatch");
 
 const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;
@@ -89,6 +91,8 @@ const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_23dot98;
 const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_29dot97;
 const int FrameRate::k50 			= dsVIDEO_FRAMERATE_50;
 const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_59dot94;
+const int FrameRate::k59 			= dsVIDEO_FRAMERATE_59;
+const int FrameRate::k23 			= dsVIDEO_FRAMERATE_23;
 const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
 const FrameRate & FrameRate::getInstance(int id)
@@ -115,32 +119,35 @@ FrameRate::FrameRate(int id)
 }
 
 FrameRate::FrameRate(float value) : _value(value){
-	if (_value == 24.0) {
+	if (_value == 24) {
 		_id = dsVIDEO_FRAMERATE_24;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 25) {
 		_id = dsVIDEO_FRAMERATE_25;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 30) {
 		_id = dsVIDEO_FRAMERATE_30;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 60) {
 		_id = dsVIDEO_FRAMERATE_60;
 	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_60;
-	}
-	else if (_value == 24.0) {
+	else if (_value == 23.98) {
 		_id = dsVIDEO_FRAMERATE_23dot98;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 29.97) {
 		_id = dsVIDEO_FRAMERATE_29dot97;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 50) {
 		_id = dsVIDEO_FRAMERATE_50;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 59.94) {
 		_id = dsVIDEO_FRAMERATE_59dot94;
+	}
+	else if (_value == 59) {
+		_id = dsVIDEO_FRAMERATE_59;
+	}
+	else if (_value == 23) {
+		_id = dsVIDEO_FRAMERATE_23;
 	}
 	else {
 		throw IllegalArgumentException();
