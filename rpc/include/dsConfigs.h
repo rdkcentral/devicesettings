@@ -42,7 +42,7 @@ typedef struct audioConfigs
 	int *pKPortSize;
 }audioConfigs_t;
 
-typedef struct videoPortConfigs
+typedef struct dsVideoPortConfigs
 {
 	const dsVideoPortTypeConfig_t  *pKVideoPortConfigs;
 	int *pKVideoPortConfigs_size;
