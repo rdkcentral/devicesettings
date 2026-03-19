@@ -272,7 +272,7 @@ static int allocateAndCopyVideoPortResolutions(const dsVideoPortResolution_t* so
     return numElements;
 }
 
-dsError_t dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs)
+dsError_t dsLoadVideoOutputPortConfig(const dsVideoPortConfigs_t* dynamicVideoPortConfigs)
 {
     int configSize, portSize, resolutionSize, defaultResIndex;
     const dsVideoPortTypeConfig_t* videoPortConfigs;

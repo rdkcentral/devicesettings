@@ -26,14 +26,6 @@
 * @{
 **/
 
-#include <iostream>
-#include <string.h>
-#include <sstream>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <mutex>
-#include <thread>
 
 #include "videoOutputPortType.hpp"
 #include "videoOutputPort.hpp"
@@ -46,15 +38,10 @@
 #include "dslogger.h"
 #include "dsVideoPort.h"
 
-#include "libIBus.h"
-#include "mfrMgr.h"
 
-//#include "iarmUtil.h"
-//#include "libIARM.h"
-
-
-
-
+#include <iostream>
+#include <string.h>
+#include <sstream>
 
 /**
  * @file videoOutputPortType.cpp
@@ -83,9 +70,6 @@ namespace {
 			"Internal",
 			"SCART",
 	};
-
-    std::mutex gHDCPEnableThreadMutex;
-    bool gHDCPEnableThreadRunning = false;
 
 	inline bool isValid(int id) {
 		return dsVideoPortType_isValid(id);
@@ -151,119 +135,6 @@ VideoOutputPortType & VideoOutputPortType::getInstance(const std::string &name)
 	throw IllegalArgumentException();
 }
 
-void VideoOutputPortType::enableHDCPAsync()
-{
-    std::lock_guard<std::mutex> lock(gHDCPEnableThreadMutex);
-
-    if (gHDCPEnableThreadRunning) {
-        INT_INFO("HDCP enable thread already running");
-        return;
-    }
-
-    gHDCPEnableThreadRunning = true;
-
-    std::thread([]() {
-        try {
-            VideoOutputPortType::getInstance(VideoOutputPortType::kHDMI)._hdcpenable();
-        }
-        catch (...) {
-            INT_ERROR("Exception caught during async HDCP enable");
-        }
-
-        std::lock_guard<std::mutex> lock(gHDCPEnableThreadMutex);
-        gHDCPEnableThreadRunning = false;
-    }).detach();
-}
-
-
-bool VideoOutputPortType::_hdcpenable()
-{
-    INT_INFO("Enter function");
-    int keySize = 0;
-    char *hdcpKey = 0;
-	int IsMfrDataRead = false;
-
-	IARM_Bus_Init("tenableHDCP");
-    IARM_Bus_Connect();
-
-    IARM_Bus_MFRLib_GetSerializedData_Param_t param_, *param = &param_;
-
-	do
-	{	
-		IsMfrDataRead = false;
-		/*Initialize the struct */
-		memset(param, 0, sizeof(*param));
-
-		/* Get Key */
-		param->type = mfrSERIALIZED_TYPE_HDMIHDCP;
-		param->bufLen = MAX_SERIALIZED_BUF;
-		
-		int ret = IARM_Bus_Call(IARM_BUS_MFRLIB_NAME,IARM_BUS_MFRLIB_API_GetSerializedData,
-			(void *)param, sizeof(IARM_Bus_MFRLib_GetSerializedData_Param_t));
-
-		if(ret != IARM_RESULT_SUCCESS)
-		{
-			INT_ERROR("Call failed for %s: error code:%d\n","IARM_BUS_MFR_SERIALIZED_TYPE_HDMIHDCP",ret);
-			/**Sleep for 2 sec - wait for MFR data to be ready*/
-			sleep(2);
-		}
-		else
-		{
-				keySize = param->bufLen;
-				hdcpKey = param->buffer;
-
-				if(0 == keySize){
-				break;
-				}
-			
-			if ((hdcpKey[0] == 0) &&
-				(hdcpKey[1] == 0) &&
-				(hdcpKey[2] == 0) &&
-				(hdcpKey[3] == 0) &&
-				(hdcpKey[4] == 0) &&
-				(hdcpKey[5] == 0) 
-				)
-			{
-				INT_ERROR("Invalid MFR Data !! Wait for MFR data to be ready..Retry after 10 sec");
-				/**Sleep for 10 sec - wait for MFR data to be ready*/
-				sleep(10);
-			}
-			else
-			{
-				INT_INFO("Call succeed for %s: [%d]\n","IARM_BUS_MFR_SERIALIZED_TYPE_HDMIHDCP", param->bufLen);
-				IsMfrDataRead = true;
-			}
-						
-			#if 1
-			    INT_INFO(" HDCP Key: ");
-				for (int i = 0; i < keySize; i++) {
-				INT_INFO(" %02X", (unsigned char)hdcpKey[i]);
-				}
-				INT_INFO("\r");
-			#endif
-		}
-	}while(false == IsMfrDataRead);	
-
-	try {
-	    INT_INFO("Setting HDCP true");
-		if(0 == keySize){
-			INT_ERROR("Ignoring request, invalid parameters ");
-		}else{
-	        device::VideoOutputPortType::getInstance(device::VideoOutputPortType::kHDMI).enabledHDCP(true, hdcpKey, keySize);
-	        INT_INFO("Setting  HDCP done");
-        }
-    }
-    catch (...) {
-	    INT_ERROR("Exception Caught during [%s]\r", __FUNCTION__);
-    }
-
-    IARM_Bus_Disconnect();
-    IARM_Bus_Term();
-
-    INT_INFO("Exit function");
-    return true;
-}
-
 
 /*
  * @fn VideoOutputPortType::VideoOutputPortType(const int id)
@@ -283,7 +154,8 @@ VideoOutputPortType::VideoOutputPortType(const int id)
 	if (::isValid(id)) {
 		_id = id;
 		_name = std::string(_names[id]);
-	} else {
+	}
+	else {
 		throw IllegalArgumentException();
 	}
 
@@ -458,4 +330,3 @@ const List<VideoResolution >  VideoOutputPortType::getSupportedResolutions() con
 
 /** @} */
 /** @} */
-

@@ -120,8 +120,8 @@ static dsError_t loadDeviceCapabilities(unsigned int capabilityType)
 
     /* Video Port Config */
     if (DEVICE_CAPABILITY_VIDEO_PORT & capabilityType) {
-        videoPortConfigs_t dynamicVideoPortConfigs;
-        memset(&dynamicVideoPortConfigs, 0, sizeof(videoPortConfigs_t));
+        dsVideoPortConfigs_t dynamicVideoPortConfigs;
+        memset(&dynamicVideoPortConfigs, 0, sizeof(dsVideoPortConfigs_t));
         
         dlSymbolLookup_t videoPortConfigSymbols[] = {
             {"kVideoPortConfigs", (void**)&dynamicVideoPortConfigs.pKVideoPortConfigs},

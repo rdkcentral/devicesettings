@@ -42,7 +42,7 @@ extern "C" {
  * @param[in] dynamicVideoPortConfigs Pointer to dynamic video port configuration, or NULL for static config
  * @return dsERR_NONE on success, dsERR_GENERAL on error
  */
-dsError_t dsLoadVideoOutputPortConfig(const videoPortConfigs_t* dynamicVideoPortConfigs);
+dsError_t dsLoadVideoOutputPortConfig(const dsVideoPortConfigs_t* dynamicVideoPortConfigs);
 
 /**
  * @brief Get video port type configurations

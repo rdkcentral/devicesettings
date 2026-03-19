@@ -51,7 +51,7 @@ typedef struct videoPortConfigs
 	dsVideoPortResolution_t *pKVideoPortResolutionsSettings;
 	int *pKResolutionsSettings_size;
 	int *pKDefaultResIndex;
-}videoPortConfigs_t;
+}dsVideoPortConfigs_t;
 
 typedef struct videoDeviceConfig
 {
