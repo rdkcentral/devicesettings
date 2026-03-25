@@ -176,6 +176,50 @@ void VideoDeviceConfig::release()
         _vDevices.clear();
 }
 
+/**
+ * @fn VideoDeviceConfig::refreshAllHandles()
+ * @brief Re-fetches the server-side _handle for EVERY video device stored in
+ *        _vDevices[] by calling VideoDevice::refreshHandle() on each entry.
+ *
+ *        This mirrors the device construction loop in load():
+ *          for (int i = 0; i < configSize; i++)
+ *              _vDevices.push_back(VideoDevice(i));
+ *        but instead of creating new objects it refreshes the handles of the
+ *        existing ones in place — no DeInitialize/Initialize needed.
+ *
+ *        Devices refreshed (typical config):
+ *          VideoDevice0  (index 0 — the single STB decoder)
+ *        The exact set depends on kVideoDeviceConfigs[] in the vendor SOC config.
+ *
+ * @return 0 (dsERR_NONE) if ALL devices refreshed successfully.
+ *         First failure code encountered if any device fails (refresh of
+ *         remaining devices continues regardless so all are attempted).
+ */
+int VideoDeviceConfig::refreshAllHandles()
+{
+    int result = dsERR_NONE;
+
+    INT_INFO("[refreshAllHandles] Refreshing handles for %zu video device(s)",
+             _vDevices.size());
+
+    for (size_t i = 0; i < _vDevices.size(); i++) {
+        int ret = _vDevices.at(i).refreshHandle();
+        if (ret == dsERR_NONE) {
+            INT_INFO("[refreshAllHandles] Device[%zu] %s  OK",
+                     i, _vDevices.at(i).getName().c_str());
+        } else {
+            INT_ERROR("[refreshAllHandles] Device[%zu] %s  FAILED (ret=%d)",
+                      i, _vDevices.at(i).getName().c_str(), ret);
+            if (result == dsERR_NONE)
+                result = ret;  /* capture first failure, keep going */
+        }
+    }
+
+    INT_INFO("[refreshAllHandles] Done. result=%d (%s)",
+             result, result == dsERR_NONE ? "ALL OK" : "PARTIAL FAIL");
+    return result;
+}
+
 }
 
 

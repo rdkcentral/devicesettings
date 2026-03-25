@@ -78,6 +78,7 @@ typedef enum _DSMgr_EventId_t {
 	IARM_BUS_DSMGR_EVENT_HDMI_IN_AVI_CONTENT_TYPE,        /*<HDMI IN content type event */
 	IARM_BUS_DSMGR_EVENT_HDMI_IN_AV_LATENCY,          /*!< HDMI IN AVLatency event */
         IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGED, /*!<Atmos capability changed event*/
+        IARM_BUS_DSMGR_EVENT_RESTARTED,          /*!< DSMgr restarted — libds clients must refresh all handles */
         IARM_BUS_DSMGR_EVENT_MAX,					       /*!< Max Event  */
 } IARM_Bus_DSMgr_EventId_t;
 
