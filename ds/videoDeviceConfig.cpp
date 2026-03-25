@@ -31,6 +31,7 @@
 #include "dsVideoDeviceSettings.h"
 #include "videoDevice.hpp"
 #include "videoDFC.hpp"
+#include "dsError.h"
 #include <iostream>
 #include "dslogger.h"
 #include "manager.hpp"
