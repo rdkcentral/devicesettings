@@ -333,6 +333,36 @@ int VideoDevice::getCurrentDisframerate(char *framerate) const
      	return 0;
 }
 
+/**
+ * @fn VideoDevice::refreshHandle()
+ * @brief Re-fetches the server-side handle from the running dsmgr via
+ *        dsGetVideoDevice() IARM RPC and updates _handle unconditionally.
+ *
+ *        Unlike the constructor which is only called once at load() time,
+ *        this method runs UNCONDITIONALLY — it does not check if _handle == -1.
+ *        It is safe to call after dsmgr crashes and restarts when _handle
+ *        holds a stale non-zero value from the previous dsmgr process.
+ *
+ *        Typical caller sequence after dsmgr restart:
+ *          VideoDeviceConfig::getInstance().refreshAllHandles();
+ *
+ * @return dsERR_NONE (0) on success, non-zero dsError_t error code on failure.
+ */
+int VideoDevice::refreshHandle()
+{
+    intptr_t old_handle = _handle;
+    dsError_t ret = dsGetVideoDevice(_id, &_handle);
+
+    printf("\n[refreshHandle] VideoDevice id:%d "
+           "old_handle:0x%lX new_handle:0x%lX ret:%d\n",
+           _id, (long)old_handle, (long)_handle, ret);
+
+    if (ret != dsERR_NONE) {
+        printf("[refreshHandle] VideoDevice FAILED – dsmgr not running? (ret=%d)\n", ret);
+    }
+    return (int)ret;
+}
+
 }
 
 /** @} */

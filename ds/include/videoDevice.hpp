@@ -80,6 +80,7 @@ public:
         int setFRFMode(int frfmode) const;
         int getCurrentDisframerate(char *framerate) const;
         int setDisplayframerate(const char *framerate) const;
+        int refreshHandle();
 };
 
 }
