@@ -50,6 +50,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <string>
 
 #include "dsTypes.h"
 #include "dsError.h"

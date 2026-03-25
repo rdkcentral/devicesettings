@@ -283,6 +283,10 @@ public:
 	unsigned int getPreferredColorDepth(bool persist = true) ;
 	void setPreferredColorDepth(const unsigned int colordepth, bool persist = true);
 	void getColorDepthCapabilities (unsigned int *capabilities) const;
+	int refreshHandle();  /*!< Re-fetch _handle (and inner Display _handle) from running dsmgr
+	                             *   after crash+restart.  Unconditional — works even when the
+	                             *   current handle is stale (non-zero). Also refreshes
+	                             *   _enabled and _displayConnected cached fields. */
 
 private:
 	Display _display;

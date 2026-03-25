@@ -127,6 +127,9 @@ public:
 
     dsError_t setEnablePort(bool enabled);	
     dsError_t reInitializeAudioOutputPort();
+    dsError_t refreshHandle();  /*!< Re-fetch _handle from running dsmgr after crash+restart.
+                                 *   Unlike reInitializeAudioOutputPort(), this runs
+                                 *   unconditionally even when _handle is stale (non-zero). */
 	void enable();
 	void disable();
 
