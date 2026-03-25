@@ -76,10 +76,16 @@ public:
 
 	void load(audioConfigs_t* dynamicAudioConfigs);
 	void release();
+        dsError_t refreshAllHandles();  /*!< Re-fetch _handle for every port in _aPorts[].
+                                         *   Mirrors the load() port loop but calls
+                                         *   AudioOutputPort::refreshHandle() on each
+                                         *   existing object instead of constructing new ones.
+                                         *   Call after dsmgr crash+restart to clear stale
+                                         *   handles for ALL audio ports in one shot. */
 
-};
+};  /* class AudioOutputPortConfig */
 
-}
+}   /* namespace device */
 
 #endif /* _DS_AUDIOOUTPUTPORTCONFIG_HPP_ */
 

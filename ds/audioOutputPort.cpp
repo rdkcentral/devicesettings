@@ -206,6 +206,52 @@ dsError_t AudioOutputPort::reInitializeAudioOutputPort()
 }
 
 /**
+ * @fn AudioOutputPort::refreshHandle()
+ * @brief Re-fetches the server-side handle from the running dsmgr via
+ *        dsGetAudioPort() IARM RPC and refreshes all cached port fields.
+ *
+ *        Unlike reInitializeAudioOutputPort() which has a guard
+ *        "if (_handle == -1)", this method runs UNCONDITIONALLY.
+ *        It is safe to call after dsmgr crashes and restarts when _handle
+ *        holds a stale non-zero value from the previous dsmgr process.
+ *
+ *        Typical caller sequence after dsmgr restart:
+ *          device::AudioOutputPort &p = Host::getInstance().getAudioOutputPort("HDMI0");
+ *          dsError_t ret = p.refreshHandle();   // clears stale handle
+ *          if (ret == dsERR_NONE) { p.isMuted(); ... }  // now safe to use
+ *
+ * @return dsERR_NONE on success, dsError_t error code on failure.
+ */
+dsError_t AudioOutputPort::refreshHandle()
+{
+    intptr_t old_handle = _handle;
+    dsError_t ret = dsGetAudioPort((dsAudioPortType_t)_type, _index, &_handle);
+
+    printf("\n[refreshHandle] AudioOutputPort type:%d index:%d "
+           "old_handle:0x%lX new_handle:0x%lX ret:%d\n",
+           _type, _index, (long)old_handle, (long)_handle, ret);
+
+    if (dsERR_NONE == ret) {
+        /* Refresh all cached fields that depend on _handle */
+        dsGetAudioEncoding    (_handle, (dsAudioEncoding_t *)&_encoding);
+        dsGetStereoMode       (_handle, (dsAudioStereoMode_t *)&_stereoMode, false);
+        dsGetAudioGain        (_handle, &_gain);
+        dsGetAudioLevel       (_handle, &_level);
+        dsGetAudioOptimalLevel(_handle, &_optimalLevel);
+        dsGetAudioMaxDB       (_handle, &_maxDb);
+        dsGetAudioMinDB       (_handle, &_minDb);
+        dsGetAudioDB          (_handle, &_db);
+        dsIsAudioLoopThru     (_handle, &_loopThru);
+        dsIsAudioMute         (_handle, &_muted);
+        dsGetAudioDelay       (_handle, &_audioDelayMs);
+        printf("[refreshHandle] AudioOutputPort cached fields refreshed OK.\n");
+    } else {
+        printf("[refreshHandle] AudioOutputPort FAILED – dsmgr not running? (ret=%d)\n", ret);
+    }
+    return ret;
+}
+
+/**
  * @fn const AudioOutputPortType & AudioOutputPort::getType() const
  * @brief This API is used to get the type of the audio output port. The type of audio output port represent the general capabilities of the port.
  *
