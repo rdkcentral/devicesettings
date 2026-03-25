@@ -92,35 +92,35 @@ static void dsMgrRestartedHandler(const char* owner, IARM_EventId_t eventId,
              owner, eventId);
 
     if (std::string(IARM_BUS_DSMGR_NAME) != std::string(owner)) {
-        INT_ERROR("[Manager] dsMgrRestartedHandler: unexpected owner '%s', ignoring", owner);
+        INT_ERROR("unexpected owner '%s', ignoring", owner);
         return;
     }
 
     std::lock_guard<std::mutex> lock(gManagerInitMutex);
-    if (IsInitialized == 0) {
+    if (Manager::IsInitialized == 0) {
         /* Manager has been torn down; ignore the event */
-        INT_WARN("[Manager] dsMgrRestartedHandler: Manager not initialized, skipping refresh");
+        INT_WARN("Manager not initialized, skipping refresh");
         return;
     }
 
-    INT_INFO("[Manager] dsMgrRestartedHandler: refreshing ALL libds handles");
+    INT_INFO("Refreshing ALL libds handles");
 
     /* 1. Audio output port handles */
     dsError_t audioRet = AudioOutputPortConfig::getInstance().refreshAllHandles();
     if (audioRet != dsERR_NONE)
-        INT_ERROR("[Manager] AudioOutputPortConfig::refreshAllHandles FAILED ret=%d", audioRet);
+        INT_ERROR("AudioOutputPortConfig::refreshAllHandles FAILED ret=%d", audioRet);
 
     /* 2. Video output port handles */
     int videoPortRet = VideoOutputPortConfig::getInstance().refreshAllHandles();
     if (videoPortRet != dsERR_NONE)
-        INT_ERROR("[Manager] VideoOutputPortConfig::refreshAllHandles FAILED ret=%d", videoPortRet);
+        INT_ERROR("VideoOutputPortConfig::refreshAllHandles FAILED ret=%d", videoPortRet);
 
     /* 3. Video device (decoder) handles */
     int videoDevRet = VideoDeviceConfig::getInstance().refreshAllHandles();
     if (videoDevRet != dsERR_NONE)
-        INT_ERROR("[Manager] VideoDeviceConfig::refreshAllHandles FAILED ret=%d", videoDevRet);
+        INT_ERROR("VideoDeviceConfig::refreshAllHandles FAILED ret=%d", videoDevRet);
 
-    INT_INFO("[Manager] dsMgrRestartedHandler: done audioRet=%d videoPortRet=%d videoDevRet=%d",
+    INT_INFO("done audioRet=%d videoPortRet=%d videoDevRet=%d",
              audioRet, videoPortRet, videoDevRet);
 }
 
