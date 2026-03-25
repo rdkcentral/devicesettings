@@ -47,6 +47,8 @@
 #include <dlfcn.h>
 #include "dsHALConfig.h"
 #include "frontPanelConfig.hpp"
+#include "dsMgr.h"       /* IARM_BUS_DSMGR_NAME, IARM_BUS_DSMGR_EVENT_RESTARTED */
+#include "libIBus.h"     /* IARM_Bus_RegisterEventHandler / UnRegisterEventHandler */
 
 /**
  * @file manager.cpp
@@ -67,6 +69,60 @@ namespace device {
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
 static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc);
+
+/**
+ * @brief IARM_BUS_DSMGR_EVENT_RESTARTED handler registered by Manager::Initialize().
+ *
+ * Fired by dsmgr after it has fully re-initialised its HAL — i.e. after
+ * dsAudioPortInit / dsVideoPortInit / dsVideoDeviceInit have all completed
+ * in the new dsmgr process.
+ *
+ * All three libds config singletons hold stale intptr_t handles that point
+ * into the address space of the *previous* dsmgr process. This handler
+ * refreshes them unconditionally so that subsequent API calls use handles
+ * valid in the new dsmgr process.
+ *
+ * Registered in Manager::Initialize() and unregistered in
+ * Manager::DeInitialize() so its lifetime exactly matches the Manager's.
+ */
+static void dsMgrRestartedHandler(const char* owner, IARM_EventId_t eventId,
+                                   void* /*data*/, size_t /*len*/)
+{
+    INT_INFO("[Manager] IARM_BUS_DSMGR_EVENT_RESTARTED received owner=%s eventId=%d",
+             owner, eventId);
+
+    if (std::string(IARM_BUS_DSMGR_NAME) != std::string(owner)) {
+        INT_ERROR("[Manager] dsMgrRestartedHandler: unexpected owner '%s', ignoring", owner);
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(gManagerInitMutex);
+    if (IsInitialized == 0) {
+        /* Manager has been torn down; ignore the event */
+        INT_WARN("[Manager] dsMgrRestartedHandler: Manager not initialized, skipping refresh");
+        return;
+    }
+
+    INT_INFO("[Manager] dsMgrRestartedHandler: refreshing ALL libds handles");
+
+    /* 1. Audio output port handles */
+    dsError_t audioRet = AudioOutputPortConfig::getInstance().refreshAllHandles();
+    if (audioRet != dsERR_NONE)
+        INT_ERROR("[Manager] AudioOutputPortConfig::refreshAllHandles FAILED ret=%d", audioRet);
+
+    /* 2. Video output port handles */
+    int videoPortRet = VideoOutputPortConfig::getInstance().refreshAllHandles();
+    if (videoPortRet != dsERR_NONE)
+        INT_ERROR("[Manager] VideoOutputPortConfig::refreshAllHandles FAILED ret=%d", videoPortRet);
+
+    /* 3. Video device (decoder) handles */
+    int videoDevRet = VideoDeviceConfig::getInstance().refreshAllHandles();
+    if (videoDevRet != dsERR_NONE)
+        INT_ERROR("[Manager] VideoDeviceConfig::refreshAllHandles FAILED ret=%d", videoDevRet);
+
+    INT_INFO("[Manager] dsMgrRestartedHandler: done audioRet=%d videoPortRet=%d videoDevRet=%d",
+             audioRet, videoPortRet, videoDevRet);
+}
 
 bool LoadDLSymbols(void* pDLHandle, const dlSymbolLookup* symbols, int numberOfSymbols)
 {
@@ -300,6 +356,22 @@ void Manager::Initialize()
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
                                     device::DEVICE_CAPABILITY_VIDEO_DEVICE |
                                     device::DEVICE_CAPABILITY_FRONT_PANEL);
+
+            /* Register the dsmgr-restart handler so that libds handles are
+             * refreshed automatically whenever dsmgr crashes and restarts.
+             * Registered here (after all HAL inits) so handles are valid
+             * before the first event can arrive.  Unregistered in
+             * DeInitialize() to match the Manager lifetime exactly. */
+            IARM_Result_t iarmRet = IARM_Bus_RegisterEventHandler(
+                IARM_BUS_DSMGR_NAME,
+                IARM_BUS_DSMGR_EVENT_RESTARTED,
+                dsMgrRestartedHandler);
+            if (IARM_RESULT_SUCCESS != iarmRet) {
+                INT_ERROR("[Manager] Failed to register IARM_BUS_DSMGR_EVENT_RESTARTED handler (ret=%d)",
+                          iarmRet);
+            } else {
+                INT_INFO("[Manager] IARM_BUS_DSMGR_EVENT_RESTARTED handler registered OK");
+            }
         }
     }
     catch(const Exception &e) {
