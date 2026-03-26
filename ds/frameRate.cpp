@@ -129,34 +129,30 @@ FrameRate::FrameRate(float value) : _value(value){
 	if (_value == 24.0) {
 		_id = dsVIDEO_FRAMERATE_24;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 25.0) {
 		_id = dsVIDEO_FRAMERATE_25;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 30.0) {
 		_id = dsVIDEO_FRAMERATE_30;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 60.0) {
 		_id = dsVIDEO_FRAMERATE_60;
 	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_60;
-	}
-	else if (_value == 24.0) {
+	else if (_value == 23.98) {
 		_id = dsVIDEO_FRAMERATE_23dot98;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 29.97) {
 		_id = dsVIDEO_FRAMERATE_29dot97;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 50.0) {
 		_id = dsVIDEO_FRAMERATE_50;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 59.94) {
 		_id = dsVIDEO_FRAMERATE_59dot94;
-	}
+	}		
 	else {
 		throw IllegalArgumentException();
 	}
-
 	_name = std::string(_names[_id]);
 }
 
