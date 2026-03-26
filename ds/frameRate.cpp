@@ -34,8 +34,10 @@
 #include "dsUtl.h"
 #include "dslogger.h"
 
+#define MAX_VIDEO_FRAMERATE_SUPPORTED 18
+
 namespace {
-	const float _values[] = {
+	const float _values[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
 			0, //unkown
 			24,
 			25,
@@ -46,13 +48,16 @@ namespace {
 			50,
 			59.94,
 			100,
-                        119.88,
-                        120,
-                        200,
-                        239.79,
-                        240,
+			119.88,
+			120,
+			200,
+			239.79,
+			240,
+			59,
+			23,
+			0
 	};
-	const char * _names[] = {
+	const char * _names[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
 			"UnKnown", //unkown
 			"24",
 			"25",
@@ -63,14 +68,20 @@ namespace {
 			"50",
 			"59.94",
 			"100",
-                        "119.88",
-                        "120",
-                        "200",
-                        "239.79",
-                        "240",
+			"119.88",
+			"120",
+			"200",
+			"239.79",
+			"240",
+			"59",
+			"23",
+			"UnKnown",
 	};
 
 	inline bool isValid(int id) {
+		if ( MAX_VIDEO_FRAMERATE_SUPPORTED <= id ) {
+			return false;
+		}
 		return dsVideoPortFrameRate_isValid(id);
 	}
 
