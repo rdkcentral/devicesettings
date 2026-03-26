@@ -34,9 +34,11 @@
 #include "dsUtl.h"
 #include "dslogger.h"
 
+#define MAX_VIDEO_FRAMERATE_SUPPORTED 18
+
 namespace {
-	const float _values[] = {
-			0, //unkown
+	const float _values[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
+			0, //unknown
 			24,
 			25,
 			30,
@@ -46,14 +48,17 @@ namespace {
 			50,
 			59.94,
 			100,
-                        119.88,
-                        120,
-                        200,
-                        239.79,
-                        240,
+			119.88,
+			120,
+			200,
+			239.76,
+			240,
+			59,
+			23,
+			0
 	};
-	const char * _names[] = {
-			"UnKnown", //unkown
+	const char * _names[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
+			"UnKnown", //unknown
 			"24",
 			"25",
 			"30",
@@ -63,14 +68,20 @@ namespace {
 			"50",
 			"59.94",
 			"100",
-                        "119.88",
-                        "120",
-                        "200",
-                        "239.79",
-                        "240",
+			"119.88",
+			"120",
+			"200",
+			"239.76",
+			"240",
+			"59",
+			"23",
+			"UnKnown"
 	};
 
 	inline bool isValid(int id) {
+		if ( MAX_VIDEO_FRAMERATE_SUPPORTED <= id ) {
+			return false;
+		}
 		return dsVideoPortFrameRate_isValid(id);
 	}
 
@@ -87,6 +98,8 @@ const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_23dot98;
 const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_29dot97;
 const int FrameRate::k50 			= dsVIDEO_FRAMERATE_50;
 const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_59dot94;
+const int FrameRate::k59 			= dsVIDEO_FRAMERATE_59;
+const int FrameRate::k23 			= dsVIDEO_FRAMERATE_23;
 const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
 const FrameRate & FrameRate::getInstance(int id)
@@ -116,34 +129,30 @@ FrameRate::FrameRate(float value) : _value(value){
 	if (_value == 24.0) {
 		_id = dsVIDEO_FRAMERATE_24;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 25.0) {
 		_id = dsVIDEO_FRAMERATE_25;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 30.0) {
 		_id = dsVIDEO_FRAMERATE_30;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 60.0) {
 		_id = dsVIDEO_FRAMERATE_60;
 	}
-	else if (_value == 24.0) {
-		_id = dsVIDEO_FRAMERATE_60;
-	}
-	else if (_value == 24.0) {
+	else if (_value == 23.98) {
 		_id = dsVIDEO_FRAMERATE_23dot98;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 29.97) {
 		_id = dsVIDEO_FRAMERATE_29dot97;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 50.0) {
 		_id = dsVIDEO_FRAMERATE_50;
 	}
-	else if (_value == 24.0) {
+	else if (_value == 59.94) {
 		_id = dsVIDEO_FRAMERATE_59dot94;
-	}
+	}		
 	else {
 		throw IllegalArgumentException();
 	}
-
 	_name = std::string(_names[_id]);
 }
 
