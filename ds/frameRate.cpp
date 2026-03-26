@@ -38,7 +38,7 @@
 
 namespace {
 	const float _values[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
-			0, //unkown
+			0, //unknown
 			24,
 			25,
 			30,
@@ -51,14 +51,14 @@ namespace {
 			119.88,
 			120,
 			200,
-			239.79,
+			239.76,
 			240,
 			59,
 			23,
 			0
 	};
 	const char * _names[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
-			"UnKnown", //unkown
+			"UnKnown", //unknown
 			"24",
 			"25",
 			"30",
@@ -71,7 +71,7 @@ namespace {
 			"119.88",
 			"120",
 			"200",
-			"239.79",
+			"239.76",
 			"240",
 			"59",
 			"23",
