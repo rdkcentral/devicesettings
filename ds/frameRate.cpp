@@ -75,7 +75,7 @@ namespace {
 			"240",
 			"59",
 			"23",
-			"UnKnown",
+			"UnKnown"
 	};
 
 	inline bool isValid(int id) {
