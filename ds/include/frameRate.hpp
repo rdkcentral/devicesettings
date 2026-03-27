@@ -58,8 +58,6 @@ public:
 	static const int k29dot97;   //!< Indicates video frame rate of 29.97 fps.
 	static const int k50;        //!< Indicates video frame rate of 50 fps.
 	static const int k59dot94;   //!< Indicates video frame rate of 59.94 fps.
-	static const int k59;        //!< Indicates video frame rate of 59 fps.
-	static const int k23;        //!< Indicates video frame rate of 23 fps.
 	static const int kMax;       //!< Indicates maximum number of frame rates supported.
 
 	static const FrameRate & getInstance(int id);
