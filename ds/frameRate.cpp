@@ -98,8 +98,9 @@ const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_23dot98;
 const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_29dot97;
 const int FrameRate::k50 			= dsVIDEO_FRAMERATE_50;
 const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_59dot94;
-const int FrameRate::k59 			= dsVIDEO_FRAMERATE_59;
-const int FrameRate::k23 			= dsVIDEO_FRAMERATE_23;
+// k59 and k23 not supported in some platforms. so configuring it as unknown to avoid build error
+const int FrameRate::k59 			= dsVIDEO_FRAMERATE_UNKNOWN;
+const int FrameRate::k23 			= dsVIDEO_FRAMERATE_UNKNOWN;
 const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
 const FrameRate & FrameRate::getInstance(int id)
