@@ -3416,10 +3416,11 @@ IARM_Result_t _dsIsAudioMute(void *arg)
     bool muted = false;
 
     dsError_t ret = dsIsAudioMute(param->handle, &muted);
+    INT_INFO("%s : ret:%d , muted: %d \n", __FUNCTION__,ret, muted);
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
     if (ret == dsERR_NONE || (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC)) {
         param->mute = muted;
-
+        INT_INFO("%s :  param mute : %d \n", __FUNCTION__,param->mute);
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string isMuteKey("");
         std::string _mute("FALSE");
@@ -3453,7 +3454,7 @@ IARM_Result_t _dsIsAudioMute(void *arg)
             INT_INFO("%s: param mute to true \n", __FUNCTION__);
             param->mute = true;
         }
-        INT_DEBUG("%s: persist value:%s for :%s\n", __FUNCTION__, _mute.c_str(), isMuteKey.c_str());
+        INT_INFO("%s: persist value:%s for :%s\n", __FUNCTION__, _mute.c_str(), isMuteKey.c_str());
 #endif //DS_AUDIO_SETTINGS_PERSISTENCE end
 
         result = IARM_RESULT_SUCCESS;
