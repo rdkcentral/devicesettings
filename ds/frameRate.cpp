@@ -57,7 +57,6 @@ namespace {
 			23,
 			0 //unknown
 	};
-
 	const char * _names[MAX_VIDEO_FRAMERATE_SUPPORTED] = {
 			"UnKnown", //unknown
 			"24",
@@ -76,7 +75,7 @@ namespace {
 			"240",
 			"59",
 			"23",
-			"UnKnown"
+			"UnKnown" //unknown
 	};
 
 	inline bool isValid(int id) {
@@ -85,6 +84,7 @@ namespace {
 		}
 		return dsVideoPortFrameRate_isValid(id);
 	}
+
 }
 
 namespace device {
@@ -98,6 +98,8 @@ const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_23dot98;
 const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_29dot97;
 const int FrameRate::k50 			= dsVIDEO_FRAMERATE_50;
 const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_59dot94;
+const int FrameRate::k59 			= dsVIDEO_FRAMERATE_59;
+const int FrameRate::k23 			= dsVIDEO_FRAMERATE_23;
 const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
 const FrameRate & FrameRate::getInstance(int id)
@@ -147,16 +149,19 @@ FrameRate::FrameRate(float value) : _value(value){
 	}
 	else if (_value == 59.94) {
 		_id = dsVIDEO_FRAMERATE_59dot94;
-	}		
+	}
 	else {
 		throw IllegalArgumentException();
 	}
 	_name = std::string(_names[_id]);
 }
 
+
 FrameRate::~FrameRate() {
 	// TODO Auto-generated destructor stub
 }
+
+
 
 }
 
