@@ -269,7 +269,7 @@ dsError_t dsGetEDIDBytesInfo (dsHdmiInPort_t iHdmiPort, unsigned char *edid, int
                             (void *)&param,
                             sizeof(param));
 
-    if (IARM_RESULT_SUCCESS == rpcRet)
+    if (IARM_RESULT_SUCCESS == rpcRet && param.result == dsERR_NONE && param.length > 0 && param.length <= MAX_EDID_BYTES_LEN)
     {
         *length = param.length;
         memcpy_s(edid, *length, param.edid, param.length);
