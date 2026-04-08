@@ -51,6 +51,10 @@ namespace {
                         200,
                         239.79,
                         240,
+#ifdef dsVIDEO_FRAMERATE_59_AND_23_SUPPORT /* Remove this define when middleware supports 4.1.2 meta-rdk-halif-headers and make open code for 59 and 23 */
+						59,
+						23,
+#endif /* dsVIDEO_FRAMERATE_59_AND_23_SUPPORT */
 	};
 	const char * _names[] = {
 			"UnKnown", //unkown
@@ -68,6 +72,10 @@ namespace {
                         "200",
                         "239.79",
                         "240",
+#ifdef dsVIDEO_FRAMERATE_59_AND_23_SUPPORT /* Remove this define when middleware supports 4.1.2 meta-rdk-halif-headers and make open code for 59 and 23 */
+						"59",
+						"23",
+#endif /* dsVIDEO_FRAMERATE_59_AND_23_SUPPORT */
 	};
 
 	inline bool isValid(int id) {
