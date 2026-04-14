@@ -73,6 +73,7 @@ extern "C" {
 #define  IARM_BUS_DSMGR_API_dsGetAudioDelay            "dsGetAudioDelay"
 #define  IARM_BUS_DSMGR_API_dsGetSinkDeviceAtmosCapability "dsGetSinkDeviceAtmosCapability"
 #define  IARM_BUS_DSMGR_API_dsSetAudioAtmosOutputMode "dsSetAudioAtmosOutputMode"
+#define  IARM_BUS_DSMGR_API_dsSetContinuousAudioOutputMode "dsSetContinuousAudioOutputMode"
 #define  IARM_BUS_DSMGR_API_dsSetAudioDucking    "dsSetAudioDucking"
 #define  IARM_BUS_DSMGR_API_dsSetAudioLevel            "dsSetAudioLevel"
 #define  IARM_BUS_DSMGR_API_dsGetAudioLevel            "dsGetAudioLevel"
@@ -1081,6 +1082,13 @@ typedef struct _dsHdmiVersionParam_t
     dsHdmiInPort_t          iHdmiPort;
     dsHdmiMaxCapabilityVersion_t iCapVersion;
 }dsHdmiVersionParam_t;
+
+typedef struct _dsContinuousAudioOutputParam_t
+{
+    dsError_t result;
+    intptr_t handle;
+    bool enable;
+}dsContinuousAudioOutputParam_t;
 
 #ifdef __cplusplus
 }

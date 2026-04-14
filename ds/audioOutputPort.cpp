@@ -366,6 +366,25 @@ void AudioOutputPort::setEnablePersist (bool isEnabled)
 
 
 /**
+ * @fn bool AudioOutputPort::setContinuousAudioOutputMode const
+ * @brief This API is used to set the audio port enable
+ * persist value
+ *
+ * @return void
+ */
+void AudioOutputPort::setContinuousAudioOutputMode (bool enable)
+{
+    INT_INFO("Shashank............Calling AudioOutputPort::setContinuousAudioOutputMode\n");
+    dsError_t ret = dsSetContinuousAudioOutputMode (_handle, enable);
+    if (ret != dsERR_NONE) {
+	std::cout << "Failed to set AudioOutputPort::setContinuousAudioOutputMode\n";
+        throw Exception(ret);
+    }
+     INT_INFO("Exiting AudioOutputPort::setContinuousAudioOutputMode\n");
+    return;
+}
+
+/**
  * @fn const int AudioOutputPort::getStereoAuto()
  * @brief This API is used to get the current auto mode.
  *

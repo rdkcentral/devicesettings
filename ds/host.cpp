@@ -521,6 +521,24 @@ Host::~Host()
        }
    }
 
+/**
+ * @fn bool AudioOutputPort::setContinuousAudioOutputMode const
+ * @brief This API is used to set the audio port enable
+ * persist value
+ *
+ * @return void
+ */
+void Host::setContinuousAudioOutputMode (bool enable)
+{
+    INT_INFO("Shashank............Calling AudioOutputPort::setContinuousAudioOutputMode\n");
+    dsError_t ret = dsSetContinuousAudioOutputMode (NULL, enable);
+    if (ret != dsERR_NONE) {
+        std::cout << "Failed to set AudioOutputPort::setContinuousAudioOutputMode\n";
+        throw Exception(ret);
+    }
+     INT_INFO("Exiting AudioOutputPort::setContinuousAudioOutputMode\n");
+    return;
+}
 
     /**
      * @fn Host::setAssociatedAudioMixing(const bool mixing)

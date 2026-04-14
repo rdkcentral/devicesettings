@@ -422,6 +422,7 @@ public:
     std::string getSocIDFromSDK();
     void getSinkDeviceAtmosCapability(dsATMOSCapability_t& atmosCapability);
     void setAudioAtmosOutputMode(bool enable);
+    void setContinuousAudioOutputMode(bool enable);
     void setAssociatedAudioMixing(const bool mixing);
     void getAssociatedAudioMixing(bool* mixing);
     void setFaderControl(const int mixerbalance);

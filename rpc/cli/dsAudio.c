@@ -396,6 +396,30 @@ dsError_t dsSetEnablePersist(intptr_t handle, const char* portName, bool enabled
 	return dsERR_GENERAL ;
 }
 
+dsError_t dsSetContinuousAudioOutputMode(intptr_t handle, bool enable)
+{
+    _DEBUG_ENTER();
+    INT_ERROR("Shashank...... dscli dsSetContinuousAudioOutputMode\n");
+    dsContinuousAudioOutputParam_t param;
+    param.handle = handle;
+    param.enable = enable;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+
+       rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                                       (char *)IARM_BUS_DSMGR_API_dsSetContinuousAudioOutputMode,
+                                                       (void *)&param,
+                                                       sizeof(param));
+
+       if (IARM_RESULT_SUCCESS == rpcRet)
+       {
+	    INT_ERROR("Shashank... Exiting dsSetContinuousAudioOutputModei Error None");
+               return dsERR_NONE;
+       }
+	INT_ERROR("Shashank2... Exiting dsSetContinuousAudioOutputMode");
+       return dsERR_GENERAL ;
+}
+
+
 dsError_t dsSetAudioEncoding(intptr_t handle, dsAudioEncoding_t encoding)
 {
 	dsError_t ret = dsERR_NONE;

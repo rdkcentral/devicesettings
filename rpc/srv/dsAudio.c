@@ -121,6 +121,7 @@ IARM_Result_t _dsIsAudioPortEnabled(void *arg);
 
 IARM_Result_t _dsGetEnablePersist(void *arg);
 IARM_Result_t _dsSetEnablePersist(void *arg);
+IARM_Result_t _dsSetContinuousAudioOutputMode(void *arg);
 
 IARM_Result_t _dsEnableAudioPort(void *arg);
 IARM_Result_t _dsSetAudioDucking(void *arg);
@@ -2412,6 +2413,7 @@ IARM_Result_t _dsAudioPortInit(void *arg)
 
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEnablePersist, _dsGetEnablePersist);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetEnablePersist, _dsSetEnablePersist);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetContinuousAudioOutputMode, _dsSetContinuousAudioOutputMode);
 
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsAudioPortTerm,_dsAudioPortTerm);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsEnableLEConfig,_dsEnableLEConfig);
@@ -3671,6 +3673,53 @@ IARM_Result_t _dsSetEnablePersist(void *arg)
  
     IARM_BUS_Unlock(lock);
     
+    return result;
+}
+
+IARM_Result_t _dsSetContinuousAudioOutputMode(void *arg)
+{
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+
+    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
+    dsError_t ret = dsERR_NONE;
+    typedef dsError_t (*dsSetContinuousAudioOutputMode_t)(intptr_t handle, uint32_t audioDelayMs);
+    static dsSetContinuousAudioOutputMode_t func = 0;
+    INT_ERROR("Inside _dsSetContinuousAudioOutputMode srv\n");
+    if (func == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func = (dsSetContinuousAudioOutputMode_t) dlsym(dllib, "dsSetContinuousAudioOutputMode");
+            if (func) {
+                INT_ERROR("dsSetContinuousAudioOutputMode_t(int, bool) is defined and loaded\r\n");
+            }
+            else {
+                INT_ERROR("dsSetContinuousAudioOutputMode_t(int, bool) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+    dsContinuousAudioOutputParam_t *param = (dsContinuousAudioOutputParam_t *)arg;
+    if (func != 0 && param != NULL)
+    {
+        ret = func(param->handle, param->enable);
+	if (ret != dsERR_NONE) 
+        {
+	    param->result = ret;
+            INT_ERROR("%s: (SERVER) Unable to set Continuous audio output mode\n", __FUNCTION__);
+        }
+        else
+        {
+            INT_INFO("%s: (SERVER) success \n", __FUNCTION__);
+	    param->result = ret;
+	   result = IARM_RESULT_SUCCESS;
+        }
+    }
+    INT_ERROR("Inside _dsSetContinuousAudioOutputMode srv\n");
+    IARM_BUS_Unlock(lock);
     return result;
 }
 
