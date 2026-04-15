@@ -260,14 +260,6 @@ namespace device {
     }
 
     FrameRate::~FrameRate() {
-        // TODO Auto-generated destructor stub
-        for (const auto& frameRate : _frameRates) {
-            if (frameRate.first == _id) {
-                INT_INFO("Destroying FrameRate with id: %d, name: %s, value: %f", frameRate.first, frameRate.second.name.c_str(), frameRate.second.value);
-                return;
-            }
-        }
-        _frameRates.clear();
     }
 }
 
