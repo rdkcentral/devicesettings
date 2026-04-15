@@ -345,6 +345,11 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
     videoPortConfigs_t configuration = {0};
 
     try {
+        // initialize the frame rates map with supported frame rates. This is required to be done before loading the video port configs as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
+        initializeFrameRates();
+
+        // dump the supported frame rates to the log for debugging purposes, as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
+        dumpFrameRates();
         /*
         * Load Constants First.
         */
@@ -457,15 +462,17 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
 void VideoOutputPortConfig::release()
   {
 	try {
-              _vPixelResolutions.clear();
-              _vAspectRatios.clear();
-              _vStereoScopieModes.clear();
-              _vFrameRates.clear();
-              _vPortTypes.clear();                            
-              {std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
-                      _supportedResolutions.clear();
-              }
-              _vPorts.clear();
+        _vPixelResolutions.clear();
+        _vAspectRatios.clear();
+        _vStereoScopieModes.clear();
+        _vFrameRates.clear();
+        _vPortTypes.clear();                            
+        {std::lock_guard<std::mutex> lock(gSupportedResolutionsMutex);
+                _supportedResolutions.clear();
+        }
+        _vPorts.clear();
+        // deinitialize the frame rates map to release the resources allocated for the map and its contents, as some of the frame rate APIs depend on this map to return the supported frame rates and its values.
+        deinitializeFrameRates();
 	}
 	catch (const Exception &e) {
 		throw e;

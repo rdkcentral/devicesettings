@@ -292,12 +292,6 @@ void Manager::Initialize()
             
             err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit);
             CHECK_RET_VAL(err);
-
-            // initialize the frame rates map with supported frame rates, as some of the APIs in this module depend on this map to return the supported frame rates and its values.
-            initializeFrameRates();
-
-            // dump the supported frame rates to the log for debugging purposes, as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
-            dumpFrameRates();
             
             loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT |
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
@@ -358,9 +352,6 @@ void Manager::DeInitialize()
 		dsVideoPortTerm();
 		dsAudioPortTerm();
 		dsDisplayTerm();
-
-		// deinitialize the frame rates map to release the resources allocated for the map and its contents, as some of the frame rate APIs depend on this map to return the supported frame rates and its values.
-		deinitializeFrameRates();
 	}
 	}
 	INT_INFO("Exiting ... with thread %lu",pthread_self());

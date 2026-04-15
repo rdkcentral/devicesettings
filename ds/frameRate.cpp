@@ -35,6 +35,8 @@
 #include "dslogger.h"
 #include <cmath>
 #include <mutex>
+#include <map>
+#include <limits>
 #include <cstdio>
 #include <unistd.h>
 
@@ -47,6 +49,7 @@ namespace {
     FrameRateInfo;
 
     std::map<dsVideoFrameRate_t, FrameRateInfo> _frameRates;
+    std::mutex _frameRatesMutex;
 
     inline bool isValid(int id) {
         bool valid = false;
@@ -76,6 +79,7 @@ namespace device {
     const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
     void initializeFrameRates() {
+        std::lock_guard<std::mutex> lock(_frameRatesMutex);
         _frameRates.clear();
         _frameRates.insert({dsVIDEO_FRAMERATE_UNKNOWN, {"Unknown", 0}});
 
@@ -190,6 +194,7 @@ namespace device {
     }
 
     void dumpFrameRates() {
+        std::lock_guard<std::mutex> lock(_frameRatesMutex);
         if ( -1 == access("/opt/dsMgrDumpFramerates", F_OK) ) {
             INT_INFO("Dumping of frame rates is disabled");
             return;
@@ -200,6 +205,7 @@ namespace device {
     }
 
     void deinitializeFrameRates() {
+        std::lock_guard<std::mutex> lock(_frameRatesMutex);
         _frameRates.clear();
     }
 
@@ -225,6 +231,7 @@ namespace device {
 
     FrameRate::FrameRate(int id)
     {
+        std::lock_guard<std::mutex> lock(_frameRatesMutex);
         if (::isValid(id)) {
             auto it = _frameRates.find(static_cast<dsVideoFrameRate_t>(id));
             if (it != _frameRates.end()) {
@@ -246,6 +253,7 @@ namespace device {
     }
 
     FrameRate::FrameRate(float value) : _value(value){
+        std::lock_guard<std::mutex> lock(_frameRatesMutex);
         for (const auto& frameRate : _frameRates) {
             // check if the value matches with any of the supported frame rates in the map, if found initialize the FrameRate object with corresponding name and id
             if (std::fabs(frameRate.second.value - value) < std::numeric_limits<float>::epsilon()) {
