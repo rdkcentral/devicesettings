@@ -92,99 +92,93 @@ namespace device {
 
             switch (i) {
                 case dsVIDEO_FRAMERATE_24: {
-                    framerateInfo.value = 24.0f;
+                    framerateInfo.value = 24.0;
+                    framerateInfo.name = "24";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_25: {
-                    framerateInfo.value = 25.0f;
+                    framerateInfo.value = 25.0;
+                    framerateInfo.name = "25";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_30: {
-                    framerateInfo.value = 30.0f;
+                    framerateInfo.value = 30.0;
+                    framerateInfo.name = "30";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_60: {
-                    framerateInfo.value = 60.0f;
+                    framerateInfo.value = 60.0;
+                    framerateInfo.name = "60";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_23dot98: {
-                    framerateInfo.value = 23.98f;
+                    framerateInfo.value = 23.98;
+                    framerateInfo.name = "23.98";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_29dot97: {
-                    framerateInfo.value = 29.97f;
+                    framerateInfo.value = 29.97;
+                    framerateInfo.name = "29.97";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_50: {
-                    framerateInfo.value = 50.0f;
+                    framerateInfo.value = 50.0;
+                    framerateInfo.name = "50";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_59dot94: {
-                    framerateInfo.value = 59.94f;
+                    framerateInfo.value = 59.94;
+                    framerateInfo.name = "59.94";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_100: {
-                    framerateInfo.value = 100.0f;
+                    framerateInfo.value = 100.0;
+                    framerateInfo.name = "100";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_119dot88: {
-                    framerateInfo.value = 119.88f;
+                    framerateInfo.value = 119.88;
+                    framerateInfo.name = "119.88";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_120: {
-                    framerateInfo.value = 120.0f;
+                    framerateInfo.value = 120.0;
+                    framerateInfo.name = "120";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_200: {
-                    framerateInfo.value = 200.0f;
+                    framerateInfo.value = 200.0;
+                    framerateInfo.name = "200";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_239dot76: {
-                    framerateInfo.value = 239.76f;
+                    framerateInfo.value = 239.76;
+                    framerateInfo.name = "239.76";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_240: {
-                    framerateInfo.value = 240.0f;
+                    framerateInfo.value = 240.0;
+                    framerateInfo.name = "240";
                 }
                 break;
             #if 0 // dsVIDEO_FRAMERATE_59 and dsVIDEO_FRAMERATE_23 are not supported in all devices, this will be enabled once all devices support them
                 case dsVIDEO_FRAMERATE_59: {
-                    framerateInfo.value = 59.0f;
+                    framerateInfo.value = 59.0;
+                    framerateInfo.name = "59";
                 }
                 break;
                 case dsVIDEO_FRAMERATE_23: {
-                    framerateInfo.value = 23.0f;
+                    framerateInfo.value = 23.0;
+                    framerateInfo.name = "23";
                 }
                 break;
             #endif
                 default: {
                     framerateInfo.name = "Unknown";
+                    framerateInfo.value = 0;
                     INT_WARN("Invalid frame rate id: %d", i);
                 }
                 break;
-            }
-
-            if (framerateInfo.name.empty()) {
-                char buf[64] = {0};
-                std::string tempFloatName = "Unknown";
-
-                // e.g. 24.0f -> "24", 23.98f -> "23.98", 119.88f -> "119.88"
-                // e.g. 59.94f -> "59.94", 119.88f -> "119.88", 239.76f -> "239.76"
-                // e.g. 100.0f -> "100", 200.0f -> "200", 240.0f -> "240"
-                // e.g. 59.946f -> "59.946", 59.9467f -> "59.9467"
-                int len = std::snprintf( buf, sizeof(buf), "%.*g", std::numeric_limits<float>::max_digits10, framerateInfo.value );
-                if (len > 0 && len < static_cast<int>(sizeof(buf))) {
-                    tempFloatName = std::string(buf);
-                    // remove trailing zeros and decimal point if not needed, e.g. "24.0" -> "24", "23.980000" -> "23.98", "100.00" -> "100"
-                    tempFloatName.erase(tempFloatName.find_last_not_of('0') + 1, std::string::npos);
-                    if (tempFloatName.back() == '.') {
-                        tempFloatName.pop_back();
-                    }
-                    framerateInfo.name = tempFloatName;
-                }
-                else {
-                    INT_WARN("Failed to convert frame rate value: %f to string for frame rate id: %d", framerateInfo.value, i);
-                }
             }
 
             INT_INFO("Frame rate id: %d, name: %s, value: %f", i, framerateInfo.name.c_str(), framerateInfo.value);
@@ -215,6 +209,7 @@ namespace device {
             return VideoOutputPortConfig::getInstance().getFrameRate(id);
         }
         else {
+            INT_ERROR("Frame rate id: %d is not valid", id);
             throw IllegalArgumentException();
         }
     }
@@ -226,6 +221,7 @@ namespace device {
                 return VideoOutputPortConfig::getInstance().getFrameRate(frameRate.first);
             }
         }
+        INT_ERROR("Frame rate name: %s is not valid", name.c_str());
         throw IllegalArgumentException();
     }
 
@@ -247,6 +243,7 @@ namespace device {
             }
         }
         else {
+            INT_ERROR("Frame rate id: %d is not valid", id);
             throw IllegalArgumentException();
         }
 
@@ -257,13 +254,13 @@ namespace device {
         for (const auto& frameRate : _frameRates) {
             // check if the value matches with any of the supported frame rates in the map, if found initialize the FrameRate object with corresponding name and id
             if (std::fabs(frameRate.second.value - value) < std::numeric_limits<float>::epsilon()) {
-                _name = frameRate.second.name;
                 _id = frameRate.first;
-                INT_INFO("Creating FrameRate with id: %d, name: %s, value: %f", _id, _name.c_str(), _value);
+                _name = frameRate.second.name;
+                INT_INFO("Creating FrameRate with value: %f, name: %s, id: %d", _value, _name.c_str(), _id);
                 return;
             }
         }
-        // if the value is not found in the map, throw exception
+        INT_ERROR("Frame rate value: %f is not valid", value);
         throw IllegalArgumentException();
     }
 
