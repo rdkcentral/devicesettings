@@ -3414,10 +3414,13 @@ IARM_Result_t _dsIsAudioMute(void *arg)
 
     dsAudioSetMutedParam_t *param = (dsAudioSetMutedParam_t *)arg;
     bool muted = false;
-
-    dsError_t ret = dsIsAudioMute(param->handle, &muted);
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
-    if (ret == dsERR_NONE || (_APortType == dsAUDIOPORT_TYPE_HDMI_ARC)) {
+    dsError_t ret = dsERR_NONE;
+    if(_APortType != dsAUDIOPORT_TYPE_HDMI_ARC)
+    {
+	dsError_t ret = dsIsAudioMute(param->handle, &muted);
+    }
+    if (ret == dsERR_NONE ) {
         param->mute = muted;
 
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
