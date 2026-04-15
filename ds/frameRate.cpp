@@ -176,12 +176,12 @@ namespace device {
                 default: {
                     framerateInfo.name = "Unknown";
                     framerateInfo.value = 0;
-                    INT_WARN("Invalid frame rate id: %d", i);
+                    INT_WARN("Invalid frame rate id: %d", static_cast<int>(i));
                 }
                 break;
             }
 
-            INT_INFO("Frame rate id: %d, name: %s, value: %f", i, framerateInfo.name.c_str(), framerateInfo.value);
+            INT_INFO("Frame rate id: %d, name: %s, value: %f", static_cast<int>(i), framerateInfo.name.c_str(), framerateInfo.value);
             // inserting the frame rate info in the map with frame rate id as key and FrameRateInfo struct as value
             _frameRates.insert({static_cast<dsVideoFrameRate_t>(i), framerateInfo});
         }
