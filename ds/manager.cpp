@@ -47,6 +47,10 @@
 #include <dlfcn.h>
 #include "dsHALConfig.h"
 #include "frontPanelConfig.hpp"
+#include "dsMgr.h"       /* IARM_BUS_DSMGR_NAME, IARM_BUS_DSMGR_EVENT_RESTARTED */
+#include "libIBus.h"     /* IARM_Bus_RegisterEventHandler / UnRegisterEventHandler */
+#include <thread>           /* std::thread for deferred handle refresh */
+#include <chrono>           /* std::chrono::milliseconds */
 
 /**
  * @file manager.cpp
@@ -67,6 +71,157 @@ namespace device {
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
 static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc);
+
+/**
+ * @brief IARM_BUS_DSMGR_EVENT_RESTARTED handler registered by Manager::Initialize().
+ *
+ * Fired by dsmgr after it has fully re-initialised its HAL — i.e. after
+ * dsAudioPortInit / dsVideoPortInit / dsVideoDeviceInit have all completed
+ * in the new dsmgr process.
+ *
+ * All three libds config singletons hold stale intptr_t handles that point
+ * into the address space of the *previous* dsmgr process. This handler
+ * refreshes them unconditionally so that subsequent API calls use handles
+ * valid in the new dsmgr process.
+ *
+ * Registered in Manager::Initialize() and unregistered in
+ * Manager::DeInitialize() so its lifetime exactly matches the Manager's.
+ */
+static void dsMgrRestartedHandler(const char* owner, IARM_EventId_t eventId,
+                                   void* /*data*/, size_t /*len*/)
+{
+    INT_INFO("[Manager] IARM_BUS_DSMGR_EVENT_RESTARTED received owner=%s eventId=%d",
+             owner, eventId);
+
+    if (std::string(IARM_BUS_DSMGR_NAME) != std::string(owner)) {
+        INT_ERROR("unexpected owner '%s', ignoring", owner);
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(gManagerInitMutex);
+    if (Manager::IsInitialized == 0) {
+        /* Manager has been torn down; ignore the event */
+        INT_WARN("Manager not initialized, skipping refresh");
+        return;
+    }
+
+    INT_INFO("Refreshing ALL libds handles (deferred — spawning retry thread)");
+
+    /*
+     * IMPORTANT: Do NOT call refreshAllHandles() synchronously here.
+     *
+     * This handler is dispatched while dsmgr is still inside
+     * IARM_Bus_BroadcastEvent(). Any IARM_Bus_Call() back into DSMgr
+     * from this context hits the RPC dispatcher while it is busy and
+     * returns IARM_RESULT_IPCCORE_FAIL — leaving every handle stale.
+     *
+     * Fix: spawn a detached thread that sleeps before calling back into
+     * dsmgr (letting BroadcastEvent return) and retries up to 3 times
+     * with escalating delays covering ~3× the observed 600 ms restart time.
+     */
+    std::thread([]() {
+        /* Delays tuned to the ~600 ms restart time observed on device.
+         * RESTARTED fires at end of DSMgr_Start() so dsmgr is already
+         * RPC-ready; only BroadcastEvent dispatch (~2 ms) needs to clear.
+         *   200 ms → fast path  |  600 ms → full restart  |  1200 ms → 2×
+         * Total window: 2.0 s. Tune DELAYS_MS[] to device RestartSec= if needed. */
+        static const int DELAYS_MS[] = { 200, 600, 1200 };
+        static const int MAX_ATTEMPTS = static_cast<int>(
+                             sizeof(DELAYS_MS) / sizeof(DELAYS_MS[0]));
+
+        int cumulativeWaitMs = 0;
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            const int delayMs = DELAYS_MS[attempt - 1];
+            cumulativeWaitMs += delayMs;
+
+            /* Sleep so BroadcastEvent has returned before we call back. */
+            std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+
+            {
+                std::lock_guard<std::mutex> lk(gManagerInitMutex);
+                if (Manager::IsInitialized == 0) {
+                    INT_WARN("[refreshThread] Manager deinitialized, aborting");
+                    return;
+                }
+            }
+
+            INT_INFO("[refreshThread] attempt %d/%d (after %d ms delay)",
+                     attempt, MAX_ATTEMPTS, delayMs);
+
+            dsError_t audioRet    = AudioOutputPortConfig::getInstance().refreshAllHandles();
+            dsError_t videoPortRet = static_cast<dsError_t>(
+                                        VideoOutputPortConfig::getInstance().refreshAllHandles());
+            dsError_t videoDevRet  = static_cast<dsError_t>(
+                                        VideoDeviceConfig::getInstance().refreshAllHandles());
+
+            INT_INFO("[refreshThread] attempt %d audioRet=%d videoPortRet=%d videoDevRet=%d",
+                     attempt, audioRet, videoPortRet, videoDevRet);
+
+            if (audioRet == dsERR_NONE && videoPortRet == dsERR_NONE && videoDevRet == dsERR_NONE) {
+                INT_INFO("[refreshThread] ALL handles refreshed OK on attempt %d "
+                         "(total wait %d ms)", attempt, cumulativeWaitMs);
+                return;
+            }
+
+            if (attempt < MAX_ATTEMPTS) {
+                INT_WARN("[refreshThread] attempt %d failed (a=%d vp=%d vd=%d), "
+                         "retrying in %d ms",
+                         attempt, audioRet, videoPortRet, videoDevRet,
+                         DELAYS_MS[attempt]);   /* next delay */
+            }
+        }
+
+        /* Last-resort: all refreshAllHandles() attempts failed after ~2 s.
+         * Do a full DeInitialize/Initialize to rebuild all libds singletons
+         * and HAL bindings from scratch against the running dsmgr.
+         * IsInitialized is a ref-count — force it to 1 so one DeInitialize()
+         * reaches 0 (triggers real teardown) and one Initialize() reaches 1
+         * (triggers real re-init); restore original count afterwards. */
+        INT_ERROR("[refreshThread] FAILED to refresh handles after %d attempts "
+                  "(~2 s window exhausted) — initiating full DeInitialize/Initialize",
+                  MAX_ATTEMPTS);
+
+        int savedRefCount = 0;
+        {
+            std::lock_guard<std::mutex> lk(gManagerInitMutex);
+            savedRefCount = Manager::IsInitialized;
+        }
+
+        if (savedRefCount <= 0) {
+            INT_WARN("[refreshThread] IsInitialized=%d — skipping force re-init",
+                     savedRefCount);
+            return;
+        }
+
+        INT_INFO("[refreshThread] force re-init: savedRefCount=%d", savedRefCount);
+
+        {
+            std::lock_guard<std::mutex> lk(gManagerInitMutex);
+            Manager::IsInitialized = 1;   /* arm: next DeInitialize() will reach 0 */
+        }
+
+        INT_INFO("[refreshThread] calling DeInitialize (will trigger real teardown)");
+        Manager::DeInitialize();   /* count 1 → 0 → dsAudioPortTerm + release() */
+
+        INT_INFO("[refreshThread] calling Initialize (will trigger real HAL re-init)");
+        try {
+            Manager::Initialize(); /* count 0 → 1 → dsAudioPortInit + load() + handler re-reg */
+        }
+        catch (const std::exception& ex) {
+            INT_ERROR("[refreshThread] Initialize threw: %s — aborting", ex.what());
+            return;
+        }
+
+        /* Restore count so callers still have a matching DeInitialize(). */
+        {
+            std::lock_guard<std::mutex> lk(gManagerInitMutex);
+            Manager::IsInitialized = savedRefCount;
+        }
+
+        INT_INFO("[refreshThread] force re-init complete — IsInitialized restored to %d",
+                 savedRefCount);
+    }).detach();
+}
 
 bool LoadDLSymbols(void* pDLHandle, const dlSymbolLookup* symbols, int numberOfSymbols)
 {
@@ -297,6 +452,22 @@ void Manager::Initialize()
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
                                     device::DEVICE_CAPABILITY_VIDEO_DEVICE |
                                     device::DEVICE_CAPABILITY_FRONT_PANEL);
+
+            /* Register the dsmgr-restart handler so that libds handles are
+             * refreshed automatically whenever dsmgr crashes and restarts.
+             * Registered here (after all HAL inits) so handles are valid
+             * before the first event can arrive.  Unregistered in
+             * DeInitialize() to match the Manager lifetime exactly. */
+            IARM_Result_t iarmRet = IARM_Bus_RegisterEventHandler(
+                IARM_BUS_DSMGR_NAME,
+                IARM_BUS_DSMGR_EVENT_RESTARTED,
+                dsMgrRestartedHandler);
+            if (IARM_RESULT_SUCCESS != iarmRet) {
+                INT_ERROR("[Manager] Failed to register IARM_BUS_DSMGR_EVENT_RESTARTED handler (ret=%d)",
+                          iarmRet);
+            } else {
+                INT_INFO("[Manager] IARM_BUS_DSMGR_EVENT_RESTARTED handler registered OK");
+            }
         }
     }
     catch(const Exception &e) {
@@ -343,7 +514,19 @@ void Manager::DeInitialize()
 	INT_INFO("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
 	if(IsInitialized>0)IsInitialized--;
 	if (0 == IsInitialized) {	
-	
+
+        /* Unregister the dsmgr-restart handler before tearing down HAL
+         * so no refresh can race with the release() / Term() calls below. */
+        IARM_Result_t iarmRet = IARM_Bus_UnRegisterEventHandler(
+            IARM_BUS_DSMGR_NAME,
+            IARM_BUS_DSMGR_EVENT_RESTARTED);
+        if (IARM_RESULT_SUCCESS != iarmRet) {
+            INT_ERROR("[Manager] Failed to unregister IARM_BUS_DSMGR_EVENT_RESTARTED handler (ret=%d)",
+                      iarmRet);
+        } else {
+            INT_INFO("[Manager] IARM_BUS_DSMGR_EVENT_RESTARTED handler unregistered OK");
+        }
+
 		VideoDeviceConfig::getInstance().release();
 		VideoOutputPortConfig::getInstance().release();
 		AudioOutputPortConfig::getInstance().release();

@@ -160,6 +160,36 @@ VideoOutputPort::VideoOutputPort(const int type, const int index, const int id, 
 	}
 }
 
+int VideoOutputPort::refreshHandle()
+{
+    intptr_t old_handle = _handle;
+    dsError_t ret = dsGetVideoPort((dsVideoPortType_t)_type, _index, &_handle);
+    printf("\n[refreshHandle] VideoOutputPort type:%d index:%d old_handle:0x%lX new_handle:0x%lX ret:%d\n",
+           _type, _index, (long)old_handle, (long)_handle, ret);
+    if (dsERR_NONE == ret) {
+        bool enabled = false;
+        if (dsIsVideoPortEnabled(_handle, &enabled) == dsERR_NONE)
+            _enabled = enabled;
+
+        bool connected = false;
+        if (dsIsDisplayConnected(_handle, &connected) == dsERR_NONE)
+            _displayConnected = connected;
+
+        /* Refresh the inner Display handle */
+        intptr_t old_disp_handle = _display._handle;
+        dsError_t dret = dsGetDisplay((dsVideoPortType_t)_type, _index, &_display._handle);
+        printf("[refreshHandle]   Display old_handle:0x%lX new_handle:0x%lX ret:%d\n",
+               (long)old_disp_handle, (long)_display._handle, dret);
+        if (dret != dsERR_NONE) {
+            INT_ERROR("[refreshHandle] dsGetDisplay failed for type:%d index:%d ret:%d", _type, _index, dret);
+            if (ret == dsERR_NONE) ret = dret;
+        }
+    } else {
+        INT_ERROR("[refreshHandle] dsGetVideoPort failed for type:%d index:%d ret:%d", _type, _index, ret);
+    }
+    return ret;
+}
+
 bool VideoOutputPort::setScartParameter(const std::string parameter, const std::string value)
 {
 	return false;
