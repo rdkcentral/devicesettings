@@ -103,7 +103,7 @@ void loadDeviceCapabilities(unsigned int capabilityType)
 
     INT_INFO("Entering capabilityType = 0x%08X", capabilityType);
     dlerror(); // clear old error
-    pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY, RTLD_NODELETE);
+    pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY | RTLD_NODELETE);
     
     if (nullptr == pDLHandle) {
         const char* dlError = dlerror();
