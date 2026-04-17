@@ -207,9 +207,7 @@ namespace device {
             // inserting the frame rate info in the map with frame rate id as key and FrameRateInfo struct as value
             _frameRates.insert({static_cast<dsVideoFrameRate_t>(i), framerateInfo});
         }
-    }
 
-    void dumpFrameRates() {
         if ( -1 == access("/opt/dsMgrDumpFramerates", F_OK) ) {
             INT_INFO("Dumping of frame rates is disabled");
             return;
@@ -220,6 +218,22 @@ namespace device {
     }
 
     void deinitializeFrameRates() {
+        FrameRate::k24 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k25 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k30 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k60 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k23dot98 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k29dot97 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k50 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k59dot94 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k100 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k119dot88 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k120 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k200 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k239dot76 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k240 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k59 = dsVIDEO_FRAMERATE_UNKNOWN;
+        FrameRate::k23 = dsVIDEO_FRAMERATE_UNKNOWN;
         _frameRates.clear();
     }
 

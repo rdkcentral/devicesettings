@@ -348,8 +348,6 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
         // initialize the frame rates map with supported frame rates. This is required to be done before loading the video port configs as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
         initializeFrameRates();
 
-        // dump the supported frame rates to the log for debugging purposes, as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
-        dumpFrameRates();
         /*
         * Load Constants First.
         */

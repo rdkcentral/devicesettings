@@ -41,7 +41,6 @@
 
 namespace device {
     void initializeFrameRates();
-    void dumpFrameRates();
     void deinitializeFrameRates();
 
 /**
