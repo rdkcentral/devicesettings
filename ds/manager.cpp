@@ -292,6 +292,9 @@ void Manager::Initialize()
             
             err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit);
             CHECK_RET_VAL(err);
+
+            // initialize the frame rates map with supported frame rates. This is required to be done before loading the video port configs as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
+            initializeFrameRates();
             
             loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT |
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
@@ -340,19 +343,21 @@ void Manager::load()
 void Manager::DeInitialize()
 {
 	{std::lock_guard<std::mutex> lock(gManagerInitMutex);
-	INT_INFO("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
-	if(IsInitialized>0)IsInitialized--;
-	if (0 == IsInitialized) {	
-	
-		VideoDeviceConfig::getInstance().release();
-		VideoOutputPortConfig::getInstance().release();
-		AudioOutputPortConfig::getInstance().release();
+        INT_INFO("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
+        if(IsInitialized>0)IsInitialized--;
+        if (0 == IsInitialized) {
+            VideoDeviceConfig::getInstance().release();
+            VideoOutputPortConfig::getInstance().release();
+            AudioOutputPortConfig::getInstance().release();
 
-		dsVideoDeviceTerm();
-		dsVideoPortTerm();
-		dsAudioPortTerm();
-		dsDisplayTerm();
-	}
+            // deinitialize the frame rates map to release the resources allocated for the map and its contents, as some of the frame rate APIs depend on this map to return the supported frame rates and its values.
+            deinitializeFrameRates();
+
+            dsVideoDeviceTerm();
+            dsVideoPortTerm();
+            dsAudioPortTerm();
+            dsDisplayTerm();
+        }
 	}
 	INT_INFO("Exiting ... with thread %lu",pthread_self());
 }
