@@ -52,16 +52,24 @@ namespace device {
 class FrameRate : public DSConstant {
 	float _value;                //!< Indicates the supported frame rate value in fps.
 public:
-	static const int kUnknown;   //!< Indicates video frame rate of unknown type.
-	static const int k24;        //!< Indicates video frame rate of 24 fps.
-	static const int k25;        //!< Indicates video frame rate of 25 fps.
-	static const int k30;        //!< Indicates video frame rate of 30 fps.
-	static const int k60;        //!< Indicates video frame rate of 60 fps.
-	static const int k23dot98;   //!< Indicates video frame rate of 23.98 fps.
-	static const int k29dot97;   //!< Indicates video frame rate of 29.97 fps.
-	static const int k50;        //!< Indicates video frame rate of 50 fps.
-	static const int k59dot94;   //!< Indicates video frame rate of 59.94 fps.
-	static const int kMax;       //!< Indicates maximum number of frame rates supported.
+    static const int kUnknown;   //!< Indicates video frame rate of unknown type.
+    static const int k24;        //!< Indicates video frame rate of 24 fps.
+    static const int k25;        //!< Indicates video frame rate of 25 fps.
+    static const int k30;        //!< Indicates video frame rate of 30 fps.
+    static const int k60;        //!< Indicates video frame rate of 60 fps.
+    static const int k23dot98;   //!< Indicates video frame rate of 23.98 fps.
+    static const int k29dot97;   //!< Indicates video frame rate of 29.97 fps.
+    static const int k50;        //!< Indicates video frame rate of 50 fps.
+    static const int k59dot94;   //!< Indicates video frame rate of 59.94 fps.
+    static const int k100;       //!< Indicates video frame rate of 100 fps.
+    static const int k119dot88;  //!< Indicates video frame rate of 119.88 fps.
+    static const int k120;       //!< Indicates video frame rate of 120 fps.
+    static const int k200;       //!< Indicates video frame rate of 200 fps.
+    static const int k239dot76;  //!< Indicates video frame rate of 239.76 fps.
+    static const int k240;       //!< Indicates video frame rate of 240 fps.
+    static const int k59;        //!< Indicates video frame rate of 59 fps.
+    static const int k23;        //!< Indicates video frame rate of 23 fps.
+    static const int kMax;       //!< Indicates maximum number of frame rates supported.
 
 	static const FrameRate & getInstance(int id);
 	static const FrameRate & getInstance(const std::string &name);

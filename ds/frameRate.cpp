@@ -67,15 +67,24 @@ namespace {
 }
 
 namespace device {
+    // initializing with UNKNOWN, actual value will be set in initializeFrameRates() function
     const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k24 			= dsVIDEO_FRAMERATE_24;
-    const int FrameRate::k25 			= dsVIDEO_FRAMERATE_25;
-    const int FrameRate::k30 			= dsVIDEO_FRAMERATE_30;
-    const int FrameRate::k60 			= dsVIDEO_FRAMERATE_60;
-    const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_23dot98;
-    const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_29dot97;
-    const int FrameRate::k50 			= dsVIDEO_FRAMERATE_50;
-    const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_59dot94;
+    const int FrameRate::k24 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k25 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k30 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k60 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k50 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k100 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k119dot88 		= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k120 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k200 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k239dot76 		= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k240 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k59 			= dsVIDEO_FRAMERATE_UNKNOWN;
+    const int FrameRate::k23 			= dsVIDEO_FRAMERATE_UNKNOWN;
     const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
 
     void initializeFrameRates() {
@@ -94,82 +103,98 @@ namespace device {
                 case dsVIDEO_FRAMERATE_24: {
                     framerateInfo.value = 24.0;
                     framerateInfo.name = "24";
+                    FrameRate::k24 = dsVIDEO_FRAMERATE_24;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_25: {
                     framerateInfo.value = 25.0;
                     framerateInfo.name = "25";
+                    FrameRate::k25 = dsVIDEO_FRAMERATE_25;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_30: {
                     framerateInfo.value = 30.0;
                     framerateInfo.name = "30";
+                    FrameRate::k30 = dsVIDEO_FRAMERATE_30;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_60: {
                     framerateInfo.value = 60.0;
                     framerateInfo.name = "60";
+                    FrameRate::k60 = dsVIDEO_FRAMERATE_60;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_23dot98: {
                     framerateInfo.value = 23.98;
                     framerateInfo.name = "23.98";
+                    FrameRate::k23dot98 = dsVIDEO_FRAMERATE_23dot98;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_29dot97: {
                     framerateInfo.value = 29.97;
                     framerateInfo.name = "29.97";
+                    FrameRate::k29dot97 = dsVIDEO_FRAMERATE_29dot97;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_50: {
                     framerateInfo.value = 50.0;
                     framerateInfo.name = "50";
+                    FrameRate::k50 = dsVIDEO_FRAMERATE_50;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_59dot94: {
                     framerateInfo.value = 59.94;
                     framerateInfo.name = "59.94";
+                    FrameRate::k59dot94 = dsVIDEO_FRAMERATE_59dot94;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_100: {
                     framerateInfo.value = 100.0;
                     framerateInfo.name = "100";
+                    FrameRate::k100 = dsVIDEO_FRAMERATE_100;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_119dot88: {
                     framerateInfo.value = 119.88;
                     framerateInfo.name = "119.88";
+                    FrameRate::k119dot88 = dsVIDEO_FRAMERATE_119dot88;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_120: {
                     framerateInfo.value = 120.0;
                     framerateInfo.name = "120";
+                    FrameRate::k120 = dsVIDEO_FRAMERATE_120;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_200: {
                     framerateInfo.value = 200.0;
                     framerateInfo.name = "200";
+                    FrameRate::k200 = dsVIDEO_FRAMERATE_200;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_239dot76: {
                     framerateInfo.value = 239.76;
                     framerateInfo.name = "239.76";
+                    FrameRate::k239dot76 = dsVIDEO_FRAMERATE_239dot76;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_240: {
                     framerateInfo.value = 240.0;
                     framerateInfo.name = "240";
+                    FrameRate::k240 = dsVIDEO_FRAMERATE_240;
                 }
                 break;
             #if 0 // dsVIDEO_FRAMERATE_59 and dsVIDEO_FRAMERATE_23 are not supported in all devices, this will be enabled once all devices support them
                 case dsVIDEO_FRAMERATE_59: {
                     framerateInfo.value = 59.0;
                     framerateInfo.name = "59";
+                    FrameRate::k59 = dsVIDEO_FRAMERATE_59;
                 }
                 break;
                 case dsVIDEO_FRAMERATE_23: {
                     framerateInfo.value = 23.0;
                     framerateInfo.name = "23";
+                    FrameRate::k23 = dsVIDEO_FRAMERATE_23;
                 }
                 break;
             #endif
