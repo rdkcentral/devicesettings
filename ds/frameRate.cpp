@@ -66,24 +66,24 @@ namespace {
 
 namespace device {
     // initializing with UNKNOWN, actual value will be set in initializeFrameRates() function
-    const int FrameRate::kUnknown 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k24 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k25 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k30 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k60 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k23dot98 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k29dot97 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k50 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k59dot94 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k100 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k119dot88 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k120 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k200 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k239dot76 		= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k240 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k59 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::k23 			= dsVIDEO_FRAMERATE_UNKNOWN;
-    const int FrameRate::kMax 			= dsVIDEO_FRAMERATE_MAX;
+    int FrameRate::kUnknown              = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k24                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k25                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k30                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k60                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k23dot98              = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k29dot97              = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k50                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k59dot94              = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k100                  = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k119dot88             = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k120                  = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k200                  = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k239dot76             = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k240                  = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k59                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::k23                   = dsVIDEO_FRAMERATE_UNKNOWN;
+    int FrameRate::kMax                  = dsVIDEO_FRAMERATE_MAX;
 
     void initializeFrameRates() {
         _frameRates.clear();
