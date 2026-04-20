@@ -115,6 +115,9 @@ void loadDeviceCapabilities(unsigned int capabilityType)
     
     INT_INFO("DL Instance '%s'", (nullptr == pDLHandle ? "NULL" : "Valid"));
 
+    // initialize the frame rates map with supported frame rates. This is required to be done before loading the video port configs as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
+    initializeFrameRates();
+
     // Audio Port Config
     if (DEVICE_CAPABILITY_AUDIO_PORT & capabilityType) {
         audioConfigs_t dynamicAudioConfigs = {0 };
@@ -292,9 +295,6 @@ void Manager::Initialize()
             
             err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit);
             CHECK_RET_VAL(err);
-
-            // initialize the frame rates map with supported frame rates. This is required to be done before loading the video port configs as some of the frame rate related APIs depend on this map to return the supported frame rates and its values.
-            initializeFrameRates();
             
             loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT |
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |

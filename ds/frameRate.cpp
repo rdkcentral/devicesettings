@@ -207,14 +207,6 @@ namespace device {
             // inserting the frame rate info in the map with frame rate id as key and FrameRateInfo struct as value
             _frameRates.insert({static_cast<dsVideoFrameRate_t>(i), framerateInfo});
         }
-
-        if ( -1 == access("/opt/dsMgrDumpFramerates", F_OK) ) {
-            INT_INFO("Dumping of frame rates is disabled");
-            return;
-        }
-        for (const auto& frameRate : _frameRates) {
-            INT_INFO("Frame rate id: %d, name: %s, value: %f", frameRate.first, frameRate.second.name.c_str(), frameRate.second.value);
-        }
     }
 
     void deinitializeFrameRates() {
