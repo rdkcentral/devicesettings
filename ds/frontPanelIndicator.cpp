@@ -529,6 +529,7 @@ void FrontPanelIndicator::setColor(uint32_t color,bool toPersist)
     bool isValidColor = false;
     if(_colorMode == 0 || _colorMode == 2)
     {
+		INT_INFO("[%s:%d] setLED: This API not supported for the color mode", __FUNCTION__, __LINE__);
         throw UnsupportedOperationException("This API not supported for the color mode");
     }
     if (dsERR_NONE != dsSetFPDColor((dsFPDIndicator_t)_id, (dsFPDColor_t) color,IsPersist) )
