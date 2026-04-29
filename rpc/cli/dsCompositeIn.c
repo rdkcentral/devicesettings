@@ -54,6 +54,10 @@
 #include "libIARM.h"
 #include "libIBus.h"
 
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
 
 dsError_t dsCompositeInInit (void)
 {

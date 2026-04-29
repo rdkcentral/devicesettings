@@ -96,6 +96,12 @@ void _dsCompositeInSignalChangeCB(dsCompositeInPort_t port, dsCompInSignalStatus
 void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus);
 void _dsCompositeInVideoModeUpdateCB(dsCompositeInPort_t port, dsVideoPortResolution_t videoResolution);
 
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
+
 #include <iostream>
 #include "hostPersistence.hpp"
 #include <sstream>

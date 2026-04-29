@@ -76,6 +76,11 @@ static dsSleepMode_t stringToEnum ( string mode );
 #define DSHAL_API_VERSION_MINOR_DEFAULT     0
 
 
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
 IARM_Result_t dsHostMgr_init()
 {
   

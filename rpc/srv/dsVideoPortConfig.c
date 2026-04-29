@@ -32,8 +32,9 @@
 #include "dsTypes.h"
 #include "dsError.h"
 #include "dsVideoPortSettings.h"
-#include "dsVideoResolutionSettings.h"
+#include "../../stubs/dsVideoResolutionSettings.h"
 #include "dsVideoPortConfig.h"
+#include "../../stubs/dsAudioSettings.h"
 
 #ifdef __cplusplus
 extern "C" {

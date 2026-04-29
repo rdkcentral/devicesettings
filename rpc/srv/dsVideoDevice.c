@@ -60,6 +60,11 @@ static bool force_disable_hdr = true;
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
 
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
 IARM_Result_t _dsVideoDeviceInit(void *arg);
 IARM_Result_t _dsGetVideoDevice(void *arg);
 IARM_Result_t _dsSetDFC(void *arg);

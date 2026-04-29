@@ -68,6 +68,12 @@ static bool m_AudioPortEnabled[dsAUDIOPORT_TYPE_MAX] = {false};
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t audioLevelMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t      audioLevelTimerCV = PTHREAD_COND_INITIALIZER;
+
+#ifndef RDK_DSHAL_NAME
+#warning   "RDK_DSHAL_NAME is not defined"
+#define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
+#endif
+
 #ifdef IGNORE_EDID_LOGIC
 int _srv_AudioHDMIAuto = 1;
 int _srv_AudioSPDIFAuto = 1;

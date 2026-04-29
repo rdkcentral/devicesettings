@@ -32,7 +32,7 @@
 #include "dsTypes.h"
 #include "dsError.h"
 #include "dsAudioConfig.h"
-#include "dsAudioSettings.h"
+#include "../../stubs/dsAudioSettings.h"
 
 
 #ifdef __cplusplus
