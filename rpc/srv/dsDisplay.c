@@ -543,7 +543,7 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
 
         case dsDISPLAY_RXSENSE_OFF:
             INT_INFO("Rx Sense Status OFF !!!!!!!! ..\r\n");
-            TELEMETRY_EVENT_STRING("HDMI_INFO_tv_off", "Rx Sense Status OFF");
+            TELEMETRY_EVENT_STRING("HDMI_INFO_tv_off_split", "Rx Sense Status OFF");
             _eventData.data.hdmi_rxsense.status =  dsDISPLAY_RXSENSE_OFF ;
             _eventId = IARM_BUS_DSMGR_EVENT_RX_SENSE;
             break;    
