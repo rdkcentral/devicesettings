@@ -2086,7 +2086,7 @@ void AudioConfigInit()
                 {
                     char telemetryValue[128] = {0};
                     snprintf(telemetryValue, sizeof(telemetryValue), "dsSetStereoMode The HDMI ARC Port Audio Settings Mode is %d", _srv_HDMI_ARC_Audiomode);
-                    TELEMETRY_EVENT_STRING("SYS_INFO_PASSTHRUENABLED_split", telemetryValue);
+                    TELEMETRY_EVENT("SYS_INFO_PASSTHRUENABLED", 1);                    
                 }
            }
       }
@@ -2751,7 +2751,8 @@ IARM_Result_t _dsSetStereoMode(void *arg)
                 if(param->toPersist){
                     char telemetryValue[128] = {0};
                     snprintf(telemetryValue, sizeof(telemetryValue), "The HDMI Audio Mode Setting From Persistent is %d", param->toPersist);
-                    TELEMETRY_EVENT_STRING("SYS_INFO_Userpassthruenable_split", telemetryValue);
+                    // TELEMETRY_EVENT_STRING("SYS_INFO_Userpassthruenable_split", telemetryValue);
+                    TELEMETRY_EVENT_INT("SYS_INFO_Userpassthruenable", 1);
                 }
                 
 
