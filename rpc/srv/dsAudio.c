@@ -2086,7 +2086,7 @@ void AudioConfigInit()
                 {
                     char telemetryValue[128] = {0};
                     snprintf(telemetryValue, sizeof(telemetryValue), "dsSetStereoMode The HDMI ARC Port Audio Settings Mode is %d", _srv_HDMI_ARC_Audiomode);
-                    TELEMETRY_EVENT("SYS_INFO_PASSTHRUENABLED", 1);                    
+                    TELEMETRY_EVENT_INT("SYS_INFO_PASSTHRUENABLED", 1);                    
                 }
            }
       }
