@@ -2329,6 +2329,7 @@ bool isComponentPortPresent()
 IARM_Result_t _dsGetIgnoreEDIDStatus(void* arg)
 {
     dsEdidIgnoreParam_t *param = (dsEdidIgnoreParam_t*) arg;
+    dsError_t ret = dsERR_GENERAL;
     _DEBUG_ENTER();
     IARM_BUS_Lock(lock);
     //Default status is false
@@ -2351,8 +2352,12 @@ IARM_Result_t _dsGetIgnoreEDIDStatus(void* arg)
         }
     }
 
-    if (func != NULL) {
-          func(param->handle, &param->ignoreEDID);
+        if (func != NULL) {
+            ret = func(param->handle, &param->ignoreEDID);
+            if (ret != dsERR_NONE) {
+              INT_INFO("dsSRV: dsGetIgnoreEDIDStatus failed with err:%d, falling back ignoreEDID to true\r\n", ret);
+              param->ignoreEDID = true;
+            }
     }
     INT_INFO("dsSRV: _dsGetIgnoreEDIDStatus status: %d\r\n", param->ignoreEDID);
 
