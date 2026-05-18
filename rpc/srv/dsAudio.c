@@ -314,6 +314,26 @@ void AudioConfigInit()
                         INT_INFO("Port %s: Initialized audio gain : %f\n","HDMI0", m_audioGain);
                     }
                 }
+//SPDIF init
+                handle = 0;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                    try {
+                        _AudioGain = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Gain");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Gain not found in persistence store. Try system default\n");
+                                _AudioGain = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Gain");
+                            }
+                            catch(...) {
+                                _AudioGain = "0";
+                            }
+                    }
+                    m_audioGain = atof(_AudioGain.c_str());
+                    if (dsSetAudioGainFunc(handle, m_audioGain) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio gain : %f\n","SPDIF0", m_audioGain);
+                    }
+                }
 
             }
             else {
@@ -430,6 +450,98 @@ void AudioConfigInit()
         }
     }
 
+    /* Restore mute state for all audio ports from persistence.
+     * dsSetAudioLevel restores volume/gain but does NOT restore mute — without
+     * this block the HAL starts UNMUTED on dsmgr restart even when the user had
+     * muted before the crash, creating a ~7-second audio-bleed window until
+     * WPEFramework's setEnableAudioPort() re-applies mute via _dsIsAudioMute.
+     */
+    typedef dsError_t (*dsSetAudioMute_t)(intptr_t handle, bool mute);
+    static dsSetAudioMute_t dsSetAudioMuteFunc = 0;
+    if (dsSetAudioMuteFunc == 0) {
+        dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            dsSetAudioMuteFunc = (dsSetAudioMute_t) dlsym(dllib, "dsSetAudioMute");
+            if (dsSetAudioMuteFunc) {
+                INT_DEBUG("dsSetAudioMute_t(intptr_t, bool) is defined and loaded\r\n");
+                std::string _AudioMute("FALSE");
+                bool m_audioMute = false;
+//SPDIF init
+                handle = 0;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","SPDIF0", _AudioMute.c_str());
+                    }
+                }
+//SPEAKER init
+                handle = 0;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","SPEAKER0", _AudioMute.c_str());
+                    }
+                }
+//HEADPHONE init
+                handle = 0;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE,0,&handle) == dsERR_NONE) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","HEADPHONE0", _AudioMute.c_str());
+                    }
+                }
+//HDMI init
+                handle = 0;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("HDMI0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","HDMI0", _AudioMute.c_str());
+                    }
+                }
+//HDMI ARC init
+                handle = 0;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI_ARC,0,&handle) == dsERR_NONE) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","HDMI_ARC0", _AudioMute.c_str());
+                    }
+                }
+            }
+            else {
+                INT_INFO("dsSetAudioMute_t(intptr_t, bool) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+
 
     typedef dsError_t (*dsSetAudioDelay_t)(intptr_t handle, uint32_t audioDelayMs);
     static dsSetAudioDelay_t dsSetAudioDelayFunc = 0;
@@ -499,6 +611,26 @@ void AudioConfigInit()
                     m_audioDelay = atoi(_AudioDelay.c_str());
                     if (dsSetAudioDelayFunc(handle, m_audioDelay) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio delay : %d\n","HDMI_ARC0", m_audioDelay);
+                    }
+                }
+//SPDIF init
+                handle = 0;
+                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                    try {
+                        _AudioDelay = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Delay");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Delay not found in persistence store. Try system default\n");
+                                _AudioDelay = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Delay");
+                            }
+                            catch(...) {
+                                _AudioDelay = "0";
+                            }
+                    }
+                    m_audioDelay = atoi(_AudioDelay.c_str());
+                    if (dsSetAudioDelayFunc(handle, m_audioDelay) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio delay : %d\n","SPDIF0", m_audioDelay);
                     }
                 }
 
@@ -2093,6 +2225,41 @@ void AudioConfigInit()
    }  
  }
 
+    /* Restore audio port enable state from HostPersistence.
+     * Without this, all ports default to DISABLED after dsmgr restart until
+     * Thunder/DisplaySettings re-enables them via dsEnableAudioPort().
+     * Restoring HDMI_ARC0 here also re-establishes the eARC/ARC session,
+     * allowing getSinkDeviceAtmosCapability() to return the correct AVR
+     * Atmos capability value instead of 0. */
+    {
+        struct { dsAudioPortType_t type; int idx; const char *name; } _aPortRestore[] = {
+            { dsAUDIOPORT_TYPE_HDMI_ARC,  0, "HDMI_ARC0"  },
+            { dsAUDIOPORT_TYPE_SPDIF,     0, "SPDIF0"     },
+            { dsAUDIOPORT_TYPE_SPEAKER,   0, "SPEAKER0"   },
+            { dsAUDIOPORT_TYPE_HEADPHONE, 0, "HEADPHONE0" },
+        };
+        for (size_t _i = 0; _i < sizeof(_aPortRestore)/sizeof(_aPortRestore[0]); _i++) {
+            intptr_t _h = 0;
+            if (dsGetAudioPort(_aPortRestore[_i].type, _aPortRestore[_i].idx, &_h) != dsERR_NONE || _h == 0) {
+                INT_INFO("AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
+                continue;
+            }
+            std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
+            std::string _enableVal = "TRUE"; /* default: enabled */
+            try {
+                _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
+            } catch(...) { _enableVal = "TRUE"; }
+            bool _enable = (_enableVal == "TRUE");
+            if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
+                INT_INFO("AudioConfigInit: Restored %s isEnabled=%s\n",
+                         _aPortRestore[_i].name, _enableVal.c_str());
+            } else {
+                INT_ERROR("AudioConfigInit: Failed to restore %s isEnabled=%s\n",
+                          _aPortRestore[_i].name, _enableVal.c_str());
+            }
+        }
+    }
+
 #endif //DS_AUDIO_SETTINGS_PERSISTENCE
 }
 
@@ -2280,6 +2447,29 @@ IARM_Result_t dsAudioMgr_init()
         else 
         {
 			_srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
+        }
+        /* Restore SPDIF0 stereo mode to SOC HAL so that dsGetStereoMode()
+         * returns the persisted value.  Without this call, audioModeSPDIF
+         * in the SOC HAL stays at its reset default (STEREO/UNKNOWN) after
+         * a dsmgr restart, causing _dsGetEncoding() to derive PCM instead
+         * of the correct DISPLAY/PASSTHRU encoding. */
+        {
+            intptr_t spdif_handle = 0;
+            if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF, 0, &spdif_handle) == dsERR_NONE && spdif_handle != 0)
+            {
+                if (dsSetStereoMode(spdif_handle, _srv_SPDIF_Audiomode) == dsERR_NONE)
+                {
+                    INT_INFO("dsSetStereoMode SPDIF0: restored HAL audioModeSPDIF to %d\r\n", _srv_SPDIF_Audiomode);
+                }
+                else
+                {
+                    INT_ERROR("dsSetStereoMode SPDIF0: failed to restore HAL audioModeSPDIF to %d\r\n", _srv_SPDIF_Audiomode);
+                }
+            }
+            else
+            {
+                INT_ERROR("dsSetStereoMode SPDIF0: dsGetAudioPort failed, cannot restore HAL audioModeSPDIF\r\n");
+            }
         }
         /* Get the AudioModesettings for HDMI_ARC from Persistence */
         std::string _ARCModeSettings("STEREO");
@@ -3764,9 +3954,27 @@ IARM_Result_t _dsGetEncoding(void *arg)
     if (s_param != NULL && NULL != s_param->handle)
     {
         dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
-        ret = dsGetStereoMode(s_param->handle, &stereoMode);
-        if(ret == dsERR_NONE) {
+        dsAudioPortType_t _APortType = _GetAudioPortType(s_param->handle);
+        if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
+        {
+            /* For SPDIF, derive encoding from the persistence-backed server
+             * variable _srv_SPDIF_Audiomode instead of the SOC HAL.
+             * dsGetStereoMode() reads audioModeSPDIF (SOC static var) which
+             * is reset to STEREO/UNKNOWN on every HAL restart and is only
+             * restored if dsSetStereoMode() succeeds during init.  Using
+             * _srv_SPDIF_Audiomode is consistent with how _dsGetStereoMode()
+             * reports the SPDIF mode and guarantees correct encoding even if
+             * the init-time dsSetStereoMode() HAL call failed. */
+            stereoMode = _srv_SPDIF_Audiomode;
             result = IARM_RESULT_SUCCESS;
+            INT_DEBUG("_dsGetEncoding SPDIF0: using _srv_SPDIF_Audiomode=%d\r\n", stereoMode);
+        }
+        else
+        {
+            ret = dsGetStereoMode(s_param->handle, &stereoMode);
+            if(ret == dsERR_NONE) {
+                result = IARM_RESULT_SUCCESS;
+            }
         }
         s_param->mode = stereoMode;
    }
