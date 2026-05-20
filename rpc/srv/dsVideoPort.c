@@ -76,7 +76,6 @@ static dsHdcpStatus_t _hdcpStatus = dsHDCP_STATUS_UNAUTHENTICATED;
 static bool force_disable_4K = false;
 static const dsDisplayColorDepth_t DEFAULT_COLOR_DEPTH = dsDISPLAY_COLORDEPTH_AUTO;
 static dsDisplayColorDepth_t hdmiColorDept = DEFAULT_COLOR_DEPTH;
-static profile_t profileType = PROFILE_INVALID;
 
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
@@ -148,9 +147,9 @@ static intptr_t dsGetDefaultPortHandle();
 static std::string getHdmiConnectionName(const int key);
 static std::string getHdcpStatusName(const int key);
 static std::string getHdcpVersionName(const int key);
-static void _enableHDCP();
+static void _enableHDCP(intptr_t handle);
 
-static void _enableHDCP()
+static void _enableHDCP(intptr_t handle)
 {
 	INT_INFO("Enter function \n");
 	errno_t rc = EOK;
@@ -164,7 +163,7 @@ static void _enableHDCP()
 	if(rc == EOK)
 	{
 		INT_INFO("Setting HDCP true \n");
-		hdcpParam.handle = getVideoPortHandle(dsVIDEOPORT_TYPE_HDMI);
+		hdcpParam.handle = handle;
 		hdcpParam.contentProtect = true;
 		hdcpParam.rpcResult = dsERR_NONE;
 
@@ -372,6 +371,11 @@ IARM_Result_t _dsVideoPortInit(void *arg)
             INT_DEBUG("%s: _dsVideoFormatUpdateRegisterCB eRet:%04x", __FUNCTION__, eRet);
         }
         m_isInitialized = 1;
+        
+		if(PROFILE_STB == profileType)
+		{
+    		_enableHDCP(handle);
+		}
     }
 
     if (!m_isPlatInitialized) {
@@ -379,14 +383,6 @@ IARM_Result_t _dsVideoPortInit(void *arg)
         dsVideoPortInit();
         VideoConfigInit();
     }
-
-    if (PROFILE_INVALID == profileType){
-        profileType = searchRdkProfile();
-    }
-	if(PROFILE_STB == profileType)
-	{
-    	_enableHDCP();
-	}
 
     m_isPlatInitialized++;
 
