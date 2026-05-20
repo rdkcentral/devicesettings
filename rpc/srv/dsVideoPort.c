@@ -337,7 +337,8 @@ IARM_Result_t _dsVideoPortInit(void *arg)
             dsEnableHDCPParam_t hdcpParam;
             dsError_t ret = dsERR_NONE;
 
-            if (memset_s(&hdcpParam, sizeof(hdcpParam), 0, sizeof(hdcpParam)) != EOK) 
+            errno_t rc = memset_s(&hdcpParam, sizeof(hdcpParam), 0, sizeof(hdcpParam));
+            if (rc != EOK)
             {
                 INT_ERROR("Failed to reset HDCP Param: error code:%d\n", rc);
             }
