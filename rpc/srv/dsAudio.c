@@ -2749,9 +2749,6 @@ IARM_Result_t _dsSetStereoMode(void *arg)
             {
                 INT_INFO("Setting Audio Mode PASSTHRU with persistent value %d \r\n",param->toPersist);
                 if(param->toPersist){
-                    char telemetryValue[128] = {0};
-                    snprintf(telemetryValue, sizeof(telemetryValue), "The HDMI Audio Mode Setting From Persistent is %d", param->toPersist);
-                    // TELEMETRY_EVENT_STRING("SYS_INFO_Userpassthruenable_split", telemetryValue);
                     TELEMETRY_EVENT_INT("SYS_INFO_Userpassthruenable", 1);
                 }
                 
