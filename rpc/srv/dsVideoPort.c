@@ -323,6 +323,28 @@ IARM_Result_t _dsVideoPortInit(void *arg)
             INT_DEBUG("%s: _dsVideoFormatUpdateRegisterCB eRet:%04x", __FUNCTION__, eRet);
         }
         m_isInitialized = 1;
+        
+		if(PROFILE_STB == profileType)
+		{
+            dsEnableHDCPParam_t hdcpParam;
+            dsError_t ret = dsERR_NONE;
+
+            errno_t rc = memset_s(&hdcpParam, sizeof(hdcpParam), 0, sizeof(hdcpParam));
+            if (rc != EOK)
+            {
+                INT_ERROR("Failed to reset HDCP Param: error code:%d\n", rc);
+            }
+
+            ret = dsEnableHDCP(handle, true, hdcpParam.hdcpKey, hdcpParam.keySize);
+            if (dsERR_NONE != ret) 
+            {
+                INT_ERROR("Failed to enable HDCP: error code:%d\n", ret);
+            }
+            else
+            {
+                INT_INFO("Setting HDCP done \n");
+            }
+		}
     }
 
     if (!m_isPlatInitialized) {
