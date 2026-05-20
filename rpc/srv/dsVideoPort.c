@@ -76,7 +76,6 @@ static dsHdcpStatus_t _hdcpStatus = dsHDCP_STATUS_UNAUTHENTICATED;
 static bool force_disable_4K = false;
 static const dsDisplayColorDepth_t DEFAULT_COLOR_DEPTH = dsDISPLAY_COLORDEPTH_AUTO;
 static dsDisplayColorDepth_t hdmiColorDept = DEFAULT_COLOR_DEPTH;
-
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&dsLock)
@@ -147,45 +146,6 @@ static intptr_t dsGetDefaultPortHandle();
 static std::string getHdmiConnectionName(const int key);
 static std::string getHdcpStatusName(const int key);
 static std::string getHdcpVersionName(const int key);
-static void _enableHDCP(intptr_t handle);
-
-static void _enableHDCP(intptr_t handle)
-{
-	INT_INFO("Enter function \n");
-	errno_t rc = EOK;
-	dsEnableHDCPParam_t hdcpParam;
-
-	rc = memset_s(&hdcpParam, sizeof(hdcpParam), 0, sizeof(hdcpParam));
-	if (rc != EOK) {
-		INT_ERROR("Failed to reset HDCP Param: error code:%d\n", rc);
-	}
-	
-	if(rc == EOK)
-	{
-		INT_INFO("Setting HDCP true \n");
-		hdcpParam.handle = handle;
-		hdcpParam.contentProtect = true;
-		hdcpParam.rpcResult = dsERR_NONE;
-
-		if(_dsEnableHDCP(&hdcpParam) != IARM_RESULT_SUCCESS)
-		{
-			INT_ERROR("Failed to enable HDCP \r\n");
-		}
-		else
-		{
-			if(hdcpParam.rpcResult != dsERR_NONE)
-			{
-				INT_ERROR("Failed to enable HDCP with error code %d \r\n", hdcpParam.rpcResult);
-			}
-			else
-			{
-				INT_INFO("Setting HDCP done \n");
-			}
-		}
-	}
-   
-    INT_INFO("Exit function \n");
-}
 
 void VideoConfigInit()
 {
@@ -374,7 +334,22 @@ IARM_Result_t _dsVideoPortInit(void *arg)
         
 		if(PROFILE_STB == profileType)
 		{
-    		_enableHDCP(handle);
+            dsEnableHDCPParam_t hdcpParam;
+            dsError_t ret = dsERR_NONE;
+	        rc = memset_s(&hdcpParam, sizeof(hdcpParam), 0, sizeof(hdcpParam));
+            if (rc != EOK) {
+                INT_ERROR("Failed to reset HDCP Param: error code:%d\n", rc);
+            }
+
+            ret = dsEnableHDCP(handle, true, hdcpParam.hdcpKey, hdcpParam.keySize);
+            if (dsERR_NONE != ret) 
+            {
+                INT_ERROR("Failed to enable HDCP: error code:%d\n", ret);
+            }
+            else
+            {
+                INT_INFO("Setting HDCP done \n");
+            }
 		}
     }
 
@@ -383,7 +358,6 @@ IARM_Result_t _dsVideoPortInit(void *arg)
         dsVideoPortInit();
         VideoConfigInit();
     }
-
     m_isPlatInitialized++;
 
     IARM_BUS_Unlock(lock);
