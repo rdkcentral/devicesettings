@@ -77,6 +77,17 @@ rm -rf telemetry
 git clone https://github.com/rdkcentral/telemetry.git
 export TELEMETRY_PATH=$ROOT/telemetry
 
+cd $ROOT
+rm -rf entservices-testframework
+git clone --branch 1.0.1 https://github.com/rdkcentral/entservices-testframework.git
+
+# Provide telemetry compatibility header used by devicesettings coverage build.
+mkdir -p $ROOT/entservices-testframework/Tests/headers
+cat << 'EOF' > $ROOT/entservices-testframework/Tests/headers/telemetry_busmessage_sender.h
+#pragma once
+#include "../mocks/Telemetry.h"
+EOF
+
 cd $WORKDIR
 patch -p1 < "$WORKDIR/patches/dsDisplay.patch"
 
