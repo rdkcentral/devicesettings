@@ -73,11 +73,6 @@ git clone --branch 6.0.0 --depth 1 https://github.com/rdkcentral/rdk-halif-devic
 export DS_IF_PATH=$ROOT/rdk-halif-device_settings
 
 cd $ROOT
-rm -rf telemetry
-git clone https://github.com/rdkcentral/telemetry.git
-export TELEMETRY_PATH=$ROOT/telemetry
-
-cd $ROOT
 rm -rf entservices-testframework
 git clone --branch 1.0.1 https://github.com/rdkcentral/entservices-testframework.git
 
