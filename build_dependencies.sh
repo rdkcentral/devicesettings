@@ -72,6 +72,11 @@ rm -rf rdk-halif-device_settings
 git clone --branch 6.0.0 --depth 1 https://github.com/rdkcentral/rdk-halif-device_settings.git
 export DS_IF_PATH=$ROOT/rdk-halif-device_settings
 
+cd $ROOT
+rm -rf telemetry
+git clone https://github.com/rdkcentral/telemetry.git
+export TELEMETRY_PATH=$ROOT/telemetry
+
 cd $WORKDIR
 patch -p1 < "$WORKDIR/patches/dsDisplay.patch"
 
