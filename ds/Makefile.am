@@ -63,3 +63,5 @@ libds_la_SOURCES = aspectRatio.cpp \
                    host.cpp \
                    manager.cpp \
                    videoDFC.cpp
+
+libds_la_LIBADD = ../rpc/cli/libdshalcli.la

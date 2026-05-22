@@ -59,8 +59,8 @@ all: install
 
 library: $(OBJS)
 	@echo "Building $(LIBNAMEFULL) ...."
-	$(CXX) $(OBJS) $(CFLAGS) $(DSHAL_LDFLAGS) -L$(INSTALL)/lib -lIARMBus -ldshalcli -shared -o $(LIBNAMEFULL)
-	$(CXX) $(OBJS) $(CFLAGS) -L$(INSTALL)/lib -lIARMBus -ldshalcli -shared -o $(LIBNAMECLI)
+	$(CXX) $(OBJS) $(CFLAGS) $(DSHAL_LDFLAGS) -L$(INSTALL)/lib -lIARMBus -Wl,--no-as-needed -ldshalcli -Wl,--as-needed -shared -o $(LIBNAMEFULL)
+	$(CXX) $(OBJS) $(CFLAGS) -L$(INSTALL)/lib -lIARMBus -Wl,--no-as-needed -ldshalcli -Wl,--as-needed -shared -o $(LIBNAMECLI)
 
 %.o: %.cpp
 	@echo "Building $@ ...."

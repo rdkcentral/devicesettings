@@ -45,12 +45,13 @@ CFLAGS      +=   -g -fPIC -D_REENTRANT -Wall $(INCLUDE)
 
 .PHONY: $(OUTPUT)
 
-BINARIES    := $(patsubst %.cpp,%,$(wildcard *.cpp))
+# Exclude DSCliLibStandaloneApp.cpp from the automatic build pattern
+BINARIES    := $(patsubst %.cpp,%,$(filter-out DSCliLibStandaloneApp.cpp,$(wildcard *.cpp)))
 UNINSTALL   := $(patsubst %,$(PWD)/install/bin/%, $(BINARIES))
 
 #all: $(BINARIES)  install
-all: $(BINARIES)
-	@echo "Build Finished...."
+all: $(BINARIES) dsapp
+	@echo "Build Finished and Installed (including DSApp) ..."
 
 #frontPanelTest:
 $(BINARIES):
@@ -58,9 +59,22 @@ $(BINARIES):
 	$(CXX) $(CFLAGS) $@.cpp -o $@ $(LDFLAGS)
 #	@cp -f $@ $(INSTALL)/bin
 
-install:
+install: $(BINARIES) dsapp
+	@echo "INSTALL=$(INSTALL)"
+	@echo "DSApp install path: $(INSTALL)/bin/DSApp"
+	@mkdir -p $(INSTALL)/bin
 	@echo "Copying the binaries to bin install folder..."
-	@cp $(BINARIES) $(INSTALL)/bin
+	@if [ -n "$(BINARIES)" ]; then \
+		@cp $(BINARIES) $(INSTALL)/bin
+	else \
+		echo "No sample BINARIES to install"; \
+	fi
+	@if [ -f ../DSApp ]; then \
+		echo "Installing DSApp to $(INSTALL)/bin/..."; \
+		cp ../DSApp $(INSTALL)/bin/; \
+	else \
+		echo "DSApp not found at ../DSApp (skipping)"; \
+	fi
 
 uninstall:
 	@echo "Removing bin from install folder..."
@@ -69,6 +83,23 @@ uninstall:
 clean:
 	@echo "Cleaning the directory..."
 	@$(RM) $(BINARIES)
+	@$(RM) DSApp
+
+# DSApp - Device Settings Test Application
+.PHONY: dsapp dsapp-clean
+
+dsapp:
+	@if [ -f DSCliLibStandaloneApp.cpp ]; then \
+		echo "Building DSApp..."; \
+		$(CXX) $(CFLAGS) -std=c++11 DSCliLibStandaloneApp.cpp -o ../DSApp -L$(INSTALL)/lib -lds -Wl,--no-as-needed -ldshalcli -Wl,--as-needed -lcurl -lpthread $(LDFLAGS); \
+		echo "DSApp built successfully at devicesettings/DSApp"; \
+	else \
+		echo "DSCliLibStandaloneApp.cpp not found, skipping DSApp build"; \
+	fi
+
+dsapp-clean:
+	@echo "Cleaning DSApp..."
+	@$(RM) ../DSApp
 
 
 

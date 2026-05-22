@@ -50,6 +50,19 @@ PKG_CHECK_MODULES([DBUS], [dbus-1])
 
 AC_CHECK_LIB(gthread-2.0, g_thread_init)
 
+# Thunder COM-RPC plugin support
+AC_ARG_ENABLE([thunder-plugin],
+    AS_HELP_STRING([--enable-thunder-plugin], [Enable Thunder COM-RPC plugin support (default: no)]),
+    [enable_thunder_plugin=$enableval],
+    [enable_thunder_plugin=no])
+
+AM_CONDITIONAL([USE_WPE_THUNDER_PLUGIN], [test "x$enable_thunder_plugin" = "xyes"])
+
+AS_IF([test "x$enable_thunder_plugin" = "xyes"],
+    [AC_DEFINE([USE_WPE_THUNDER_PLUGIN], [1], [Define to 1 to enable Thunder COM-RPC plugin support])
+     AC_MSG_NOTICE([Thunder COM-RPC plugin support enabled])],
+    [AC_MSG_NOTICE([Thunder COM-RPC plugin support disabled])])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
