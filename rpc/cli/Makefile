@@ -21,8 +21,20 @@ CFLAGS      += -g -fPIC -D_REENTRANT -Wall
 LIBNAME     := dshalcli
 LIBNAMEFULL := lib$(LIBNAME).so
 INSTALL     := $(PWD)/install
-OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
-OBJS        += $(patsubst %.c,%.o,$(wildcard *.c))
+
+# Conditional compilation: Thunder vs IARM
+ifdef USE_WPE_THUNDER_PLUGIN
+    # Thunder mode - use dsFPD-com.cpp, exclude dsFPD.c
+    OBJS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+    OBJS += $(patsubst %.c,%.o,$(filter-out dsFPD.c,$(wildcard *.c)))
+else
+    # IARM mode - use dsFPD.c, exclude dsFPD-com.cpp
+    OBJS := $(patsubst %.cpp,%.o,$(filter-out dsFPD-com.cpp,$(wildcard *.cpp)))
+    OBJS += $(patsubst %.c,%.o,$(wildcard *.c))
+endif
+
+#OBJS        := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+#OBJS        += $(patsubst %.c,%.o,$(wildcard *.c))
 INCLUDE     := -I$(PWD)                         \
                -I$(PWD)/hal/include             \
                -I$(PWD)/rpc/include             
@@ -31,13 +43,19 @@ INCLUDE      += $(HAL_INCLUDE)
 
 CFLAGS      += $(INCLUDE)
 
+# Conditional linking flags
+ifdef USE_WPE_THUNDER_PLUGIN
+    LDLIBS := -lWPEFrameworkCore -lWPEFrameworkCOM
+else
+    LDLIBS := -lIARMBus
+endif
 
 all: install
 	@echo "Build Finished...."
 
 library: $(OBJS)
 	@echo "Building $(LIBNAMEFULL) ...."
-	$(CXX) $(OBJS) $(CFLAGS) -lIARMBus -shared -o $(LIBNAMEFULL)
+	$(CXX) $(OBJS) $(CFLAGS) $(LDLIBS) -shared -o $(LIBNAMEFULL)
 
 %.o: %.cpp
 	@echo "Building $@ ...."
