@@ -3955,19 +3955,23 @@ IARM_Result_t _dsGetEncoding(void *arg)
     {
         dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
         dsAudioPortType_t _APortType = _GetAudioPortType(s_param->handle);
-        if (_APortType == dsAUDIOPORT_TYPE_SPDIF)
+        if (_APortType == dsAUDIOPORT_TYPE_SPDIF && !_srv_AudioSPDIFAuto)
         {
-            /* For SPDIF, derive encoding from the persistence-backed server
-             * variable _srv_SPDIF_Audiomode instead of the SOC HAL.
-             * dsGetStereoMode() reads audioModeSPDIF (SOC static var) which
-             * is reset to STEREO/UNKNOWN on every HAL restart and is only
-             * restored if dsSetStereoMode() succeeds during init.  Using
+            /* For SPDIF in MANUAL mode, derive encoding from the persistence-
+             * backed server variable _srv_SPDIF_Audiomode instead of the SOC
+             * HAL.  dsGetStereoMode() reads audioModeSPDIF (SOC static var)
+             * which is reset to STEREO/UNKNOWN on every HAL restart and is
+             * only restored if dsSetStereoMode() succeeds during init.  Using
              * _srv_SPDIF_Audiomode is consistent with how _dsGetStereoMode()
              * reports the SPDIF mode and guarantees correct encoding even if
-             * the init-time dsSetStereoMode() HAL call failed. */
+             * the init-time dsSetStereoMode() HAL call failed.
+             * NOTE: In AUTO mode (_srv_AudioSPDIFAuto=1) we fall through to
+             * the HAL call below so that the live negotiated mode is used —
+             * _srv_SPDIF_Audiomode holds the base/manual mode (e.g. STEREO)
+             * which does not reflect the current auto-negotiated mode. */
             stereoMode = _srv_SPDIF_Audiomode;
             result = IARM_RESULT_SUCCESS;
-            INT_DEBUG("_dsGetEncoding SPDIF0: using _srv_SPDIF_Audiomode=%d\r\n", stereoMode);
+            INT_INFO("[gsk] _dsGetEncoding SPDIF0 manual: using _srv_SPDIF_Audiomode=%d\r\n", stereoMode);
         }
         else
         {
