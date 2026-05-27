@@ -2245,16 +2245,24 @@ void AudioConfigInit()
                 continue;
             }
             std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
-            std::string _enableVal = "TRUE"; /* default: enabled */
+            std::string _enableVal = "NOT_FOUND"; /* sentinel: key absent = first boot */
             try {
                 _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
-            } catch(...) { _enableVal = "TRUE"; }
+            } catch(...) { _enableVal = "NOT_FOUND"; }
+            /* Skip on first boot — key only exists after a prior session wrote it
+             * via _dsSetEnablePersist(). On restart the key is present and we
+             * restore the last-known enable state into the HAL. */
+            if (_enableVal == "NOT_FOUND") {
+                INT_INFO("[gsk] AudioConfigInit: %s isEnabled key absent (first boot), skip restore\n",
+                         _aPortRestore[_i].name);
+                continue;
+            }
             bool _enable = (_enableVal == "TRUE");
             if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
-                INT_INFO("AudioConfigInit: Restored %s isEnabled=%s\n",
+                INT_INFO("[gsk] AudioConfigInit: Restored %s isEnabled=%s\n",
                          _aPortRestore[_i].name, _enableVal.c_str());
             } else {
-                INT_ERROR("AudioConfigInit: Failed to restore %s isEnabled=%s\n",
+                INT_ERROR("[gsk] AudioConfigInit: Failed to restore %s isEnabled=%s\n",
                           _aPortRestore[_i].name, _enableVal.c_str());
             }
         }
