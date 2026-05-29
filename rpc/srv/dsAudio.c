@@ -2231,7 +2231,7 @@ void AudioConfigInit()
      * Restoring HDMI_ARC0 here also re-establishes the eARC/ARC session,
      * allowing getSinkDeviceAtmosCapability() to return the correct AVR
      * Atmos capability value instead of 0. */
-    {
+    { //GSK
         struct { dsAudioPortType_t type; int idx; const char *name; } _aPortRestore[] = {
             { dsAUDIOPORT_TYPE_HDMI_ARC,  0, "HDMI_ARC0"  },
             { dsAUDIOPORT_TYPE_SPDIF,     0, "SPDIF0"     },
@@ -2241,22 +2241,14 @@ void AudioConfigInit()
         for (size_t _i = 0; _i < sizeof(_aPortRestore)/sizeof(_aPortRestore[0]); _i++) {
             intptr_t _h = 0;
             if (dsGetAudioPort(_aPortRestore[_i].type, _aPortRestore[_i].idx, &_h) != dsERR_NONE || _h == 0) {
-                INT_INFO("AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
+                INT_INFO("[gsk] AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
                 continue;
             }
             std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
-            std::string _enableVal = "NOT_FOUND"; /* sentinel: key absent = first boot */
+            std::string _enableVal = "TRUE"; /* default: enabled */
             try {
                 _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
-            } catch(...) { _enableVal = "NOT_FOUND"; }
-            /* Skip on first boot — key only exists after a prior session wrote it
-             * via _dsSetEnablePersist(). On restart the key is present and we
-             * restore the last-known enable state into the HAL. */
-            if (_enableVal == "NOT_FOUND") {
-                INT_INFO("[gsk] AudioConfigInit: %s isEnabled key absent (first boot), skip restore\n",
-                         _aPortRestore[_i].name);
-                continue;
-            }
+            } catch(...) { _enableVal = "TRUE"; }
             bool _enable = (_enableVal == "TRUE");
             if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
                 INT_INFO("[gsk] AudioConfigInit: Restored %s isEnabled=%s\n",
@@ -2264,6 +2256,59 @@ void AudioConfigInit()
             } else {
                 INT_ERROR("[gsk] AudioConfigInit: Failed to restore %s isEnabled=%s\n",
                           _aPortRestore[_i].name, _enableVal.c_str());
+            }
+
+            /* [gsk] Restore stereo auto + stereo mode for this port from persistence.
+             * After dsmgr restart the SOC HAL static vars (autoMode, audioMode) reset
+             * to their defaults.  We must push the persisted values back to the HAL so
+             * that dsGetStereoMode() / dsGetEncoding() return the correct values before
+             * Thunder re-applies them. */
+            std::string _audioModeKey  = std::string(_aPortRestore[_i].name) + ".AudioMode";
+            std::string _audioAutoKey  = std::string(_aPortRestore[_i].name) + ".AudioMode.AUTO";
+            std::string _audioModeVal  = "STEREO";  /* default mode  */
+            std::string _audioAutoVal  = "FALSE";   /* default: manual */
+            try {
+                _audioModeVal = device::HostPersistence::getInstance().getProperty(_audioModeKey);
+            } catch(...) { /* key absent — keep default */ }
+            try {
+                _audioAutoVal = device::HostPersistence::getInstance().getProperty(_audioAutoKey);
+            } catch(...) { /* key absent — keep default */ }
+
+            INT_INFO("[gsk] AudioConfigInit: %s AudioMode=%s AUTO=%s\n",
+                     _aPortRestore[_i].name, _audioModeVal.c_str(), _audioAutoVal.c_str());
+
+            if (_audioAutoVal == "TRUE") {
+                /* AUTO mode: set autoMode=true in HAL; no explicit setStereoMode needed */
+                if (dsSetStereoAuto(_h, 1) == dsERR_NONE) {
+                    INT_INFO("[gsk] AudioConfigInit: %s → dsSetStereoAuto(true)\n",
+                             _aPortRestore[_i].name);
+                } else {
+                    INT_ERROR("[gsk] AudioConfigInit: %s → dsSetStereoAuto(true) failed\n",
+                              _aPortRestore[_i].name);
+                }
+            } else {
+                /* MANUAL mode: force autoMode=false, then push the persisted mode enum */
+                dsAudioStereoMode_t _stereoMode = dsAUDIO_STEREO_STEREO; /* safe default */
+                if      (_audioModeVal == "PASSTHRU")        _stereoMode = dsAUDIO_STEREO_PASSTHRU;
+                else if (_audioModeVal == "SURROUND")        _stereoMode = dsAUDIO_STEREO_SURROUND;
+                else if (_audioModeVal == "DOLBYDIGITAL")    _stereoMode = dsAUDIO_STEREO_DD;
+                else if (_audioModeVal == "DOLBYDIGITALPLUS") _stereoMode = dsAUDIO_STEREO_DDPLUS;
+                else                                          _stereoMode = dsAUDIO_STEREO_STEREO;
+
+                if (dsSetStereoAuto(_h, 0) == dsERR_NONE) {
+                    INT_INFO("[gsk] AudioConfigInit: %s → dsSetStereoAuto(false)\n",
+                             _aPortRestore[_i].name);
+                } else {
+                    INT_ERROR("[gsk] AudioConfigInit: %s → dsSetStereoAuto(false) failed\n",
+                              _aPortRestore[_i].name);
+                }
+                if (dsSetStereoMode(_h, _stereoMode) == dsERR_NONE) {
+                    INT_INFO("[gsk] AudioConfigInit: %s → dsSetStereoMode(%d)\n",
+                             _aPortRestore[_i].name, _stereoMode);
+                } else {
+                    INT_ERROR("[gsk] AudioConfigInit: %s → dsSetStereoMode(%d) failed\n",
+                              _aPortRestore[_i].name, _stereoMode);
+                }
             }
         }
     }
