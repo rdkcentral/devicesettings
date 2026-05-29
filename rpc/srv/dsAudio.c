@@ -2244,25 +2244,61 @@ void AudioConfigInit()
                 INT_INFO("[gsk] AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
                 continue;
             }
-            std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
-            std::string _enableVal = "TRUE"; /* default: enabled */
-            try {
-                _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
-            } catch(...) { _enableVal = "TRUE"; }
-            bool _enable = (_enableVal == "TRUE");
-            if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
-                INT_INFO("[gsk] AudioConfigInit: Restored %s isEnabled=%s\n",
-                         _aPortRestore[_i].name, _enableVal.c_str());
+            /* [gsk] Port enable restore — per-port policy:
+             *
+             *  HDMI_ARC0  : read persistence (key audio.HDMI_ARC0.isEnabled).
+             *               This re-establishes the eARC/ARC session after restart.
+             *               Default TRUE if key absent (key is only written by Thunder
+             *               setEnableAudioPort; first-boot devices won't have it yet).
+             *
+             *  SPDIF0     : skip dsEnableAudioPort entirely.  The SOC HAL keeps SPDIF
+             *               always enabled at hardware level; calling enable here is
+             *               unnecessary and may cause interference.
+             *               Stereo auto+mode restore still runs below for SPDIF0.
+             *
+             *  SPEAKER0   : always enable unconditionally — internal speaker must be
+             *               on regardless of any stale persistence value.
+             *
+             *  HEADPHONE0 : always enable unconditionally — headphone presence is
+             *               managed by HW detection, not by a SW enable flag.
+             */
+            if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_HDMI_ARC) {
+                /* HDMI_ARC0: restore from persistence */
+                std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
+                std::string _enableVal = "TRUE"; /* default: enabled if key absent */
+                try {
+                    _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
+                } catch(...) { _enableVal = "TRUE"; }
+                bool _enable = (_enableVal == "TRUE");
+                if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
+                    INT_INFO("[gsk] AudioConfigInit: HDMI_ARC0 isEnabled=%s (from persistence)\n",
+                             _enableVal.c_str());
+                } else {
+                    INT_ERROR("[gsk] AudioConfigInit: HDMI_ARC0 dsEnableAudioPort(%d) failed\n",
+                              (int)_enable);
+                }
+            } else if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_SPDIF) {
+                /* SPDIF0: skip enable — always HW-enabled */
+                INT_INFO("[gsk] AudioConfigInit: SPDIF0 skipping dsEnableAudioPort (always HW-enabled)\n");
             } else {
-                INT_ERROR("[gsk] AudioConfigInit: Failed to restore %s isEnabled=%s\n",
-                          _aPortRestore[_i].name, _enableVal.c_str());
+                /* SPEAKER0 / HEADPHONE0: always enable unconditionally */
+                if (dsEnableAudioPort(_h, true) == dsERR_NONE) {
+                    INT_INFO("[gsk] AudioConfigInit: %s enabled unconditionally\n",
+                             _aPortRestore[_i].name);
+                } else {
+                    INT_ERROR("[gsk] AudioConfigInit: %s dsEnableAudioPort(true) failed\n",
+                              _aPortRestore[_i].name);
+                }
             }
 
-            /* [gsk] Restore stereo auto + stereo mode for this port from persistence.
-             * After dsmgr restart the SOC HAL static vars (autoMode, audioMode) reset
-             * to their defaults.  We must push the persisted values back to the HAL so
-             * that dsGetStereoMode() / dsGetEncoding() return the correct values before
-             * Thunder re-applies them. */
+            /* [gsk] Restore stereo auto + stereo mode for SPDIF0 and HDMI_ARC0 only.
+             * These are the ports where the SOC HAL has independent autoMode/audioMode
+             * static vars that reset after dsmgr restart.  SPEAKER and HEADPHONE are
+             * handled by the existing code above this loop and do not need this. */
+            if (_aPortRestore[_i].type != dsAUDIOPORT_TYPE_SPDIF &&
+                _aPortRestore[_i].type != dsAUDIOPORT_TYPE_HDMI_ARC) {
+                continue;
+            }
             std::string _audioModeKey  = std::string(_aPortRestore[_i].name) + ".AudioMode";
             std::string _audioAutoKey  = std::string(_aPortRestore[_i].name) + ".AudioMode.AUTO";
             std::string _audioModeVal  = "STEREO";  /* default mode  */
