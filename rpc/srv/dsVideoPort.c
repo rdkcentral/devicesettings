@@ -191,7 +191,9 @@ IARM_Result_t dsVideoPortMgr_init()
 		INT_INFO("The Persistent HDMI resolution read is %s \r\n",_dsHDMIResolution.c_str());
         if (_dsHDMIResolution == "2160p")
         {
-            TELEMETRY_EVENT_INT("SYS_INFO_4KResolution", 1);
+            char telemetryValue[128] = {0};
+            snprintf(telemetryValue, sizeof(telemetryValue), "The Persistent HDMI resolution read is %s", _dsHDMIResolution.c_str());
+            TELEMETRY_EVENT_STRING("SYS_INFO_4KResolution", telemetryValue);
         }
         
 		#ifdef HAS_ONLY_COMPOSITE
