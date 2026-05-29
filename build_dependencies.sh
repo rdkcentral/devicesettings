@@ -72,6 +72,17 @@ rm -rf rdk-halif-device_settings
 git clone --branch 6.0.0 --depth 1 https://github.com/rdkcentral/rdk-halif-device_settings.git
 export DS_IF_PATH=$ROOT/rdk-halif-device_settings
 
+cd $ROOT
+rm -rf entservices-testframework
+git clone --branch 1.0.1 https://github.com/rdkcentral/entservices-testframework.git
+
+# Provide telemetry compatibility header used by devicesettings coverage build.
+mkdir -p $ROOT/entservices-testframework/Tests/headers
+cat << 'EOF' > $ROOT/entservices-testframework/Tests/headers/telemetry_busmessage_sender.h
+#pragma once
+#include "../mocks/Telemetry.h"
+EOF
+
 cd $WORKDIR
 patch -p1 < "$WORKDIR/patches/dsDisplay.patch"
 
