@@ -172,7 +172,13 @@ std::string enumToColor (dsFPDColor_t enumColor)
 
 IARM_Result_t dsFPDMgr_init()
 {
-
+    IARM_BUS_Lock(lock);
+    if (!m_isPlatInitialized) {
+        dsFPInit();
+        m_isPlatInitialized = 1;
+        INT_INFO("FP HAL Initialized successfully ...\n");
+    }
+    IARM_BUS_Unlock(lock);
 
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsFPInit,_dsFPInit);
 	
