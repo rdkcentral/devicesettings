@@ -2843,16 +2843,12 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
     }
 
     dsAudioSetStereoAutoParam_t *param = (dsAudioSetStereoAutoParam_t *)arg;
-    if ((NULL == param) || (NULL == param->handle)) {
-        return IARM_RESULT_INVALID_PARAM;
-    }
 
     IARM_BUS_Lock(lock);
 
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
     int *runtimeAutoPtr = NULL;
-    int oldRuntimeAuto = 0;
 
     switch(_APortType) {
         case dsAUDIOPORT_TYPE_HDMI:
@@ -2871,8 +2867,6 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
             IARM_BUS_Unlock(lock);
             return IARM_RESULT_INVALID_PARAM;
     }
-
-    oldRuntimeAuto = *runtimeAutoPtr;
 
     if ((_APortType == dsAUDIOPORT_TYPE_HDMI_ARC) || (_APortType == dsAUDIOPORT_TYPE_SPDIF)) {
         typedef dsError_t (*dsSetStereoAuto_t)(intptr_t handle, int autoMode);
@@ -2901,7 +2895,6 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
         }
 
         if (!halUpdateSuccess) {
-            *runtimeAutoPtr = oldRuntimeAuto;
             IARM_BUS_Unlock(lock);
             return result;
         }
