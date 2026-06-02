@@ -2244,50 +2244,37 @@ void AudioConfigInit()
                 INT_INFO("[gsk] AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
                 continue;
             }
-            /* [gsk] Port enable restore — per-port policy:
+            /* [gsk] Restore port enable state from persistence for ALL ports.
+             * Key: "audio.<PORT>.isEnabled" — written by _dsSetEnablePersist()
+             * when Thunder calls setEnableAudioPort().  If the key is absent
+             * (first boot, or port never explicitly toggled), default to TRUE
+             * so ports come up enabled just as they would on a fresh start.
              *
-             *  HDMI_ARC0  : read persistence (key audio.HDMI_ARC0.isEnabled).
-             *               This re-establishes the eARC/ARC session after restart.
-             *               Default TRUE if key absent (key is only written by Thunder
-             *               setEnableAudioPort; first-boot devices won't have it yet).
-             *
-             *  SPDIF0     : skip dsEnableAudioPort entirely.  The SOC HAL keeps SPDIF
-             *               always enabled at hardware level; calling enable here is
-             *               unnecessary and may cause interference.
-             *               Stereo auto+mode restore still runs below for SPDIF0.
-             *
-             *  SPEAKER0   : always enable unconditionally — internal speaker must be
-             *               on regardless of any stale persistence value.
-             *
-             *  HEADPHONE0 : always enable unconditionally — headphone presence is
-             *               managed by HW detection, not by a SW enable flag.
+             * This ensures the post-restart state exactly mirrors what was
+             * active before the dsmgr restart, for every port:
+             *   HDMI_ARC0  — re-establishes eARC/ARC session if was enabled
+             *   SPDIF0     — respects if Thunder had disabled it
+             *   SPEAKER0   — respects user/app disable if persisted
+             *   HEADPHONE0 — respects user/app disable if persisted
              */
-            if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_HDMI_ARC) {
-                /* HDMI_ARC0: restore from persistence */
+            {
                 std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
                 std::string _enableVal = "TRUE"; /* default: enabled if key absent */
                 try {
                     _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
                 } catch(...) { _enableVal = "TRUE"; }
                 bool _enable = (_enableVal == "TRUE");
-                if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
-                    INT_INFO("[gsk] AudioConfigInit: HDMI_ARC0 isEnabled=%s (from persistence)\n",
-                             _enableVal.c_str());
+                dsAudioPortEnabledParam_t _enableParam;
+                memset(&_enableParam, 0, sizeof(_enableParam));
+                _enableParam.handle  = _h;
+                _enableParam.enabled = _enable;
+                strncpy(_enableParam.portName, _aPortRestore[_i].name, sizeof(_enableParam.portName) - 1);
+                if (_dsEnableAudioPort(&_enableParam) == IARM_RESULT_SUCCESS) {
+                    INT_INFO("[gsk] AudioConfigInit: %s isEnabled=%s (restored from persistence)\n",
+                             _aPortRestore[_i].name, _enableVal.c_str());
                 } else {
-                    INT_ERROR("[gsk] AudioConfigInit: HDMI_ARC0 dsEnableAudioPort(%d) failed\n",
-                              (int)_enable);
-                }
-            } else if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_SPDIF) {
-                /* SPDIF0: skip enable — always HW-enabled */
-                INT_INFO("[gsk] AudioConfigInit: SPDIF0 skipping dsEnableAudioPort (always HW-enabled)\n");
-            } else {
-                /* SPEAKER0 / HEADPHONE0: always enable unconditionally */
-                if (dsEnableAudioPort(_h, true) == dsERR_NONE) {
-                    INT_INFO("[gsk] AudioConfigInit: %s enabled unconditionally\n",
-                             _aPortRestore[_i].name);
-                } else {
-                    INT_ERROR("[gsk] AudioConfigInit: %s dsEnableAudioPort(true) failed\n",
-                              _aPortRestore[_i].name);
+                    INT_ERROR("[gsk] AudioConfigInit: %s _dsEnableAudioPort(%d) failed\n",
+                              _aPortRestore[_i].name, (int)_enable);
                 }
             }
 
