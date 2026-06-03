@@ -2844,7 +2844,6 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
 
     IARM_BUS_Lock(lock);
 
-    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
     int *runtimeAutoPtr = NULL;
 
@@ -2894,7 +2893,7 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
 
         if (!halUpdateSuccess) {
             IARM_BUS_Unlock(lock);
-            return result;
+            return IARM_RESULT_INVALID_STATE;
         }
     }
 
@@ -2915,15 +2914,11 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
             case dsAUDIOPORT_TYPE_SPEAKER:
                 device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
                 break;
-            default:
-                break;
         }
     }
 
-    result = IARM_RESULT_SUCCESS;
-
     IARM_BUS_Unlock(lock);
-    return result;
+    return IARM_RESULT_SUCCESS;
 }
 
 IARM_Result_t _dsSetAudioDucking(void *arg)
