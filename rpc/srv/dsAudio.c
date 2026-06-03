@@ -2264,9 +2264,7 @@ void AudioConfigInit()
             } else {
                 INT_ERROR("[gsk] AudioConfigInit: Failed to restore %s isEnabled=%s\n",
                           _aPortRestore[_i].name, _enableVal.c_str());
-            }
-        }
-         
+            } 
             /* [gsk] Restore stereo auto + stereo mode for SPDIF0 and HDMI_ARC0 only.
              * These are the ports where the SOC HAL has independent autoMode/audioMode
              * static vars that reset after dsmgr restart.  SPEAKER and HEADPHONE are
