@@ -2241,43 +2241,32 @@ void AudioConfigInit()
         for (size_t _i = 0; _i < sizeof(_aPortRestore)/sizeof(_aPortRestore[0]); _i++) {
             intptr_t _h = 0;
             if (dsGetAudioPort(_aPortRestore[_i].type, _aPortRestore[_i].idx, &_h) != dsERR_NONE || _h == 0) {
-                INT_INFO("[gsk] AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
+                INT_INFO("AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
                 continue;
             }
-            /* [gsk] Restore port enable state from persistence for ALL ports.
-             * Key: "audio.<PORT>.isEnabled" — written by _dsSetEnablePersist()
-             * when Thunder calls setEnableAudioPort().  If the key is absent
-             * (first boot, or port never explicitly toggled), default to TRUE
-             * so ports come up enabled just as they would on a fresh start.
-             *
-             * This ensures the post-restart state exactly mirrors what was
-             * active before the dsmgr restart, for every port:
-             *   HDMI_ARC0  — re-establishes eARC/ARC session if was enabled
-             *   SPDIF0     — respects if Thunder had disabled it
-             *   SPEAKER0   — respects user/app disable if persisted
-             *   HEADPHONE0 — respects user/app disable if persisted
-             */
-            {
-                std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
-                std::string _enableVal = "TRUE"; /* default: enabled if key absent */
-                try {
-                    _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
-                } catch(...) { _enableVal = "TRUE"; }
-                bool _enable = (_enableVal == "TRUE");
-                dsAudioPortEnabledParam_t _enableParam;
-                memset(&_enableParam, 0, sizeof(_enableParam));
-                _enableParam.handle  = _h;
-                _enableParam.enabled = _enable;
-                strncpy(_enableParam.portName, _aPortRestore[_i].name, sizeof(_enableParam.portName) - 1);
-                if (_dsEnableAudioPort(&_enableParam) == IARM_RESULT_SUCCESS) {
-                    INT_INFO("[gsk] AudioConfigInit: %s isEnabled=%s (restored from persistence)\n",
-                             _aPortRestore[_i].name, _enableVal.c_str());
-                } else {
-                    INT_ERROR("[gsk] AudioConfigInit: %s _dsEnableAudioPort(%d) failed\n",
-                              _aPortRestore[_i].name, (int)_enable);
-                }
+            std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
+            std::string _enableVal = "NOT_FOUND"; /* sentinel: key absent = first boot */
+            try {
+                _enableVal = device::HostPersistence::getInstance().getProperty(_enableKey);
+            } catch(...) { _enableVal = "NOT_FOUND"; }
+            /* Skip on first boot — key only exists after a prior session wrote it
+             * via _dsSetEnablePersist(). On restart the key is present and we
+             * restore the last-known enable state into the HAL. */
+            if (_enableVal == "NOT_FOUND") {
+                INT_INFO("[gsk] AudioConfigInit: %s isEnabled key absent (first boot), skip restore\n",
+                         _aPortRestore[_i].name);
+                continue;
             }
-
+            bool _enable = (_enableVal == "TRUE");
+            if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
+                INT_INFO("[gsk] AudioConfigInit: Restored %s isEnabled=%s\n",
+                         _aPortRestore[_i].name, _enableVal.c_str());
+            } else {
+                INT_ERROR("[gsk] AudioConfigInit: Failed to restore %s isEnabled=%s\n",
+                          _aPortRestore[_i].name, _enableVal.c_str());
+            }
+        }
+         
             /* [gsk] Restore stereo auto + stereo mode for SPDIF0 and HDMI_ARC0 only.
              * These are the ports where the SOC HAL has independent autoMode/audioMode
              * static vars that reset after dsmgr restart.  SPEAKER and HEADPHONE are
