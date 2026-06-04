@@ -2261,10 +2261,27 @@ void AudioConfigInit()
             if (dsEnableAudioPort(_h, _enable) == dsERR_NONE) {
                 INT_INFO("[gsk] AudioConfigInit: Restored %s isEnabled=%s\n",
                          _aPortRestore[_i].name, _enableVal.c_str());
+                /* [gsk] Mirror what _dsEnableAudioPort() does after a successful HAL call:
+                 * update the in-process m_AudioPortEnabled[] array so that any subsequent
+                 * calls to _dsSetAudioDucking / _dsSetAudioLevel see the correct port state.
+                 * Also re-apply the persisted audio delay for the port, identical to the
+                 * delay-restore step in _dsEnableAudioPort(). */
+                dsAudioPortType_t _aPortType = _GetAudioPortType(_h);
+                if (_aPortType < dsAUDIOPORT_TYPE_MAX) {
+                    m_AudioPortEnabled[_aPortType] = _enable;
+                    INT_INFO("[gsk] AudioConfigInit: m_AudioPortEnabled[%d]=%d\n",
+                             (int)_aPortType, (int)_enable);
+                    if (_enable) {
+                        uint32_t _audioDelay = dsGetAudioDelayInternal(_aPortType);
+                        dsSetAudioDelayInternal(_h, _audioDelay);
+                        INT_INFO("[gsk] AudioConfigInit: %s audio delay restored to %u ms\n",
+                                 _aPortRestore[_i].name, _audioDelay);
+                    }
+                }
             } else {
                 INT_ERROR("[gsk] AudioConfigInit: Failed to restore %s isEnabled=%s\n",
                           _aPortRestore[_i].name, _enableVal.c_str());
-            } 
+            }
             /* [gsk] Restore stereo auto + stereo mode for SPDIF0 and HDMI_ARC0 only.
              * These are the ports where the SOC HAL has independent autoMode/audioMode
              * static vars that reset after dsmgr restart.  SPEAKER and HEADPHONE are
@@ -3734,7 +3751,7 @@ IARM_Result_t _dsIsAudioPortEnabled(void *arg)
         param->enabled = enabled;
         result = IARM_RESULT_SUCCESS;
     }
-    INT_DEBUG("%s : returned ret: %04x enabled: %s\n", __FUNCTION__, ret, param->enabled? "TRUE":"FALSE");
+    INT_INFO("[GSK ===> plat return]%s : returned ret: %04x enabled: %s\n", __FUNCTION__, ret, param->enabled? "TRUE":"FALSE");
 
     IARM_BUS_Unlock(lock);
 
@@ -4017,6 +4034,7 @@ IARM_Result_t _dsGetEncoding(void *arg)
     if (s_param != NULL && NULL != s_param->handle)
     {
         dsAudioStereoMode_t stereoMode = dsAUDIO_STEREO_UNKNOWN;
+        #if 0 //gsk
         dsAudioPortType_t _APortType = _GetAudioPortType(s_param->handle);
         if (_APortType == dsAUDIOPORT_TYPE_SPDIF && !_srv_AudioSPDIFAuto)
         {
@@ -4037,6 +4055,7 @@ IARM_Result_t _dsGetEncoding(void *arg)
             INT_INFO("[gsk] _dsGetEncoding SPDIF0 manual: using _srv_SPDIF_Audiomode=%d\r\n", stereoMode);
         }
         else
+        #endif //GSK
         {
             ret = dsGetStereoMode(s_param->handle, &stereoMode);
             if(ret == dsERR_NONE) {
