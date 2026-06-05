@@ -1495,7 +1495,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
     /* ── SECTION 2 : Target port – every getter ───────────────────────────────────── */
     out << "\n";
     out << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    out << "  SECTION 2 – " << port_name << " : ALL Getter APIs (47 getters)\n";
+    out << "  SECTION 2 – " << port_name << " : ALL Getter APIs (34 getters)\n";
     out << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     try {
         device::AudioOutputPort &sp =
@@ -1505,68 +1505,25 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
         /* ── Feature: Port Management ───────────────────────────────── */
         out << "── Feature: Port Management ──────────────────────────────────────\n";
 
-        try { out << "  getId()                       : " << sp.getId() << "\n";
-              ++getter_pass; }
-        catch (...) { out << "  getId()                       : EXCEPTION\n";
-              ++getter_fail; any_fail = true; }
-
-        try { out << "  getIndex()                    : " << sp.getIndex() << "\n";
-              ++getter_pass; }
-        catch (...) { out << "  getIndex()                    : EXCEPTION\n";
-              ++getter_fail; any_fail = true; }
-
-        try { const device::AudioOutputPortType &v = sp.getType();
-              out << "  getType()                     : " << v.getName()
-                  << " (id=" << v.getId() << ")\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getType()                     : EXCEPTION – " << e.what() << "\n";
-              ++getter_fail; any_fail = true; }
-
         try { bool v = sp.isEnabled();
               out << "  isEnabled()                   : " << (v ? "Yes" : "No") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  isEnabled()                   : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  isEnabled()                   : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.isConnected();
               out << "  isConnected()                 : " << (v ? "Yes" : "No") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  isConnected()                 : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  isConnected()                 : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.getEnablePersist();
               out << "  getEnablePersist()            : " << (v ? "true" : "false") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getEnablePersist()            : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { device::List<device::AudioEncoding> v = sp.getSupportedEncodings();
-              out << "  getSupportedEncodings()       : " << v.size() << " encodings [";
-              for (size_t _ei = 0; _ei < v.size(); ++_ei)
-                  out << ((_ei)?" ":"" ) << v.at(_ei).getName();
-              out << "]\n"; ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getSupportedEncodings()       : EXCEPTION – " << e.what() << "\n";
-              ++getter_fail; any_fail = true; }
-
-        try { device::List<device::AudioCompression> v = sp.getSupportedCompressions();
-              out << "  getSupportedCompressions()    : " << v.size() << " levels\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getSupportedCompressions()    : EXCEPTION – " << e.what() << "\n";
-              ++getter_fail; any_fail = true; }
-
-        try { device::List<device::AudioStereoMode> v = sp.getSupportedStereoModes();
-              out << "  getSupportedStereoModes()     : " << v.size() << " modes [";
-              for (size_t _mi = 0; _mi < v.size(); ++_mi)
-                  out << ((_mi)?" ":"" ) << v.at(_mi).getName();
-              out << "]\n"; ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getSupportedStereoModes()     : EXCEPTION – " << e.what() << "\n";
+              out << "  getEnablePersist()            : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: Volume Control ────────────────────────────────── */
@@ -1576,49 +1533,49 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
               out << "  isMuted()                     : " << (v ? "muted" : "unmuted") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  isMuted()                     : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  isMuted()                     : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { float v = sp.getLevel();
               out << "  getLevel()                    : " << v << "  (0.0-100.0)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getLevel()                    : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getLevel()                    : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { float v = sp.getGain();
               out << "  getGain()                     : " << v << " dB\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getGain()                     : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getGain()                     : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { float v = sp.getDB();
               out << "  getDB()                       : " << v << " dB\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getDB()                       : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getDB()                       : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { float v = sp.getMaxDB();
               out << "  getMaxDB()                    : " << v << " dB\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getMaxDB()                    : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getMaxDB()                    : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { float v = sp.getMinDB();
               out << "  getMinDB()                    : " << v << " dB\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getMinDB()                    : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getMinDB()                    : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { float v = sp.getOptimalLevel();
               out << "  getOptimalLevel()             : " << v << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getOptimalLevel()             : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getOptimalLevel()             : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.isLoopThru();
@@ -1635,14 +1592,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
               out << "  getAudioDelay()               : " << v << " ms\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getAudioDelay()               : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { uint32_t v = 0; sp.getAudioDelayOffset(v);
-              out << "  getAudioDelayOffset()         : " << v << " ms\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getAudioDelayOffset()         : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getAudioDelay()               : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: Stereo / Encoding ─────────────────────────────── */
@@ -1652,7 +1602,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
               out << "  getEncoding()                 : " << v.getName() << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getEncoding()                 : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getEncoding()                 : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { const device::AudioStereoMode &v = sp.getStereoMode(false);
@@ -1660,28 +1610,14 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
                   << " (id=" << v.getId() << ")\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getStereoMode()               : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getStereoMode()               : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.getStereoAuto();
               out << "  getStereoAuto()               : " << (v ? "auto" : "manual") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getStereoAuto()               : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { int v = sp.getCompression();
-              out << "  getCompression()              : " << v << "\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getCompression()              : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { int v = sp.getDialogEnhancement();
-              out << "  getDialogEnhancement()        : " << v << "\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getDialogEnhancement()        : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getStereoAuto()               : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: MS12 / Dolby Processing ─────────────────────────── */
@@ -1691,81 +1627,49 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
               out << "  getDolbyVolumeMode()          : " << (v ? "on" : "off") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getDolbyVolumeMode()          : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getDolbyVolumeMode()          : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int v = sp.getIntelligentEqualizerMode();
               out << "  getIntelligentEqualizerMode() : " << v << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getIntelligentEqualizerMode() : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getIntelligentEqualizerMode() : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int v = sp.getBassEnhancer();
               out << "  getBassEnhancer()             : " << v << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getBassEnhancer()             : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getBassEnhancer()             : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.isSurroundDecoderEnabled();
               out << "  isSurroundDecoderEnabled()    : " << (v ? "yes" : "no") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  isSurroundDecoderEnabled()    : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  isSurroundDecoderEnabled()    : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int v = sp.getDRCMode();
               out << "  getDRCMode()                  : " << v << "  (0=line, 1=RF)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getDRCMode()                  : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getDRCMode()                  : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.getMISteering();
               out << "  getMISteering()               : " << (v ? "on" : "off") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getMISteering()               : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getMISteering()               : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int v = sp.getGraphicEqualizerMode();
               out << "  getGraphicEqualizerMode()     : " << v << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getGraphicEqualizerMode()     : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { dsVolumeLeveller_t v = sp.getVolumeLeveller();
-              out << "  getVolumeLeveller()           : mode=" << v.mode
-                  << " level=" << v.level << "\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getVolumeLeveller()           : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { dsSurroundVirtualizer_t v = sp.getSurroundVirtualizer();
-              out << "  getSurroundVirtualizer()      : mode=" << v.mode
-                  << " boost=" << v.boost << "\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getSurroundVirtualizer()      : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { const std::string v = sp.getMS12AudioProfile();
-              out << "  getMS12AudioProfile()         : \"" << v << "\"\n";
-              ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getMS12AudioProfile()         : EXCEPTION – " << e.what() << " *** gsk ***\n";
-              ++getter_fail; any_fail = true; }
-
-        try { std::vector<std::string> v = sp.getMS12AudioProfileList();
-              out << "  getMS12AudioProfileList()     : " << v.size() << " profiles [";
-              for (size_t _pi = 0; _pi < v.size(); ++_pi)
-                  out << ((_pi)?",":"" ) << "\"" << v[_pi] << "\"";
-              out << "]\n"; ++getter_pass; }
-        catch (const device::Exception &e) {
-              out << "  getMS12AudioProfileList()     : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getGraphicEqualizerMode()     : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: Capability Queries ────────────────────────────── */
@@ -1775,14 +1679,14 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
               out << "  isAudioMSDecode()             : " << (v ? "yes" : "no") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  isAudioMSDecode()             : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  isAudioMSDecode()             : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.isAudioMS12Decode();
               out << "  isAudioMS12Decode()           : " << (v ? "yes" : "no") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  isAudioMS12Decode()           : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  isAudioMS12Decode()           : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int caps = 0; sp.getAudioCapabilities(&caps);
@@ -1790,7 +1694,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
                   << "  (dsAudioCapabilities_t bitmask)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getAudioCapabilities()        : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getAudioCapabilities()        : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int caps = 0; sp.getMS12Capabilities(&caps);
@@ -1798,7 +1702,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
                   << "  (dsMS12Capabilities_t bitmask)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getMS12Capabilities()         : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getMS12Capabilities()         : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: ATMOS ─────────────────────────────────────────────── */
@@ -1810,7 +1714,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
                   << "  (0=none, 1=ddpAtmos, 2=trueHDAtmos)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getSinkDeviceAtmosCapability(): EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getSinkDeviceAtmosCapability(): EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: ARC / LE Config ───────────────────────────────── */
@@ -1821,21 +1725,21 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
                   << "  (bit0=ARC, bit1=eARC)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getSupportedARCTypes()        : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getSupportedARCTypes()        : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int v = -1; sp.getHdmiArcPortId(&v);
               out << "  getHdmiArcPortId()            : " << v << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getHdmiArcPortId()            : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getHdmiArcPortId()            : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { bool v = sp.GetLEConfig();
               out << "  GetLEConfig()                 : " << (v ? "enabled" : "disabled") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  GetLEConfig()                 : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  GetLEConfig()                 : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         /* ── Feature: Language / Mixing ─────────────────────────────── */
@@ -1845,7 +1749,7 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
               out << "  getAssociatedAudioMixing()    : " << (v ? "true" : "false") << "\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getAssociatedAudioMixing()    : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getAssociatedAudioMixing()    : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { int v = 0; sp.getFaderControl(&v);
@@ -1853,21 +1757,21 @@ static void tc_aud_port_all_getters(const std::string &mod_dir,
                   << "  (-32=full-main ... 32=full-assoc)\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getFaderControl()             : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getFaderControl()             : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { std::string v; sp.getPrimaryLanguage(v);
               out << "  getPrimaryLanguage()          : \"" << v << "\"\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getPrimaryLanguage()          : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getPrimaryLanguage()          : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
         try { std::string v; sp.getSecondaryLanguage(v);
               out << "  getSecondaryLanguage()        : \"" << v << "\"\n";
               ++getter_pass; }
         catch (const device::Exception &e) {
-              out << "  getSecondaryLanguage()        : EXCEPTION – " << e.what() << " *** gsk ***\n";
+              out << "  getSecondaryLanguage()        : EXCEPTION – " << e.what() << " *** STALE ***\n";
               ++getter_fail; any_fail = true; }
 
     }
