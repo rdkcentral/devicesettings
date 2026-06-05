@@ -2298,22 +2298,15 @@ void AudioConfigInit()
                         INT_ERROR("[gsk] AudioConfigInit: HDMI_ARC0 dsAudioEnableARC(type=%d,status=%d) failed\n",
                                   (int)_arcStatus.type, (int)_arcStatus.status);
                 }
-            } 
-            #if 0
-            else {
-                INT_DEBUG("[gsk] AudioConfigInit: %s dsEnableAudioPort(enable=%d)\n",
-                          _aPortRestore[_i].name, (int)_enable);
-                dsError_t _enRet = dsEnableAudioPort(_h, _enable);
-                INT_DEBUG("[gsk] AudioConfigInit: %s dsEnableAudioPort ret=0x%x\n",
-                          _aPortRestore[_i].name, (int)_enRet);
             }
-            #endif
-            //Enable port default.
-            INT_DEBUG("[gsk] AudioConfigInit: %s dsEnableAudioPort(enable=%d)\n",
-                          _aPortRestore[_i].name, (int)_enable);
+            /* [gsk] All ports: call dsEnableAudioPort() to set the enable state.
+             * For HDMI_ARC, dsAudioEnableARC() above sets up ARC/eARC routing;
+             * dsEnableAudioPort() is still needed to gate the audio path in the HAL. */
+            INT_INFO("[gsk] AudioConfigInit: %s dsEnableAudioPort(enable=%d)\n",
+                      _aPortRestore[_i].name, (int)_enable);
             dsError_t _enRet = dsEnableAudioPort(_h, _enable);
-            INT_DEBUG("[gsk] AudioConfigInit: %s dsEnableAudioPort ret=0x%x\n",
-                          _aPortRestore[_i].name, (int)_enRet);
+            INT_INFO("[gsk] AudioConfigInit: %s dsEnableAudioPort ret=0x%x\n",
+                      _aPortRestore[_i].name, (int)_enRet);
 
             /* [gsk] Verify via HAL read-back, same as _dsEnableAudioPort() does after
              * calling dsEnableAudioPort().  Only update m_AudioPortEnabled[] and restore
@@ -2323,7 +2316,7 @@ void AudioConfigInit()
             dsAudioPortType_t _aPortType = _GetAudioPortType(_h);
             if (_verifyRet == dsERR_NONE) {
                 if (_enableVerify != _enable) {
-                    INT_DEBUG("[gsk] AudioConfigInit: %s enable verification failed:"
+                    INT_INFO("[gsk] AudioConfigInit: %s enable verification failed:"
                               " requested=%d HAL=%d\n",
                               _aPortRestore[_i].name, (int)_enable, (int)_enableVerify);
                 } else {
