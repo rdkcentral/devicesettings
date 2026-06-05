@@ -2240,10 +2240,12 @@ void AudioConfigInit()
         };
         for (size_t _i = 0; _i < sizeof(_aPortRestore)/sizeof(_aPortRestore[0]); _i++) {
             intptr_t _h = 0;
+            
             if (dsGetAudioPort(_aPortRestore[_i].type, _aPortRestore[_i].idx, &_h) != dsERR_NONE || _h == 0) {
                 INT_INFO("AudioConfigInit: dsGetAudioPort failed for %s, skip enable restore\n", _aPortRestore[_i].name);
                 continue;
             }
+        
             std::string _enableKey = std::string("audio.") + _aPortRestore[_i].name + ".isEnabled";
             std::string _enableVal = "NOT_FOUND"; /* sentinel: key absent = first boot */
             try {
@@ -2258,25 +2260,14 @@ void AudioConfigInit()
                 continue;
             }
             bool _enable = (_enableVal == "TRUE");
+            
             if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_HDMI_ARC) {
-                #if 0
-                /* [gsk] HDMI_ARC: use dsAudioEnableARC() (HAL) instead of dsEnableAudioPort()
-                 * so the SOC can correctly set up ARC/eARC routing.
-                 * dsAudioEnableARC is called directly via dlopen (same as _dsAudioEnableARC
-                 * handler) to avoid going through IARM Bus which would deadlock since the
-                 * lock is already held.
-                 * ARC type: read audio.hdmiArc0.type from persistence; default to eARC. */
-                std::string _arcTypeVal("eARC");
-                try {
-                    _arcTypeVal = device::HostPersistence::getInstance().getProperty("audio.hdmiArc0.type");
-                } catch(...) { /* key absent — keep default eARC */ }
-                #endif
                 dsAudioARCStatus_t _arcStatus;
                 _arcStatus.status = _enable;
                 //_arcStatus.type   = (_arcTypeVal == "ARC") ? dsAUDIOARCSUPPORT_ARC
                 //                                           : dsAUDIOARCSUPPORT_eARC;
                 _arcStatus.type = dsAUDIOARCSUPPORT_eARC;
-
+                
                 typedef dsError_t (*dsAudioEnableARC_t)(intptr_t handle, dsAudioARCStatus_t arcStatus);
                 static dsAudioEnableARC_t _arcFunc = 0;
                 if (_arcFunc == 0) {
@@ -2290,15 +2281,19 @@ void AudioConfigInit()
                         INT_ERROR("[gsk] AudioConfigInit: dlopen(%s) failed\n", RDK_DSHAL_NAME);
                     }
                 }
+                
                 if (_arcFunc) {
-                    if (_arcFunc(_h, _arcStatus) == dsERR_NONE)
+                    if (_arcFunc(_h, _arcStatus) == dsERR_NONE) {
                         INT_INFO("[gsk] AudioConfigInit: HDMI_ARC0 dsAudioEnableARC(type=%d,status=%d) OK\n",
                                  (int)_arcStatus.type, (int)_arcStatus.status);
-                    else
+                    } else {
                         INT_ERROR("[gsk] AudioConfigInit: HDMI_ARC0 dsAudioEnableARC(type=%d,status=%d) failed\n",
                                   (int)_arcStatus.type, (int)_arcStatus.status);
+                    }
                 }
+            
             }
+
             /* [gsk] All ports: call dsEnableAudioPort() to set the enable state.
              * For HDMI_ARC, dsAudioEnableARC() above sets up ARC/eARC routing;
              * dsEnableAudioPort() is still needed to gate the audio path in the HAL. */
@@ -2307,7 +2302,7 @@ void AudioConfigInit()
             dsError_t _enRet = dsEnableAudioPort(_h, _enable);
             INT_INFO("[gsk] AudioConfigInit: %s dsEnableAudioPort ret=0x%x\n",
                       _aPortRestore[_i].name, (int)_enRet);
-
+            
             /* [gsk] Verify via HAL read-back, same as _dsEnableAudioPort() does after
              * calling dsEnableAudioPort().  Only update m_AudioPortEnabled[] and restore
              * the audio delay when the HAL confirms the state matches what we requested. */
@@ -2339,6 +2334,7 @@ void AudioConfigInit()
                          " (ret=0x%x), skipping m_AudioPortEnabled update\n",
                          _aPortRestore[_i].name, (int)_verifyRet);
             }
+            
             /* [gsk] Restore stereo auto + stereo mode for SPDIF0 and HDMI_ARC0 only.
              * These are the ports where the SOC HAL has independent autoMode/audioMode
              * static vars that reset after dsmgr restart.  SPEAKER and HEADPHONE are
