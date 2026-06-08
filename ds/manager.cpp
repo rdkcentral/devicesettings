@@ -120,18 +120,15 @@ static void dsMgrRestartedHandler(const char* owner, IARM_EventId_t eventId,
      * with escalating delays covering ~3× the observed 600 ms restart time.
      */
     std::thread([]() {
-        /* Delays tuned to the ~600 ms restart time observed on device.
+        /* Retry every 200 ms for up to 10 attempts (total window: 2.0 s).
          * RESTARTED fires at end of DSMgr_Start() so dsmgr is already
-         * RPC-ready; only BroadcastEvent dispatch (~2 ms) needs to clear.
-         *   200 ms → fast path  |  600 ms → full restart  |  1200 ms → 2×
-         * Total window: 2.0 s. Tune DELAYS_MS[] to device RestartSec= if needed. */
-        static const int DELAYS_MS[] = { 200, 600, 1200 };
-        static const int MAX_ATTEMPTS = static_cast<int>(
-                             sizeof(DELAYS_MS) / sizeof(DELAYS_MS[0]));
+         * RPC-ready; only BroadcastEvent dispatch (~2 ms) needs to clear. */
+        static const int RETRY_DELAY_MS = 200;
+        static const int MAX_ATTEMPTS   = 10;
 
         int cumulativeWaitMs = 0;
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-            const int delayMs = DELAYS_MS[attempt - 1];
+            const int delayMs = RETRY_DELAY_MS;
             cumulativeWaitMs += delayMs;
 
             /* Sleep so BroadcastEvent has returned before we call back. */
@@ -167,7 +164,7 @@ static void dsMgrRestartedHandler(const char* owner, IARM_EventId_t eventId,
                 INT_WARN("[refreshThread] attempt %d failed (a=%d vp=%d vd=%d), "
                          "retrying in %d ms",
                          attempt, audioRet, videoPortRet, videoDevRet,
-                         DELAYS_MS[attempt]);   /* next delay */
+                         RETRY_DELAY_MS);
             }
         }
 
