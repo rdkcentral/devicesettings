@@ -528,6 +528,16 @@ void AudioConfigInit()
                         INT_INFO("Port %s: Restored audio mute : %s\n","HDMI0", _AudioMute.c_str());
                     }
                 }
+            }
+            else {
+                INT_INFO("dsSetAudioMute_t(intptr_t, bool) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
 
     typedef dsError_t (*dsSetAudioDelay_t)(intptr_t handle, uint32_t audioDelayMs);
     static dsSetAudioDelay_t dsSetAudioDelayFunc = 0;
