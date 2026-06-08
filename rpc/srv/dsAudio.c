@@ -2304,7 +2304,7 @@ void AudioConfigInit()
             else if (_audioModeVal == "DOLBYDIGITAL")     _stereoMode = dsAUDIO_STEREO_DD;
             else if (_audioModeVal == "DOLBYDIGITALPLUS") _stereoMode = dsAUDIO_STEREO_DDPLUS;
 
-            dsError_t  ret = dsSetStereoMode(_h, _stereoMode);
+            ret = dsSetStereoMode(_h, _stereoMode);
             if (ret != dsERR_NONE) {
                 INT_ERROR(" AudioConfigInit: %s dsSetStereoMode(%d) failed\n, ret =%d \n", _name, (int)_stereoMode, ret);
             }
