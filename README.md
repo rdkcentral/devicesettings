@@ -482,8 +482,8 @@ Device Settings interacts with client applications through direct library linkag
 | Target Component / Layer | Interaction Purpose | Key APIs / Topics |
 | ------------------------ | ------------------- | ----------------- |
 | **RDK-E Plugins** | | |
-| Thunder Plugins (DisplaySettings, DeviceSettings, etc.) | Thunder plugins link directly to Device Settings library and invoke C++ APIs to control hardware settings and subscribe to hardware events. | `device::Manager::Initialize()`, `device::Host::getInstance()`, `VideoOutputPort::setResolution()`, `AudioOutputPort::setAudioLevel()` |
-| RDK Services (Device Settings Service) | RDK Services use Device Settings for querying and configuring device capabilities, output port states, and display properties. | `Host::getVideoOutputPorts()`, `VideoOutputPort::getResolution()`, `AudioOutputPort::getMuted()` |
+| Thunder Plugins (DisplaySettings, DeviceSettings, etc.) | Thunder plugins link directly to Device Settings library and invoke C++ APIs to control hardware settings and subscribe to hardware events. | `device::Manager::Initialize()`, `device::Host::getInstance()`, `VideoOutputPort::setResolution()` |
+| RDK Services (Device Settings Service) | RDK Services use Device Settings for querying and configuring device capabilities, output port states, and display properties. | `Host::getVideoOutputPorts()`, `VideoOutputPort::getResolution()` |
 | Rialto Media Pipeline | Media playback components may query audio and video capabilities, set audio formats, and receive format change notifications. | `AudioOutputPort::getSupportedEncodings()`, `VideoDevice::getHDRCapabilities()` |
 | **Device Services / HAL** | | |
 | DS Audio HAL | Audio port initialization, volume control, mute control, audio format selection, MS12 audio processing control, audio delay settings, audio capability queries. | `dsAudioPortInit()`, `dsSetAudioLevel()`, `dsSetAudioMute()`, `dsSetAudioEncoding()`, `dsSetAudioCompression()`, `dsSetDialogEnhancement()`, `dsSetBassEnhancer()` |
@@ -491,7 +491,7 @@ Device Settings interacts with client applications through direct library linkag
 | DS Video Device HAL | Video decoder initialization, DFC/zoom control, HDR capability queries, codec information, frame rate queries. | `dsVideoDeviceInit()`, `dsSetDFC()`, `dsGetHDRCapabilities()`, `dsGetVideoCodecInfo()` |
 | DS Display HAL | Display subsystem initialization, display connection status, display event registration. | `dsDisplayInit()`, `dsRegisterDisplayEventCallback()` |
 | DS Host HAL | Host subsystem initialization, CPU temperature retrieval, SOC ID query, host EDID retrieval, version information. | `dsHostInit()`, `dsGetCPUTemperature()`, `dsGetSocIDFromSDK()`, `dsGetHostEDID()` |
-| DS Front Panel HAL | Front panel initialization, LED indicator control, text display control. | `dsFPInit()`, `dsSetFPBrightness()`, `dsSetFPColor()`, `dsFPSetLED()`, `dsFPSetText()`, `dsFPEnableCLockDisplay()` |
+| DS Front Panel HAL | Front panel initialization, LED indicator control, text display control. | `dsFPInit()`, `dsSetFPBrightness()`, `dsSetFPColor()`, `dsFPSetLED()`, `dsFPEnableCLockDisplay()` |
 | DS HDMI Input HAL | HDMI input port initialization, port selection, signal status query, HDMI input event registration. | `dsHdmiInInit()`, `dsHdmiInSelectPort()`, `dsHdmiInGetCurrentVideoMode()`, `dsHdmiInRegisterConnectCB()` |
 | DS Composite Input HAL | Composite input initialization, port selection, signal detection. | `dsCompositeInInit()`, `dsCompositeInSelectPort()` |
 | IARM Bus | System-wide event distribution for hardware state changes. Device Settings publishes events when hardware configuration changes occur (display connection, audio format changes, HDCP status). | `IARM_Bus_RegisterEventHandler()`, `IARM_Bus_BroadcastEvent()`, Event groups: `IARM_BUS_DSMGR_EVENT_*` |
@@ -625,7 +625,6 @@ Device Settings invokes the following HAL functions as verified in source code. 
 | `dsSetFPBrightness()` | Set brightness level of front panel LED indicators. | `frontPanelIndicator.cpp` |
 | `dsSetFPColor()` | Set color of front panel LED indicators (predefined colors). | `frontPanelIndicator.cpp` |
 | `dsSetFPBlink()` | Configure blink pattern for front panel LEDs. | `frontPanelIndicator.cpp` |
-| `dsFPSetText()` | Display text string on front panel text display. | `frontPanelTextDisplay.cpp` |
 | `dsFPEnableCLockDisplay()` | Enable clock mode on front panel text display with time format selection. | `frontPanelTextDisplay.cpp` |
 | `dsGetCPUTemperature()` | Query CPU temperature in degrees Celsius (if HAS_THERMAL_API is enabled). | `host.cpp` (called on-demand, not during initialization) |
 | `dsGetSocIDFromSDK()` | Retrieve SoC chip identifier. | `host.cpp` (called on-demand, not during initialization) |
