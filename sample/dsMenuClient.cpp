@@ -61,8 +61,9 @@
  *     TC-CIN-02  isPortConnected     – connected status per composite input port
  *
  *   Module 3 – Display             [handle-based via VideoOutputPort::Display._handle]
- *     TC-DSP-01  hasSurround+getSurroundMode – via HDMI0 Display object
+ *     TC-DSP-01  ALL getter snapshot – INTERNAL0 (TV panel / Amlogic)
  *     TC-DSP-02  getEDIDBytes        – raw EDID bytes from HDMI0 display (if connected)
+ *     TC-DSP-03  ALL getter snapshot – HDMI0 (STB Realtek / dsVIDEOPORT_TYPE_HDMI)
  *
  *   Module 4 – FPD (Front Panel Display)  [enum-based, immune to stale handle]
  *     TC-FPD-01  getFPBrightness  – reads brightness for each indicator
@@ -3401,6 +3402,191 @@ static void tc_dsp_02_display_edid(const std::string &mod_dir)
 }
 
 /* =========================================================================
+ * TC-DSP-03: Display – ALL getter APIs snapshot for HDMI0 (STB Realtek)
+ *
+ *   Same getter set as TC-DSP-01 but targets dsVIDEOPORT_TYPE_HDMI (HDMI0).
+ *   Use on Realtek STB where INTERNAL0 port does not exist.
+ *   HDCP and EDID getters are fully applicable on HDMI0 and counted in totals.
+ *
+ *   Section 1 : VideoOutputPort getters  – getName, getId, getIndex, isEnabled,
+ *               isActive, isDisplayConnected, isContentProtected,
+ *               isDynamicResolutionSupported, getResolution, getDefaultResolution,
+ *               getType, getVideoEOTF, getMatrixCoefficients, getColorSpace,
+ *               getColorDepth, getQuantizationRange, getCurrentOutputSettings,
+ *               getPreferredColorDepth, getColorDepthCapabilities, IsOutputHDR,
+ *               getTVHDRCapabilities, getSupportedTvResolutions,
+ *               getHDCPStatus/Protocol/CurrentProtocol, GetHdmiPreference
+ *   Section 2 : Display sub-object       – hasSurround, getSurroundMode,
+ *               getProductCode, getSerialNumber, getManufacturerYear,
+ *               getManufacturerWeek, getConnectedDeviceType,
+ *               isConnectedDeviceRepeater, getAspectRatio, getPhysicallAddress
+ *   Section 3 : EDID bytes               – getEDIDBytes
+ *   Section 4 : Result summary
+ *
+ *   Output file: 3_Display/Display_HDMI0_all_getters.txt
+ * ========================================================================= */
+static void tc_dsp_03_hdmi0_all_getters(const std::string &mod_dir)
+{
+    printf("\n  [TC-DSP-03] Display – ALL getter APIs snapshot (%s)\n", HDMI_PORT_NAME);
+
+    std::string fname = mod_dir + "/Display_HDMI0_all_getters.txt";
+    TeeStream out;
+    out.open(fname);
+
+    out << "╔══════════════════════════════════════════════════════════════════╗\n";
+    out << "║  TC-DSP-03 : Display – ALL Getter APIs Snapshot (HDMI0/STB)     ║\n";
+    out << "║  Run BEFORE and AFTER dsmgr restart to compare output.          ║\n";
+    out << "╚══════════════════════════════════════════════════════════════════╝\n";
+    out << "Timestamp   : " << timestamp_now() << "\n";
+    out << "Run number  : " << g_run_count << "\n";
+    out << "Port        : " << HDMI_PORT_NAME << "  (dsVIDEOPORT_TYPE_HDMI, index 0)\n";
+    out << "IARM_Init   : " << (g_iarm_initialized ? "YES" : "NO") << "\n";
+    out << "DS_Init     : " << (g_ds_initialized ? "YES (may be stale after restart)" : "NO") << "\n\n";
+
+    bool any_fail = false;
+    int  get_pass = 0, get_fail = 0;
+
+    try {
+        device::VideoOutputPort &vPort =
+            device::Host::getInstance().getVideoOutputPort(HDMI_PORT_NAME);
+
+        /* ── SECTION 1 : VideoOutputPort getters ──────────────────────────── */
+        out << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        out << "  SECTION 1 – VideoOutputPort Getters\n";
+        out << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+
+        try { out << "  getName()                     : " << vPort.getName() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getName()                     : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getId()                       : " << vPort.getId() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getId()                       : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getIndex()                    : " << vPort.getIndex() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getIndex()                    : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { bool v = vPort.isEnabled(); out << "  isEnabled()                   : " << (v?"Yes":"No") << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  isEnabled()                   : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { bool v = vPort.isActive(); out << "  isActive()                    : " << (v?"Yes":"No") << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  isActive()                    : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+
+        bool connected = false;
+        try { connected = vPort.isDisplayConnected(); out << "  isDisplayConnected()          : " << (connected?"Yes":"No") << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  isDisplayConnected()          : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { bool v = vPort.isContentProtected(); out << "  isContentProtected()          : " << (v?"Yes":"No") << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  isContentProtected()          : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { bool v = vPort.isDynamicResolutionSupported(); out << "  isDynamicResolutionSupported(): " << (v?"Yes":"No") << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  isDynamicResolutionSupported(): EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getResolution()               : " << vPort.getResolution().getName() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getResolution()               : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getDefaultResolution()        : " << vPort.getDefaultResolution().getName() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getDefaultResolution()        : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getType()                     : " << vPort.getType().getName() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getType()                     : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getVideoEOTF()                : " << vPort.getVideoEOTF() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getVideoEOTF()                : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getMatrixCoefficients()       : " << vPort.getMatrixCoefficients() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getMatrixCoefficients()       : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getColorSpace()               : " << vPort.getColorSpace() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getColorSpace()               : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getColorDepth()               : " << vPort.getColorDepth() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getColorDepth()               : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getQuantizationRange()        : " << vPort.getQuantizationRange() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getQuantizationRange()        : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { int eo,mc,cs,cd,qr; vPort.getCurrentOutputSettings(eo,mc,cs,cd,qr);
+              out << "  getCurrentOutputSettings()    : eotf=" << eo << " mc=" << mc << " cs=" << cs << " cd=" << cd << " qr=" << qr << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getCurrentOutputSettings()    : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getPreferredColorDepth()      : " << vPort.getPreferredColorDepth() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getPreferredColorDepth()      : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { unsigned int cap=0; vPort.getColorDepthCapabilities(&cap);
+              out << "  getColorDepthCapabilities()   : " << cap << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getColorDepthCapabilities()   : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  IsOutputHDR()                 : " << (vPort.IsOutputHDR()?"Yes":"No") << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  IsOutputHDR()                 : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { int cap=0; vPort.getTVHDRCapabilities(&cap);
+              out << "  getTVHDRCapabilities()        : " << cap << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getTVHDRCapabilities()        : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { int res=0; vPort.getSupportedTvResolutions(&res);
+              out << "  getSupportedTvResolutions()   : " << decode_tv_resolutions(res) << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getSupportedTvResolutions()   : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getHDCPStatus()               : " << vPort.getHDCPStatus() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getHDCPStatus()               : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getHDCPProtocol()             : " << vPort.getHDCPProtocol() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getHDCPProtocol()             : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  getHDCPCurrentProtocol()      : " << vPort.getHDCPCurrentProtocol() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  getHDCPCurrentProtocol()      : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+        try { out << "  GetHdmiPreference()           : " << vPort.GetHdmiPreference() << "\n"; ++get_pass; }
+        catch (const device::Exception &e) { out << "  GetHdmiPreference()           : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+
+        /* ── SECTION 2 : Display sub-object ───────────────────────────────── */
+        out << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        out << "  SECTION 2 – Display Sub-Object Getters\n";
+        out << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+
+        if (!connected) {
+            out << "  Display not connected – sub-object getters skipped.\n";
+        } else {
+            try {
+                const device::VideoOutputPort::Display &disp = vPort.getDisplay();
+
+                try { out << "  hasSurround()                 : " << (disp.hasSurround()?"Yes":"No") << "\n"; ++get_pass; }
+                catch (const device::Exception &e) { out << "  hasSurround()                 : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+                try { out << "  getSurroundMode()             : " << disp.getSurroundMode() << "\n"; ++get_pass; }
+                catch (const device::Exception &e) { out << "  getSurroundMode()             : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+
+                /* Inline getters cached from EDID – no RPC */
+                out << "  getProductCode()              : " << disp.getProductCode() << "\n"; ++get_pass;
+                out << "  getSerialNumber()             : " << disp.getSerialNumber() << "\n"; ++get_pass;
+                out << "  getManufacturerYear()         : " << disp.getManufacturerYear() << "\n"; ++get_pass;
+                out << "  getManufacturerWeek()         : " << disp.getManufacturerWeek() << "\n"; ++get_pass;
+                out << "  getConnectedDeviceType()      : " << disp.getConnectedDeviceType()
+                    << (disp.getConnectedDeviceType() ? "  (HDMI)" : "  (DVI)") << "\n"; ++get_pass;
+                out << "  isConnectedDeviceRepeater()   : " << (disp.isConnectedDeviceRepeater()?"Yes":"No") << "\n"; ++get_pass;
+                out << "  getAspectRatio()              : " << disp.getAspectRatio().getName() << "\n"; ++get_pass;
+
+                try { uint8_t a,b,c,d; disp.getPhysicallAddress(a,b,c,d);
+                      out << "  getPhysicallAddress()         : " << (int)a << "." << (int)b << "." << (int)c << "." << (int)d << "\n"; ++get_pass; }
+                catch (const device::Exception &e) { out << "  getPhysicallAddress()         : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+
+                /* ── SECTION 3 : EDID bytes ────────────────────────────────── */
+                out << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                out << "  SECTION 3 – EDID Bytes\n";
+                out << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                try { std::vector<uint8_t> edid; disp.getEDIDBytes(edid);
+                      out << "  getEDIDBytes()                : " << edid.size() << " bytes";
+                      if (!edid.empty()) {
+                          out << "  first-8:";
+                          for (size_t j=0; j<8 && j<edid.size(); ++j)
+                              out << " 0x" << std::hex << std::setw(2) << std::setfill('0') << (int)edid[j];
+                          out << std::dec << std::setfill(' ');
+                      }
+                      out << "\n"; ++get_pass; }
+                catch (const device::Exception &e) { out << "  getEDIDBytes()                : EXCEPTION – " << e.what() << "\n"; ++get_fail; any_fail=true; }
+            }
+            catch (const device::Exception &e) {
+                out << "  getDisplay() EXCEPTION: " << e.what() << "\n"; any_fail=true;
+            }
+        }
+    }
+    catch (const device::Exception &e) {
+        out << "\nEXCEPTION getting VideoOutputPort: " << e.what() << "\n"; any_fail=true;
+    }
+    catch (...) {
+        out << "\nEXCEPTION (unknown)\n"; any_fail=true;
+    }
+
+    /* ── SECTION 4 : Result summary ──────────────────────────────────────── */
+    out << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    out << "  Getters called  : " << (get_pass + get_fail) << "\n";
+    out << "  Getters OK      : " << get_pass << "\n";
+    out << "  Getters FAILED  : " << get_fail << "\n\n";
+    out << (any_fail ? "  RESULT: FAIL – " + std::to_string(get_fail) + " getter(s) threw exceptions\n"
+                    : "  RESULT: PASS – all Display getters returned values OK\n");
+    verify_record("TC-DSP-03",
+                  "Display all-getters snapshot (HDMI0/STB Realtek)",
+                  !any_fail,
+                  "getters_ok=" + std::to_string(get_pass) +
+                  " getters_fail=" + std::to_string(get_fail));
+    out << "Saved to: " << fname << "\n";
+}
+
+/* =========================================================================
  * TC-HIN-01: HdmiInput – ALL global getter APIs snapshot (before / after restart)
  *
  *   PURPOSE:
@@ -5365,10 +5551,12 @@ static void run_module_display(const std::string &run_dir)
     summary << "             + Display: hasSurround/getSurroundMode/getProductCode/getSerialNumber/\n";
     summary << "             getManufacturerYear/getManufacturerWeek/getConnectedDeviceType/\n";
     summary << "             isConnectedDeviceRepeater/getAspectRatio/getPhysicallAddress/getEDIDBytes)\n";
-    summary << "  TC-DSP-02  getEDIDBytes standalone raw file\n\n";
+    summary << "  TC-DSP-02  getEDIDBytes standalone raw file\n";
+    summary << "  TC-DSP-03  Display all-getter snapshot (HDMI0 – STB Realtek / dsVIDEOPORT_TYPE_HDMI)\n\n";
 
     tc_dsp_01_display_surround(mod_dir);
     tc_dsp_02_display_edid(mod_dir);
+    tc_dsp_03_hdmi0_all_getters(mod_dir);
 
     summary << "\n";
     print_sep(summary, "Verify Summary \u2013 Module 3 Display");
@@ -6040,7 +6228,7 @@ static void print_tc_module_menu(void)
     printf("╠══════════════════════════════════════════════════════════════╣\n");
     printf("║  [1] Audio         TC-AUD-01 … TC-AUD-17  (17 TCs) ◄ ACTIVE║\n");
     printf("║  [2] CompositeIn   TC-CIN-01 … TC-CIN-02  (2 TCs) ◄ ACTIVE ║\n");
-    printf("║  [3] Display       TC-DSP-01 … TC-DSP-02  (2 TCs) ◄ ACTIVE ║\n");
+    printf("║  [3] Display       TC-DSP-01 … TC-DSP-03  (3 TCs) ◄ ACTIVE ║\n");
     printf("║  [4] FPD           TC-FPD-01 … TC-FPD-07  (7 TCs) ◄ ACTIVE ║\n");
     printf("║  [5] HDMIIn        TC-HIN-01 … TC-HIN-02  (2 TCs) ◄ ACTIVE ║\n");
     printf("║  [6] Host          TC-HST-01 … TC-HST-02  (2 TCs) ◄ ACTIVE ║\n");
@@ -6341,9 +6529,12 @@ static void print_dsp_tc_menu(void)
     printf("║  READ (getter snapshot – no side-effects)                      ║\n");
     printf("║  [1] TC-DSP-01  ALL getter snapshot (VOP + Display sub-object) ║\n");
     printf("║       26 VOP getters + 10 Display getters + EDID bytes          ║\n");
+    printf("║       Port: INTERNAL0 (TV panel – Amlogic/Elemetti)             ║\n");
     printf("║  [2] TC-DSP-02  getEDIDBytes standalone raw file               ║\n");
+    printf("║  [3] TC-DSP-03  ALL getter snapshot (HDMI0 – STB Realtek)      ║\n");
+    printf("║       Same getters as TC-DSP-01 via dsVIDEOPORT_TYPE_HDMI      ║\n");
     printf("╠═══════════════════════════════════════════════════════════════╣\n");
-    printf("║  [A] Run ALL Display TCs (TC-DSP-01 … TC-DSP-02)               ║\n");
+    printf("║  [A] Run ALL Display TCs (TC-DSP-01 … TC-DSP-03)               ║\n");
     printf("║  [B] Back to TC module menu                                    ║\n");
     printf("╚════════════════════════════════════════════════════════════════╝\n");
     printf("Choice: ");
@@ -6381,12 +6572,24 @@ static void handle_dsp_tc_submenu(void)
             printf("  RUN %02d complete.  Results: %s\n", g_run_count, rd.c_str());
             printf("════════════════════════════════════════════════════════════════\n");
             break; }
+        case '3': {
+            std::string rd = start_tc_run("TC-DSP-03");
+            std::string md = get_module_dir(rd, "3_Display");
+            g_jctl_pid = journalctl_start(rd);
+            tc_dsp_03_hdmi0_all_getters(md);
+            write_global_verify_summary(rd);
+            journalctl_stop(g_jctl_pid, rd); g_jctl_pid = -1;
+            printf("\n════════════════════════════════════════════════════════════════\n");
+            printf("  RUN %02d complete.  Results: %s\n", g_run_count, rd.c_str());
+            printf("════════════════════════════════════════════════════════════════\n");
+            break; }
         case 'A': case 'a': {
-            std::string rd = start_tc_run("TC-DSP-01..02 (ALL)");
+            std::string rd = start_tc_run("TC-DSP-01..03 (ALL)");
             std::string md = get_module_dir(rd, "3_Display");
             g_jctl_pid = journalctl_start(rd);
             tc_dsp_01_display_surround(md);
             tc_dsp_02_display_edid(md);
+            tc_dsp_03_hdmi0_all_getters(md);
             write_global_verify_summary(rd);
             journalctl_stop(g_jctl_pid, rd); g_jctl_pid = -1;
             printf("\n════════════════════════════════════════════════════════════════\n");

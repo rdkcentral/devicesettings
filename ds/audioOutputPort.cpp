@@ -838,10 +838,15 @@ void AudioOutputPort::setDRCMode(const int mode)
 {
         dsError_t ret = dsERR_NONE;
 
+        INT_INFO("[AudioOutputPort::setDRCMode] port:%s handle:0x%lX mode:%d (%s)\n",
+                 _name.c_str(), (long)_handle, mode, mode == 1 ? "RF" : "Line");
+
         if ( (ret = dsSetDRCMode(_handle, mode)) == dsERR_NONE) {
+            INT_INFO("[AudioOutputPort::setDRCMode] OK\n");
         }
         else
         {
+            INT_ERROR("[AudioOutputPort::setDRCMode] FAILED ret:%d\n", ret);
             throw Exception(ret);
         }
 }
@@ -1046,12 +1051,19 @@ int AudioOutputPort::getDRCMode() const
 {
         dsError_t ret = dsERR_NONE;
         int _mode = 0;
+
+        INT_INFO("[AudioOutputPort::getDRCMode] port:%s handle:0x%lX\n",
+                 _name.c_str(), (long)_handle);
+
         if ((ret = dsGetDRCMode(_handle, &_mode)) == dsERR_NONE)
         {
-        return _mode;
+            INT_INFO("[AudioOutputPort::getDRCMode] OK mode:%d (%s)\n",
+                     _mode, _mode == 1 ? "RF" : "Line");
+            return _mode;
         }
         else
         {
+            INT_ERROR("[AudioOutputPort::getDRCMode] FAILED ret:%d\n", ret);
             throw Exception(ret);
         }
 }
@@ -1592,6 +1604,7 @@ void AudioOutputPort::enableARC(dsAudioARCTypes_t type, bool enable)
         dsError_t ret = dsERR_NONE;
         dsAudioARCStatus_t arcStatus;
 
+        
 	arcStatus.type = type;
 	arcStatus.status = enable;
 
