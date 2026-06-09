@@ -5254,11 +5254,23 @@ IARM_Result_t _dsGetDRCMode(void *arg)
     {
         int mode = 0;
         param->mode = 0;
-        if (func(param->handle, &mode) == dsERR_NONE)
+        INT_INFO("[_dsGetDRCMode SRV] handle:0x%lX -> SOC HAL dsGetDRCMode()\n", (long)param->handle);
+        dsError_t halRet = func(param->handle, &mode);
+        if (halRet == dsERR_NONE)
         {
             param->mode = mode;
             result = IARM_RESULT_SUCCESS;
+            INT_INFO("[_dsGetDRCMode SRV] SOC HAL OK mode:%d (%s)\n", mode, mode == 1 ? "RF" : "Line");
         }
+        else
+        {
+            INT_ERROR("[_dsGetDRCMode SRV] SOC HAL FAILED halRet:%d\n", halRet);
+        }
+    }
+    else
+    {
+        INT_ERROR("[_dsGetDRCMode SRV] func:%p param:%p – HAL not loaded or null arg\n",
+                  (void*)func, (void*)param);
     }
 
     IARM_BUS_Unlock(lock);
@@ -5299,14 +5311,27 @@ IARM_Result_t _dsSetDRCMode(void *arg)
 
     if (func != 0 && param != NULL)
     {
-        if (func(param->handle, param->mode) == dsERR_NONE)
+        INT_INFO("[_dsSetDRCMode SRV] handle:0x%lX mode:%d (%s) -> SOC HAL dsSetDRCMode()\n",
+                 (long)param->handle, param->mode, param->mode == 1 ? "RF" : "Line");
+        dsError_t halRet = func(param->handle, param->mode);
+        if (halRet == dsERR_NONE)
         {
+            INT_INFO("[_dsSetDRCMode SRV] SOC HAL OK\n");
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
             INT_INFO("%s: persist DRC Mode value: %s\n",__func__, param->mode ? "RF":"Line");
             device::HostPersistence::getInstance().persistHostProperty("audio.DRCMode",param->mode ? "RF":"Line");
 #endif
             result = IARM_RESULT_SUCCESS;
         }
+        else
+        {
+            INT_ERROR("[_dsSetDRCMode SRV] SOC HAL FAILED halRet:%d\n", halRet);
+        }
+    }
+    else
+    {
+        INT_ERROR("[_dsSetDRCMode SRV] func:%p param:%p – HAL not loaded or null arg\n",
+                  (void*)func, (void*)param);
     }
 
     IARM_BUS_Unlock(lock);
