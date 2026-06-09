@@ -51,6 +51,8 @@
 #include "libIBus.h"     /* IARM_Bus_RegisterEventHandler / UnRegisterEventHandler */
 #include <thread>           /* std::thread for deferred handle refresh */
 #include <chrono>           /* std::chrono::milliseconds */
+#include <cstdio>           /* fopen / fgets / fclose */
+#include <cstring>          /* strstr / strchr / strncmp */
 
 /**
  * @file manager.cpp
@@ -71,6 +73,62 @@ namespace device {
 int Manager::IsInitialized = 0;   //!< Indicates the application has initialized with devicettings modules.
 static std::mutex gManagerInitMutex;
 static dsError_t initializeFunctionWithRetry(const char* functionName, std::function<dsError_t()> initFunc);
+
+/**
+ * @brief Device profile type — identical naming and values as profile_t in
+ *        dsInternal.h (server-side) but defined locally so the client
+ *        library has no dependency on RPC-layer headers.
+ */
+typedef enum profile {
+    PROFILE_INVALID = -1,
+    PROFILE_STB     =  0,
+    PROFILE_TV,
+    PROFILE_MAX
+} profile_t;
+
+/**
+ * @brief Read RDK_PROFILE from /etc/device.properties and return the
+ *        corresponding profile_t value.  Uses the same key/value scan as
+ *        dsMgr.c::searchRdkProfile() but is self-contained in the client
+ *        library — no dependency on server-side dsInternal.h or the
+ *        dsmgr-process profileType global.
+ *
+ *        Result is cached by each call-site (static local) so the file
+ *        is only read once per process lifetime.
+ */
+static profile_t getRdkDeviceProfile()
+{
+    const char* devPropPath = "/etc/device.properties";
+    char line[256];
+    profile_t result = PROFILE_INVALID;
+
+    FILE* fp = std::fopen(devPropPath, "r");
+    if (fp == nullptr) {
+        INT_WARN("[Manager] getRdkDeviceProfile: cannot open %s", devPropPath);
+        return PROFILE_INVALID;
+    }
+
+    while (std::fgets(line, sizeof(line), fp)) {
+        if (std::strstr(line, "RDK_PROFILE") != nullptr) {
+            const char* val = std::strchr(line, '=');
+            if (val != nullptr) {
+                val++; /* skip past '=' */
+                if        (std::strncmp(val, "STB", 3) == 0) {
+                    result = PROFILE_STB;
+                } else if (std::strncmp(val, "TV",  2) == 0) {
+                    result = PROFILE_TV;
+                }
+            }
+            break;
+        }
+    }
+
+    std::fclose(fp);
+    INT_INFO("[Manager] getRdkDeviceProfile: %s",
+             result == PROFILE_STB ? "STB"  :
+             result == PROFILE_TV  ? "TV"   : "INVALID");
+    return result;
+}
 
 /**
  * @brief IARM_BUS_DSMGR_EVENT_RESTARTED handler registered by Manager::Initialize().
@@ -157,6 +215,53 @@ static void dsMgrRestartedHandler(const char* owner, IARM_EventId_t eventId,
             if (audioRet == dsERR_NONE && videoPortRet == dsERR_NONE && videoDevRet == dsERR_NONE) {
                 INT_INFO("[refreshThread] ALL handles refreshed OK on attempt %d "
                          "(total wait %d ms)", attempt, cumulativeWaitMs);
+
+                /* Cache the profile once for the lifetime of this process.
+                 * C++11 guarantees thread-safe static-local initialisation. */
+                static const profile_t deviceProfile = getRdkDeviceProfile();
+
+                if (deviceProfile == PROFILE_STB) {
+                    /* ---- STB only: cycle HDMI0 audio port (disable → enable) ----
+                     * After dsmgr restarts, some STB SOC HALs reset the audio
+                     * output enable state.  Cycling forces the HAL back to the
+                     * correct enabled state and ensures getter APIs (e.g. getDB,
+                     * getFormat) return consistent values on the new handle. */
+                    try {
+                        AudioOutputPort& aport =
+                            AudioOutputPortConfig::getInstance().getPort("HDMI0");
+                        INT_INFO("[refreshThread] STB: cycling HDMI0 audio port (disable)");
+                        aport.disable();
+                        INT_INFO("[refreshThread] STB: cycling HDMI0 audio port (enable)");
+                        aport.enable();
+                        INT_INFO("[refreshThread] STB: HDMI0 audio port cycle OK");
+                    }
+                    catch (const std::exception& ex) {
+                        INT_WARN("[refreshThread] STB: HDMI0 audio port cycle failed: %s",
+                                 ex.what());
+                    }
+
+                    /* ---- STB only: cycle HDMI0 video port (disable → enable) ----
+                     * Avoids black screen after dsmgr restarts.  The SOC HAL may
+                     * leave video output disabled after re-init; an explicit
+                     * disable→enable re-asserts the HDMI Tx path. */
+                    try {
+                        VideoOutputPort& vport =
+                            VideoOutputPortConfig::getInstance().getPort("HDMI0");
+                        INT_INFO("[refreshThread] STB: cycling HDMI0 video port (disable)");
+                        vport.disable();
+                        INT_INFO("[refreshThread] STB: cycling HDMI0 video port (enable)");
+                        vport.enable();
+                        INT_INFO("[refreshThread] STB: HDMI0 video port cycle OK");
+                    }
+                    catch (const std::exception& ex) {
+                        INT_WARN("[refreshThread] STB: HDMI0 video port cycle failed: %s",
+                                 ex.what());
+                    }
+                } else {
+                    INT_INFO("[refreshThread] profile=%s — skipping HDMI0 port cycle",
+                             deviceProfile == PROFILE_TV ? "TV" : "INVALID");
+                }
+
                 return;
             }
 
