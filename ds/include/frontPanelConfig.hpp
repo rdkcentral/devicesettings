@@ -77,7 +77,7 @@ private:
 	virtual ~FrontPanelConfig();
 
 public:
-	static FrontPanelConfig & getInstance();
+	static FrontPanelConfig & getInstance(bool isForce = false);
 
 	FrontPanelIndicator::Color &getColor(int id);
 	FrontPanelIndicator 	   &getIndicator(int id);
