@@ -83,11 +83,19 @@ FrontPanelConfig::~FrontPanelConfig()
  *
  * @return _singleton An instance of FrontPanelConfig is returned.
  */
-FrontPanelConfig & FrontPanelConfig::getInstance()
+FrontPanelConfig & FrontPanelConfig::getInstance(bool isForce)
 {
     static FrontPanelConfig _singleton;
-    if (!_singleton.m_isFPInitialized)
+    if (!_singleton.m_isFPInitialized || isForce)
     {
+        /* isForce=true: called after dsmgr restart — the static singleton's
+         * m_isFPInitialized flag stays true across restarts so the normal
+         * (!m_isFPInitialized) guard would skip dsFPInit().  Reset the flag
+         * here to force the retry loop to run and re-establish the FPD HAL. */
+        if (isForce) {
+            INT_INFO("FrontPanelConfig::getInstance — force re-init requested, resetting m_isFPInitialized\n");
+            _singleton.m_isFPInitialized = false;
+        }
         dsError_t errorCode = dsERR_NONE;
         unsigned int retryCount = 1;
         do
