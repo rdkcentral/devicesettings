@@ -2306,10 +2306,12 @@ void AudioConfigInit()
 
             ret = dsSetStereoMode(_h, _stereoMode);
             if (ret != dsERR_NONE) {
-                INT_ERROR(" AudioConfigInit: %s dsSetStereoMode(%d) failed\n, ret =%d \n", _name, (int)_stereoMode, ret);
+                INT_ERROR(" AudioConfigInit: %s dsSetStereoMode(%d) failed ret=%d\n",
+                          _name, (int)_stereoMode, ret);
             }
             else {
-                INT_INFO(" AudioConfigInit: %s dsSetStereoAuto(%d) success ret =%d\n", _name, _autoMode, ret);
+                INT_INFO(" AudioConfigInit: %s dsSetStereoMode(%d) success ret=%d\n",
+                         _name, (int)_stereoMode, ret);
             }
         }
     }
