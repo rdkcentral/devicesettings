@@ -53,6 +53,7 @@
 #include <chrono>           /* std::chrono::milliseconds */
 #include <cstdio>           /* fopen / fgets / fclose */
 #include <cstring>          /* strstr / strchr / strncmp */
+#include <string> 
 
 /**
  * @file manager.cpp
@@ -619,6 +620,10 @@ void Manager::DeInitialize()
         INT_INFO("Entering ... count %d with thread id %lu",IsInitialized,pthread_self());
         if(IsInitialized>0)IsInitialized--;
         if (0 == IsInitialized) {
+            IARM_Bus_UnRegisterEventHandler(
+                IARM_BUS_DSMGR_NAME,
+                IARM_BUS_DSMGR_EVENT_RESTARTED);
+
             VideoDeviceConfig::getInstance().release();
             VideoOutputPortConfig::getInstance().release();
             AudioOutputPortConfig::getInstance().release();

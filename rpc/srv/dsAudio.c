@@ -2247,6 +2247,19 @@ void AudioConfigInit()
                 }
             }
 
+            /* Speaker: restore ducking volume before enabling — same logic as _dsEnableAudioPort() */
+            if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_SPEAKER && _enable) {
+                bool _muted = false;
+                if (dsIsAudioMute(_h, &_muted) != dsERR_NONE)
+                    INT_INFO(" AudioConfigInit: SPEAKER0 dsIsAudioMute failed\n");
+                if (!_muted) {
+                    if (IARM_RESULT_SUCCESS != setAudioDuckingAudioLevel(_h))
+                        INT_INFO(" AudioConfigInit: SPEAKER0 setAudioDuckingAudioLevel failed\n");
+                } else {
+                    INT_INFO(" AudioConfigInit: SPEAKER0 muted — skipping ducking restore\n");
+                }
+            }
+
             /* Gate audio path for all ports */
             dsError_t _enRet = dsEnableAudioPort(_h, _enable);
             INT_INFO(" AudioConfigInit: %s dsEnableAudioPort(enable=%d) ret=0x%x\n",
