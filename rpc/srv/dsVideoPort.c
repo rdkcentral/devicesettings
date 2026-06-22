@@ -1689,6 +1689,18 @@ IARM_Result_t _dsGetTVHDRCapabilities(void *arg)
         param->capabilities = dsHDRSTANDARD_NONE;
     }
 
+    INT_INFO("dsGetTVHDRCapabilities: capabilities=0x%x [ %s%s%s%s%s%s%s]\r\n",
+        param->capabilities,
+        (param->capabilities & dsHDRSTANDARD_HDR10)           ? "HDR10 "            : "",
+        (param->capabilities & dsHDRSTANDARD_HDR10PLUS)       ? "HDR10PLUS "        : "",
+        (param->capabilities & dsHDRSTANDARD_HLG)             ? "HLG "              : "",
+        (param->capabilities & dsHDRSTANDARD_DolbyVision)     ? "DolbyVision "      : "",
+        (param->capabilities & dsHDRSTANDARD_TechnicolorPrime) ? "TechnicolorPrime " : "",
+        (param->capabilities & dsHDRSTANDARD_SDR)             ? "SDR "              : "",
+        (param->capabilities == dsHDRSTANDARD_NONE)           ? "NONE "             : "");
+    INT_INFO("dsGetTVHDRCapabilities: HDR10PLUS is %s\r\n",
+        (param->capabilities & dsHDRSTANDARD_HDR10PLUS) ? "SUPPORTED" : "NOT SUPPORTED");
+
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
