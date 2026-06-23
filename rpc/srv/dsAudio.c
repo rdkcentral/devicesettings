@@ -2086,7 +2086,7 @@ void AudioConfigInit()
                 {
                     char telemetryValue[128] = {0};
                     snprintf(telemetryValue, sizeof(telemetryValue), "dsSetStereoMode The HDMI ARC Port Audio Settings Mode is %d", _srv_HDMI_ARC_Audiomode);
-                    TELEMETRY_EVENT_STRING("SYS_INFO_PASSTHRUENABLED", telemetryValue);
+                    TELEMETRY_EVENT_INT("SYS_INFO_PASSTHRUENABLED", 1);                    
                 }
            }
       }
@@ -2749,9 +2749,7 @@ IARM_Result_t _dsSetStereoMode(void *arg)
             {
                 INT_INFO("Setting Audio Mode PASSTHRU with persistent value %d \r\n",param->toPersist);
                 if(param->toPersist){
-                    char telemetryValue[128] = {0};
-                    snprintf(telemetryValue, sizeof(telemetryValue), "The HDMI Audio Mode Setting From Persistent is %d", param->toPersist);
-                    TELEMETRY_EVENT_STRING("SYS_INFO_Userpassthruenable", telemetryValue);
+                    TELEMETRY_EVENT_INT("SYS_INFO_Userpassthruenable", 1);
                 }
                 
 
@@ -2838,42 +2836,40 @@ IARM_Result_t _dsGetStereoAuto(void *arg)
 IARM_Result_t _dsSetStereoAuto(void *arg)
 {
     _DEBUG_ENTER();
-    IARM_BUS_Lock(lock);
+    if (!arg) {
+        return IARM_RESULT_INVALID_PARAM;
+    }
 
-    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     dsAudioSetStereoAutoParam_t *param = (dsAudioSetStereoAutoParam_t *)arg;
 
+    IARM_BUS_Lock(lock);
+
     dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
+    int *runtimeAutoPtr = NULL;
 
-    if (param->toPersist) {
-	switch(_APortType) {
-	    case dsAUDIOPORT_TYPE_HDMI:
-	        device::HostPersistence::getInstance().persistHostProperty("HDMI0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
-            _srv_AudioHDMIAuto = param->autoMode;
-		break;
-
-	    case dsAUDIOPORT_TYPE_HDMI_ARC:
-	        device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
-            _srv_AudioHDMIARCAuto = param->autoMode;
-		break;
-
-	    case dsAUDIOPORT_TYPE_SPDIF:
-		device::HostPersistence::getInstance().persistHostProperty("SPDIF0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
-            _srv_AudioSPDIFAuto = param->autoMode;
-		break;
-
+    switch(_APortType) {
+        case dsAUDIOPORT_TYPE_HDMI:
+            runtimeAutoPtr = &_srv_AudioHDMIAuto;
+            break;
+        case dsAUDIOPORT_TYPE_HDMI_ARC:
+            runtimeAutoPtr = &_srv_AudioHDMIARCAuto;
+            break;
+        case dsAUDIOPORT_TYPE_SPDIF:
+            runtimeAutoPtr = &_srv_AudioSPDIFAuto;
+            break;
         case dsAUDIOPORT_TYPE_SPEAKER:
-            device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
-            _srv_AudioSPEAKERAuto = param->autoMode;
-        break; 
-	    default:
-		break;
-	}
+            runtimeAutoPtr = &_srv_AudioSPEAKERAuto;
+            break;
+        default:
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_PARAM;
     }
 
     if ((_APortType == dsAUDIOPORT_TYPE_HDMI_ARC) || (_APortType == dsAUDIOPORT_TYPE_SPDIF)) {
         typedef dsError_t (*dsSetStereoAuto_t)(intptr_t handle, int autoMode);
         static dsSetStereoAuto_t func = 0;
+        bool halUpdateSuccess = false;
+
         if (func == 0) {
             void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
             if (dllib) {
@@ -2891,12 +2887,33 @@ IARM_Result_t _dsSetStereoAuto(void *arg)
             }
         }
 
-        if (func != 0)
-        {
-            if (func(param->handle, param->autoMode) == dsERR_NONE)
-            {
-               result = IARM_RESULT_SUCCESS;
-            }
+        if (func != 0) {
+            halUpdateSuccess = (func(param->handle, param->autoMode) == dsERR_NONE);
+        }
+
+        if (!halUpdateSuccess) {
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+    }
+
+    /* Update runtime auto-state for immediate readback behavior. */
+    *runtimeAutoPtr = param->autoMode ? 1 : 0;
+
+    if (param->toPersist) {
+        switch(_APortType) {
+            case dsAUDIOPORT_TYPE_HDMI:
+                device::HostPersistence::getInstance().persistHostProperty("HDMI0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+                break;
+            case dsAUDIOPORT_TYPE_HDMI_ARC:
+                device::HostPersistence::getInstance().persistHostProperty("HDMI_ARC0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+                break;
+            case dsAUDIOPORT_TYPE_SPDIF:
+                device::HostPersistence::getInstance().persistHostProperty("SPDIF0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+                break;
+            case dsAUDIOPORT_TYPE_SPEAKER:
+                device::HostPersistence::getInstance().persistHostProperty("SPEAKER0.AudioMode.AUTO", param->autoMode ? "TRUE" : "FALSE");
+                break;
         }
     }
 
