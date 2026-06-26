@@ -45,17 +45,20 @@ extern "C" {
 
 #define TELEMETRY_EVENT_STRING(marker, value) \
     do { \
-        t2_event_s((char*)marker, (char*)value); \
+        (void)(marker); \
+        (void)(value); \
     } while(0)
-
+    
 #define TELEMETRY_EVENT_FLOAT(marker, value) \
     do { \
-        t2_event_f((char*)marker, (double)value); \
+        (void)(marker); \
+        (void)(value); \
     } while(0)
 
 #define TELEMETRY_EVENT_INT(marker, value) \
     do { \
-        t2_event_d((char*)marker, (int)value); \
+        (void)(marker); \
+        (void)(value); \
     } while(0)
 
 #ifdef __cplusplus
