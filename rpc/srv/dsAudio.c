@@ -4231,7 +4231,7 @@ IARM_Result_t _dsGetSinkDeviceAtmosCapability(void *arg)
 #endif
     _DEBUG_ENTER();
     IARM_BUS_Lock(lock);
-
+    INT_INFO("preeja _dsGetSinkDeviceAtmosCapability");
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     typedef dsError_t (*dsGetSinkDeviceAtmosCapability_t)(intptr_t handle, dsATMOSCapability_t *capability);
     static dsGetSinkDeviceAtmosCapability_t func = 0;
@@ -4240,7 +4240,7 @@ IARM_Result_t _dsGetSinkDeviceAtmosCapability(void *arg)
         if (dllib) {
             func = (dsGetSinkDeviceAtmosCapability_t) dlsym(dllib, "dsGetSinkDeviceAtmosCapability");
             if (func) {
-                INT_DEBUG("dsGetSinkDeviceAtmosCapability_t (intptr_t handle, dsATMOSCapability_t *capability ) is defined and loaded\r\n");
+                INT_INFO("preeja dsGetSinkDeviceAtmosCapability_t (intptr_t handle, dsATMOSCapability_t *capability ) is defined and loaded\r\n");
             }
             else {
                 INT_INFO("dsGetSinkDeviceAtmosCapability_t (intptr_t handle, dsATMOSCapability_t *capability ) is not defined\r\n");
@@ -4253,7 +4253,7 @@ IARM_Result_t _dsGetSinkDeviceAtmosCapability(void *arg)
     }
 
     dsGetAudioAtmosCapabilityParam_t *param = (dsGetAudioAtmosCapabilityParam_t *)arg;
-
+    INT_INFO("preeja capability fetch");
     if (func != 0 && param != NULL)
     {
         dsATMOSCapability_t capability = dsAUDIO_ATMOS_NOTSUPPORTED;
@@ -4261,9 +4261,11 @@ IARM_Result_t _dsGetSinkDeviceAtmosCapability(void *arg)
         param->capability= dsAUDIO_ATMOS_NOTSUPPORTED;
         if (func(param->handle, &capability) == dsERR_NONE)
         {
+			INT_INFO("preeja capability %d", capability);
             param->capability = capability;
             result = IARM_RESULT_SUCCESS;
         }
+		INT_INFO("preeja param->capability %d", param->capability);
     }
 
     IARM_BUS_Unlock(lock);
