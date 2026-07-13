@@ -800,7 +800,7 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
     _DEBUG_ENTER();
 
     dsHdmiInGetNumberOfInputsParam_t *param = (dsHdmiInGetNumberOfInputsParam_t *)arg;
-	INT_DEBUG("[%s:%d] Entering _dsHdmiInGetNumberOfInputs with arg: %p\r\n", __FUNCTION__, __LINE__, arg);
+	INT_INFO("[%s:%d] Entering _dsHdmiInGetNumberOfInputs with arg: %p\r\n", __FUNCTION__, __LINE__, arg);
 
     IARM_BUS_Lock(lock);
 	INT_INFO("[%s:%d] Lock acquired, profileType: %d\r\n", __FUNCTION__, __LINE__, profileType);
