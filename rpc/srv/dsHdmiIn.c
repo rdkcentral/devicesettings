@@ -800,20 +800,25 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
     _DEBUG_ENTER();
 
     dsHdmiInGetNumberOfInputsParam_t *param = (dsHdmiInGetNumberOfInputsParam_t *)arg;
+	INT_DEBUG("[%s:%d] Entering _dsHdmiInGetNumberOfInputs with arg: %p\r\n", __FUNCTION__, __LINE__, arg);
 
     IARM_BUS_Lock(lock);
+	INT_INFO("[%s:%d] Lock acquired, profileType: %d\r\n", __FUNCTION__, __LINE__, profileType);
 
     if (PROFILE_TV == profileType)
     {
         INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
         param->result = dsHdmiInGetNumberOfInputs(&param->numHdmiInputs);
+		INT_INFO("[%s:%d] dsHdmiInGetNumberOfInputs returned result: %d, numHdmiInputs: %d\r\n", __FUNCTION__, __LINE__, param->result, param->numHdmiInputs);
     }
     else
     {
         INT_INFO("[%d][%s]: its Other Profile\r\n", __LINE__, __FUNCTION__);
         param->result = dsERR_GENERAL;
     }
+	INT_INFO("[%s:%d] About to release lock, final result: %d\r\n", __FUNCTION__, __LINE__, param->result);
     IARM_BUS_Unlock(lock);
+	INT_INFO("[%s:%d] Exiting _dsHdmiInGetNumberOfInputs\r\n", __FUNCTION__, __LINE__);
 
     return IARM_RESULT_SUCCESS;
 }
