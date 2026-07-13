@@ -100,6 +100,7 @@ dsError_t dsHdmiInTerm (void)
 
 dsError_t dsHdmiInGetNumberOfInputs (uint8_t *pNumHdmiInputs)
 {
+	printf("dsHdmiInGetNumberOfInputs cli: entry\n");
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(pNumHdmiInputs != NULL, dsERR_INVALID_PARAM);
 
@@ -107,7 +108,8 @@ dsError_t dsHdmiInGetNumberOfInputs (uint8_t *pNumHdmiInputs)
     param.numHdmiInputs = 0;
 
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
-
+	printf("dsHdmiInGetNumberOfInputs cli: IARM call start\n");
+	
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                             (char *)IARM_BUS_DSMGR_API_dsHdmiInGetNumberOfInputs,
                             (void *)&param,
