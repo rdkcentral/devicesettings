@@ -61,6 +61,7 @@ static bool m_MS12DAPV2Enabled = 0;
 static bool m_MS12DEEnabled = 0;
 static bool m_LEEnabled = 0;
 static int m_volumeDuckingLevel = 0;
+static std::atomic<float> m_LastVolumeLevel = ATOMIC_VAR_INIT(0.0);
 static int m_MuteStatus = false;
 static int m_isDuckingInProgress = false;
 static bool m_AudioPortEnabled[dsAUDIOPORT_TYPE_MAX] = {false};
@@ -3249,6 +3250,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         } else if( dsSetAudioLevelFunc(param->handle, param->level) == dsERR_NONE) {
             result = IARM_RESULT_SUCCESS;
         }
+	m_LastVolumeLevel = {param->level};
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioLevel = std::to_string(param->level);
         switch(_APortType) {
@@ -3316,11 +3318,8 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     }
     else
     {
-         dsError_t ret = dsGetAudioLevel (handle, &volume);
-         if (ret != dsERR_NONE) {
-            INT_ERROR("%s dsGetAudioLevel\n",__FUNCTION__);
-         }
-         INT_DEBUG("%s: audio level %f\n", __FUNCTION__, volume);
+	 volume = m_LastVolumeLevel;
+         INT_INFO("%s: audio level from cache before ducking started: %f\n", __FUNCTION__, volume);
     }
     if (dsSetAudioLevelFunc == 0)
     {
