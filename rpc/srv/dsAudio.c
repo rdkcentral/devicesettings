@@ -3210,7 +3210,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         if(_APortType == dsAUDIOPORT_TYPE_SPEAKER)
         {
-            INT_DEBUG("_dsSetAudioLevel param->level :%f m_isDuckingInProgress :%d  \n",param->level,m_isDuckingInProgress);
+            INT_INFO("_dsSetAudioLevel param->level :%f m_isDuckingInProgress :%d  \n",param->level,m_isDuckingInProgress);
             float currlevel = 0;
             if (dsGetAudioLevelfunc == 0) {
                 void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
@@ -3239,6 +3239,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
                  result = IARM_RESULT_SUCCESS;
                }
             }
+            INT_INFO("_dsSetAudioLevel currlevel :%f m_isDuckingInProgress :%d  \n",currlevel,m_isDuckingInProgress);
             if(m_isDuckingInProgress && currlevel != m_volumeDuckingLevel )
             {
                dsSetAudioLevelFunc(param->handle, m_volumeDuckingLevel);
@@ -3251,6 +3252,7 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
             result = IARM_RESULT_SUCCESS;
         }
 	m_LastVolumeLevel = {param->level};
+	            INT_INFO("_dsSetAudioLevel m_LastVolumeLevel :%f  \n",float(m_LastVolumeLevel));
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioLevel = std::to_string(param->level);
         switch(_APortType) {
@@ -3312,15 +3314,18 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
 static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
 {
     float volume = 0;
+         INT_INFO("%s: audio level m_isDuckingInProgress : %d\n", __FUNCTION__, m_isDuckingInProgress);
     if(m_isDuckingInProgress)
     {
          volume = m_volumeDuckingLevel;
+         INT_INFO("%s: audio level from cache before m_volumeDuckingLevel: %d\n", __FUNCTION__, m_volumeDuckingLevel);
     }
     else
     {
 	 volume = m_LastVolumeLevel;
-         INT_INFO("%s: audio level from cache before ducking started: %f\n", __FUNCTION__, volume);
+         INT_INFO("%s: audio level from cache before m_LastVolumeLevel: %f\n", __FUNCTION__, float(m_LastVolumeLevel));
     }
+         INT_INFO("%s: audio level from cache before ducking started: %f\n", __FUNCTION__, volume);
     if (dsSetAudioLevelFunc == 0)
     {
          void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
@@ -3363,7 +3368,7 @@ IARM_Result_t _dsSetAudioMute(void *arg)
            return IARM_RESULT_INVALID_STATE;
        }
     }
-   
+  INT_INFO("%s: param mute:: %d\n", __FUNCTION__, param->mute); 
     ret = dsSetAudioMute(param->handle, param->mute);
     if (ret == dsERR_NONE) {
 	    m_MuteStatus = param->mute;
