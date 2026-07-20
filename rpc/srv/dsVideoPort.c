@@ -831,19 +831,23 @@ IARM_Result_t _dsGetResolution(void *arg)
 
 	dsVideoPortType_t _VPortType = _GetVideoPortType(param->handle);
 	bool isConnected = 0;
-	dsIsDisplayConnected(param->handle,&isConnected);
+	dsError_t error = dsIsDisplayConnected(param->handle,&isConnected);
+	if(dsERR_NONE != error)
+	{
+		INT_ERROR("Failed to get display connected status, _VPortType:%d, Error:%d\r\n",_VPortType,error);
+	}
 
 	if (_VPortType == dsVIDEOPORT_TYPE_HDMI ||
          _VPortType == dsVIDEOPORT_TYPE_INTERNAL)
 	{
-		INT_INFO("Reading HDMI  persistent resolution if toPersist true value: %d isConnected is false value:%d ",param->toPersist,isConnected);
-		if(param->toPersist || !isConnected)
+		INT_INFO("_VPortType:%d toPersist:%d isConnected:%d\r\n",_VPortType,param->toPersist,isConnected);
+		if ((param->toPersist) || ((dsERR_NONE == error) && (!isConnected)))
 		{
 			_Resolution = device::HostPersistence::getInstance().getProperty("HDMI0.resolution",_Resolution);
 			INT_INFO("Reading HDMI  persistent resolution %s\r\n",_Resolution.c_str());
 		}
 		else{
-			dsError_t error = dsGetResolution(param->handle,resolution);
+			error = dsGetResolution(param->handle,resolution);
 			if(error == dsERR_NONE) {
 				_Resolution = resolution->name;
 				INT_DEBUG("ResOverride platform reported resolution is: %s. Cached resolution is: %s\r\n",_Resolution.c_str(), _dsHDMIResolution.c_str());
