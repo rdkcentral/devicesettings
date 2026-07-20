@@ -838,11 +838,14 @@ IARM_Result_t _dsGetResolution(void *arg)
 	dsVideoPortResolution_t *resolution = &param->resolution;	
 
 	dsVideoPortType_t _VPortType = _GetVideoPortType(param->handle);
+	bool isConnected = 0;
+	dsIsDisplayConnected(param->handle,&isConnected);
 
 	if (_VPortType == dsVIDEOPORT_TYPE_HDMI ||
          _VPortType == dsVIDEOPORT_TYPE_INTERNAL)
 	{
-		if(param->toPersist)
+		INT_INFO("Reading HDMI  persistent resolution if toPersist true value: %d isConnected is false value:%d ",param->toPersist,isConnected);
+		if(param->toPersist || !isConnected)
 		{
 			_Resolution = device::HostPersistence::getInstance().getProperty("HDMI0.resolution",_Resolution);
 			INT_INFO("Reading HDMI  persistent resolution %s\r\n",_Resolution.c_str());
