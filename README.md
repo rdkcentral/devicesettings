@@ -16,7 +16,7 @@ classDef VL stroke:#808080,fill:#F2F2F2,stroke-width:2px;
         FBApps["Firebolt Apps"]
 		WPE_RT["WPE Runtime"]
     end
-	
+
 %% Middleware
     subgraph RDKMW["RDK Core Middleware"]
         AM["App Manager"]
@@ -53,7 +53,7 @@ classDef VL stroke:#808080,fill:#F2F2F2,stroke-width:2px;
 
 - **Front Panel Management**: Controls front panel LED indicators with configurable colors, brightness levels, and blink patterns, as well as text display modules supporting scrolling text, clock display with configurable time formats.
 
-- **HDMI Input Management**: Manages HDMI input port selection, signal presence detection, scaling configuration, EDCP protection status, and audio-video format detection for HDMI input sources.
+- **HDMI Input Management**: Manages HDMI input port selection, signal presence detection, scaling configuration, HDCP protection status, and audio-video format detection for HDMI input sources.
 
 - **Composite Input Support**: Provides interface for composite video input port management including port selection and signal detection capabilities.
 
@@ -186,11 +186,11 @@ graph TD
 
 ### Threading Model
 
-Device Settings is a single-threaded library with thread-safe initialization. The component does not create or manage any worker threads internally. All API calls execute synchronously in the caller's thread context, directly invoking the underlying HAL functions and returning results to the caller before the function returns.
+Device Settings does not create or manage any internal threads. Direct API calls execute synchronously in the calling thread's context, invoking the underlying HAL functions and returning results before the function returns. However, the library may execute in multiple external thread contexts depending on the calling source: client-initiated API calls run in the caller's thread, hardware event callbacks from the HAL are invoked in the HAL's callback thread, and IARM event handlers are dispatched in the IARM Bus event dispatch thread. Callers should treat callback and event handler implementations as potentially executing on threads outside their direct control.
 
-- **Threading Architecture**: Single-threaded library with synchronous API execution model
+- **Threading Architecture**: Device Settings does not spawn or manage threads. Direct API calls run synchronously in the calling thread's context. HAL hardware event callbacks execute in the HAL's callback thread, and IARM event handlers execute in the IARM Bus event dispatch thread.
 
-- **Main Thread**: Device Settings executes all operations in the calling thread's context. When a client invokes a Device Settings API (such as setting audio volume or querying video resolution), the call flows through the C++ wrapper layer to the HAL function and returns synchronously with the result or error code.
+- **Client API Thread**: Device Settings executes all direct API calls in the calling thread's context. When a client invokes a Device Settings API (such as setting audio volume or querying video resolution), the call flows through the C++ wrapper layer to the HAL function and returns synchronously with the result or error code.
 
 - **Initialization Synchronization**: The Manager::Initialize() method uses a mutex (gManagerInitMutex) to ensure thread-safe initialization. This prevents race conditions when multiple threads or processes attempt to initialize Device Settings concurrently. Once initialization completes, the IsInitialized flag is set atomically to indicate readiness.
 
@@ -204,7 +204,7 @@ Device Settings is a single-threaded library with thread-safe initialization. Th
 
 ### Platform and Integration Requirements
 
-- **Build Dependencies**: 
+- **Build Dependencies**:
   - Yocto recipe dependencies: `json-c`, `iarmbus`, `rdk-logger`, `virtual/vendor-devicesettings-hal`, `devicesettings-hal-headers`, `safec-common-wrapper`, `rfc`, `wdmp-c`, `telemetry`, `glib-2.0 >= 2.24.0`, `gthread-2.0 >= 2.24.0`, `dbus-1`, `direct`, `fusion`
   - Linked libraries (LDFLAGS): `-lrdkloggers`, `-lpthread`, `-lglib-2.0`, `-lIARMBus`, `-ldl`, `-ltelemetry_msgsender`, `-lrfcapi`
   - HAL library name: `libds-hal.so.0` (loaded dynamically via dlopen at runtime)
@@ -226,18 +226,18 @@ Device Settings is a single-threaded library with thread-safe initialization. Th
   - Resolution configurations: `ENABLE_EU_RESOLUTION`, `ENABLE_US_RESOLUTION`, `ENABLE_FLEX2_RESOLUTION` (region-specific)
   - LED configuration: `ENABLE_US_LED_CONFIG` for all-white LED config
 
-- **Device Services / HAL**: 
+- **Device Services / HAL**:
   - Required DS HAL APIs: dsAudio.h, dsVideoPort.h, dsVideoDevice.h, dsDisplay.h, dsFPD.h
   - Optional DS HAL APIs (conditional): dsHdmiIn.h (if HAS_HDMI_IN_SUPPORT), dsCompositeIn.h (if HAS_COMPOSITE_IN_SUPPORT), dsHost.h (for temperature and SoC ID queries)
   - HAL version compatibility: Must implement Device Settings HAL specification as defined in rdk-halif-device_settings
   - Platform configuration symbols: HAL library must export configuration symbols (kAudioConfigs, kVideoPortConfigs, kVideoDeviceConfigs, kFPDIndicatorColors, etc.) that Device Settings loads via dlsym
 
-- **IARM Bus**: 
+- **IARM Bus**:
   - IARM namespace: `IARM_BUS_DSMGR_NAME` for RPC server registration
   - Event groups registered: Audio output port events, Video output port events, Video device events, Display device events, HDMI input events (conditional), Composite input events (conditional)
   - IARM must be initialized and running before Device Settings RPC server can register
 
-- **Configuration Files**: 
+- **Configuration Files**:
   - No traditional configuration files - HAL shared library (`libds-hal.so.0`) contains configuration as exported symbols
   - Platform-specific configuration data embedded in HAL library as symbols: kAudioConfigs, kVideoPortConfigs, kVideoDeviceConfigs, kFPDIndicatorColors, kIndicators, kFPDTextDisplays, kResolutionsSettings
 
@@ -245,7 +245,7 @@ Device Settings is a single-threaded library with thread-safe initialization. Th
   - **RFC (Remote Feature Control)**: Linked with `-lrfcapi` for runtime feature configuration queries. RFC integration enables dynamic feature control based on remote configuration parameters.
   - **Telemetry**: Linked with `-ltelemetry_msgsender` for diagnostic data collection and reporting. Telemetry support allows Device Settings to report operational metrics and hardware state information.
 
-- **Startup Order**: 
+- **Startup Order**:
   - Device Settings library can be initialized at any time after system libraries (libc, libstdc++, glib) are available
   - For RPC server mode: IARM Bus must be initialized before Device Settings RPC server starts
   - Typical ordering in RDK-V stack: System services → IARM Bus → Device Settings RPC Server → Thunder plugins/RDK Services → Applications
@@ -256,7 +256,7 @@ Device Settings is a single-threaded library with thread-safe initialization. Th
 
 #### Initialization to Active State
 
-Device Settings initialization progresses through distinct phases: Pre-Initialization where the Manager verifies the module is not already initialized using a mutex-protected check, HAL Subsystem Initialization where HAL modules (Display, Audio Port, Video Port, Video Device) are initialized sequentially with retry logic for transient failures, Configuration Loading where the HAL shared library (libds-hal.so.0) is opened via dlopen and configuration symbols are loaded via dlsym into C++ configuration objects, and finally transitioning to the Active state where all APIs become available for client invocations. Front Panel initialization occurs on-demand when first accessed, rather than during the main initialization sequence.
+Device Settings initialization progresses through distinct phases: Pre-Initialization where the Manager verifies the module is not already initialized using a mutex-protected check, HAL Subsystem Initialization where HAL modules (Display, Audio Port, Video Port, Video Device) are initialized sequentially with retry logic for transient failures, Configuration Loading where the HAL shared library (libds-hal.so.0) is opened via dlopen and configuration symbols are loaded via dlsym into C++ configuration objects, and finally transitioning to the Active state where all APIs become available for client invocations. Front Panel configuration loading (FrontPanelConfig::load()) and HAL initialization (dsFPInit()) both occur during Manager::Initialize() as part of the loadDeviceCapabilities() call. dsFPInit() is invoked within FrontPanelConfig::getInstance() on its first call, which takes place during loadDeviceCapabilities(), with up to 20 retry attempts.
 
 ```mermaid
 sequenceDiagram
@@ -405,7 +405,7 @@ sequenceDiagram
         Manager->>Manager: VideoOutputPortConfig::load(dynamicConfigs)
         Manager->>Manager: VideoDeviceConfig::load(dynamicConfigs)
         Manager->>Manager: FrontPanelConfig::load(dynamicConfigs)
-        Note over Manager: dsFPInit() called lazily in FrontPanelConfig::getInstance() on first access
+        Note over Manager: dsFPInit() called within FrontPanelConfig::getInstance() during loadDeviceCapabilities(), with up to 20 retry attempts
         Manager->>Manager: dlclose(HAL library handle)
         Manager-->>Client: SUCCESS
     end
@@ -449,27 +449,27 @@ sequenceDiagram
 
 Device Settings consists of multiple internal modules organized by functional category. Each module encapsulates the configuration and management logic for a specific hardware subsystem.
 
-| Module / Class | Description | Key Files |
-| -------------- | ----------- | --------- |
-| `Manager` | Central orchestration module responsible for initializing and deinitializing all Device Settings subsystems. Provides the primary entry point for library initialization and maintains the global initialization state. | `manager.cpp`, `manager.hpp` |
-| `Host` | Represents the device as a whole and provides system-level APIs such as retrieving video output ports, audio output ports, CPU temperature, SOC ID, host EDID, and version information. Singleton pattern ensures only one Host instance exists per process. | `host.cpp`, `host.hpp` |
-| `AudioOutputPortConfig` | Configuration management for audio output ports. Loads supported audio encodings, compressions, stereo modes, and audio port types. Manages instances of AudioOutputPort objects representing physical audio ports (SPDIF, HDMI_ARC, Speaker, etc.). | `audioOutputPortConfig.cpp`, `audioOutputPortConfig.hpp` |
-| `AudioOutputPort` | Represents an individual audio output port instance. Provides APIs for setting volume, mute state, audio encoding, compression mode, audio delay, dialogue enhancement, bass enhancement, surround virtualizer, MS12 capabilities, audio ducking, and other audio processing features. | `audioOutputPort.cpp`, `audioOutputPort.hpp` |
-| `AudioOutputPortType` | Defines the type-level properties shared by all audio ports of the same type (e.g., all HDMI_ARC ports). Manages supported encodings, compressions, and capabilities for that port type. | `audioOutputPortType.cpp`, `audioOutputPortType.hpp` |
-| `VideoOutputPortConfig` | Configuration management for video output ports. Loads supported video resolutions, port types (HDMI, Component, Composite), and creates VideoOutputPort instances. Manages resolution objects representing available video modes. | `videoOutputPortConfig.cpp`, `videoOutputPortConfig.hpp` |
-| `VideoOutputPort` | Represents an individual video output port instance. Provides APIs for enabling/disabling the port, setting display resolution, querying EDID, managing HDCP settings, controlling HDR and Dolby Vision modes, setting display color space, and handling display connections. | `videoOutputPort.cpp`, `videoOutputPort.hpp` |
-| `VideoOutputPortType` | Defines type-level properties for video port types (HDMI, Component, etc.), including supported resolutions and capabilities. | `videoOutputPortType.cpp`, `videoOutputPortType.hpp` |
-| `VideoDeviceConfig` | Configuration module for video decoder devices. Loads supported Digital Format Conversion (DFC/Zoom) settings and video device capabilities from HAL configuration data. | `videoDeviceConfig.cpp`, `videoDeviceConfig.hpp` |
-| `VideoDevice` | Represents a video decoder instance. Provides APIs for setting DFC/zoom mode, managing HDR capabilities, querying frame rate, video codec, and other decoder-specific settings. | `videoDevice.cpp`, `videoDevice.hpp` |
-| `VideoDFC` | Encapsulates Digital Format Conversion (zoom) settings and modes. Provides APIs for querying and applying zoom/scaling configurations. | `videoDFC.cpp`, `videoDFC.hpp` |
-| `FrontPanelConfig` | Configuration module for front panel hardware. Loads indicator definitions (LEDs with color and blink capabilities) and text display configurations. Manages FrontPanelIndicator and FrontPanelTextDisplay instances. | `frontPanelConfig.cpp`, `frontPanelConfig.hpp` |
-| `FrontPanelIndicator` | Represents a single LED indicator on the front panel. Provides APIs for setting brightness, color (RGB or predefined colors), and blink rate. | `frontPanelIndicator.cpp`, `frontPanelIndicator.hpp` |
-| `FrontPanelTextDisplay` | Represents a text display module on the front panel. Supports displaying text strings, setting scroll speed, enabling clock mode with 12/24-hour format selection. | `frontPanelTextDisplay.cpp`, `frontPanelTextDisplay.hpp` |
-| `HdmiInput` | Manages HDMI input port selection and capabilities. Provides APIs for selecting active HDMI input port, querying HDMI input signal status, and receiving HDMI input events. | `hdmiIn.cpp`, `hdmiIn.hpp` |
-| `CompositeIn` | Manages composite video input interface. Provides APIs for port selection and signal presence detection. | `compositeIn.cpp`, `compositeIn.hpp` |
-| `IarmImpl` | IARM Bus integration layer for event distribution. Manages registration of event listeners and dispatches HAL callbacks to IARM event subscribers. Provides event grouping by subsystem (Audio, Video, Display, HDMI Input, Composite Input). | `IarmImpl.cpp`, `IarmImpl.hpp` |
-| `IARMProxy` | Proxy for IARM power event handler registration. Used for legacy power event handling integration. | `iarmProxy.cpp`, `iarmProxy.hpp` |
-| `EDID Parser` | Parses EDID data structures to extract display capabilities such as supported resolutions, manufacturer information, and display timings. | `edid-parser.cpp`, `edid-parser.hpp` |
+| Module / Class          | Description                                                                                                                                                                                                                                                                            | Key Files                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `Manager`               | Central orchestration module responsible for initializing and deinitializing all Device Settings subsystems. Provides the primary entry point for library initialization and maintains the global initialization state.                                                                | `manager.cpp`, `manager.hpp`                             |
+| `Host`                  | Represents the device as a whole and provides system-level APIs such as retrieving video output ports, audio output ports, CPU temperature, SOC ID, host EDID, and version information. Singleton pattern ensures only one Host instance exists per process.                           | `host.cpp`, `host.hpp`                                   |
+| `AudioOutputPortConfig` | Configuration management for audio output ports. Loads supported audio encodings, compressions, stereo modes, and audio port types. Manages instances of AudioOutputPort objects representing physical audio ports (SPDIF, HDMI_ARC, Speaker, etc.).                                   | `audioOutputPortConfig.cpp`, `audioOutputPortConfig.hpp` |
+| `AudioOutputPort`       | Represents an individual audio output port instance. Provides APIs for setting volume, mute state, audio encoding, compression mode, audio delay, dialogue enhancement, bass enhancement, surround virtualizer, MS12 capabilities, audio ducking, and other audio processing features. | `audioOutputPort.cpp`, `audioOutputPort.hpp`             |
+| `AudioOutputPortType`   | Defines the type-level properties shared by all audio ports of the same type (e.g., all HDMI_ARC ports). Manages supported encodings, compressions, and capabilities for that port type.                                                                                               | `audioOutputPortType.cpp`, `audioOutputPortType.hpp`     |
+| `VideoOutputPortConfig` | Configuration management for video output ports. Loads supported video resolutions, port types (HDMI, Component, Composite), and creates VideoOutputPort instances. Manages resolution objects representing available video modes.                                                     | `videoOutputPortConfig.cpp`, `videoOutputPortConfig.hpp` |
+| `VideoOutputPort`       | Represents an individual video output port instance. Provides APIs for enabling/disabling the port, setting display resolution, querying EDID, managing HDCP settings, controlling HDR and Dolby Vision modes, setting display color space, and handling display connections.          | `videoOutputPort.cpp`, `videoOutputPort.hpp`             |
+| `VideoOutputPortType`   | Defines type-level properties for video port types (HDMI, Component, etc.), including supported resolutions and capabilities.                                                                                                                                                          | `videoOutputPortType.cpp`, `videoOutputPortType.hpp`     |
+| `VideoDeviceConfig`     | Configuration module for video decoder devices. Loads supported Digital Format Conversion (DFC/Zoom) settings and video device capabilities from HAL configuration data.                                                                                                               | `videoDeviceConfig.cpp`, `videoDeviceConfig.hpp`         |
+| `VideoDevice`           | Represents a video decoder instance. Provides APIs for setting DFC/zoom mode, managing HDR capabilities, querying frame rate, video codec, and other decoder-specific settings.                                                                                                        | `videoDevice.cpp`, `videoDevice.hpp`                     |
+| `VideoDFC`              | Encapsulates Digital Format Conversion (zoom) settings and modes. Provides APIs for querying and applying zoom/scaling configurations.                                                                                                                                                 | `videoDFC.cpp`, `videoDFC.hpp`                           |
+| `FrontPanelConfig`      | Configuration module for front panel hardware. Loads indicator definitions (LEDs with color and blink capabilities) and text display configurations. Manages FrontPanelIndicator and FrontPanelTextDisplay instances.                                                                  | `frontPanelConfig.cpp`, `frontPanelConfig.hpp`           |
+| `FrontPanelIndicator`   | Represents a single LED indicator on the front panel. Provides APIs for setting brightness, color (RGB or predefined colors), and blink rate.                                                                                                                                          | `frontPanelIndicator.cpp`, `frontPanelIndicator.hpp`     |
+| `FrontPanelTextDisplay` | Represents a text display module on the front panel. Supports displaying text strings, setting scroll speed, enabling clock mode with 12/24-hour format selection.                                                                                                                     | `frontPanelTextDisplay.cpp`, `frontPanelTextDisplay.hpp` |
+| `HdmiInput`             | Manages HDMI input port selection and capabilities. Provides APIs for selecting active HDMI input port, querying HDMI input signal status, and receiving HDMI input events.                                                                                                            | `hdmiIn.cpp`, `hdmiIn.hpp`                               |
+| `CompositeIn`           | Manages composite video input interface. Provides APIs for port selection and signal presence detection.                                                                                                                                                                               | `compositeIn.cpp`, `compositeIn.hpp`                     |
+| `IarmImpl`              | IARM Bus integration layer for event distribution. Manages registration of event listeners and dispatches HAL callbacks to IARM event subscribers. Provides event grouping by subsystem (Audio, Video, Display, HDMI Input, Composite Input).                                          | `IarmImpl.cpp`, `IarmImpl.hpp`                           |
+| `IARMProxy`             | Proxy for IARM power event handler registration. Used for legacy power event handling integration.                                                                                                                                                                                     | `iarmProxy.cpp`, `iarmProxy.hpp`                         |
+| `EDID Parser`           | Parses EDID data structures to extract display capabilities such as supported resolutions, manufacturer information, and display timings.                                                                                                                                              | `edid-parser.cpp`, `edid-parser.hpp`                     |
 
 ---
 
@@ -479,36 +479,36 @@ Device Settings interacts with client applications through direct library linkag
 
 ### Interaction Matrix
 
-| Target Component / Layer | Interaction Purpose | Key APIs / Topics |
-| ------------------------ | ------------------- | ----------------- |
-| **RDK-E Plugins** | | |
-| Thunder Plugins (DisplaySettings, DeviceSettings, etc.) | Thunder plugins link directly to Device Settings library and invoke C++ APIs to control hardware settings and subscribe to hardware events. | `device::Manager::Initialize()`, `device::Host::getInstance()`, `VideoOutputPort::setResolution()` |
-| RDK Services (Device Settings Service) | RDK Services use Device Settings for querying and configuring device capabilities, output port states, and display properties. | `Host::getVideoOutputPorts()`, `VideoOutputPort::getResolution()` |
-| Rialto Media Pipeline | Media playback components may query audio and video capabilities, set audio formats, and receive format change notifications. | `AudioOutputPort::getSupportedEncodings()`, `VideoDevice::getHDRCapabilities()` |
-| **Device Services / HAL** | | |
-| DS Audio HAL | Audio port initialization, volume control, mute control, audio format selection, MS12 audio processing control, audio delay settings, audio capability queries. | `dsAudioPortInit()`, `dsSetAudioLevel()`, `dsSetAudioMute()`, `dsSetAudioEncoding()`, `dsSetAudioCompression()`, `dsSetDialogEnhancement()`, `dsSetBassEnhancer()` |
-| DS Video Port HAL | Video port initialization, resolution setting, display enable/disable, EDID retrieval, HDCP management, HDR mode control, color space settings. | `dsVideoPortInit()`, `dsSetResolution()`, `dsEnableVideoPort()`, `dsGetEDID()`, `dsEnableHDCP()`, `dsSetHdmiPreference()`, `dsSetForceHDRMode()` |
-| DS Video Device HAL | Video decoder initialization, DFC/zoom control, HDR capability queries, codec information, frame rate queries. | `dsVideoDeviceInit()`, `dsSetDFC()`, `dsGetHDRCapabilities()`, `dsGetVideoCodecInfo()` |
-| DS Display HAL | Display subsystem initialization, display connection status, display event registration. | `dsDisplayInit()`, `dsRegisterDisplayEventCallback()` |
-| DS Host HAL | Host subsystem initialization, CPU temperature retrieval, SOC ID query, host EDID retrieval, version information. | `dsHostInit()`, `dsGetCPUTemperature()`, `dsGetSocIDFromSDK()`, `dsGetHostEDID()` |
-| DS Front Panel HAL | Front panel initialization, LED indicator control, text display control. | `dsFPInit()`, `dsSetFPBrightness()`, `dsSetFPColor()`, `dsFPSetLED()`, `dsFPEnableCLockDisplay()` |
-| DS HDMI Input HAL | HDMI input port initialization, port selection, signal status query, HDMI input event registration. | `dsHdmiInInit()`, `dsHdmiInSelectPort()`, `dsHdmiInGetCurrentVideoMode()`, `dsHdmiInRegisterConnectCB()` |
-| DS Composite Input HAL | Composite input initialization, port selection, signal detection. | `dsCompositeInInit()`, `dsCompositeInSelectPort()` |
-| IARM Bus | System-wide event distribution for hardware state changes. Device Settings publishes events when hardware configuration changes occur (display connection, audio format changes, HDCP status). | `IARM_Bus_RegisterEventHandler()`, `IARM_Bus_BroadcastEvent()`, Event groups: `IARM_BUS_DSMGR_EVENT_*` |
+| Target Component / Layer                                | Interaction Purpose                                                                                                                                                                            | Key APIs / Topics                                                                                                                                                  |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **RDK-E Plugins**                                       |                                                                                                                                                                                                |                                                                                                                                                                    |
+| Thunder Plugins (DisplaySettings, DeviceSettings, etc.) | Thunder plugins link directly to Device Settings library and invoke C++ APIs to control hardware settings and subscribe to hardware events.                                                    | `device::Manager::Initialize()`, `device::Host::getInstance()`, `VideoOutputPort::setResolution()`                                                                 |
+| RDK Services (Device Settings Service)                  | RDK Services use Device Settings for querying and configuring device capabilities, output port states, and display properties.                                                                 | `Host::getVideoOutputPorts()`, `VideoOutputPort::getResolution()`                                                                                                  |
+| Rialto Media Pipeline                                   | Media playback components may query audio and video capabilities, set audio formats, and receive format change notifications.                                                                  | `AudioOutputPort::getSupportedEncodings()`, `VideoDevice::getHDRCapabilities()`                                                                                    |
+| **Device Services / HAL**                               |                                                                                                                                                                                                |                                                                                                                                                                    |
+| DS Audio HAL                                            | Audio port initialization, volume control, mute control, audio format selection, MS12 audio processing control, audio delay settings, audio capability queries.                                | `dsAudioPortInit()`, `dsSetAudioLevel()`, `dsSetAudioMute()`, `dsSetAudioEncoding()`, `dsSetAudioCompression()`, `dsSetDialogEnhancement()`, `dsSetBassEnhancer()` |
+| DS Video Port HAL                                       | Video port initialization, resolution setting, display enable/disable, EDID retrieval, HDCP management, HDR mode control, color space settings.                                                | `dsVideoPortInit()`, `dsSetResolution()`, `dsEnableVideoPort()`, `dsGetEDID()`, `dsEnableHDCP()`, `dsSetHdmiPreference()`, `dsSetForceHDRMode()`                   |
+| DS Video Device HAL                                     | Video decoder initialization, DFC/zoom control, HDR capability queries, codec information, frame rate queries.                                                                                 | `dsVideoDeviceInit()`, `dsSetDFC()`, `dsGetHDRCapabilities()`, `dsGetVideoCodecInfo()`                                                                             |
+| DS Display HAL                                          | Display subsystem initialization, display connection status, display event registration.                                                                                                       | `dsDisplayInit()`, `dsRegisterDisplayEventCallback()`                                                                                                              |
+| DS Host HAL                                             | Host subsystem initialization, CPU temperature retrieval, SOC ID query, host EDID retrieval, version information.                                                                              | `dsHostInit()`, `dsGetCPUTemperature()`, `dsGetSocIDFromSDK()`, `dsGetHostEDID()`                                                                                  |
+| DS Front Panel HAL                                      | Front panel initialization, LED indicator control, text display control.                                                                                                                       | `dsFPInit()`, `dsSetFPBrightness()`, `dsSetFPColor()`, `dsFPSetLED()`, `dsFPEnableCLockDisplay()`                                                                  |
+| DS HDMI Input HAL                                       | HDMI input port initialization, port selection, signal status query, HDMI input event registration.                                                                                            | `dsHdmiInInit()`, `dsHdmiInSelectPort()`, `dsHdmiInGetCurrentVideoMode()`, `dsHdmiInRegisterConnectCB()`                                                           |
+| DS Composite Input HAL                                  | Composite input initialization, port selection, signal detection.                                                                                                                              | `dsCompositeInInit()`, `dsCompositeInSelectPort()`                                                                                                                 |
+| IARM Bus                                                | System-wide event distribution for hardware state changes. Device Settings publishes events when hardware configuration changes occur (display connection, audio format changes, HDCP status). | `IARM_Bus_RegisterEventHandler()`, `IARM_Bus_BroadcastEvent()`, Event groups: `IARM_BUS_DSMGR_EVENT_*`                                                             |
 
 ### Events Published
 
-| Event Name | IARM / JSON-RPC Topic | Trigger Condition | Subscriber Components |
-| ---------- | --------------------- | ----------------- | --------------------- |
-| Display Connected | `IARM_BUS_DSMGR_EVENT_DISPLAY_CONNECTED` | HAL reports display connection on a video output port (HDMI hotplug detected). | Thunder DisplaySettings plugin, UI components, resolution management services |
-| Display Disconnected | `IARM_BUS_DSMGR_EVENT_DISPLAY_DISCONNECTED` | HAL reports display disconnection on a video output port (HDMI cable removed). | Thunder DisplaySettings plugin, UI components, resolution management services |
-| HDCP Status Change | `IARM_BUS_DSMGR_EVENT_HDCP_STATUS` | HDCP authentication state changes on a video output port (authentication success, failure, or protocol version change). | DRM components, content playback services, Thunder plugins monitoring content protection |
-| Audio Format Change | `IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE` | Audio format of the current playback content changes (e.g., PCM to Dolby Digital, stereo to 5.1 surround). | Audio processing components, UI indicators, Thunder AudioOutputPort plugin |
-| Video Format Change | `IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE` | Video resolution or format changes during playback or on output port. | Video processing pipelines, UI resolution indicators, display management services |
-| HDMI Input Signal Change | `IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS` | HDMI input signal presence or video mode changes on an HDMI input port. | HDMI input management services, UI source selection components |
-| Composite Input Signal Change | `IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS` | Composite input signal presence changes. | Composite input management services, source selection UI |
-| Rx Sense Status | `IARM_BUS_DSMGR_EVENT_RX_SENSE` | HDMI Rx Sense status change indicating whether a sink device is actively monitoring the HDMI connection. | Power management services, display power state management |
-| Atmos Capability Change | `IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGE` | Dolby Atmos capability status change on audio sink (connected display/AVR supports or no longer supports Atmos). | Audio capability management, codec selection logic, media playback pipelines |
+| Event Name                    | IARM / JSON-RPC Topic                       | Trigger Condition                                                                                                       | Subscriber Components                                                                    |
+| ----------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Display Connected             | `IARM_BUS_DSMGR_EVENT_DISPLAY_CONNECTED`    | HAL reports display connection on a video output port (HDMI hotplug detected).                                          | Thunder DisplaySettings plugin, UI components, resolution management services            |
+| Display Disconnected          | `IARM_BUS_DSMGR_EVENT_DISPLAY_DISCONNECTED` | HAL reports display disconnection on a video output port (HDMI cable removed).                                          | Thunder DisplaySettings plugin, UI components, resolution management services            |
+| HDCP Status Change            | `IARM_BUS_DSMGR_EVENT_HDCP_STATUS`          | HDCP authentication state changes on a video output port (authentication success, failure, or protocol version change). | DRM components, content playback services, Thunder plugins monitoring content protection |
+| Audio Format Change           | `IARM_BUS_DSMGR_EVENT_AUDIO_FORMAT_UPDATE`  | Audio format of the current playback content changes (e.g., PCM to Dolby Digital, stereo to 5.1 surround).              | Audio processing components, UI indicators, Thunder AudioOutputPort plugin               |
+| Video Format Change           | `IARM_BUS_DSMGR_EVENT_VIDEO_FORMAT_UPDATE`  | Video resolution or format changes during playback or on output port.                                                   | Video processing pipelines, UI resolution indicators, display management services        |
+| HDMI Input Signal Change      | `IARM_BUS_DSMGR_EVENT_HDMI_IN_STATUS`       | HDMI input signal presence or video mode changes on an HDMI input port.                                                 | HDMI input management services, UI source selection components                           |
+| Composite Input Signal Change | `IARM_BUS_DSMGR_EVENT_COMPOSITE_IN_STATUS`  | Composite input signal presence changes.                                                                                | Composite input management services, source selection UI                                 |
+| Rx Sense Status               | `IARM_BUS_DSMGR_EVENT_RX_SENSE`             | HDMI Rx Sense status change indicating whether a sink device is actively monitoring the HDMI connection.                | Power management services, display power state management                                |
+| Atmos Capability Change       | `IARM_BUS_DSMGR_EVENT_ATMOS_CAPS_CHANGE`    | Dolby Atmos capability status change on audio sink (connected display/AVR supports or no longer supports Atmos).        | Audio capability management, codec selection logic, media playback pipelines             |
 
 ### IPC Flow Patterns
 
@@ -580,63 +580,63 @@ sequenceDiagram
 
 Device Settings invokes the following HAL functions as verified in source code. Each subsystem's initialization and operational APIs are called from corresponding Device Settings modules.
 
-| HAL / DS API | Purpose | Implementation File |
-| ------------ | ------- | ------------------- |
-| `dsDisplayInit()` | Initialize display subsystem and display event handling capabilities. | `manager.cpp` (called during Manager::Initialize) |
-| `dsDisplayTerm()` | Terminate display subsystem and release display-related resources. | `manager.cpp` (called during Manager::DeInitialize) |
-| `dsRegisterDisplayEventCallback()` | Register callback for display connection/disconnection events. | `videoOutputPort.cpp`, `IarmImpl.cpp` |
-| `dsAudioPortInit()` | Initialize audio output port subsystem. | `manager.cpp` |
-| `dsAudioPortTerm()` | Terminate audio output port subsystem. | `manager.cpp` |
-| `dsGetAudioPort()` | Retrieve handle for a specific audio output port by type and index. | `audioOutputPort.cpp` |
-| `dsSetAudioLevel()` | Set audio volume level on an audio output port. | `audioOutputPort.cpp` |
-| `dsGetAudioLevel()` | Query current audio volume level. | `audioOutputPort.cpp` |
-| `dsSetAudioMute()` | Enable or disable mute on an audio output port. | `audioOutputPort.cpp` |
-| `dsSetAudioEncoding()` | Set audio encoding format (PCM, AC3, EAC3, etc.) on audio port. | `audioOutputPort.cpp` |
-| `dsSetAudioCompression()` | Configure audio compression mode. | `audioOutputPort.cpp` |
-| `dsSetDialogEnhancement()` | Enable/disable dialogue enhancement feature. | `audioOutputPort.cpp` |
-| `dsSetBassEnhancer()` | Control bass enhancement level. | `audioOutputPort.cpp` |
-| `dsSetSurroundVirtualizer()` | Configure surround sound virtualizer mode. | `audioOutputPort.cpp` |
-| `dsSetAudioDelay()` | Set audio delay/offset for audio-video synchronization. | `audioOutputPort.cpp` |
-| `dsAudioOutRegisterConnectCB()` | Register callback for audio port connection status changes. | `audioOutputPort.cpp`, `IarmImpl.cpp` |
-| `dsAudioFormatUpdateRegisterCB()` | Register callback for audio format updates during playback. | `audioOutputPort.cpp`, `IarmImpl.cpp` |
-| `dsVideoPortInit()` | Initialize video output port subsystem. | `manager.cpp` |
-| `dsVideoPortTerm()` | Terminate video output port subsystem. | `manager.cpp` |
-| `dsGetVideoPort()` | Retrieve handle for a specific video output port by type and index. | `videoOutputPort.cpp` |
-| `dsSetResolution()` | Set display resolution on a video output port. | `videoOutputPort.cpp` |
-| `dsGetResolution()` | Query current display resolution. | `videoOutputPort.cpp` |
-| `dsEnableVideoPort()` | Enable or disable a video output port. | `videoOutputPort.cpp` |
-| `dsIsVideoPortEnabled()` | Check if a video output port is enabled. | `videoOutputPort.cpp` |
-| `dsIsDisplayConnected()` | Query display connection status on a video output port. | `videoOutputPort.cpp` |
-| `dsGetEDID()` | Retrieve EDID data from connected display. | `videoOutputPort.cpp` |
-| `dsEnableHDCP()` | Enable or disable HDCP content protection. | `videoOutputPort.cpp` |
-| `dsIsHDCPEnabled()` | Query HDCP enabled status. | `videoOutputPort.cpp` |
-| `dsGetHDCPStatus()` | Retrieve detailed HDCP authentication status. | `videoOutputPort.cpp` |
-| `dsSetForceHDRMode()` | Force HDR output mode (HDR10, Dolby Vision, etc.). | `videoOutputPort.cpp` |
-| `dsGetForceHDRMode()` | Query currently configured HDR mode. | `videoOutputPort.cpp` |
-| `dsSetHdmiPreference()` | Set HDMI output preference (EDID-based or forced mode). | `videoOutputPort.cpp` |
-| `dsVideoDeviceInit()` | Initialize video decoder/device subsystem. | `manager.cpp` |
-| `dsVideoDeviceTerm()` | Terminate video decoder subsystem. | `manager.cpp` |
-| `dsSetDFC()` | Set Digital Format Conversion (zoom) mode on video decoder. | `videoDevice.cpp` |
-| `dsGetDFC()` | Query current DFC/zoom mode. | `videoDevice.cpp` |
-| `dsGetHDRCapabilities()` | Query HDR capabilities of video decoder. | `videoDevice.cpp` |
-| `dsGetVideoCodecInfo()` | Retrieve information about active video codec. | `videoDevice.cpp` |
-| `dsFPInit()` | Initialize front panel display and indicator subsystem. | `frontPanelConfig.cpp` |
-| `dsFPTerm()` | Terminate front panel subsystem. | `frontPanelConfig.cpp` |
-| `dsSetFPBrightness()` | Set brightness level of front panel LED indicators. | `frontPanelIndicator.cpp` |
-| `dsSetFPColor()` | Set color of front panel LED indicators (predefined colors). | `frontPanelIndicator.cpp` |
-| `dsSetFPBlink()` | Configure blink pattern for front panel LEDs. | `frontPanelIndicator.cpp` |
-| `dsFPEnableCLockDisplay()` | Enable clock mode on front panel text display with time format selection. | `frontPanelTextDisplay.cpp` |
-| `dsGetCPUTemperature()` | Query CPU temperature in degrees Celsius (if HAS_THERMAL_API is enabled). | `host.cpp` (called on-demand, not during initialization) |
-| `dsGetSocIDFromSDK()` | Retrieve SoC chip identifier. | `host.cpp` (called on-demand, not during initialization) |
-| `dsGetHostEDID()` | Retrieve host EDID data (for HDMI input devices). | `host.cpp` (called on-demand, not during initialization) |
-| Note: `dsHostInit()` and `dsHostTerm()` | These HAL APIs are defined in the HAL specification but are NOT called by the current Device Settings implementation. | Not used in current implementation |
-| `dsHdmiInInit()` | Initialize HDMI input subsystem. | `hdmiIn.cpp` |
-| `dsHdmiInTerm()` | Terminate HDMI input subsystem. | `hdmiIn.cpp` |
-| `dsHdmiInSelectPort()` | Select active HDMI input port. | `hdmiIn.cpp` |
-| `dsHdmiInRegisterConnectCB()` | Register callback for HDMI input connection events. | `hdmiIn.cpp`, `IarmImpl.cpp` |
-| `dsCompositeInInit()` | Initialize composite input subsystem. | `compositeIn.cpp` |
-| `dsCompositeInTerm()` | Terminate composite input subsystem. | `compositeIn.cpp` |
-| `dsCompositeInSelectPort()` | Select active composite input port. | `compositeIn.cpp` |
+| HAL / DS API                            | Purpose                                                                                                               | Implementation File                                      |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `dsDisplayInit()`                       | Initialize display subsystem and display event handling capabilities.                                                 | `manager.cpp` (called during Manager::Initialize)        |
+| `dsDisplayTerm()`                       | Terminate display subsystem and release display-related resources.                                                    | `manager.cpp` (called during Manager::DeInitialize)      |
+| `dsRegisterDisplayEventCallback()`      | Register callback for display connection/disconnection events.                                                        | `videoOutputPort.cpp`, `IarmImpl.cpp`                    |
+| `dsAudioPortInit()`                     | Initialize audio output port subsystem.                                                                               | `manager.cpp`                                            |
+| `dsAudioPortTerm()`                     | Terminate audio output port subsystem.                                                                                | `manager.cpp`                                            |
+| `dsGetAudioPort()`                      | Retrieve handle for a specific audio output port by type and index.                                                   | `audioOutputPort.cpp`                                    |
+| `dsSetAudioLevel()`                     | Set audio volume level on an audio output port.                                                                       | `audioOutputPort.cpp`                                    |
+| `dsGetAudioLevel()`                     | Query current audio volume level.                                                                                     | `audioOutputPort.cpp`                                    |
+| `dsSetAudioMute()`                      | Enable or disable mute on an audio output port.                                                                       | `audioOutputPort.cpp`                                    |
+| `dsSetAudioEncoding()`                  | Set audio encoding format (PCM, AC3, EAC3, etc.) on audio port.                                                       | `audioOutputPort.cpp`                                    |
+| `dsSetAudioCompression()`               | Configure audio compression mode.                                                                                     | `audioOutputPort.cpp`                                    |
+| `dsSetDialogEnhancement()`              | Enable/disable dialogue enhancement feature.                                                                          | `audioOutputPort.cpp`                                    |
+| `dsSetBassEnhancer()`                   | Control bass enhancement level.                                                                                       | `audioOutputPort.cpp`                                    |
+| `dsSetSurroundVirtualizer()`            | Configure surround sound virtualizer mode.                                                                            | `audioOutputPort.cpp`                                    |
+| `dsSetAudioDelay()`                     | Set audio delay/offset for audio-video synchronization.                                                               | `audioOutputPort.cpp`                                    |
+| `dsAudioOutRegisterConnectCB()`         | Register callback for audio port connection status changes.                                                           | `audioOutputPort.cpp`, `IarmImpl.cpp`                    |
+| `dsAudioFormatUpdateRegisterCB()`       | Register callback for audio format updates during playback.                                                           | `audioOutputPort.cpp`, `IarmImpl.cpp`                    |
+| `dsVideoPortInit()`                     | Initialize video output port subsystem.                                                                               | `manager.cpp`                                            |
+| `dsVideoPortTerm()`                     | Terminate video output port subsystem.                                                                                | `manager.cpp`                                            |
+| `dsGetVideoPort()`                      | Retrieve handle for a specific video output port by type and index.                                                   | `videoOutputPort.cpp`                                    |
+| `dsSetResolution()`                     | Set display resolution on a video output port.                                                                        | `videoOutputPort.cpp`                                    |
+| `dsGetResolution()`                     | Query current display resolution.                                                                                     | `videoOutputPort.cpp`                                    |
+| `dsEnableVideoPort()`                   | Enable or disable a video output port.                                                                                | `videoOutputPort.cpp`                                    |
+| `dsIsVideoPortEnabled()`                | Check if a video output port is enabled.                                                                              | `videoOutputPort.cpp`                                    |
+| `dsIsDisplayConnected()`                | Query display connection status on a video output port.                                                               | `videoOutputPort.cpp`                                    |
+| `dsGetEDID()`                           | Retrieve EDID data from connected display.                                                                            | `videoOutputPort.cpp`                                    |
+| `dsEnableHDCP()`                        | Enable or disable HDCP content protection.                                                                            | `videoOutputPort.cpp`                                    |
+| `dsIsHDCPEnabled()`                     | Query HDCP enabled status.                                                                                            | `videoOutputPort.cpp`                                    |
+| `dsGetHDCPStatus()`                     | Retrieve detailed HDCP authentication status.                                                                         | `videoOutputPort.cpp`                                    |
+| `dsSetForceHDRMode()`                   | Force HDR output mode (HDR10, Dolby Vision, etc.).                                                                    | `videoOutputPort.cpp`                                    |
+| `dsGetForceHDRMode()`                   | Query currently configured HDR mode.                                                                                  | `videoOutputPort.cpp`                                    |
+| `dsSetHdmiPreference()`                 | Set HDMI output preference (EDID-based or forced mode).                                                               | `videoOutputPort.cpp`                                    |
+| `dsVideoDeviceInit()`                   | Initialize video decoder/device subsystem.                                                                            | `manager.cpp`                                            |
+| `dsVideoDeviceTerm()`                   | Terminate video decoder subsystem.                                                                                    | `manager.cpp`                                            |
+| `dsSetDFC()`                            | Set Digital Format Conversion (zoom) mode on video decoder.                                                           | `videoDevice.cpp`                                        |
+| `dsGetDFC()`                            | Query current DFC/zoom mode.                                                                                          | `videoDevice.cpp`                                        |
+| `dsGetHDRCapabilities()`                | Query HDR capabilities of video decoder.                                                                              | `videoDevice.cpp`                                        |
+| `dsGetVideoCodecInfo()`                 | Retrieve information about active video codec.                                                                        | `videoDevice.cpp`                                        |
+| `dsFPInit()`                            | Initialize front panel display and indicator subsystem.                                                               | `frontPanelConfig.cpp`                                   |
+| `dsFPTerm()`                            | Terminate front panel subsystem.                                                                                      | `frontPanelConfig.cpp`                                   |
+| `dsSetFPBrightness()`                   | Set brightness level of front panel LED indicators.                                                                   | `frontPanelIndicator.cpp`                                |
+| `dsSetFPColor()`                        | Set color of front panel LED indicators (predefined colors).                                                          | `frontPanelIndicator.cpp`                                |
+| `dsSetFPBlink()`                        | Configure blink pattern for front panel LEDs.                                                                         | `frontPanelIndicator.cpp`                                |
+| `dsFPEnableCLockDisplay()`              | Enable clock mode on front panel text display with time format selection.                                             | `frontPanelTextDisplay.cpp`                              |
+| `dsGetCPUTemperature()`                 | Query CPU temperature in degrees Celsius (if HAS_THERMAL_API is enabled).                                             | `host.cpp` (called on-demand, not during initialization) |
+| `dsGetSocIDFromSDK()`                   | Retrieve SoC chip identifier.                                                                                         | `host.cpp` (called on-demand, not during initialization) |
+| `dsGetHostEDID()`                       | Retrieve host EDID data (for HDMI input devices).                                                                     | `host.cpp` (called on-demand, not during initialization) |
+| Note: `dsHostInit()` and `dsHostTerm()` | These HAL APIs are defined in the HAL specification but are NOT called by the current Device Settings implementation. | Not used in current implementation                       |
+| `dsHdmiInInit()`                        | Initialize HDMI input subsystem.                                                                                      | `hdmiIn.cpp`                                             |
+| `dsHdmiInTerm()`                        | Terminate HDMI input subsystem.                                                                                       | `hdmiIn.cpp`                                             |
+| `dsHdmiInSelectPort()`                  | Select active HDMI input port.                                                                                        | `hdmiIn.cpp`                                             |
+| `dsHdmiInRegisterConnectCB()`           | Register callback for HDMI input connection events.                                                                   | `hdmiIn.cpp`, `IarmImpl.cpp`                             |
+| `dsCompositeInInit()`                   | Initialize composite input subsystem.                                                                                 | `compositeIn.cpp`                                        |
+| `dsCompositeInTerm()`                   | Terminate composite input subsystem.                                                                                  | `compositeIn.cpp`                                        |
+| `dsCompositeInSelectPort()`             | Select active composite input port.                                                                                   | `compositeIn.cpp`                                        |
 
 ### Key Implementation Logic
 
@@ -670,18 +670,18 @@ Device Settings invokes the following HAL functions as verified in source code. 
 
 Device Settings does not use traditional text-based configuration files. Configuration data is dynamically loaded from the HAL shared library at initialization time.
 
-| Configuration File | Purpose | Override Mechanism |
-| ------------------ | ------- | ------------------ |
+| Configuration File                           | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Override Mechanism                                                                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | N/A - HAL Library Symbols (`libds-hal.so.0`) | Device-specific configurations (supported resolutions, audio encodings, port types, front panel capabilities) are embedded in the HAL implementation as exported symbols (`kAudioConfigs`, `kVideoPortConfigs`, `kVideoDeviceConfigs`, `kFPDIndicatorColors`, `kIndicators`, `kFPDTextDisplays`, etc.). Device Settings opens the HAL library using `dlopen("libds-hal.so.0", RTLD_LAZY)` and loads these symbols using `dlsym()` during `loadDeviceCapabilities()` in Manager::Initialize(). | Configuration is compiled into the HAL library as exported symbols. Changes require HAL library rebuild and Device Settings reinitialization (or device reboot). |
 
-| Parameter | Type | Default | Description |
-| --------- | ---- | ------- | ----------- |
-| `numSupportedResolutions` | int | Platform-specific | Number of video resolutions supported by the platform. Loaded from `videoOutputPortConfig_t`. |
-| `supportedAudioEncodings` | Array of `dsAudioEncoding_t` | Platform-specific | List of audio encoding formats supported by audio output ports (PCM, AC3, EAC3, AAC, Atmos). Loaded from `audioOutputPortConfig_t`. |
-| `supportedVideoPortTypes` | Array of `dsVideoPortType_t` | Platform-specific | List of video output port types available (HDMI, Component, Composite, Internal). Loaded from `videoOutputPortConfig_t`. |
-| `numFrontPanelIndicators` | int | Platform-specific | Number of LED indicators on the front panel. Loaded from `frontPanelConfig_t`. |
-| `numFrontPanelTextDisplays` | int | Platform-specific | Number of text display modules on the front panel. Loaded from `frontPanelConfig_t`. |
-| `supportedDFCModes` | Array of DFC modes | Platform-specific | List of Digital Format Conversion (zoom) modes supported by video decoders. Loaded from `videoDeviceConfig_t`. |
+| Parameter                   | Type                         | Default           | Description                                                                                                                         |
+| --------------------------- | ---------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `numSupportedResolutions`   | int                          | Platform-specific | Number of video resolutions supported by the platform. Loaded from `videoOutputPortConfig_t`.                                       |
+| `supportedAudioEncodings`   | Array of `dsAudioEncoding_t` | Platform-specific | List of audio encoding formats supported by audio output ports (PCM, AC3, EAC3, AAC, Atmos). Loaded from `audioOutputPortConfig_t`. |
+| `supportedVideoPortTypes`   | Array of `dsVideoPortType_t` | Platform-specific | List of video output port types available (HDMI, Component, Composite, Internal). Loaded from `videoOutputPortConfig_t`.            |
+| `numFrontPanelIndicators`   | int                          | Platform-specific | Number of LED indicators on the front panel. Loaded from `frontPanelConfig_t`.                                                      |
+| `numFrontPanelTextDisplays` | int                          | Platform-specific | Number of text display modules on the front panel. Loaded from `frontPanelConfig_t`.                                                |
+| `supportedDFCModes`         | Array of DFC modes           | Platform-specific | List of Digital Format Conversion (zoom) modes supported by video decoders. Loaded from `videoDeviceConfig_t`.                      |
 
 ### Runtime Configuration
 
