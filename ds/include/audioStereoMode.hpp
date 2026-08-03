@@ -65,9 +65,6 @@ public:
 
 	AudioStereoMode(int id);
 	virtual ~AudioStereoMode();
-	//coverity fix: MISSING_MOVE_ASSIGNMENT - add move operations
-	AudioStereoMode(AudioStereoMode&&) = default;
-	AudioStereoMode& operator=(AudioStereoMode&&) = default;
 
 };
 
