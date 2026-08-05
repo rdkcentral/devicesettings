@@ -1502,6 +1502,12 @@ void _dsHdcpCallback (intptr_t handle, dsHdcpStatus_t status)
 			_dsSyncHdmiStatus(DS_HDMI_TAG_HDCPVERSION, dsHDCP_VERSION_1X);
 		}
 	}
+	else
+	{
+		INT_INFO("Hdmi sync HDCP Protocol inprogress  new protocol status is : %d  new protocol verision is : %d  !!!!!!!! ..\r\n", _hdcpStatus ,dsHDCP_VERSION_1X);
+	       _dsSyncHdmiStatus(DS_HDMI_TAG_HDCPSTATUS, _hdcpStatus);
+	       _dsSyncHdmiStatus(DS_HDMI_TAG_HDCPVERSION, dsHDCP_VERSION_1X);
+	}
 	
 	IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_HDCP_STATUS,(void *)&hdcp_eventData, sizeof(hdcp_eventData));
 }
