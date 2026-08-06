@@ -122,6 +122,9 @@ IARM_Result_t _dsIsAudioPortEnabled(void *arg);
 
 IARM_Result_t _dsGetEnablePersist(void *arg);
 IARM_Result_t _dsSetEnablePersist(void *arg);
+IARM_Result_t _dsSetApplicationAudioConfig(void *arg);
+IARM_Result_t _dsGetApplicationAudioConfig(void *arg);
+IARM_Result_t _dsGetApplicationAudioConfigList(void *arg);
 
 IARM_Result_t _dsEnableAudioPort(void *arg);
 IARM_Result_t _dsSetAudioDucking(void *arg);
@@ -2415,6 +2418,9 @@ IARM_Result_t _dsAudioPortInit(void *arg)
 
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetEnablePersist, _dsGetEnablePersist);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetEnablePersist, _dsSetEnablePersist);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsSetApplicationAudioConfig, _dsSetApplicationAudioConfig);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetApplicationAudioConfig, _dsGetApplicationAudioConfig);
+	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetApplicationAudioConfigList, _dsGetApplicationAudioConfigList);
 
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsAudioPortTerm,_dsAudioPortTerm);
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsEnableLEConfig,_dsEnableLEConfig);
@@ -3682,6 +3688,176 @@ IARM_Result_t _dsSetEnablePersist(void *arg)
  
     IARM_BUS_Unlock(lock);
     
+    return result;
+}
+
+IARM_Result_t _dsGetApplicationAudioConfigList(void *arg)
+{
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+
+    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
+    dsError_t ret = dsERR_NONE;
+    typedef dsError_t (*dsGetApplicationAudioConfigList_t)(intptr_t handle, dsApplicationAudioConfigList_t* audioConfigList);
+    static dsGetApplicationAudioConfigList_t func = 0;
+    INT_DEBUG("Inside _dsGetApplicationAudioConfigList_t srv\n");
+    if (func == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func = (dsGetApplicationAudioConfigList_t) dlsym(dllib, "dsGetApplicationAudioConfigList");
+            if (func) {
+                INT_ERROR("dsGetApplicationAudioConfigList_t is defined and loaded\r\n");
+            }
+            else {
+                IARM_BUS_Unlock(lock);
+                dlclose(dllib);
+                INT_ERROR("dsGetApplicationAudioConfigList is not defined\r\n");
+                return IARM_RESULT_INVALID_STATE;
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+    dsApplicationAudioConfigListParam_t *param = (dsApplicationAudioConfigListParam_t *)arg;
+    dsApplicationAudioConfigList_t configList;
+    memset(&configList, 0, sizeof(configList));
+    if (func != 0 && param != NULL)
+    {
+        configList.size = param->appAudioConfigList.size;
+        ret = func(param->handle, &configList);
+	if (ret != dsERR_NONE) 
+        {
+	    param->result = ret;
+            INT_ERROR("%s: (SERVER) Unable to fetch the application audio configuration list\n", __FUNCTION__);
+        }
+        else
+        {
+            INT_INFO("%s: (SERVER) success \n", __FUNCTION__);
+	    param->result = ret;
+	    param->appAudioConfigList.size = configList.size;
+	    param->appAudioConfigList.totalCount = configList.totalCount;
+	    param->appAudioConfigList.returnedCount = configList.returnedCount;
+	    for (int count =0; count < param->appAudioConfigList.returnedCount; count++) {
+		memset(param->appAudioConfigList.config[count].configName, 0, DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN);
+                strncpy(param->appAudioConfigList.config[count].configName, configList.config[count].configName, (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN-1));
+	    }
+                
+	   result = IARM_RESULT_SUCCESS;
+        }
+    }
+
+    IARM_BUS_Unlock(lock);
+    return result;
+}
+
+
+IARM_Result_t _dsSetApplicationAudioConfig(void *arg)
+{
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+
+    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
+    dsError_t ret = dsERR_NONE;
+    typedef dsError_t (*dsSetApplicationAudioConfig_t)(intptr_t handle, dsApplicationAudioConfig_t* audioConfig, bool enable);
+    static dsSetApplicationAudioConfig_t func = 0;
+    INT_DEBUG("Inside _dsSetApplicationAudioConfig srv\n");
+    if (func == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func = (dsSetApplicationAudioConfig_t) dlsym(dllib, "dsSetApplicationAudioConfig");
+            if (func) {
+                INT_DEBUG("dsSetApplicationAudioConfig_t(int, bool) is defined and loaded\r\n");
+            }
+            else {
+                IARM_BUS_Unlock(lock);
+                dlclose(dllib);
+                INT_ERROR("dsSetApplicationAudioConfig_t(int, bool) is not defined\r\n");
+                return IARM_RESULT_INVALID_STATE;
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+    dsApplicationAudioConfigParam_t *param = (dsApplicationAudioConfigParam_t *)arg;
+    dsApplicationAudioConfig_t config;
+    memset(&config, 0, sizeof(config));
+    if (func != 0 && param != NULL)
+    {
+        strncpy(config.configName, param->audioConfig.configName, (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN - 1));
+        ret = func(param->handle, &config, param->enable);
+	if (ret != dsERR_NONE) 
+        {
+	    param->result = ret;
+            INT_ERROR("%s: (SERVER) Unable to set Application audio configuration\n", __FUNCTION__);
+        }
+        else
+        {
+            INT_INFO("%s: (SERVER) success \n", __FUNCTION__);
+	    param->result = ret;
+	   result = IARM_RESULT_SUCCESS;
+        }
+    }
+
+    IARM_BUS_Unlock(lock);
+    return result;
+}
+
+IARM_Result_t _dsGetApplicationAudioConfig(void *arg)
+{
+    _DEBUG_ENTER();
+    IARM_BUS_Lock(lock);
+
+    IARM_Result_t result = IARM_RESULT_INVALID_STATE;
+    dsError_t ret = dsERR_NONE;
+    typedef dsError_t (*dsGetApplicationAudioConfig_t)(intptr_t handle, dsApplicationAudioConfig_t* audioConfig, bool *enable);
+    static dsGetApplicationAudioConfig_t func = 0;
+    bool enable = false;
+    dsApplicationAudioConfig_t config;
+    INT_DEBUG("Inside _dsGetApplicationAudioConfig srv\n");
+    if (func == 0) {
+        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            func = (dsGetApplicationAudioConfig_t) dlsym(dllib, "dsGetApplicationAudioConfig");
+            if (func) {
+                INT_DEBUG("dsGetApplicationAudioConfig_t(int, bool) is defined and loaded\r\n");
+            }
+            else {
+                IARM_BUS_Unlock(lock);
+                dlclose(dllib);
+                INT_ERROR("dsGetApplicationAudioConfig_t(int, bool) is not defined\r\n");
+                return IARM_RESULT_INVALID_STATE;
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
+    dsApplicationAudioConfigParam_t *param = (dsApplicationAudioConfigParam_t *)arg;
+    memset(&config, 0, sizeof(config));
+    if (func != 0 && param != NULL)
+    {
+        strncpy(config.configName, param->audioConfig.configName, (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN - 1));
+        ret = func(param->handle, &config, &enable);
+	if (ret != dsERR_NONE) 
+        {
+	    param->result = ret;
+            INT_ERROR("%s: (SERVER) Unable to get application audio configuration\n", __FUNCTION__);
+        }
+        else
+        {
+            INT_INFO("%s: (SERVER) success \n", __FUNCTION__);
+	    param->result = ret;
+	    param->enable = enable;
+	    result = IARM_RESULT_SUCCESS;
+        }
+    }
+
+    IARM_BUS_Unlock(lock);
     return result;
 }
 
