@@ -218,8 +218,18 @@ void AudioConfigInit()
     typedef dsError_t  (*dsEnableLEConfig_t)(intptr_t handle, const bool enable);
     intptr_t handle = 0;
     void *dllib = NULL;
+    /* Fetch all port handles once at startup; reused throughout instead of
+     * calling dsGetAudioPort() repeatedly for the same port in each section. */
+    intptr_t h_hdmi = 0, h_speaker = 0, h_spdif = 0, h_arc = 0, h_headphone = 0;
+    if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,      0, &h_hdmi)     != dsERR_NONE) INT_INFO("AudioConfigInit: HDMI port unavailable\n");
+    if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,   0, &h_speaker)  != dsERR_NONE) INT_INFO("AudioConfigInit: SPEAKER port unavailable\n");
+    if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,     0, &h_spdif)    != dsERR_NONE) INT_INFO("AudioConfigInit: SPDIF port unavailable\n");
+    if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI_ARC,  0, &h_arc)      != dsERR_NONE) INT_INFO("AudioConfigInit: HDMI_ARC port unavailable\n");
+    if (dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE, 0, &h_headphone)!= dsERR_NONE) INT_INFO("AudioConfigInit: HEADPHONE port unavailable\n");
+
     static dsEnableLEConfig_t func = NULL;
-    if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+    handle = h_hdmi;
+    if (handle != 0) {
       if (func == NULL) {
         dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
         if (dllib) {
@@ -276,8 +286,8 @@ void AudioConfigInit()
                 std::string _AudioGain("0");
                 float m_audioGain = 0;
 //SPEAKER init
-                handle = 0;
-                if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                handle = h_speaker;
+                if (handle != 0) {
                     try {
                         _AudioGain = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.Gain");
                     }
@@ -296,8 +306,8 @@ void AudioConfigInit()
                     }
                 }
 //HDMI init
-                handle = 0;
-                if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                handle = h_hdmi;
+                if (handle != 0) {
                     try {
                         _AudioGain = device::HostPersistence::getInstance().getProperty("HDMI0.audio.Gain");
                     }
@@ -313,6 +323,26 @@ void AudioConfigInit()
                     m_audioGain = atof(_AudioGain.c_str());
                     if (dsSetAudioGainFunc(handle, m_audioGain) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio gain : %f\n","HDMI0", m_audioGain);
+                    }
+                }
+//SPDIF init
+                handle = h_spdif;
+                if (handle != 0) {
+                    try {
+                        _AudioGain = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Gain");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Gain not found in persistence store. Try system default\n");
+                                _AudioGain = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Gain");
+                            }
+                            catch(...) {
+                                _AudioGain = "0";
+                            }
+                    }
+                    m_audioGain = atof(_AudioGain.c_str());
+                    if (dsSetAudioGainFunc(handle, m_audioGain) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio gain : %f\n","SPDIF0", m_audioGain);
                     }
                 }
 
@@ -336,8 +366,8 @@ void AudioConfigInit()
                 std::string _AudioLevel("0");
                 float m_audioLevel = 0;
 //SPDIF init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF,0,&handle) == dsERR_NONE) {
+                handle = h_spdif;
+                if(handle != 0) {
                     try {
                         _AudioLevel = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Level");
                     }
@@ -357,8 +387,8 @@ void AudioConfigInit()
                     }
                 }
 //SPEAKER init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                handle = h_speaker;
+                if(handle != 0) {
                     try {
                         _AudioLevel = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.Level");
                     }
@@ -378,8 +408,8 @@ void AudioConfigInit()
                     }
                 }
 //HEADPHONE init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE,0,&handle) == dsERR_NONE) {
+                handle = h_headphone;
+                if(handle != 0) {
                     try {
                         _AudioLevel = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.Level");
                     }
@@ -399,8 +429,8 @@ void AudioConfigInit()
                     }
                 }
 //HDMI init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                handle = h_hdmi;
+                if(handle != 0) {
                     try {
                         _AudioLevel = device::HostPersistence::getInstance().getProperty("HDMI0.audio.Level");
                     }
@@ -433,6 +463,84 @@ void AudioConfigInit()
         }
     }
 
+    /* Restore mute state for all audio ports from persistence.
+     * dsSetAudioLevel restores volume/gain but does NOT restore mute — without
+     * this block the HAL starts UNMUTED on dsmgr restart even when the user had
+     * muted before the crash, creating a ~7-second audio-bleed window until
+     * WPEFramework's setEnableAudioPort() re-applies mute via _dsIsAudioMute.
+     */
+    typedef dsError_t (*dsSetAudioMute_t)(intptr_t handle, bool mute);
+    static dsSetAudioMute_t dsSetAudioMuteFunc = 0;
+    if (dsSetAudioMuteFunc == 0) {
+        dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+        if (dllib) {
+            dsSetAudioMuteFunc = (dsSetAudioMute_t) dlsym(dllib, "dsSetAudioMute");
+            if (dsSetAudioMuteFunc) {
+                INT_DEBUG("dsSetAudioMute_t(intptr_t, bool) is defined and loaded\r\n");
+                std::string _AudioMute("FALSE");
+                bool m_audioMute = false;
+//SPDIF init
+                handle = h_spdif;
+                if (handle != 0) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","SPDIF0", _AudioMute.c_str());
+                    }
+                }
+//SPEAKER init
+                handle = h_speaker;
+                if (handle != 0) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","SPEAKER0", _AudioMute.c_str());
+                    }
+                }
+//HEADPHONE init
+                handle = h_headphone;
+                if (handle != 0) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","HEADPHONE0", _AudioMute.c_str());
+                    }
+                }
+//HDMI init
+                handle = h_hdmi;
+                if (handle != 0) {
+                    _AudioMute = "FALSE";
+                    try {
+                        _AudioMute = device::HostPersistence::getInstance().getProperty("HDMI0.audio.mute");
+                    }
+                    catch(...) { _AudioMute = "FALSE"; }
+                    m_audioMute = (_AudioMute == "TRUE");
+                    if (dsSetAudioMuteFunc(handle, m_audioMute) == dsERR_NONE) {
+                        INT_INFO("Port %s: Restored audio mute : %s\n","HDMI0", _AudioMute.c_str());
+                    }
+                }
+            }
+            else {
+                INT_INFO("dsSetAudioMute_t(intptr_t, bool) is not defined\r\n");
+            }
+            dlclose(dllib);
+        }
+        else {
+            INT_ERROR("Opening RDK_DSHAL_NAME [%s] failed\r\n", RDK_DSHAL_NAME);
+        }
+    }
 
     typedef dsError_t (*dsSetAudioDelay_t)(intptr_t handle, uint32_t audioDelayMs);
     static dsSetAudioDelay_t dsSetAudioDelayFunc = 0;
@@ -445,8 +553,8 @@ void AudioConfigInit()
                 std::string _AudioDelay("0");
                 int m_audioDelay = 0;
 //SPEAKER init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                handle = h_speaker;
+                if(handle != 0) {
                     try {
                         _AudioDelay = device::HostPersistence::getInstance().getProperty("SPEAKER0.audio.Delay");
                     }
@@ -465,8 +573,8 @@ void AudioConfigInit()
                     }
                 }
 //HDMI init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                handle = h_hdmi;
+                if(handle != 0) {
                     try {
                         _AudioDelay = device::HostPersistence::getInstance().getProperty("HDMI0.audio.Delay");
                     }
@@ -485,8 +593,8 @@ void AudioConfigInit()
                     }
                 }
 //HDMI ARC init
-                handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI_ARC,0,&handle) == dsERR_NONE) {
+                handle = h_arc;
+                if(handle != 0) {
                     try {
                         _AudioDelay = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.audio.Delay");
                     }
@@ -502,6 +610,26 @@ void AudioConfigInit()
                     m_audioDelay = atoi(_AudioDelay.c_str());
                     if (dsSetAudioDelayFunc(handle, m_audioDelay) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio delay : %d\n","HDMI_ARC0", m_audioDelay);
+                    }
+                }
+//SPDIF init
+                handle = h_spdif;
+                if(handle != 0) {
+                    try {
+                        _AudioDelay = device::HostPersistence::getInstance().getProperty("SPDIF0.audio.Delay");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("SPDIF0.audio.Delay not found in persistence store. Try system default\n");
+                                _AudioDelay = device::HostPersistence::getInstance().getDefaultProperty("SPDIF0.audio.Delay");
+                            }
+                            catch(...) {
+                                _AudioDelay = "0";
+                            }
+                    }
+                    m_audioDelay = atoi(_AudioDelay.c_str());
+                    if (dsSetAudioDelayFunc(handle, m_audioDelay) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio delay : %d\n","SPDIF0", m_audioDelay);
                     }
                 }
 
@@ -696,11 +824,6 @@ void AudioConfigInit()
                 dsSetMS12AudioProfileFunc = (dsSetMS12AudioProfile_t) dlsym(dllib, "dsSetMS12AudioProfile");
                 if (dsSetMS12AudioProfileFunc) {
                     INT_DEBUG("dsSetMS12AudioProfile_t(int, const char*) is defined and loaded\r\n");
-                    handle = 0;
-                    if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
-                        INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
-                    }
-
                     try {
                         _AProfile = device::HostPersistence::getInstance().getProperty("audio.MS12Profile");
                     }
@@ -714,8 +837,8 @@ void AudioConfigInit()
                             }
                     }
         //SPEAKER init
-                    handle = 0;
-                    if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                    handle = h_speaker;
+                    if(handle != 0) {
                         if (dsSetMS12AudioProfileFunc(handle, _AProfile.c_str()) == dsERR_NONE) {
                             INT_INFO("Port %s: Initialized MS12 Audio Profile : %s\n","SPEAKER0", _AProfile.c_str());
                             device::HostPersistence::getInstance().persistHostProperty("audio.MS12Profile",_AProfile.c_str());
@@ -773,15 +896,15 @@ void AudioConfigInit()
                             _AudioCompression = device::HostPersistence::getInstance().getProperty("audio.Compression");
                             m_audioCompression = atoi(_AudioCompression.c_str());
             //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetAudioCompressionFunc(handle, m_audioCompression) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized audio compression : %d\n","SPEAKER0", m_audioCompression);
                                 }
                             }
             //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetAudioCompressionFunc(handle, m_audioCompression) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized audio compression : %d\n","HDMI0", m_audioCompression);
                                 }
@@ -829,15 +952,15 @@ void AudioConfigInit()
                             _EnhancerLevel = device::HostPersistence::getInstance().getProperty(_Property);
                             m_enhancerLevel = atoi(_EnhancerLevel.c_str());
             //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetDialogEnhancementFunc(handle, m_enhancerLevel) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized dialog enhancement level : %d\n","SPEAKER0", m_enhancerLevel);
                                 }
                             }
             //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetDialogEnhancementFunc(handle, m_enhancerLevel) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized dialog enhancement level : %d\n","HDMI0", m_enhancerLevel);
                                 }
@@ -888,15 +1011,15 @@ void AudioConfigInit()
                                 m_dolbyVolumeMode = false;
                             }
             //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetDolbyVolumeModeFunc(handle, m_dolbyVolumeMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Dolby Volume Mode : %d\n","SPEAKER0", m_dolbyVolumeMode);
                                 }
                             }
             //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetDolbyVolumeModeFunc(handle, m_dolbyVolumeMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Dolby Volume Mode : %d\n","HDMI0", m_dolbyVolumeMode);
                                 }
@@ -938,25 +1061,19 @@ void AudioConfigInit()
                         INT_DEBUG("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
                         std::string _IEQMode("0");
                         int m_IEQMode = 0;
-                        handle = 0;
-                        dsError_t ret = dsERR_NONE;
-                        ret = dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle);
-                        if (ret != dsERR_NONE) {
-                            INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
-                        }
                         try {
                             _IEQMode = device::HostPersistence::getInstance().getProperty("audio.IntelligentEQ");
                             m_IEQMode = atoi(_IEQMode.c_str());
             //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetIntelligentEqualizerModeFunc(handle, m_IEQMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Intelligent Equalizer mode : %d\n","SPEAKER0", m_IEQMode);
                                 }
                             }
             //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetIntelligentEqualizerModeFunc(handle, m_IEQMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Intelligent Equalizer mode : %d\n","HDMI0", m_IEQMode);
                                 }
@@ -1007,15 +1124,15 @@ void AudioConfigInit()
                             m_volumeLeveller.mode = atoi(_volLevellerMode.c_str());
 			    m_volumeLeveller.level = atoi(_volLevellerLevel.c_str());
                 //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetVolumeLevellerFunc(handle, m_volumeLeveller) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Volume Leveller : Mode: %d, Level: %d\n","SPEAKER0", m_volumeLeveller.mode, m_volumeLeveller.level);
                                 }
                             }
                 //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetVolumeLevellerFunc(handle, m_volumeLeveller) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Volume Leveller : Mode: %d, Level: %d\n","HDMI0", m_volumeLeveller.mode, m_volumeLeveller.level);
                                 }
@@ -1061,15 +1178,15 @@ void AudioConfigInit()
                             _BassBoost = device::HostPersistence::getInstance().getProperty("audio.BassBoost");
                             m_bassBoost = atoi(_BassBoost.c_str());
             //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetBassEnhancerFunc(handle, m_bassBoost) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Bass Boost : %d\n","SPEAKER0", m_bassBoost);
                                 }
                             }
             //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetBassEnhancerFunc(handle, m_bassBoost) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Bass Boost : %d\n","HDMI0", m_bassBoost);
                                 }
@@ -1120,15 +1237,15 @@ void AudioConfigInit()
                                 m_surroundDecoder = false;
                             }
             //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsEnableSurroundDecoderFunc(handle, m_surroundDecoder) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Surroudn Decoder : %d\n","SPEAKER0", m_surroundDecoder);
                                 }
                             }
             //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsEnableSurroundDecoderFunc(handle, m_surroundDecoder) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Surroudn Decoder : %d\n","HDMI0", m_surroundDecoder);
                                 }
@@ -1179,15 +1296,15 @@ void AudioConfigInit()
                                 m_DRCMode = 0;
                             }
                 //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetDRCModeFunc(handle, m_DRCMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized DRCMode : %d\n","SPEAKER0", m_DRCMode);
                                 }
                             }
                 //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetDRCModeFunc(handle, m_DRCMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized DRCMode : %d\n","HDMI0", m_DRCMode);
                                 }
@@ -1238,15 +1355,15 @@ void AudioConfigInit()
                             m_virtualizer.mode = atoi(_SVMode.c_str());
 			    m_virtualizer.boost = atoi(_SVBoost.c_str());
                 //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetSurroundVirtualizerFunc(handle, m_virtualizer) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Surround Virtualizer : Mode: %d, Boost : %d\n","SPEAKER0", m_virtualizer.mode, m_virtualizer.boost);
                                 }
                             }
                 //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetSurroundVirtualizerFunc(handle, m_virtualizer) == dsERR_NONE){
                                     INT_INFO("Port %s: Initialized Surround Virtualizer : Mode: %d, Boost : %d\\n","HDMI0", m_virtualizer.mode, m_virtualizer.boost);
 				}
@@ -1297,15 +1414,15 @@ void AudioConfigInit()
                                 m_MISteering = false;
                             }
                 //SPEAKER init
-                            handle = 0;
-                            if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if (handle != 0) {
                                 if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
                                 }
-			    }
+                            }
                 //HDMI init
-                            handle = 0;
-                            if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if (handle != 0) {
                                 if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized MI Steering : %d\n","HDMI0", m_MISteering);
                                 }
@@ -1350,24 +1467,20 @@ void AudioConfigInit()
                         INT_DEBUG("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
                         std::string _GEQMode("0");
                         int m_GEQMode = 0;
-                        handle = 0;
-                        if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
-                            INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
-                        }
 
 		        try {
                             _GEQMode = device::HostPersistence::getInstance().getProperty("audio.GraphicEQ");
                             m_GEQMode = atoi(_GEQMode.c_str());
                 //SPEAKER init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                            handle = h_speaker;
+                            if(handle != 0) {
                                 if (dsSetGraphicEqualizerModeFunc(handle, m_GEQMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Graphic Equalizer mode : %d\n","SPEAKER0", m_GEQMode);
                                 }
                             }
                 //HDMI init
-                            handle = 0;
-                            if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                            handle = h_hdmi;
+                            if(handle != 0) {
                                 if (dsSetGraphicEqualizerModeFunc(handle, m_GEQMode) == dsERR_NONE) {
                                     INT_INFO("Port %s: Initialized Graphic Equalizer mode : %d\n","HDMI0", m_GEQMode);
                                 }
@@ -1415,15 +1528,15 @@ void AudioConfigInit()
                        }
                        m_audioCompression = atoi(_AudioCompression.c_str());
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetAudioCompressionFunc(handle, m_audioCompression) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized audio compression : %d\n","SPEAKER0", m_audioCompression);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetAudioCompressionFunc(handle, m_audioCompression) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized audio compression : %d\n","HDMI0", m_audioCompression);
                            }
@@ -1464,15 +1577,15 @@ void AudioConfigInit()
                        }
                        m_enhancerLevel = atoi(_EnhancerLevel.c_str());
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetDialogEnhancementFunc(handle, m_enhancerLevel) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized dialog enhancement level : %d\n","SPEAKER0", m_enhancerLevel);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetDialogEnhancementFunc(handle, m_enhancerLevel) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized dialog enhancement level : %d\n","HDMI0", m_enhancerLevel);
                            }
@@ -1520,15 +1633,15 @@ void AudioConfigInit()
                            m_dolbyVolumeMode = false;
                        }
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetDolbyVolumeModeFunc(handle, m_dolbyVolumeMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Dolby Volume Mode : %d\n","SPEAKER0", m_dolbyVolumeMode);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetDolbyVolumeModeFunc(handle, m_dolbyVolumeMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Dolby Volume Mode : %d\n","HDMI0", m_dolbyVolumeMode);
                            }
@@ -1554,10 +1667,6 @@ void AudioConfigInit()
                        INT_DEBUG("dsSetIntelligentEqualizerMode_t(int, int) is defined and loaded\r\n");
                        std::string _IEQMode("0");
                        int m_IEQMode = 0;
-                       handle = 0;
-                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
-		           INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
-		       }
                        try {
                            _IEQMode = device::HostPersistence::getInstance().getProperty("audio.IntelligentEQ");
                        }
@@ -1573,15 +1682,15 @@ void AudioConfigInit()
                        m_IEQMode = atoi(_IEQMode.c_str());
 
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetIntelligentEqualizerModeFunc(handle, m_IEQMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Intelligent Equalizer mode : %d\n","SPEAKER0", m_IEQMode);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetIntelligentEqualizerModeFunc(handle, m_IEQMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Intelligent Equalizer mode : %d\n","HDMI0", m_IEQMode);
                            }
@@ -1627,16 +1736,16 @@ void AudioConfigInit()
                        m_volumeLeveller.mode = atoi(_volLevellerMode.c_str());
 		       m_volumeLeveller.level = atoi(_volLevellerLevel.c_str());
            //SPEAKER init
-                       handle = 0;
+                       handle = h_speaker;
                        INT_DEBUG("bDolbyVolumeOverrideCheck value:  %d\n", (int)bDolbyVolumeOverrideCheck);
-                       if(bDolbyVolumeOverrideCheck && dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       if(bDolbyVolumeOverrideCheck && handle != 0) {
                            if (dsSetVolumeLevellerFunc(handle, m_volumeLeveller) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Volume Leveller : Mode: %d, Level: %d\n","SPEAKER0", m_volumeLeveller.mode, m_volumeLeveller.level);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(bDolbyVolumeOverrideCheck && dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(bDolbyVolumeOverrideCheck && handle != 0) {
                            if (dsSetVolumeLevellerFunc(handle, m_volumeLeveller) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Volume Leveller : Mode: %d, Level: %d\n","HDMI0", m_volumeLeveller.mode, m_volumeLeveller.level);
                            }
@@ -1678,15 +1787,15 @@ void AudioConfigInit()
                        }
                        m_bassBoost = atoi(_BassBoost.c_str());
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetBassEnhancerFunc(handle, m_bassBoost) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Bass Boost : %d\n","SPEAKER0", m_bassBoost);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetBassEnhancerFunc(handle, m_bassBoost) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Bass Boost : %d\n","HDMI0", m_bassBoost);
                            }
@@ -1732,15 +1841,15 @@ void AudioConfigInit()
                            m_surroundDecoder = false;
                        }
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsEnableSurroundDecoderFunc(handle, m_surroundDecoder) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Surroudn Decoder : %d\n","SPEAKER0", m_surroundDecoder);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsEnableSurroundDecoderFunc(handle, m_surroundDecoder) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Surroudn Decoder : %d\n","HDMI0", m_surroundDecoder);
                            }
@@ -1786,15 +1895,15 @@ void AudioConfigInit()
                            m_DRCMode = 0;
                        }
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetDRCModeFunc(handle, m_DRCMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized DRCMode : %d\n","SPEAKER0", m_DRCMode);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetDRCModeFunc(handle, m_DRCMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized DRCMode : %d\n","HDMI0", m_DRCMode);
                            }
@@ -1843,15 +1952,15 @@ void AudioConfigInit()
                        m_virtualizer.mode = atoi(_SVMode.c_str());
 		       m_virtualizer.boost = atoi(_SVBoost.c_str());
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetSurroundVirtualizerFunc(handle, m_virtualizer) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Surround Virtualizer : Mode: %d, Boost : %d\n","SPEAKER0", m_virtualizer.mode, m_virtualizer.boost);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetSurroundVirtualizerFunc(handle, m_virtualizer) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Surround Virtualizer : Mode: %d, Boost : %d\\n","HDMI0", m_virtualizer.mode, m_virtualizer.boost);
                            }
@@ -1898,15 +2007,15 @@ void AudioConfigInit()
                        }
 
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                             if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
                                 INT_INFO("Port %s: Initialized MI Steering : %d\n","SPEAKER0", m_MISteering);
                             }
                         }
            //HDMI init
-                       handle = 0;
-                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if (handle != 0) {
                            if (dsSetMISteeringFunc(handle, m_MISteering) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized MI Steering : %d\n","HDMI0", m_MISteering);
                            }
@@ -1936,10 +2045,6 @@ void AudioConfigInit()
                        INT_DEBUG("dsSetGraphicEqualizerMode_t(int, int) is defined and loaded\r\n");
                        std::string _GEQMode("0");
                        int m_GEQMode = 0;
-                       handle = 0;
-                       if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) != dsERR_NONE) {
-			       INT_ERROR("dsGetAudioPort failed for SPEAKER0\n");
-		       }
                        try {
                            _GEQMode = device::HostPersistence::getInstance().getProperty("audio.GraphicEQ");
                        }
@@ -1955,15 +2060,15 @@ void AudioConfigInit()
                        m_GEQMode = atoi(_GEQMode.c_str());
 
            //SPEAKER init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_SPEAKER,0,&handle) == dsERR_NONE) {
+                       handle = h_speaker;
+                       if(handle != 0) {
                            if (dsSetGraphicEqualizerModeFunc(handle, m_GEQMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Graphic Equalizer mode : %d\n","SPEAKER0", m_GEQMode);
                            }
                        }
            //HDMI init
-                       handle = 0;
-                       if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+                       handle = h_hdmi;
+                       if(handle != 0) {
                            if (dsSetGraphicEqualizerModeFunc(handle, m_GEQMode) == dsERR_NONE) {
                                INT_INFO("Port %s: Initialized Graphic Equalizer mode : %d\n","HDMI0", m_GEQMode);
                            }
@@ -1981,8 +2086,8 @@ void AudioConfigInit()
     }
 
     /* HDMI digital audio mode settings */
-    handle = 0;
-    if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI,0,&handle) == dsERR_NONE) {
+    handle = h_hdmi;
+    if(handle != 0) {
        std::string _AudioModeAuto("FALSE");
        try {
           _AudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI0.AudioMode.AUTO");
@@ -2034,8 +2139,8 @@ void AudioConfigInit()
   }
 
     /* HDMI ARC digital audio mode settings */
-    handle = 0;
-    if(dsGetAudioPort(dsAUDIOPORT_TYPE_HDMI_ARC,0,&handle) == dsERR_NONE) {
+    handle = h_arc;
+    if(handle != 0) {
        std::string _ARCAudioModeAuto("FALSE");
        try {
           _ARCAudioModeAuto = device::HostPersistence::getInstance().getProperty("HDMI_ARC0.AudioMode.AUTO");
@@ -2095,6 +2200,137 @@ void AudioConfigInit()
       }
    }  
  }
+
+    /* Restore per-port enable state and, for SPDIF/HDMI_ARC, stereo mode after dsmgr restart.
+     * Keys are written by _dsSetEnablePersist(); absent key means first boot — skip silently. */
+    {
+        struct { dsAudioPortType_t type; int idx; const char *name; } _aPortRestore[] = {
+            { dsAUDIOPORT_TYPE_HDMI_ARC,  0, "HDMI_ARC0"  },
+            { dsAUDIOPORT_TYPE_SPDIF,     0, "SPDIF0"     },
+            { dsAUDIOPORT_TYPE_SPEAKER,   0, "SPEAKER0"   },
+            { dsAUDIOPORT_TYPE_HEADPHONE, 0, "HEADPHONE0" },
+        };
+        for (size_t _i = 0; _i < sizeof(_aPortRestore)/sizeof(_aPortRestore[0]); _i++) {
+            const char *_name = _aPortRestore[_i].name;
+            intptr_t _h = 0;
+
+            if (dsGetAudioPort(_aPortRestore[_i].type, _aPortRestore[_i].idx, &_h) != dsERR_NONE || _h == 0) {
+                INT_INFO(" AudioConfigInit: dsGetAudioPort failed for %s, skipping\n", _name);
+                continue;
+            }
+
+            /* Read persisted enable state; skip if key absent (first boot) */
+            std::string _enableVal = "NOT_FOUND";
+            try {
+                _enableVal = device::HostPersistence::getInstance().getProperty(
+                    std::string("audio.") + _name + ".isEnabled");
+            } catch(...) {}
+            if (_enableVal == "NOT_FOUND") continue;
+            bool _enable = (_enableVal == "TRUE");
+
+            /* HDMI_ARC: re-establish eARC session before gating the audio path */
+            if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_HDMI_ARC) {
+                typedef dsError_t (*dsAudioEnableARC_t)(intptr_t, dsAudioARCStatus_t);
+                static dsAudioEnableARC_t _arcFunc = 0;
+                if (_arcFunc == 0) {
+                    void *_lib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+                    if (_lib) {
+                        _arcFunc = (dsAudioEnableARC_t)dlsym(_lib, "dsAudioEnableARC");
+                        dlclose(_lib);
+                    }
+                    if (!_arcFunc)
+                        INT_INFO(" AudioConfigInit: dsAudioEnableARC not available\n");
+                }
+                if (_arcFunc) {
+                    dsAudioARCStatus_t _arc = { dsAUDIOARCSUPPORT_eARC, _enable };
+                    dsError_t _r = _arcFunc(_h, _arc);
+                    if (_r != dsERR_NONE)
+                        INT_ERROR(" AudioConfigInit: %s dsAudioEnableARC(status=%d) ret=0x%x\n",
+                                  _name, (int)_enable, (int)_r);
+                }
+            }
+
+            /* Speaker: restore ducking volume before enabling — same logic as _dsEnableAudioPort() */
+            if (_aPortRestore[_i].type == dsAUDIOPORT_TYPE_SPEAKER && _enable) {
+                bool _muted = false;
+                if (dsIsAudioMute(_h, &_muted) != dsERR_NONE)
+                    INT_INFO(" AudioConfigInit: SPEAKER0 dsIsAudioMute failed\n");
+                if (!_muted) {
+                    if (IARM_RESULT_SUCCESS != setAudioDuckingAudioLevel(_h))
+                        INT_INFO(" AudioConfigInit: SPEAKER0 setAudioDuckingAudioLevel failed\n");
+                } else {
+                    INT_INFO(" AudioConfigInit: SPEAKER0 muted — skipping ducking restore\n");
+                }
+            }
+
+            /* Gate audio path for all ports */
+            dsError_t _enRet = dsEnableAudioPort(_h, _enable);
+            INT_INFO(" AudioConfigInit: %s dsEnableAudioPort(enable=%d) ret=0x%x\n",
+                     _name, (int)_enable, (int)_enRet);
+
+            /* HAL read-back verify; update in-memory state and restore delay on match */
+            bool _verify = false;
+            dsAudioPortType_t _aPortType = _GetAudioPortType(_h);
+            if (dsIsAudioPortEnabled(_h, &_verify) == dsERR_NONE && _verify == _enable) {
+                INT_INFO(" AudioConfigInit: %s isEnabled=%s restored (verified)\n",
+                         _name, _enableVal.c_str());
+                if (_aPortType < dsAUDIOPORT_TYPE_MAX) {
+                    m_AudioPortEnabled[_aPortType] = _enable;
+                    if (_enable) {
+                        uint32_t _delay = dsGetAudioDelayInternal(_aPortType);
+                        dsSetAudioDelayInternal(_h, _delay);
+                        INT_INFO(" AudioConfigInit: %s audio delay restored to %u ms\n",
+                                 _name, _delay);
+                    }
+                }
+            } else {
+                INT_INFO(" AudioConfigInit: %s enable verify failed (requested=%d)\n",
+                         _name, (int)_enable);
+            }
+
+            /* Stereo mode restore — SPDIF0 and HDMI_ARC0 only */
+            if (_aPortRestore[_i].type != dsAUDIOPORT_TYPE_SPDIF &&
+                _aPortRestore[_i].type != dsAUDIOPORT_TYPE_HDMI_ARC) {
+                continue;
+            }
+            std::string _audioModeVal = "STEREO";
+            std::string _audioAutoVal = "FALSE";
+            try { _audioModeVal = device::HostPersistence::getInstance().getProperty(
+                      std::string(_name) + ".AudioMode"); } catch(...) {}
+            try { _audioAutoVal = device::HostPersistence::getInstance().getProperty(
+                      std::string(_name) + ".AudioMode.AUTO"); } catch(...) {}
+
+            INT_INFO(" AudioConfigInit: %s AudioMode=%s AUTO=%s\n",
+                     _name, _audioModeVal.c_str(), _audioAutoVal.c_str());
+
+            int _autoMode = (_audioAutoVal == "TRUE") ? 1 : 0;
+            dsError_t  ret = dsSetStereoAuto(_h, _autoMode);
+            if (ret != dsERR_NONE)
+            {
+                INT_ERROR(" AudioConfigInit: %s dsSetStereoAuto(%d) failed ret =%d\n", _name, _autoMode, ret);
+            }
+            else {
+                INT_INFO(" AudioConfigInit: %s dsSetStereoAuto(%d) success ret =%d\n", _name, _autoMode, ret);
+            }
+            
+
+            dsAudioStereoMode_t _stereoMode = dsAUDIO_STEREO_STEREO;
+            if      (_audioModeVal == "PASSTHRU")         _stereoMode = dsAUDIO_STEREO_PASSTHRU;
+            else if (_audioModeVal == "SURROUND")         _stereoMode = dsAUDIO_STEREO_SURROUND;
+            else if (_audioModeVal == "DOLBYDIGITAL")     _stereoMode = dsAUDIO_STEREO_DD;
+            else if (_audioModeVal == "DOLBYDIGITALPLUS") _stereoMode = dsAUDIO_STEREO_DDPLUS;
+
+            ret = dsSetStereoMode(_h, _stereoMode);
+            if (ret != dsERR_NONE) {
+                INT_ERROR(" AudioConfigInit: %s dsSetStereoMode(%d) failed ret=%d\n",
+                          _name, (int)_stereoMode, ret);
+            }
+            else {
+                INT_INFO(" AudioConfigInit: %s dsSetStereoMode(%d) success ret=%d\n",
+                         _name, (int)_stereoMode, ret);
+            }
+        }
+    }
 
 #endif //DS_AUDIO_SETTINGS_PERSISTENCE
 }
@@ -2283,6 +2519,29 @@ IARM_Result_t dsAudioMgr_init()
         else 
         {
 			_srv_SPDIF_Audiomode = dsAUDIO_STEREO_STEREO;
+        }
+        /* Restore SPDIF0 stereo mode to SOC HAL so that dsGetStereoMode()
+         * returns the persisted value.  Without this call, audioModeSPDIF
+         * in the SOC HAL stays at its reset default (STEREO/UNKNOWN) after
+         * a dsmgr restart, causing _dsGetEncoding() to derive PCM instead
+         * of the correct DISPLAY/PASSTHRU encoding. */
+        {
+            intptr_t spdif_handle = 0;
+            if (dsGetAudioPort(dsAUDIOPORT_TYPE_SPDIF, 0, &spdif_handle) == dsERR_NONE && spdif_handle != 0)
+            {
+                if (dsSetStereoMode(spdif_handle, _srv_SPDIF_Audiomode) == dsERR_NONE)
+                {
+                    INT_INFO("dsSetStereoMode SPDIF0: restored HAL audioModeSPDIF to %d\r\n", _srv_SPDIF_Audiomode);
+                }
+                else
+                {
+                    INT_ERROR("dsSetStereoMode SPDIF0: failed to restore HAL audioModeSPDIF to %d\r\n", _srv_SPDIF_Audiomode);
+                }
+            }
+            else
+            {
+                INT_ERROR("dsSetStereoMode SPDIF0: dsGetAudioPort failed, cannot restore HAL audioModeSPDIF\r\n");
+            }
         }
         /* Get the AudioModesettings for HDMI_ARC from Persistence */
         std::string _ARCModeSettings("STEREO");
@@ -5004,11 +5263,23 @@ IARM_Result_t _dsGetDRCMode(void *arg)
     {
         int mode = 0;
         param->mode = 0;
-        if (func(param->handle, &mode) == dsERR_NONE)
+        INT_INFO("[_dsGetDRCMode SRV] handle:0x%lX -> SOC HAL dsGetDRCMode()\n", (long)param->handle);
+        dsError_t halRet = func(param->handle, &mode);
+        if (halRet == dsERR_NONE)
         {
             param->mode = mode;
             result = IARM_RESULT_SUCCESS;
+            INT_INFO("[_dsGetDRCMode SRV] SOC HAL OK mode:%d (%s)\n", mode, mode == 1 ? "RF" : "Line");
         }
+        else
+        {
+            INT_ERROR("[_dsGetDRCMode SRV] SOC HAL FAILED halRet:%d\n", halRet);
+        }
+    }
+    else
+    {
+        INT_ERROR("[_dsGetDRCMode SRV] func:%p param:%p – HAL not loaded or null arg\n",
+                  (void*)func, (void*)param);
     }
 
     IARM_BUS_Unlock(lock);
@@ -5049,14 +5320,27 @@ IARM_Result_t _dsSetDRCMode(void *arg)
 
     if (func != 0 && param != NULL)
     {
-        if (func(param->handle, param->mode) == dsERR_NONE)
+        INT_INFO("[_dsSetDRCMode SRV] handle:0x%lX mode:%d (%s) -> SOC HAL dsSetDRCMode()\n",
+                 (long)param->handle, param->mode, param->mode == 1 ? "RF" : "Line");
+        dsError_t halRet = func(param->handle, param->mode);
+        if (halRet == dsERR_NONE)
         {
+            INT_INFO("[_dsSetDRCMode SRV] SOC HAL OK\n");
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
             INT_INFO("%s: persist DRC Mode value: %s\n",__func__, param->mode ? "RF":"Line");
             device::HostPersistence::getInstance().persistHostProperty("audio.DRCMode",param->mode ? "RF":"Line");
 #endif
             result = IARM_RESULT_SUCCESS;
         }
+        else
+        {
+            INT_ERROR("[_dsSetDRCMode SRV] SOC HAL FAILED halRet:%d\n", halRet);
+        }
+    }
+    else
+    {
+        INT_ERROR("[_dsSetDRCMode SRV] func:%p param:%p – HAL not loaded or null arg\n",
+                  (void*)func, (void*)param);
     }
 
     IARM_BUS_Unlock(lock);

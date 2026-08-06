@@ -33,6 +33,7 @@
 #include "dsError.h"
 #include "dsUtl.h"
 #include "stdlib.h"
+#include <unistd.h>
 #include "dslogger.h"
 #include <dlfcn.h>
 #include "manager.hpp"
@@ -276,6 +277,53 @@ void AudioOutputPortConfig::release()
 	}
 
   }
+
+/**
+ * @fn AudioOutputPortConfig::refreshAllHandles()
+ * @brief Re-fetches the server-side _handle for EVERY audio port stored in
+ *        _aPorts[] by calling AudioOutputPort::refreshHandle() on each entry.
+ *
+ *        This mirrors the port construction loop in load():
+ *          for (int i = 0; i < portSize; i++)
+ *              _aPorts.push_back(AudioOutputPort(type, index, i));
+ *        but instead of creating new objects it refreshes the handles of the
+ *        existing ones in place – no DeInitialize/Initialize needed.
+ *
+ *        Ports refreshed (example vendor config):
+ *          SPDIF0     (dsAUDIOPORT_TYPE_SPDIF,     index 0)
+ *          SPEAKER0   (dsAUDIOPORT_TYPE_SPEAKER,   index 0)
+ *          HDMI_ARC0  (dsAUDIOPORT_TYPE_HDMI_ARC,  index 0)
+ *          HDMI0      (dsAUDIOPORT_TYPE_HDMI,       index 0)  -- if present
+ *        The exact set depends on kAudioPorts[] in the vendor SOC config.
+ *
+ * @return dsERR_NONE if ALL ports refreshed successfully.
+ *         First failure code encountered if any port fails (refresh of
+ *         remaining ports continues regardless so all are attempted).
+ */
+dsError_t AudioOutputPortConfig::refreshAllHandles()
+{
+    dsError_t result = dsERR_NONE;
+
+    INT_INFO("[refreshAllHandles] Refreshing handles for %zu audio port(s)",
+             _aPorts.size());
+
+    for (size_t i = 0; i < _aPorts.size(); i++) {
+        dsError_t ret = _aPorts.at(i).refreshHandle();
+        if (ret == dsERR_NONE) {
+            INT_INFO("[refreshAllHandles] Port[%zu] %s  OK",
+                     i, _aPorts.at(i).getName().c_str());
+        } else {
+            INT_ERROR("[refreshAllHandles] Port[%zu] %s  FAILED (ret=%d)",
+                      i, _aPorts.at(i).getName().c_str(), ret);
+            if (result == dsERR_NONE)
+                result = ret;  /* capture first failure, keep going */
+        }
+    }
+
+    INT_INFO("[refreshAllHandles] Done. result=%d (%s)",
+             result, result == dsERR_NONE ? "ALL OK" : "PARTIAL FAIL");
+    return result;
+}
 }
 /** @} */
 /** @} */

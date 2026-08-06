@@ -83,6 +83,11 @@ public:
 
 	void load(videoPortConfigs_t* dynamicVideoPortConfigs);
 	void release();
+	int refreshAllHandles();  /*!< Re-fetch _handle (and inner Display handle) for every port
+	                                 *   in _vPorts[].  Mirrors the load() port loop but calls
+	                                 *   VideoOutputPort::refreshHandle() on each existing object
+	                                 *   instead of constructing new ones.  Call after dsmgr
+	                                 *   crash+restart to clear stale handles for ALL video ports. */
 
 };
 

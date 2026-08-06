@@ -63,6 +63,7 @@ public:
 
 	void load(videoDeviceConfig_t* dynamicVideoDeviceConfigs);
 	void release();
+	int  refreshAllHandles();
 
 };
 

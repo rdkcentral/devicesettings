@@ -471,6 +471,27 @@ void VideoOutputPortConfig::release()
 		throw e;
 	}
   }
+
+int VideoOutputPortConfig::refreshAllHandles()
+{
+    int result = dsERR_NONE;
+    INT_INFO("[refreshAllHandles] Refreshing handles for %zu video port(s)", _vPorts.size());
+    for (size_t i = 0; i < _vPorts.size(); i++) {
+        int ret = _vPorts.at(i).refreshHandle();
+        if (ret == dsERR_NONE) {
+            INT_INFO("[refreshAllHandles] Port[%zu] %s  OK", i, _vPorts.at(i).getName().c_str());
+        } else {
+            INT_ERROR("[refreshAllHandles] Port[%zu] %s  FAILED (ret=%d)",
+                      i, _vPorts.at(i).getName().c_str(), ret);
+            if (result == dsERR_NONE)
+                result = ret;  /* capture first failure, keep going */
+        }
+    }
+    INT_INFO("[refreshAllHandles] Done. result=%d (%s)",
+             result, result == dsERR_NONE ? "ALL OK" : "PARTIAL FAIL");
+    return result;
+}
+
 }
 /** @} */
 /** @} */
