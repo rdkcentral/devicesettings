@@ -1507,7 +1507,7 @@ void AudioConfigInit()
                                _DolbyVolumeMode = device::HostPersistence::getInstance().getDefaultProperty("audio.DolbyVolumeMode");
                            }
                            catch(...) {
-                               //coverity fix: UNUSED_VALUE - removed redundant assignment, already initialized to "FALSE" at line 1498
+							   INT_DEBUG("audio.DolbyVolumeMode system default not found. Using default: FALSE\n");
                            }
                        }
                        if (_DolbyVolumeMode == "TRUE") {
