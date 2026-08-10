@@ -419,8 +419,18 @@ void AudioConfigInit()
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
                 }
-		m_LastVolumeLevel = m_audioLevel; 
-               INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
+		// Use SPEAKER cache for TV (primary), HDMI cache for STB (primary)
+		// Avoids using fallback "40" from last-processed port if that port failed persistence
+		if (audioLevel_cache_speaker > 0.0) {
+		    m_LastVolumeLevel = audioLevel_cache_speaker;
+		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (from SPEAKER cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		} else if (audioLevel_cache_hdmi > 0.0) {
+		    m_LastVolumeLevel = audioLevel_cache_hdmi;
+		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (from HDMI cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		} else {
+		    m_LastVolumeLevel = 40.0; // Final fallback if both primary ports failed
+		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (fallback default)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		}
 		
             }
             else {
