@@ -176,6 +176,8 @@ IARM_Result_t dsFPDMgr_init()
 
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsFPInit,_dsFPInit);
 	
+
+
 	try
 	{
 		/* Init the Power and Clock Brightness */
