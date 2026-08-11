@@ -53,6 +53,7 @@
 #include "dsAudioConfig.h"
 
 #include "safec_lib.h"
+#include "UtilsSearchRDKProfile.h"
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
@@ -419,17 +420,26 @@ void AudioConfigInit()
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
                 }
-		// Use SPEAKER cache for TV (primary), HDMI cache for STB (primary)
-		// Avoids using fallback "40" from last-processed port if that port failed persistence
-		if (audioLevel_cache_speaker.load() > 0.0) {
+		// Primary port for volume reference: SPEAKER on TV, HDMI on STB
+		profile_t rdkProfile = searchRdkProfile();
+		if (rdkProfile == PROFILE_TV) {
 		    m_LastVolumeLevel = audioLevel_cache_speaker.load();
-		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (from SPEAKER cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
-		} else if (audioLevel_cache_hdmi.load() > 0.0) {
+		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (TV: from SPEAKER cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		} else if (rdkProfile == PROFILE_STB) {
 		    m_LastVolumeLevel = audioLevel_cache_hdmi.load();
-		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (from HDMI cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (STB: from HDMI cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
 		} else {
-		    m_LastVolumeLevel = 40.0; // Final fallback if both primary ports failed
-		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (fallback default)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		    // Profile unknown: prefer SPEAKER if available, else HDMI, else default
+		    if (audioLevel_cache_speaker.load() > 0.0) {
+		        m_LastVolumeLevel = audioLevel_cache_speaker.load();
+		        INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (unknown profile: SPEAKER cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		    } else if (audioLevel_cache_hdmi.load() > 0.0) {
+		        m_LastVolumeLevel = audioLevel_cache_hdmi.load();
+		        INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (unknown profile: HDMI cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		    } else {
+		        m_LastVolumeLevel = 40.0;
+		        INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (unknown profile: fallback default)\n", __FUNCTION__, float(m_LastVolumeLevel));
+		    }
 		}
 		
             }
