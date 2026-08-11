@@ -377,26 +377,40 @@ void AudioConfigInit()
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","SPEAKER0", m_audioLevel);
                     }
+                    m_LastVolumeLevel = m_audioLevel;
                 }
 //HEADPHONE init
                 handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE,0,&handle) == dsERR_NONE) {
-                    try {
-                        _AudioLevel = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.Level");
+                bool isHeadphoneConnected = false;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE, 0, &handle) == dsERR_NONE) {
+                    typedef dsError_t (*dsAudioOutIsConnected_t)(intptr_t handle, bool *isCon);
+                    void *hplib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+                    if (hplib) {
+                        dsAudioOutIsConnected_t isConFunc = (dsAudioOutIsConnected_t)dlsym(hplib, "dsAudioOutIsConnected");
+                        if (isConFunc) isConFunc(handle, &isHeadphoneConnected);
+                        else isHeadphoneConnected = true; // assume connected if HAL symbol absent
+                        dlclose(hplib);
                     }
-                    catch(...) {
-                            try {
-                                INT_DEBUG("HEADPHONE0.audio.Level not found in persistence store. Try system default\n");
-                                _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("HEADPHONE0.audio.Level");
-                            }
-                            catch(...) {
-                                _AudioLevel = "40";
-                            }
-                    }
-                    m_audioLevel = atof(_AudioLevel.c_str());
-		    audioLevel_cache_headphone = m_audioLevel;
-                    if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
-                        INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
+
+                    if (isHeadphoneConnected) {
+                        try {
+                            _AudioLevel = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.Level");
+                        }
+                        catch(...) {
+                                try {
+                                    INT_DEBUG("HEADPHONE0.audio.Level not found in persistence store. Try system default\n");
+                                    _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("HEADPHONE0.audio.Level");
+                                }
+                                catch(...) {
+                                    _AudioLevel = "40";
+                                }
+                        }
+                        m_audioLevel = atof(_AudioLevel.c_str());
+		                audioLevel_cache_headphone = m_audioLevel;
+                        if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
+                            INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
+                        }
+                        m_LastVolumeLevel = m_audioLevel;
                     }
                 }
 //HDMI init
@@ -419,29 +433,9 @@ void AudioConfigInit()
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
+                    m_LastVolumeLevel = m_audioLevel;
                 }
-		// Primary port for volume reference: SPEAKER on TV, HDMI on STB
-		profile_t rdkProfile = searchRdkProfile();
-		if (rdkProfile == PROFILE_TV) {
-		    m_LastVolumeLevel = audioLevel_cache_speaker.load();
-		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (TV: from SPEAKER cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
-		} else if (rdkProfile == PROFILE_STB) {
-		    m_LastVolumeLevel = audioLevel_cache_hdmi.load();
-		    INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (STB: from HDMI cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
-		} else {
-		    // Profile unknown: prefer SPEAKER if available, else HDMI, else default
-		    if (audioLevel_cache_speaker.load() > 0.0) {
-		        m_LastVolumeLevel = audioLevel_cache_speaker.load();
-		        INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (unknown profile: SPEAKER cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
-		    } else if (audioLevel_cache_hdmi.load() > 0.0) {
-		        m_LastVolumeLevel = audioLevel_cache_hdmi.load();
-		        INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (unknown profile: HDMI cache)\n", __FUNCTION__, float(m_LastVolumeLevel));
-		    } else {
-		        m_LastVolumeLevel = 40.0;
-		        INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f (unknown profile: fallback default)\n", __FUNCTION__, float(m_LastVolumeLevel));
-		    }
-		}
-		
+            INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
             }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
