@@ -53,7 +53,7 @@
 #include "dsAudioConfig.h"
 
 #include "safec_lib.h"
-#include "UtilsSearchRDKProfile.h"
+#include "dsInternal.h"
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;

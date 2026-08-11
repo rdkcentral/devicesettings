@@ -54,6 +54,7 @@ typedef enum profile {
 }profile_t;
 
 extern profile_t profileType;
+profile_t searchRdkProfile(void);
 
 struct HdmiEnumToStrMapping
 {
