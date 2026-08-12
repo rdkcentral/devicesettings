@@ -377,7 +377,6 @@ void AudioConfigInit()
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","SPEAKER0", m_audioLevel);
                     }
-                    m_LastVolumeLevel = m_audioLevel;
                 }
 //HEADPHONE init
                 handle = 0;
@@ -410,7 +409,6 @@ void AudioConfigInit()
                         if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                             INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
                         }
-                        m_LastVolumeLevel = m_audioLevel;
                     }
                 }
 //HDMI init
@@ -429,13 +427,14 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
-		    audioLevel_cache_hdmi = m_audioLevel;
+		            audioLevel_cache_hdmi = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
-                    m_LastVolumeLevel = m_audioLevel;
                 }
-            INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
+
+                m_LastVolumeLevel = m_audioLevel;
+                INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
             }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
