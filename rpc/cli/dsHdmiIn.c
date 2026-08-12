@@ -107,6 +107,7 @@ dsError_t dsHdmiInGetNumberOfInputs (uint8_t *pNumHdmiInputs)
     param.numHdmiInputs = 0;
 
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+        printf(" calling IARM %s:%d \n", __PRETTY_FUNCTION__,__LINE__);
 
 	rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                             (char *)IARM_BUS_DSMGR_API_dsHdmiInGetNumberOfInputs,
