@@ -798,6 +798,7 @@ IARM_Result_t _dsHdmiInTerm(void *arg)
 IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
 {
     _DEBUG_ENTER();
+        INT_INFO("[%d][%s]: entry before lock \r\n", __LINE__, __FUNCTION__);
 
     dsHdmiInGetNumberOfInputsParam_t *param = (dsHdmiInGetNumberOfInputsParam_t *)arg;
 
@@ -821,6 +822,7 @@ IARM_Result_t _dsHdmiInGetNumberOfInputs(void *arg)
 IARM_Result_t _dsHdmiInGetStatus(void *arg)
 {
     _DEBUG_ENTER();
+        INT_INFO("[%d][%s]: entry before lock \r\n", __LINE__, __FUNCTION__);
 
     dsHdmiInGetStatusParam_t *param= (dsHdmiInGetStatusParam_t *)arg;
 
@@ -892,6 +894,7 @@ IARM_Result_t _dsHdmiInScaleVideo(void *arg)
 IARM_Result_t _dsHdmiInSelectZoomMode(void *arg)
 {
     _DEBUG_ENTER();
+        INT_INFO("[%d][%s]: entry before lock \r\n", __LINE__, __FUNCTION__);
     IARM_BUS_Lock(lock);
     dsHdmiInSelectZoomModeParam_t *param = (dsHdmiInSelectZoomModeParam_t *)arg;
 
@@ -914,6 +917,7 @@ IARM_Result_t _dsHdmiInSelectZoomMode(void *arg)
 IARM_Result_t _dsHdmiInGetCurrentVideoMode(void *arg)
 {
     _DEBUG_ENTER();
+        INT_INFO("[%d][%s]: entry before lock \r\n", __LINE__, __FUNCTION__);
 
     dsHdmiInGetResolutionParam_t *param = (dsHdmiInGetResolutionParam_t *)arg;
 
