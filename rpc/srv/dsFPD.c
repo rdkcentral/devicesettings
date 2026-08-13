@@ -177,8 +177,13 @@ IARM_Result_t dsFPDMgr_init()
 		string value;
 		int maxBrightness = dsFPD_BRIGHTNESS_MAX;
 
-		value = device::HostPersistence::getInstance().getDefaultProperty("Power.brightness");
-		_dsPowerBrightness = stringToNumber(value);
+		try {
+		    value = device::HostPersistence::getInstance().getDefaultProperty("Power.brightness");
+		    _dsPowerBrightness = stringToNumber(value);
+		}
+		catch(...) {
+		    _dsPowerBrightness = maxBrightness;
+		}
 		
 		value = device::HostPersistence::getInstance().getProperty("Text.brightness", numberToString(maxBrightness));
 		_dsTextBrightness = stringToNumber(std::move(value));
