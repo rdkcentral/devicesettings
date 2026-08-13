@@ -432,7 +432,6 @@ void AudioConfigInit()
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
                 }
-
                 m_LastVolumeLevel = m_audioLevel;
                 INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
             }
@@ -3274,7 +3273,10 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         } else if( dsSetAudioLevelFunc(param->handle, param->level) == dsERR_NONE) {
             result = IARM_RESULT_SUCCESS;
         }
-	m_LastVolumeLevel = {param->level};
+        /* Only SPEAKER level is the reference for ducking restore; other ports must not overwrite it */
+        if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
+            m_LastVolumeLevel = {param->level};
+        }
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioLevel = std::to_string(param->level);
         switch(_APortType) {
@@ -3343,8 +3345,9 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     }
     else
     {
-	 volume = m_LastVolumeLevel;
-         INT_INFO("%s: audio level from cache before ducking started: %f", __FUNCTION__, volume);
+	 /* Restore the speaker's own level; do not use another port's reference level. */
+	 volume = audioLevel_cache_speaker.load();
+     INT_INFO("%s: audio level from cache before ducking started: %f", __FUNCTION__, volume);
     }
     if (dsSetAudioLevelFunc == 0)
     {
@@ -3583,6 +3586,28 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
     ret = dsEnableAudioPort(param->handle, param->enabled);
     if(ret == dsERR_NONE) {
           result = IARM_RESULT_SUCCESS;
+          if (param->enabled && _APortType != dsAUDIOPORT_TYPE_SPEAKER) {
+              float restoredVolume = 0.0f;
+              switch (_APortType) {
+                  case dsAUDIOPORT_TYPE_SPDIF:
+                      restoredVolume = audioLevel_cache_spdif.load();
+                      break;
+                  case dsAUDIOPORT_TYPE_HDMI:
+                      restoredVolume = audioLevel_cache_hdmi.load();
+                      break;
+                  case dsAUDIOPORT_TYPE_HEADPHONE:
+                      restoredVolume = audioLevel_cache_headphone.load();
+                      break;
+                  default:
+                      break;
+              }
+
+              if (dsSetAudioLevelFunc != 0) {
+                  dsSetAudioLevelFunc(param->handle, restoredVolume);
+                  INT_INFO("%s: restored audio level %f for port type %d\n",
+                           __FUNCTION__, restoredVolume, _APortType);
+              }
+          }
     }
 
     std::string isEnabledAudioPortKey("audio.");
