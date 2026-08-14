@@ -3345,8 +3345,12 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     }
     else
     {
-	 /* Restore the speaker's own level; do not use another port's reference level. */
+#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
+     /* Restore the speaker's own level; do not use another port's reference level. */
 	 volume = audioLevel_cache_speaker.load();
+#else
+     volume = m_LastVolumeLevel;
+#endif
      INT_INFO("%s: audio level from cache before ducking started: %f", __FUNCTION__, volume);
     }
     if (dsSetAudioLevelFunc == 0)
@@ -3586,6 +3590,7 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
     ret = dsEnableAudioPort(param->handle, param->enabled);
     if(ret == dsERR_NONE) {
           result = IARM_RESULT_SUCCESS;
+#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
           if (param->enabled && _APortType != dsAUDIOPORT_TYPE_SPEAKER) {
               float restoredVolume = 0.0f;
               switch (_APortType) {
@@ -3608,6 +3613,7 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
                            __FUNCTION__, restoredVolume, _APortType);
               }
           }
+#endif
     }
 
     std::string isEnabledAudioPortKey("audio.");
