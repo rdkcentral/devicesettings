@@ -3273,10 +3273,8 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         } else if( dsSetAudioLevelFunc(param->handle, param->level) == dsERR_NONE) {
             result = IARM_RESULT_SUCCESS;
         }
-        /* Only SPEAKER level is the reference for ducking restore; other ports must not overwrite it */
-        if (_APortType == dsAUDIOPORT_TYPE_SPEAKER) {
-            m_LastVolumeLevel = {param->level};
-        }
+
+        m_LastVolumeLevel = {param->level};
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioLevel = std::to_string(param->level);
         switch(_APortType) {
