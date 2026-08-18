@@ -53,7 +53,6 @@
 #include "dsAudioConfig.h"
 
 #include "safec_lib.h"
-#include "dsInternal.h"
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
@@ -391,24 +390,27 @@ void AudioConfigInit()
                         dlclose(hplib);
                     }
 
-                    if (isHeadphoneConnected) {
-                        try {
-                            _AudioLevel = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.Level");
-                        }
-                        catch(...) {
-                                try {
-                                    INT_DEBUG("HEADPHONE0.audio.Level not found in persistence store. Try system default\n");
-                                    _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("HEADPHONE0.audio.Level");
-                                }
-                                catch(...) {
-                                    _AudioLevel = "40";
-                                }
-                        }
-                        m_audioLevel = atof(_AudioLevel.c_str());
-		                audioLevel_cache_headphone = m_audioLevel;
-                        if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
-                            INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
-                        }
+                    try {
+                        _AudioLevel = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.Level");
+                    }
+                    catch(...) {
+                            try {
+                                INT_DEBUG("HEADPHONE0.audio.Level not found in persistence store. Try system default\n");
+                                _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("HEADPHONE0.audio.Level");
+                            }
+                            catch(...) {
+                                _AudioLevel = "40";
+                            }
+                    }
+                    float headphoneAudioLevel = atof(_AudioLevel.c_str());
+	                audioLevel_cache_headphone = headphoneAudioLevel;
+                    if(true == isHeadphoneConnected)
+                    {
+                        m_audioLevel = headphoneAudioLevel;
+                    }
+                    if (dsSetAudioLevelFunc(handle, headphoneAudioLevel) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio level : %f (connected: %d)\n",
+                                 "HEADPHONE0", headphoneAudioLevel, isHeadphoneConnected);
                     }
                 }
 //HDMI init
@@ -432,6 +434,7 @@ void AudioConfigInit()
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
                 }
+
                 m_LastVolumeLevel = m_audioLevel;
                 INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
             }
