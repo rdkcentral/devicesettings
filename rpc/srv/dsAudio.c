@@ -379,7 +379,17 @@ void AudioConfigInit()
                 }
 //HEADPHONE init
                 handle = 0;
-                if(dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE,0,&handle) == dsERR_NONE) {
+                bool isHeadphoneConnected = false;
+                if (dsGetAudioPort(dsAUDIOPORT_TYPE_HEADPHONE, 0, &handle) == dsERR_NONE) {
+                    typedef dsError_t (*dsAudioOutIsConnected_t)(intptr_t handle, bool *isCon);
+                    void *hplib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
+                    if (hplib) {
+                        dsAudioOutIsConnected_t isConFunc = (dsAudioOutIsConnected_t)dlsym(hplib, "dsAudioOutIsConnected");
+                        if (isConFunc) isConFunc(handle, &isHeadphoneConnected);
+                        else isHeadphoneConnected = true; // assume connected if HAL symbol absent
+                        dlclose(hplib);
+                    }
+
                     try {
                         _AudioLevel = device::HostPersistence::getInstance().getProperty("HEADPHONE0.audio.Level");
                     }
@@ -392,10 +402,15 @@ void AudioConfigInit()
                                 _AudioLevel = "40";
                             }
                     }
-                    m_audioLevel = atof(_AudioLevel.c_str());
-		    audioLevel_cache_headphone = m_audioLevel;
-                    if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
-                        INT_INFO("Port %s: Initialized audio level : %f\n","HEADPHONE0", m_audioLevel);
+                    float headphoneAudioLevel = atof(_AudioLevel.c_str());
+	                audioLevel_cache_headphone = headphoneAudioLevel;
+                    if(true == isHeadphoneConnected)
+                    {
+                        m_audioLevel = headphoneAudioLevel;
+                    }
+                    if (dsSetAudioLevelFunc(handle, headphoneAudioLevel) == dsERR_NONE) {
+                        INT_INFO("Port %s: Initialized audio level : %f (connected: %d)\n",
+                                 "HEADPHONE0", headphoneAudioLevel, isHeadphoneConnected);
                     }
                 }
 //HDMI init
@@ -414,14 +429,14 @@ void AudioConfigInit()
                             }
                     }
                     m_audioLevel = atof(_AudioLevel.c_str());
-		    audioLevel_cache_hdmi = m_audioLevel;
+		            audioLevel_cache_hdmi = m_audioLevel;
                     if (dsSetAudioLevelFunc(handle, m_audioLevel) == dsERR_NONE) {
                         INT_INFO("Port %s: Initialized audio level : %f\n","HDMI0", m_audioLevel);
                     }
                 }
-		m_LastVolumeLevel = m_audioLevel; 
-               INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
-		
+
+                m_LastVolumeLevel = m_audioLevel;
+                INT_INFO("%s: audio level during init config m_LastVolumeLevel : %f\n", __FUNCTION__, float(m_LastVolumeLevel));
             }
             else {
                 INT_INFO("dsSetAudioLevel_t(int, float ) is not defined\r\n");
@@ -3262,7 +3277,8 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         } else if( dsSetAudioLevelFunc(param->handle, param->level) == dsERR_NONE) {
             result = IARM_RESULT_SUCCESS;
         }
-	m_LastVolumeLevel = {param->level};
+
+        m_LastVolumeLevel = {param->level};
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
         std::string _AudioLevel = std::to_string(param->level);
         switch(_APortType) {
@@ -3331,8 +3347,13 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     }
     else
     {
-	 volume = m_LastVolumeLevel;
-         INT_INFO("%s: audio level from cache before ducking started: %f", __FUNCTION__, volume);
+#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
+     /* Restore the speaker's own level; do not use another port's reference level. */
+	 volume = audioLevel_cache_speaker.load();
+#else
+     volume = m_LastVolumeLevel;
+#endif
+     INT_INFO("%s: audio level from cache before ducking started: %f", __FUNCTION__, volume);
     }
     if (dsSetAudioLevelFunc == 0)
     {
@@ -3571,6 +3592,30 @@ IARM_Result_t _dsEnableAudioPort(void *arg)
     ret = dsEnableAudioPort(param->handle, param->enabled);
     if(ret == dsERR_NONE) {
           result = IARM_RESULT_SUCCESS;
+#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
+          if (param->enabled && _APortType != dsAUDIOPORT_TYPE_SPEAKER) {
+              float restoredVolume = 0.0f;
+              switch (_APortType) {
+                  case dsAUDIOPORT_TYPE_SPDIF:
+                      restoredVolume = audioLevel_cache_spdif.load();
+                      break;
+                  case dsAUDIOPORT_TYPE_HDMI:
+                      restoredVolume = audioLevel_cache_hdmi.load();
+                      break;
+                  case dsAUDIOPORT_TYPE_HEADPHONE:
+                      restoredVolume = audioLevel_cache_headphone.load();
+                      break;
+                  default:
+                      break;
+              }
+
+              if (dsSetAudioLevelFunc != 0) {
+                  dsSetAudioLevelFunc(param->handle, restoredVolume);
+                  INT_INFO("%s: restored audio level %f for port type %d\n",
+                           __FUNCTION__, restoredVolume, _APortType);
+              }
+          }
+#endif
     }
 
     std::string isEnabledAudioPortKey("audio.");
