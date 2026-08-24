@@ -1517,7 +1517,8 @@ void AudioConfigInit()
                        bool m_dolbyVolumeMode = false;
                        try {
                            _DolbyVolumeMode = device::HostPersistence::getInstance().getProperty("audio.DolbyVolumeMode");
-                           bDolbyVolumeOverrideCheck = false;
+						   bDolbyVolumeOverrideCheck = false;
+                           INT_DEBUG("audio.DolbyVolumeMode found in persistence: %s. bDolbyVolumeOverrideCheck will be set by VolumeLeveller check\n", _DolbyVolumeMode.c_str());
                        }
                        catch(...) {
                            try {
@@ -1525,7 +1526,7 @@ void AudioConfigInit()
                                _DolbyVolumeMode = device::HostPersistence::getInstance().getDefaultProperty("audio.DolbyVolumeMode");
                            }
                            catch(...) {
-                               _DolbyVolumeMode = "FALSE";
+                               INT_DEBUG("audio.DolbyVolumeMode system default not found. Using default: FALSE\n");
                            }
                        }
                        if (_DolbyVolumeMode == "TRUE") {
