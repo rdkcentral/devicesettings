@@ -1723,7 +1723,7 @@ void AudioOutputPort::setGain(const float newGain)
 void AudioOutputPort::setLevel(const float newLevel)
 {
 	dsError_t ret = dsERR_NONE;
-
+printf("YESH: AudioOutputPort::setLevel %f \n", newLevel);
 	if (newLevel < 0) {
 		ret = dsERR_INVALID_PARAM;
     } else if ( (ret = dsSetAudioLevel(_handle, newLevel)) == dsERR_NONE) {
