@@ -548,8 +548,9 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
             break;    
                 
         case dsDISPLAY_HDCPPROTOCOL_CHANGE:
-             INT_INFO("HDCP Protocol Version Change !!!!!!!! ..\r\n");
+             INT_INFO("HDCP Protocol Version Change !!!!!!!! .. version: %d \r\n",(dsHdcpProtocolVersion_t) *eventData);
              _eventId = IARM_BUS_DSMGR_EVENT_HDCP_STATUS;
+	     _dsSyncHdmiStatus(DS_HDMI_TAG_HDCPVERSION, (dsHdcpProtocolVersion_t) *eventData);
              break;
 
         default:
