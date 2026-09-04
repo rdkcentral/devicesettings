@@ -549,9 +549,19 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
             break;    
                 
         case dsDISPLAY_HDCPPROTOCOL_CHANGE:
-             INT_INFO("HDCP Protocol Version Change !!!!!!!! ..\r\n");
-             _eventId = IARM_BUS_DSMGR_EVENT_HDCP_STATUS;
-             break;
+        {
+            if (eventData == NULL)
+            {
+                INT_ERROR("HDCP Protocol Version Change has NULL event data\r\n");
+                return;
+            }
+
+            dsHdcpProtocolVersion_t protocolVersion = *((dsHdcpProtocolVersion_t*)eventData);
+            INT_INFO("HDCP Protocol Version Change !!!!!!!! .. version: %d \r\n", protocolVersion);
+            _eventId = IARM_BUS_DSMGR_EVENT_HDCP_STATUS;
+            _dsSyncHdmiStatus(DS_HDMI_TAG_HDCPVERSION, protocolVersion);
+            break;
+        }
 
         default:
 			INT_ERROR("Error: Unsupported event in _dsHdmiCallback...\r\n");
