@@ -265,7 +265,9 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
    
 
     if (func != 0) {
+        INT_INFO("Calling dsGetEDIDBytes for handle %ld", (long)param->handle);
         dsError_t ret = func(param->handle, edid, &length);
+        INT_INFO("dsGetEDIDBytes returned %d with length %d", ret, length);
         if (ret == dsERR_NONE && length <= 1024) {
             rc = memcpy_s(param->bytes,sizeof(param->bytes),edid,length);
             if(rc!=EOK)
