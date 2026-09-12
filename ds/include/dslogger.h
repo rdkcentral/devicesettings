@@ -46,10 +46,10 @@ static inline const char* fileName(const char* path) {
 }
 
 #ifndef DS_LOG_LEVEL
-#define DS_LOG_LEVEL ERROR_LEVEL
+#define DS_LOG_LEVEL DEBUG_LEVEL
 #endif
 
-#define INT_INFO(FORMAT, ...)       ds_log(INFO_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
+#define INT_INFO(FORMAT, ...)       ds_log(DEBUG_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
 #define INT_WARN(FORMAT, ...)       ds_log(WARN_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
 #define INT_ERROR(FORMAT, ...)      ds_log(ERROR_LEVEL, fileName(__FILE__), __LINE__, __FUNCTION__, FORMAT,  ##__VA_ARGS__ )
 
