@@ -53,11 +53,6 @@
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&fpLock)
 #define IARM_BUS_Unlock(lock) pthread_mutex_unlock(&fpLock)
 
-/* Below block allows the default brightness of a device (after a reset) to be set from 
- * device-specific recipes. If recipes say nothing, it should use max brightness supported. */
-#ifndef dsFPD_BRIGHTNESS_DEFAULT
-#define dsFPD_BRIGHTNESS_DEFAULT dsFPD_BRIGHTNESS_MAX 
-#endif
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized=0;
@@ -180,30 +175,19 @@ IARM_Result_t dsFPDMgr_init()
 	{
 		/* Init the Power and Clock Brightness */
 		string value;
-		int maxBrightness = dsFPD_BRIGHTNESS_DEFAULT;	
+		int maxBrightness = dsFPD_BRIGHTNESS_MAX;
 
-		value = device::HostPersistence::getInstance().getProperty("Power.brightness", numberToString(maxBrightness));
-		_dsPowerBrightness = stringToNumber(value);
+		try {
+		    value = device::HostPersistence::getInstance().getDefaultProperty("Power.brightness");
+		    _dsPowerBrightness = stringToNumber(value);
+		}
+		catch(...) {
+		    _dsPowerBrightness = maxBrightness;
+		}
 		
 		value = device::HostPersistence::getInstance().getProperty("Text.brightness", numberToString(maxBrightness));
 		_dsTextBrightness = stringToNumber(std::move(value));
 
-#if(dsFPD_BRIGHTNESS_DEFAULT != dsFPD_BRIGHTNESS_MAX)
-		/* If we're applying a default brightness that's not MAX, check for currently persisted values. If any of them = MAX,
-		 * update those to the current default. If the persisted values != MAX, leave them alone because they're likely to have been
-		 * set by the user. */
-		if(dsFPD_BRIGHTNESS_MAX == _dsPowerBrightness)
-		{
-			INT_INFO("Applying new default brightness to power indicator. Changing from %d to %d.\n", _dsPowerBrightness, dsFPD_BRIGHTNESS_DEFAULT);
-			_dsPowerBrightness = dsFPD_BRIGHTNESS_DEFAULT;
-		}
-		if(dsFPD_BRIGHTNESS_MAX == _dsTextBrightness)
-		{
-			INT_INFO("Applying new default brightness to text indicator. Changing from %d to %d.\n", _dsTextBrightness, dsFPD_BRIGHTNESS_DEFAULT);
-			_dsTextBrightness = dsFPD_BRIGHTNESS_DEFAULT;
-		}
-#endif
-		
 		INT_INFO("Power Brightness Read from Persistent is %d \r\n",_dsPowerBrightness);
 		INT_INFO("Text Brightness Read from Persistent is %d \r\n",_dsTextBrightness);
 
