@@ -521,6 +521,91 @@ Host::~Host()
        }
    }
 
+/**
+ * @brief Sets the application-specific audio configuration.
+ *
+ * Some applications may require custom audio settings, such as enabling
+ * continuous audio output to prevent audio glitches, muting, or format
+ * re-lock events on downstream devices when the input stream to MS12 is
+ * temporarily interrupted.
+ *
+ * This interface is designed to be extensible and can accommodate additional
+ * application-specific audio configuration requirements in the future.
+ *
+ * Applications should call getApplicationAudioConfigList() to retrieve the list of supported audio configurations
+ * and then call setApplicationAudioConfig() with a supported audioConfig name.
+ *
+ * @param[in] audioConfig  - Configuration name entry.
+ * @param[in] enable       - enable/disable audio configuration ( @a true to enable, @a false to disable)
+ *
+ * @return None
+ *
+ */
+void Host::setApplicationAudioConfig (const std::string &audioConfig, bool enable)
+{
+    dsApplicationAudioConfig_t config;
+    memset(config.configName, 0, DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN);
+    strncpy(config.configName, audioConfig.c_str(), (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN - 1));
+    dsError_t ret = dsSetApplicationAudioConfig (NULL, &config, enable);
+    if (ret != dsERR_NONE) {
+        INT_ERROR("Failed to set Host::setApplicationAudioConfig\n");
+        throw Exception(ret);
+    }
+    return;
+}
+
+/**
+ * @brief Gets the application-specific audio configuration.
+ * Returns whether the requested specific audio configuration (see setApplicationAudioConfig())
+ * is currently enabled or disabled.
+ *
+ * @param[in] audioConfig  - Configuration name entry
+ * @param[out] enable      - True if audio configuration is enabled, false otherwise.
+ *
+ * @return None
+ *
+ */
+void Host::getApplicationAudioConfig (const std::string &audioConfig, bool *enable)
+{
+    dsError_t ret;
+    if (enable == NULL) {
+	INT_ERROR("Invalid parameter\n");
+	ret = dsERR_INVALID_PARAM;
+        throw Exception(ret);
+    }
+    dsApplicationAudioConfig_t config;
+    memset(config.configName, 0, DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN);
+    strncpy(config.configName, audioConfig.c_str(), (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN -1 ));
+    ret = dsGetApplicationAudioConfig (NULL, &config, enable);
+    if (ret != dsERR_NONE) {
+        INT_ERROR("Failed to get Host::getApplicationAudioConfig\n");
+        throw Exception(ret);
+    }
+    return;
+}
+
+/**
+ * @brief Gets the list of supported audio configurations.
+ *
+ * @param[out] ConfigList  - pointer to List of supported audio configurations
+ *
+ * @return None
+ *
+ */
+void Host::getApplicationAudioConfigList (std::vector<std::string>& configList)
+{
+    dsApplicationAudioConfigList_t appAudioConfigList;
+    memset(&appAudioConfigList, 0, sizeof(appAudioConfigList));
+    dsError_t ret = dsGetApplicationAudioConfigList(NULL, &appAudioConfigList);
+    if (ret != dsERR_NONE) {
+        INT_ERROR("Failed to get Host::getApplicationAudioConfigList\n");
+        throw Exception(ret);
+    }
+    for (int count =0; count < appAudioConfigList.returnedCount; count++) {
+        configList.push_back(appAudioConfigList.config[count].configName);
+    }
+    return;
+}
 
     /**
      * @fn Host::setAssociatedAudioMixing(const bool mixing)
