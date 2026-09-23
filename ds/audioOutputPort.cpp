@@ -1517,6 +1517,13 @@ void AudioOutputPort::setSAD(std::vector<int> sad_list)
 {
         dsError_t ret = dsERR_NONE;
 	dsAudioSADList_t list;
+	
+	// Bounds check to prevent buffer overflow
+	if (sad_list.size() > 15) {
+		INT_ERROR("%s: SAD list size %zu exceeds maximum 15\n", __FUNCTION__, sad_list.size());
+		throw Exception(dsERR_INVALID_PARAM);
+	}
+	
 	list.count = sad_list.size();
 
 	for(int i=0; i<sad_list.size(); i++) {
