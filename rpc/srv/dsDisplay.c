@@ -52,12 +52,14 @@
 
 #include "safec_lib.h"
 #include <string>
+#include <set>
 
 static int m_isInitialized = 0;
 static int m_isPlatInitialized = 0;
 static bool isEdidCached = false;
 static bool isEdidBytesCached = false;
 static pthread_mutex_t dsLock = PTHREAD_MUTEX_INITIALIZER;
+static std::set<intptr_t> validDisplayHandles;
 
 #define NULL_HANDLE 0
 #define IARM_BUS_Lock(lock) pthread_mutex_lock(&dsLock)
@@ -147,12 +149,17 @@ IARM_Result_t _dsGetDisplay(void *arg)
     _DEBUG_ENTER();
 
     IARM_BUS_Lock(lock);
-    
+
 	dsDisplayGetHandleParam_t *param = (dsDisplayGetHandleParam_t *)arg;
     dsGetDisplay(param->type, param->index, &param->handle);
     
+    // Track the valid handle for later validation
+    if (param->handle != NULL_HANDLE) {
+        validDisplayHandles.insert(param->handle);
+    }
+
 	IARM_BUS_Unlock(lock);
-	
+
 	return IARM_RESULT_SUCCESS;
 }
 
@@ -161,13 +168,21 @@ IARM_Result_t _dsGetDisplayAspectRatio(void *arg)
     _DEBUG_ENTER();
 
     IARM_BUS_Lock(lock);
-    
+
 	dsDisplayGetAspectRatioParam_t *param = (dsDisplayGetAspectRatioParam_t *)arg;
-    dsGetDisplayAspectRatio(param->handle, &param->aspectRatio);
     
-	
+    // Validate handle before HAL call
+    if (param->handle == NULL_HANDLE || validDisplayHandles.find(param->handle) == validDisplayHandles.end()) {
+        INT_ERROR("%s: Invalid display handle %ld\n", __func__, (long)param->handle);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
+    dsGetDisplayAspectRatio(param->handle, &param->aspectRatio);
+
+
 	IARM_BUS_Unlock(lock);
-	
+
 	return IARM_RESULT_SUCCESS;
 }
 
@@ -191,10 +206,18 @@ IARM_Result_t _dsGetEDID(void *arg)
 	    return IARM_RESULT_SUCCESS;
     }
     IARM_BUS_Lock(lock);
+    
+    // Validate handle before HAL call
+    if (param->handle == NULL_HANDLE || validDisplayHandles.find(param->handle) == validDisplayHandles.end()) {
+        INT_ERROR("%s: Invalid display handle %ld\n", __func__, (long)param->handle);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
     memset(edidInfo,0,sizeof(*edidInfo));
 
     dsGetEDID(param->handle, &param->edid);
-    
+
     filterEDIDResolution(param->handle, &param->edid);
     dumpEDIDInformation( &param->edid);
     rc = memcpy_s(edidInfo,sizeof(dsDisplayEDID_t),&param->edid,sizeof(param->edid));
@@ -265,6 +288,13 @@ IARM_Result_t _dsGetEDIDBytes(void *arg)
    
 
     if (func != 0) {
+        // Validate handle before HAL call
+        if (param->handle == NULL_HANDLE || validDisplayHandles.find(param->handle) == validDisplayHandles.end()) {
+            INT_ERROR("%s: Invalid display handle %ld\n", __func__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        
         INT_INFO("Calling dsGetEDIDBytes for handle %ld", (long)param->handle);
         dsError_t ret = func(param->handle, edid, &length);
         INT_INFO("dsGetEDIDBytes returned %d with length %d", ret, length);
@@ -324,6 +354,13 @@ IARM_Result_t _dsSetAllmEnabled(void* arg)
 
     if (func_dsGetAllmEnabled != 0 &&  func_dsSetAllmEnabled  != 0)
     {
+        // Validate handle before HAL call
+        if (param->handle == NULL_HANDLE || validDisplayHandles.find(param->handle) == validDisplayHandles.end()) {
+            INT_ERROR("%s: Invalid display handle %ld\n", __func__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        
 	    bool currentALLMState = false;
 	    ret = func_dsGetAllmEnabled (param->handle, &currentALLMState);
 	    if (ret == dsERR_NONE)
@@ -391,6 +428,13 @@ IARM_Result_t _dsSetAVIContentType(void* arg)
 
     if (func_dsGetAVIContentType != 0 &&  func_dsSetAVIContentType  != 0)
     {
+        // Validate handle before HAL call
+        if (param->handle == NULL_HANDLE || validDisplayHandles.find(param->handle) == validDisplayHandles.end()) {
+            INT_ERROR("%s: Invalid display handle %ld\n", __func__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        
 	    dsAviContentType_t contentType = dsAVICONTENT_TYPE_NOT_SIGNALLED;
 	    ret = func_dsGetAVIContentType (param->handle, &contentType);
 	    if (ret == dsERR_NONE)
@@ -458,6 +502,13 @@ IARM_Result_t _dsSetAVIScanInformation(void* arg)
 
     if (func_dsGetAVIScanInfo != 0 &&  func_dsSetAVIScanInfo  != 0)
     {
+        // Validate handle before HAL call
+        if (param->handle == NULL_HANDLE || validDisplayHandles.find(param->handle) == validDisplayHandles.end()) {
+            INT_ERROR("%s: Invalid display handle %ld\n", __func__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        
 	    dsAVIScanInformation_t scanInfo = dsAVI_SCAN_TYPE_NO_DATA;
 	    ret = func_dsGetAVIScanInfo (param->handle, &scanInfo);
 	    if (ret == dsERR_NONE)
