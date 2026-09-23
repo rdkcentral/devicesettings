@@ -3673,6 +3673,28 @@ IARM_Result_t _dsGetEnablePersist(void *arg)
     //By default all the ports are enabled.
     bool enabled = true;
 
+    // Validate portName before using as persistence key
+    if (param->portName == NULL || strlen(param->portName) == 0) {
+        INT_ERROR("%s: Empty portName\n", __FUNCTION__);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
+    // Check for whitespace-only or invalid characters
+    bool portName_valid = true;
+    for (const char* c = param->portName; *c; c++) {
+        if (*c == '\n' || *c == '\r' || *c == '\t' || *c == ' ') {
+            portName_valid = false;
+            break;
+        }
+    }
+    
+    if (!portName_valid) {
+        INT_ERROR("%s: Invalid portName contains whitespace or control characters\n", __FUNCTION__);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+
     std::string isEnabledAudioPortKey("audio.");
     isEnabledAudioPortKey.append (param->portName);
     isEnabledAudioPortKey.append (".isEnabled");
@@ -3722,6 +3744,29 @@ IARM_Result_t _dsSetEnablePersist(void *arg)
     dsError_t ret = dsERR_NONE;
 
     dsAudioPortEnabledParam_t *param = (dsAudioPortEnabledParam_t *)arg;
+    
+    // Validate portName before using as persistence key
+    if (param->portName == NULL || strlen(param->portName) == 0) {
+        INT_ERROR("%s: Empty portName\n", __FUNCTION__);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
+    // Check for whitespace-only or invalid characters
+    bool portName_valid = true;
+    for (const char* c = param->portName; *c; c++) {
+        if (*c == '\n' || *c == '\r' || *c == '\t' || *c == ' ') {
+            portName_valid = false;
+            break;
+        }
+    }
+    
+    if (!portName_valid) {
+        INT_ERROR("%s: Invalid portName contains whitespace or control characters\n", __FUNCTION__);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
     result = IARM_RESULT_SUCCESS;
 
     std::string isEnabledAudioPortKey("audio.");
