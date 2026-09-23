@@ -6230,12 +6230,24 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
          }
          else if(strcmp(param->profileSettingsName, "SurroundVirtualizerMode") == 0) {
              std::string _PropertyMode = _dsGetCurrentProfileProperty("SurroundVirtualizer.mode");
-             if((atoi(param->profileSettingValue) >= 0) && (atoi(param->profileSettingValue) <= 2)) {
-                device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,param->profileSettingValue);
-                result = IARM_RESULT_SUCCESS;
-             }
-             else {
-                INT_INFO("%s: Unknow MS12 property value %s %s \n",__func__, param->profileSettingsName,param->profileSettingValue);
+             // Validate profileSettingValue is non-empty before parsing
+             if(param->profileSettingValue != NULL && strlen(param->profileSettingValue) > 0) {
+                 int value = atoi(param->profileSettingValue);
+                 if(value >= 0 && value <= 2) {
+                    try {
+                        device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,param->profileSettingValue);
+                        result = IARM_RESULT_SUCCESS;
+                    } catch (const std::exception& e) {
+                        INT_ERROR("%s: Exception in persistHostProperty: %s\n",__func__, e.what());
+                        result = IARM_RESULT_INVALID_STATE;
+                    }
+                 }
+                 else {
+                    INT_INFO("%s: Unknow MS12 property value %s %s \n",__func__, param->profileSettingsName,param->profileSettingValue);
+                    result = IARM_RESULT_INVALID_STATE;
+                 }
+             } else {
+                INT_INFO("%s: Empty profileSettingValue for %s\n",__func__, param->profileSettingsName);
                 result = IARM_RESULT_INVALID_STATE;
              }
          }
@@ -6286,7 +6298,12 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
        }
        if(strcmp(param->profileState, "ADD") == 0) {
           INT_INFO("%s: Profile %s property %s persist value: %s\n",__func__,param->profileName, param->profileSettingsName , param->profileSettingValue);
-          device::HostPersistence::getInstance().persistHostProperty(_hostProperty ,param->profileSettingValue);
+          try {
+              device::HostPersistence::getInstance().persistHostProperty(_hostProperty ,param->profileSettingValue);
+          } catch (const std::exception& e) {
+              INT_ERROR("%s: Exception in persistHostProperty: %s\n",__func__, e.what());
+              result = IARM_RESULT_INVALID_STATE;
+          }
        }
        else if(strcmp(param->profileState, "REMOVE") == 0) {
           try {
@@ -6296,7 +6313,12 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
               _value = "0";
           }
           INT_INFO("%s: Profile %s property %s persist value: %s\n",__func__,param->profileName, param->profileSettingsName , _value.c_str());
-          device::HostPersistence::getInstance().persistHostProperty(_hostProperty,_value);
+          try {
+              device::HostPersistence::getInstance().persistHostProperty(_hostProperty,_value);
+          } catch (const std::exception& e) {
+              INT_ERROR("%s: Exception in persistHostProperty: %s\n",__func__, e.what());
+              result = IARM_RESULT_INVALID_STATE;
+          }
        }
        else {
           INT_INFO("%s: Unknow State %s \n",__func__, param->profileState);
