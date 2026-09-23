@@ -591,6 +591,7 @@ dsError_t dsSetAudioLevel(intptr_t handle, float level)
 
     param.handle = handle;
     param.level = level;
+printf("YESH: cli setaudiolevel %f\n ", level);
 
     rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                         (char *)IARM_BUS_DSMGR_API_dsSetAudioLevel,
@@ -618,6 +619,7 @@ dsError_t dsSetAudioDucking(intptr_t handle,dsAudioDuckingAction_t action, dsAud
     param.type = type;
     param.level = level;
 
+printf("YESH: cli setaudioducking %d\n ", level);
 
     rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
                         (char *)IARM_BUS_DSMGR_API_dsSetAudioDucking,
