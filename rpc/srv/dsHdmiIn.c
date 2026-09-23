@@ -1238,16 +1238,23 @@ IARM_Result_t _dsSetEdid2AllmSupport (void *arg)
     dsEdidAllmSupportParam_t *param = (dsEdidAllmSupportParam_t *) arg;
     IARM_BUS_Lock(lock);
     param->result = dsERR_NONE;
-    INT_INFO("[srv] :  In _dsSetEdid2AllmSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
-    if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the allm bit in edid
-    {
-        param->result = setEdid2AllmSupport (param->iHdmiPort, param->allmSupport);
-    }
-    INT_INFO("[srv] %s: dsSetEdid2AllmSupport Port: %d AllmSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->allmSupport, param->result);
-    if(param->result == dsERR_NONE) 
-    {
-        updateEdidAllmBitValuesInPersistence(param->iHdmiPort,param->allmSupport);
-        m_edidallmsupport[param->iHdmiPort] = param->allmSupport;
+    
+    // Validate iHdmiPort bounds before array access
+    if (param->iHdmiPort >= 0 && param->iHdmiPort < dsHDMI_IN_PORT_MAX) {
+        INT_INFO("[srv] :  In _dsSetEdid2AllmSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
+        if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the allm bit in edid
+        {
+            param->result = setEdid2AllmSupport (param->iHdmiPort, param->allmSupport);
+        }
+        INT_INFO("[srv] %s: dsSetEdid2AllmSupport Port: %d AllmSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->allmSupport, param->result);
+        if(param->result == dsERR_NONE) 
+        {
+            updateEdidAllmBitValuesInPersistence(param->iHdmiPort,param->allmSupport);
+            m_edidallmsupport[param->iHdmiPort] = param->allmSupport;
+        }
+    } else {
+        param->result = dsERR_INVALID_PARAM;
+        INT_ERROR("[srv] %s: Invalid HDMI port %d\n", __FUNCTION__, param->iHdmiPort);
     }   
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
