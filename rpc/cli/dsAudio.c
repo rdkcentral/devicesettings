@@ -1553,6 +1553,12 @@ dsError_t dsAudioSetSAD(intptr_t handle, dsAudioSADList_t sad_list)
         param.handle = handle;
 	param.list.count = sad_list.count;
 
+	// Bounds check to prevent buffer overflow
+	if (sad_list.count > 15) {
+		printf("%s: Invalid SAD count %d, max is 15\n", __FUNCTION__, sad_list.count);
+		return dsERR_INVALID_PARAM;
+	}
+
 	for(int i=0;i<sad_list.count;i++) {
 	    param.list.sad[i] = sad_list.sad[i];
 	}
