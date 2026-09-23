@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cctype>
 
 
 #include "hostPersistence.hpp"
@@ -275,6 +276,33 @@ void HostPersistence::persistHostProperty(const std::string &key, const std::str
     if( key.empty() || value.empty())
     {
         cout << "Given KEY or VALUE is empty..." << endl;
+        throw IllegalArgumentException();
+    }
+    
+    // Check for whitespace-only strings
+    bool key_whitespace_only = true;
+    bool value_whitespace_only = true;
+    for (char c : key) {
+        if (!isspace((unsigned char)c)) {
+            key_whitespace_only = false;
+            break;
+        }
+    }
+    for (char c : value) {
+        if (!isspace((unsigned char)c)) {
+            value_whitespace_only = false;
+            break;
+        }
+    }
+    
+    if (key_whitespace_only || value_whitespace_only) {
+        cout << "Given KEY or VALUE is whitespace-only..." << endl;
+        throw IllegalArgumentException();
+    }
+    
+    // Check for newline characters which could enable injection
+    if (key.find('\n') != std::string::npos || value.find('\n') != std::string::npos) {
+        cout << "Given KEY or VALUE contains newline..." << endl;
         throw IllegalArgumentException();
     }
 
