@@ -2538,6 +2538,13 @@ IARM_Result_t _dsGetAudioPort(void *arg)
 
     if (param != NULL)
     {
+        // Validate type and index before HAL call
+        if (param->type < 0 || param->index < 0) {
+            INT_ERROR("%s: Invalid type %d or index %d\n", __FUNCTION__, param->type, param->index);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        
         INT_INFO("%s..%d-%d \r\n",__func__,param->type,param->index);
         ret = dsGetAudioPort(param->type, param->index, &param->handle);
         if(ret == dsERR_NONE) {
@@ -6168,6 +6175,14 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
     IARM_Result_t result = IARM_RESULT_INVALID_STATE;
     IARM_BUS_Lock(lock);
     dsMS12SetttingsOverrideParam_t *param = (dsMS12SetttingsOverrideParam_t*)arg;
+    
+    // Validate handle before HAL call
+    if (_GetAudioPortType(param->handle) == dsAUDIOPORT_TYPE_MAX) {
+        INT_ERROR("%s: Invalid audio port handle %ld\n", __FUNCTION__, (long)param->handle);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
     std::string _hostProperty;
     std::string _value;
     std::string _AProfile("Off");
@@ -6390,6 +6405,13 @@ IARM_Result_t _dsAudioSetSAD(void *arg)
 
     if (func != 0 && param != NULL)
     {
+        // Validate handle before HAL call
+        if (_GetAudioPortType(param->handle) == dsAUDIOPORT_TYPE_MAX) {
+            INT_ERROR("%s: Invalid audio port handle %ld\n", __FUNCTION__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        
         if (func(param->handle, param->list) == dsERR_NONE)
         {
             result = IARM_RESULT_SUCCESS;
