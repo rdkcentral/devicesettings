@@ -5985,6 +5985,9 @@ IARM_Result_t _dsSetPrimaryLanguage(void *arg)
 
     if (func != 0 && param != NULL)
     {
+        // Ensure primaryLanguage is NUL-terminated before use
+        param->primaryLanguage[sizeof(param->primaryLanguage) - 1] = '\0';
+        
         if (func(param->handle, param->primaryLanguage) == dsERR_NONE)
         {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
@@ -6171,6 +6174,13 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
     std::string _hostProperty;
     std::string _value;
     std::string _AProfile("Off");
+    
+    // Ensure string fields are NUL-terminated before use
+    param->profileName[sizeof(param->profileName) - 1] = '\0';
+    param->profileSettingsName[sizeof(param->profileSettingsName) - 1] = '\0';
+    param->profileState[sizeof(param->profileState) - 1] = '\0';
+    param->profileSettingValue[sizeof(param->profileSettingValue) - 1] = '\0';
+    
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
     if(!(_dsMs12ProfileSupported(param->handle,param->profileName))) {
          INT_INFO("%s: Unknow MS12 profile %s \n",__func__, param->profileName);
@@ -6201,8 +6211,16 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
          }
          else if(strcmp(param->profileSettingsName, "VolumeLevellerMode") == 0) {
             std::string _PropertyMode = _dsGetCurrentProfileProperty("VolumeLeveller.mode");
-            if((atoi(param->profileSettingValue) == 0) || (atoi(param->profileSettingValue) == 1)) {
-                device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,param->profileSettingValue);
+            // Validate profileSettingValue is non-empty before atoi
+            if (strlen(param->profileSettingValue) == 0) {
+                INT_INFO("%s: Empty profileSettingValue for %s\n",__func__, param->profileSettingsName);
+                result = IARM_RESULT_INVALID_STATE;
+            } else if((atoi(param->profileSettingValue) == 0) || (atoi(param->profileSettingValue) == 1)) {
+                try {
+                    device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,param->profileSettingValue);
+                } catch (const std::exception& e) {
+                    INT_ERROR("%s: Exception in persistHostProperty: %s\n",__func__, e.what());
+                }
                 result = IARM_RESULT_SUCCESS;
             }else {
                 INT_INFO("%s: Unknow MS12 property value %s %s \n",__func__, param->profileSettingsName,param->profileSettingValue);
@@ -6230,8 +6248,16 @@ IARM_Result_t _dsSetMS12SetttingsOverride(void *arg)
          }
          else if(strcmp(param->profileSettingsName, "SurroundVirtualizerMode") == 0) {
              std::string _PropertyMode = _dsGetCurrentProfileProperty("SurroundVirtualizer.mode");
-             if((atoi(param->profileSettingValue) >= 0) && (atoi(param->profileSettingValue) <= 2)) {
-                device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,param->profileSettingValue);
+             // Validate profileSettingValue is non-empty before atoi
+             if (strlen(param->profileSettingValue) == 0) {
+                 INT_INFO("%s: Empty profileSettingValue for %s\n",__func__, param->profileSettingsName);
+                 result = IARM_RESULT_INVALID_STATE;
+             } else if((atoi(param->profileSettingValue) >= 0) && (atoi(param->profileSettingValue) <= 2)) {
+                try {
+                    device::HostPersistence::getInstance().persistHostProperty(_PropertyMode,param->profileSettingValue);
+                } catch (const std::exception& e) {
+                    INT_ERROR("%s: Exception in persistHostProperty: %s\n",__func__, e.what());
+                }
                 result = IARM_RESULT_SUCCESS;
              }
              else {
