@@ -6089,23 +6089,32 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
 
     if (func != 0 && param != NULL)
     {
-        if (func(param->handle, param->secondaryLanguage) == dsERR_NONE)
-        {
+        // Validate secondaryLanguage is non-empty before persisting
+        if (strlen(param->secondaryLanguage) > 0) {
+            if (func(param->handle, param->secondaryLanguage) == dsERR_NONE)
+            {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
-            INT_INFO("%s: persist Secondary Language : %s\n", __func__, param->secondaryLanguage);
-            device::HostPersistence::getInstance().persistHostProperty("audio.SecondaryLanguage",param->secondaryLanguage);
+                INT_INFO("%s: persist Secondary Language : %s\n", __func__, param->secondaryLanguage);
+                try {
+                    device::HostPersistence::getInstance().persistHostProperty("audio.SecondaryLanguage",param->secondaryLanguage);
+                } catch (const std::exception& e) {
+                    INT_ERROR("%s: Exception in persistHostProperty: %s\n",__func__, e.what());
+                }
 #endif
-            IARM_Bus_DSMgr_EventData_t secondary_language_event_data;
-            INT_INFO("%s: Secondary Language changed :%s \r\n", __FUNCTION__, param->secondaryLanguage);
-	    memset(secondary_language_event_data.data.AudioLanguageInfo.audioLanguage,'\0',MAX_LANGUAGE_LEN);
-            strncpy(secondary_language_event_data.data.AudioLanguageInfo.audioLanguage, param->secondaryLanguage, MAX_LANGUAGE_LEN-1);
+                IARM_Bus_DSMgr_EventData_t secondary_language_event_data;
+                INT_INFO("%s: Secondary Language changed :%s \r\n", __FUNCTION__, param->secondaryLanguage);
+                memset(secondary_language_event_data.data.AudioLanguageInfo.audioLanguage,'\0',MAX_LANGUAGE_LEN);
+                strncpy(secondary_language_event_data.data.AudioLanguageInfo.audioLanguage, param->secondaryLanguage, MAX_LANGUAGE_LEN-1);
 
-            IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,
-                                   (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,
-                                   (void *)&secondary_language_event_data,
-                                   sizeof(secondary_language_event_data));
+                IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,
+                                       (IARM_EventId_t)IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED,
+                                       (void *)&secondary_language_event_data,
+                                       sizeof(secondary_language_event_data));
 
-            result = IARM_RESULT_SUCCESS;
+                result = IARM_RESULT_SUCCESS;
+            }
+        } else {
+            INT_INFO("%s: Empty secondaryLanguage, skipping persistence\n", __func__);
         }
     }
 

@@ -48,7 +48,8 @@ LDFLAGS += $(HAL_LDFLAGS)
 .PHONY: $(OUTPUT)
 
 OUTPUT      :=  testHost                \
-                testPersistence         
+                testPersistence         \
+                testMs12Validation         
                
               
 #OUTPUT      :=  testAOP                 \
@@ -100,6 +101,10 @@ testPersistence:
 testFPD:
 	@echo "Building $@ ...."
 	@$(CXX) $(CFLAGS) -std=c++0x -o testFPD testFrontPannel.cpp -L../install/lib  $(LDFLAGS)
+
+testMs12Validation:
+	@echo "Building $@ ...."
+	@$(CXX) $(CFLAGS) -std=c++0x -o testMs12Validation testMs12Validation.cpp
 
 uninstall: clean
 	@echo "Uninstalling $@ ...."
