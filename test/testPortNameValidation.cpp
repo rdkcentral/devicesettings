@@ -36,7 +36,7 @@ void test_port_name_validation() {
     {
         const char* portName = "HDMI0";
         (void)portName;
-        assert(portName != NULL && strlen(portName) > 0);
+        assert(strlen(portName) > 0);
         bool valid = true;
         for (const char* c = portName; *c; c++) {
             if (*c == '\n' || *c == '\r' || *c == '\t' || *c == ' ') {
