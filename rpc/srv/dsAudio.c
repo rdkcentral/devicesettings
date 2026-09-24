@@ -6090,7 +6090,7 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
     if (func != 0 && param != NULL)
     {
         // Validate secondaryLanguage is non-empty before persisting
-        if (param->secondaryLanguage != NULL && strlen(param->secondaryLanguage) > 0) {
+        if (strlen(param->secondaryLanguage) > 0) {
             if (func(param->handle, param->secondaryLanguage) == dsERR_NONE)
             {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
