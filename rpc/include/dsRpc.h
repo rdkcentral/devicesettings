@@ -33,6 +33,7 @@
 
 #include "dsTypes.h"
 #include "dsError.h"
+#include "dsAudio.h"
 
 #ifdef __cplusplus
 extern "C" {
