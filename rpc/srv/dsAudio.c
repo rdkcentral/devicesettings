@@ -2354,7 +2354,7 @@ IARM_Result_t dsAudioMgr_init()
         /*coverity[missing_lock]  CID-19380 using Coverity Annotation to ignore error*/
         m_isPlatInitialized ++;
         {
-           IARM_Bus_DSMgr_EventData_t audio_portstate_event_data;
+           IARM_Bus_DSMgr_EventData_t audio_portstate_event_data = {0};
            audio_portstate_event_data.data.AudioPortStateInfo.audioPortState = dsAUDIOPORT_STATE_INITIALIZED;
            INT_INFO("%s: AudioOutPort PortInitState:%d \r\n", __FUNCTION__, audio_portstate_event_data.data.AudioPortStateInfo.audioPortState);
            IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,
@@ -2621,7 +2621,7 @@ IARM_Result_t _dsGetStereoMode(void *arg)
 IARM_Result_t _dsSetStereoMode(void *arg)
 {
     _DEBUG_ENTER();
-    IARM_Bus_DSMgr_EventData_t eventData;
+    IARM_Bus_DSMgr_EventData_t eventData = {0};
 
     IARM_BUS_Lock(lock);
 
@@ -3341,13 +3341,8 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     float volume = 0;
     if(m_isDuckingInProgress)
     {
-         volume = m_volumeDuckingLevel;
-         INT_INFO("%s: audio level set to m_volumeDuckingLevel : %f", __FUNCTION__, volume);
+    IARM_Bus_DSMgr_EventData_t eventData = {0};
     }
-    else
-    {
-#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
-     /* Restore the speaker's own level; do not use another port's reference level. */
 	 volume = audioLevel_cache_speaker.load();
 #else
      volume = m_LastVolumeLevel;
@@ -5606,7 +5601,7 @@ IARM_Result_t _dsSetAssociatedAudioMixing(void *arg)
             INT_INFO("%s: persist Associated Audio Mixing status : %s\n", __func__, param->mixing ? "Enabled":"Disabled");
             device::HostPersistence::getInstance().persistHostProperty("audio.AssociatedAudioMixing",param->mixing ? "Enabled":"Disabled");
 #endif
-            IARM_Bus_DSMgr_EventData_t associated_audio_mixing_event_data;
+            IARM_Bus_DSMgr_EventData_t associated_audio_mixing_event_data = {0};
             INT_INFO("%s: Associated Audio Mixing status changed :%d \r\n", __FUNCTION__, param->mixing);
             associated_audio_mixing_event_data.data.AssociatedAudioMixingInfo.mixing = param->mixing;
 
@@ -5709,7 +5704,7 @@ IARM_Result_t _dsSetFaderControl(void *arg)
             INT_INFO("%s: persist fader control level: %d\n",__func__, param->mixerbalance);
             device::HostPersistence::getInstance().persistHostProperty("audio.FaderControl",_mixerbalance);
 #endif
-            IARM_Bus_DSMgr_EventData_t fader_control_event_data;
+            IARM_Bus_DSMgr_EventData_t fader_control_event_data = {0};
             INT_INFO("%s: Fader Control changed :%d \r\n", __FUNCTION__, param->mixerbalance);
             fader_control_event_data.data.FaderControlInfo.mixerbalance = param->mixerbalance;
 
@@ -5814,7 +5809,7 @@ IARM_Result_t _dsSetPrimaryLanguage(void *arg)
             INT_INFO("%s: persist Primary Language : %s\n", __func__, param->primaryLanguage);
             device::HostPersistence::getInstance().persistHostProperty("audio.PrimaryLanguage",param->primaryLanguage);
 #endif
-            IARM_Bus_DSMgr_EventData_t primary_language_event_data;
+            IARM_Bus_DSMgr_EventData_t primary_language_event_data = {0};
             INT_INFO("%s: Primary Language changed :%s \r\n", __FUNCTION__, param->primaryLanguage);
 	    memset(primary_language_event_data.data.AudioLanguageInfo.audioLanguage,'\0',MAX_LANGUAGE_LEN);
             strncpy(primary_language_event_data.data.AudioLanguageInfo.audioLanguage, param->primaryLanguage, MAX_LANGUAGE_LEN-1);
@@ -5918,7 +5913,7 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
             INT_INFO("%s: persist Secondary Language : %s\n", __func__, param->secondaryLanguage);
             device::HostPersistence::getInstance().persistHostProperty("audio.SecondaryLanguage",param->secondaryLanguage);
 #endif
-            IARM_Bus_DSMgr_EventData_t secondary_language_event_data;
+            IARM_Bus_DSMgr_EventData_t secondary_language_event_data = {0};
             INT_INFO("%s: Secondary Language changed :%s \r\n", __FUNCTION__, param->secondaryLanguage);
 	    memset(secondary_language_event_data.data.AudioLanguageInfo.audioLanguage,'\0',MAX_LANGUAGE_LEN);
             strncpy(secondary_language_event_data.data.AudioLanguageInfo.audioLanguage, param->secondaryLanguage, MAX_LANGUAGE_LEN-1);
@@ -6552,7 +6547,7 @@ IARM_Result_t _dsGetMS12Capabilities(void *arg)
 
 void _dsAudioOutPortConnectCB(dsAudioPortType_t portType, unsigned int uiPortNo, bool isPortConnected)
 {
-    IARM_Bus_DSMgr_EventData_t audio_out_hpd_eventData;
+    IARM_Bus_DSMgr_EventData_t audio_out_hpd_eventData = {0};
     INT_INFO("%s: AudioOutPort type:%d portNo:%d Hotplug happened\r\n", 
             __FUNCTION__, portType, uiPortNo);
     audio_out_hpd_eventData.data.audio_out_connect.portType = portType;
@@ -6660,7 +6655,7 @@ IARM_Result_t _dsAudioOutIsConnected (void *arg) {
 
 void _dsAudioFormatUpdateCB(dsAudioFormat_t audioFormat)
 {
-    IARM_Bus_DSMgr_EventData_t audio_format_event_data;
+    IARM_Bus_DSMgr_EventData_t audio_format_event_data = {0};
     INT_INFO("%s: AudioOutPort format:%d \r\n", __FUNCTION__, audioFormat);
     audio_format_event_data.data.AudioFormatInfo.audioFormat = audioFormat;
 
@@ -6709,7 +6704,7 @@ static dsError_t _dsAudioFormatUpdateRegisterCB (dsAudioFormatUpdateCB_t cbFun) 
 
 void _dsAudioAtmosCapsChangeCB(dsATMOSCapability_t atmosCaps, bool status)
 {
-    IARM_Bus_DSMgr_EventData_t atmos_caps_change_event_data;
+    IARM_Bus_DSMgr_EventData_t atmos_caps_change_event_data = {0};
     INT_INFO("%s: Atmos caps changed :%d \r\n", __FUNCTION__, atmosCaps);
     atmos_caps_change_event_data.data.AtmosCapsChange.caps = atmosCaps;
     atmos_caps_change_event_data.data.AtmosCapsChange.status = status;
