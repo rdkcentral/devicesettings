@@ -1460,6 +1460,12 @@ void _dsHdcpCallback (intptr_t handle, dsHdcpStatus_t status)
 {
     IARM_Bus_DSMgr_EventData_t hdcp_eventData = {0};
 
+    if ((status < dsHDCP_STATUS_UNPOWERED) || (status >= dsHDCP_STATUS_MAX))
+    {
+        INT_ERROR("Invalid HDCP status from HAL: %d\n", status);
+        return;
+    }
+
 	if (handle == NULL_HANDLE)
 	{
 		INT_INFO("Err:HDMI Hot plug back has NULL Handle... !!!!!!..\r\n");
