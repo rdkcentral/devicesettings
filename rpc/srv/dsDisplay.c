@@ -558,6 +558,13 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
             dsHdcpProtocolVersion_t protocolVersion = *((dsHdcpProtocolVersion_t*)eventData);
             INT_INFO("HDCP Protocol Version Change !!!!!!!! .. version: %d \r\n", protocolVersion);
 
+            if ((protocolVersion < dsHDCP_VERSION_1X) || (protocolVersion >= dsHDCP_VERSION_MAX)) {
+                INT_ERROR("Invalid HDCP protocol version from HAL: %d\r\n", protocolVersion);
+                return;
+            }
+
+            _dsSyncHdmiStatus(DS_HDMI_TAG_HDCPVERSION, protocolVersion);
+
             if (!_hdmiVideoPortHandle &&
                 (dsERR_NONE != dsGetVideoPort(dsVIDEOPORT_TYPE_HDMI, 0, &_hdmiVideoPortHandle))) {
                 INT_ERROR("Failed to get HDMI video port for HDCP status change\r\n");
@@ -570,9 +577,13 @@ void _dsDisplayEventCallback(intptr_t handle, dsDisplayEvent_t event, void *even
                 return;
             }
 
+            if ((hdcpStatus < dsHDCP_STATUS_UNPOWERED) || (hdcpStatus >= dsHDCP_STATUS_MAX)) {
+                INT_ERROR("Invalid HDCP status for protocol version change: %d\r\n", hdcpStatus);
+                return;
+            }
+
             _eventData.data.hdmi_hdcp.hdcpStatus = hdcpStatus;
             _eventId = IARM_BUS_DSMGR_EVENT_HDCP_STATUS;
-            _dsSyncHdmiStatus(DS_HDMI_TAG_HDCPVERSION, protocolVersion);
             break;
         }
 
