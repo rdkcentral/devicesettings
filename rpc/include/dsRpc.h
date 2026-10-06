@@ -32,7 +32,6 @@
 
 
 #include "dsTypes.h"
-#include "dsAVDTypes.h"
 #include "dsError.h"
 
 #ifdef __cplusplus
