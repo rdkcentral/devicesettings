@@ -93,8 +93,7 @@ private:
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
-            const auto& value = eventData->data.DisplayFrameRateChange.framerate;
-            std::string framerate(value, strnlen(value, sizeof(value)));
+            std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePreChange(framerate);
@@ -115,8 +114,7 @@ private:
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
-            const auto& value = eventData->data.DisplayFrameRateChange.framerate;
-            std::string framerate(value, strnlen(value, sizeof(value)));
+            std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
                 listener->OnDisplayFrameratePostChange(framerate);
@@ -223,11 +221,6 @@ private:
 
         if (eventData) {
             dsHdcpStatus_t hdcpStatus = static_cast<dsHdcpStatus_t>(eventData->data.hdmi_hdcp.hdcpStatus);
-            if ((hdcpStatus < dsHDCP_STATUS_UNPOWERED) || (hdcpStatus >= dsHDCP_STATUS_MAX)) {
-                INT_ERROR("Invalid HDCP status received: %d", hdcpStatus);
-                return;
-            }
-
             IarmImpl::Dispatch([hdcpStatus](IVideoOutputPortEvents* listener) {
                 listener->OnHDCPStatusChange(hdcpStatus);
             });

@@ -638,18 +638,14 @@ static int _dsSendDisplayFrameRateStatusChangeEventCallBack(dsFramerateParam_t *
 {
     IARM_Bus_DSMgr_EventData_t _eventData = {0};
     dsError_t ret = result;
-    size_t framerateLength = strnlen(displayframerate->framerate, sizeof(displayframerate->framerate));
 
-    if ((framerateLength == 0) ||
-        (framerateLength == sizeof(displayframerate->framerate)) ||
-        (ret == dsERR_INVALID_PARAM))
+    if ((strcmp(displayframerate->framerate,"") == 0) || ret == dsERR_INVALID_PARAM)
     {
         ret = dsERR_INVALID_PARAM;
         return ret;
     }
 
-    memcpy(_eventData.data.DisplayFrameRateChange.framerate,
-           displayframerate->framerate, framerateLength);
+    memmove(_eventData.data.DisplayFrameRateChange.framerate, displayframerate->framerate, sizeof(_eventData.data.DisplayFrameRateChange));
     __TIMESTAMP();
     printf("%s:%d - Framerate status change update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
     IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,
@@ -661,7 +657,6 @@ static int _dsSendDisplayFrameRateStatusChangeEventCallBack(dsFramerateParam_t *
 
 void _dsFramerateStatusPreChangeCB(unsigned int inputStatus)
 {
-    // TODO: Populate DisplayFrameRateChange.framerate when the HAL callback provides the actual frame rate.
     IARM_Bus_DSMgr_EventData_t _eventData = {0};
 
     INT_INFO("%s:%d - Framerate status prechange update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
@@ -675,7 +670,6 @@ void _dsFramerateStatusPreChangeCB(unsigned int inputStatus)
 
 void _dsFramerateStatusPostChangeCB(unsigned int inputStatus)
 {
-    // TODO: Populate DisplayFrameRateChange.framerate when the HAL callback provides the actual frame rate.
     IARM_Bus_DSMgr_EventData_t _eventData = {0};
 
     INT_INFO("%s:%d - Framerate status changed update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
