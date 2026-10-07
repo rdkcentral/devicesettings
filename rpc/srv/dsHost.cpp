@@ -130,7 +130,7 @@ IARM_Result_t _dsSetPreferredSleepMode(void *arg)
         
         device::HostPersistence::getInstance().persistHostProperty("Power.Mode",enumToString(param->mode));
         _SleepMode  = param->mode;
-        IARM_Bus_DSMgr_EventData_t eventData;
+        IARM_Bus_DSMgr_EventData_t eventData = {0};
         eventData.data.sleepModeInfo.sleepMode = _SleepMode;
         IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED,(void *)&eventData, sizeof(eventData));
         INT_INFO("callaing IARM_BUS_DSMGR_EVENT_SLEEP_MODE_CHANGED :%d \n",_SleepMode);
