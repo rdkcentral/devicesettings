@@ -2947,7 +2947,7 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
     int volume = 0;
     bool portEnabled = false;
     dsAudioSetDuckingParam_t *param = (dsAudioSetDuckingParam_t *)arg;
-    IARM_Bus_DSMgr_EventData_t eventData;
+    IARM_Bus_DSMgr_EventData_t eventData = {0};
     INT_INFO("%s action : %d type :%d val :%d m_LastVolumeLevel :%f  \n",__FUNCTION__,param->action,param->type,param->level,float(m_LastVolumeLevel));
 
     dsError_t ret = dsIsAudioPortEnabled(param->handle, &portEnabled);
@@ -3341,8 +3341,13 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
     float volume = 0;
     if(m_isDuckingInProgress)
     {
-    IARM_Bus_DSMgr_EventData_t eventData = {0};
+         volume = m_volumeDuckingLevel;
+         INT_INFO("%s: audio level set to m_volumeDuckingLevel : %f", __FUNCTION__, volume);
     }
+    else
+    {
+#ifdef DS_AUDIO_SETTINGS_PERSISTENCE
+     /* Restore the speaker's own level; do not use another port's reference level. */
 	 volume = audioLevel_cache_speaker.load();
 #else
      volume = m_LastVolumeLevel;
