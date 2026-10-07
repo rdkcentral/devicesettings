@@ -937,7 +937,7 @@ IARM_Result_t _dsHdmiInGetCurrentVideoMode(void *arg)
 
 void _dsHdmiInConnectCB(dsHdmiInPort_t port, bool isPortConnected)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_hpd_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_hpd_eventData = {0};
  
     INT_INFO("%s:%d - HDMI In hotplug update!!!!!!..Port: %d, isPort: %d\r\n",__PRETTY_FUNCTION__,__LINE__, port, isPortConnected);
     hdmi_in_hpd_eventData.data.hdmi_in_connect.port = port;
@@ -952,7 +952,7 @@ void _dsHdmiInConnectCB(dsHdmiInPort_t port, bool isPortConnected)
 
 void _dsHdmiInSignalChangeCB(dsHdmiInPort_t port, dsHdmiInSignalStatus_t sigStatus)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_sigStatus_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_sigStatus_eventData = {0};
 
     INT_INFO("%s:%d - HDMI In signal status change update!!!!!! Port: %d, Signal Status: %d\r\n", __PRETTY_FUNCTION__,__LINE__,port, sigStatus);
     hdmi_in_sigStatus_eventData.data.hdmi_in_sig_status.port = port;
@@ -967,7 +967,7 @@ void _dsHdmiInSignalChangeCB(dsHdmiInPort_t port, dsHdmiInSignalStatus_t sigStat
 
 void _dsHdmiInStatusChangeCB(dsHdmiInStatus_t inputStatus)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_status_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_status_eventData = {0};
 
     INT_INFO("%s:%d - HDMI In status change update!!!!!! Port: %d, isPresented: %d\r\n", __PRETTY_FUNCTION__,__LINE__, inputStatus.activePort, inputStatus.isPresented);
     hdmi_in_status_eventData.data.hdmi_in_status.port = inputStatus.activePort;
@@ -982,7 +982,7 @@ void _dsHdmiInStatusChangeCB(dsHdmiInStatus_t inputStatus)
 
 void _dsHdmiInVideoModeUpdateCB(dsHdmiInPort_t port, dsVideoPortResolution_t videoResolution)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_videoMode_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_videoMode_eventData = {0};
 
     INT_INFO("%s:%d - HDMI In video mode info  update, Port: %d, Pixel Resolution: %d, Interlaced: %d, Frame Rate: %d \n", __PRETTY_FUNCTION__,__LINE__,port, videoResolution.pixelResolution, videoResolution.interlaced, videoResolution.frameRate);
     hdmi_in_videoMode_eventData.data.hdmi_in_video_mode.port = port;
@@ -1000,7 +1000,7 @@ void _dsHdmiInVideoModeUpdateCB(dsHdmiInPort_t port, dsVideoPortResolution_t vid
 
 void _dsHdmiInAllmChangeCB(dsHdmiInPort_t port, bool allm_mode)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_allmMode_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_allmMode_eventData = {0};
 
     INT_INFO("%s:%d - HDMI In ALLM Mode update!!!!!! Port: %d, ALLM Mode: %d\r\n", __FUNCTION__,__LINE__,port, allm_mode);
     hdmi_in_allmMode_eventData.data.hdmi_in_allm_mode.port = port;
@@ -1015,7 +1015,7 @@ void _dsHdmiInAllmChangeCB(dsHdmiInPort_t port, bool allm_mode)
 
 void _dsHdmiInVRRChangeCB(dsHdmiInPort_t port, dsVRRType_t vrr_type)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_vrrMode_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_vrrMode_eventData = {0};
 
     INT_INFO("%s:%d - HDMI In VRR Mode update!!!!!! Port: %d, VRR TYPE: %d\r\n", __FUNCTION__,__LINE__,port, vrr_type);
     hdmi_in_vrrMode_eventData.data.hdmi_in_vrr_mode.port = port;
@@ -1030,7 +1030,7 @@ void _dsHdmiInVRRChangeCB(dsHdmiInPort_t port, dsVRRType_t vrr_type)
 
 void _dsHdmiInAviContentTypeChangeCB(dsHdmiInPort_t port, dsAviContentType_t avi_content_type)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_contentType_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_contentType_eventData = {0};
 
     INT_INFO("%s:%d - HDMI In Content Type update!!!!!! Port: %d, content type: %d\r\n", __FUNCTION__,__LINE__,port, avi_content_type);
     hdmi_in_contentType_eventData.data.hdmi_in_content_type.port = port;
@@ -1044,7 +1044,7 @@ void _dsHdmiInAviContentTypeChangeCB(dsHdmiInPort_t port, dsAviContentType_t avi
 
 void _dsHdmiInAVLatencyChangeCB(int audio_latency, int video_latency)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_av_latency_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_av_latency_eventData = {0};
 
     hdmi_in_av_latency_eventData.data.hdmi_in_av_latency.audio_output_delay = audio_latency;
     hdmi_in_av_latency_eventData.data.hdmi_in_av_latency.video_latency = video_latency;
