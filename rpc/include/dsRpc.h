@@ -73,6 +73,9 @@ extern "C" {
 #define  IARM_BUS_DSMGR_API_dsGetAudioDelay            "dsGetAudioDelay"
 #define  IARM_BUS_DSMGR_API_dsGetSinkDeviceAtmosCapability "dsGetSinkDeviceAtmosCapability"
 #define  IARM_BUS_DSMGR_API_dsSetAudioAtmosOutputMode "dsSetAudioAtmosOutputMode"
+#define  IARM_BUS_DSMGR_API_dsSetApplicationAudioConfig "dsSetApplicationAudioConfig"
+#define  IARM_BUS_DSMGR_API_dsGetApplicationAudioConfig "dsGetApplicationAudioConfig"
+#define  IARM_BUS_DSMGR_API_dsGetApplicationAudioConfigList "dsGetApplicationAudioConfigList"
 #define  IARM_BUS_DSMGR_API_dsSetAudioDucking    "dsSetAudioDucking"
 #define  IARM_BUS_DSMGR_API_dsSetAudioLevel            "dsSetAudioLevel"
 #define  IARM_BUS_DSMGR_API_dsGetAudioLevel            "dsGetAudioLevel"
@@ -1081,6 +1084,21 @@ typedef struct _dsHdmiVersionParam_t
     dsHdmiInPort_t          iHdmiPort;
     dsHdmiMaxCapabilityVersion_t iCapVersion;
 }dsHdmiVersionParam_t;
+
+typedef struct _dsApplicationAudioConfigParam_t
+{
+    dsError_t result;
+    intptr_t handle;
+    dsApplicationAudioConfig_t audioConfig ;
+    bool enable;
+}dsApplicationAudioConfigParam_t;
+
+typedef struct _dsApplicationAudioConfigListParam_t {
+    dsError_t result;
+    intptr_t handle;
+    dsApplicationAudioConfigList_t appAudioConfigList;
+} dsApplicationAudioConfigListParam_t;
+
 
 #ifdef __cplusplus
 }
