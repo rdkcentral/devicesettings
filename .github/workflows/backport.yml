@@ -634,8 +634,9 @@ jobs:
             exit 0
           fi
 
-          # Use the original merged PR title for the backport PR
-          TITLE="${PR_TITLE}"
+          #Using Target ticket for the backport PR title
+          TITLE_NO_TICKET=$(echo "$PR_TITLE" | sed -E 's/^[A-Z]+-[0-9]+\s*:\s*//')
+          TITLE="${TICKET}:${TITLE_NO_TICKET}"
 
           # Strip backport_to line from original PR body
           ORIGINAL_BODY_CLEAN=$(printf '%s' "$ORIGINAL_PR_BODY" | grep -viE '^\s*backport_to\s*:' || true)
