@@ -966,20 +966,14 @@ IARM_Result_t _dsSetResolution(void *arg)
 			IARM_BUS_Unlock(lock);
 			return IARM_RESULT_SUCCESS;
 		}
-		/* The Pre/Post change calls use the IARM bus (IARM bus lock). Never hold dsLock while making them:
-		 * an IARM event handler running with the IARM bus lock held may be waiting for dsLock (lock order inversion). */
 		/*!< Resolution Pre Change Event  - IARM_BUS_DSMGR_EVENT_RES_PRECHANGE */
-		IARM_BUS_Unlock(lock);
 		_dsVideoPortPreResolutionCall(&param->resolution);
-		IARM_BUS_Lock(lock);
 
 		/*!< Set Platform Resolution  */
 		ret = dsSetResolution(param->handle, &param->resolution);
 		
 		/*!< Resolution Post Change Event  - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE */
-		IARM_BUS_Unlock(lock);
 		_dsSendVideoPortPostResolutionCall(&param->resolution);
-		IARM_BUS_Lock(lock);
 		
 		if (ret == dsERR_NONE)
 		{
