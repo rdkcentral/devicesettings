@@ -966,14 +966,20 @@ IARM_Result_t _dsSetResolution(void *arg)
 			IARM_BUS_Unlock(lock);
 			return IARM_RESULT_SUCCESS;
 		}
-		/*!< Resolution Pre Change Event  - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE */
+		/* The Pre/Post change calls use the IARM bus (IARM bus lock). Never hold dsLock while making them:
+		 * an IARM event handler running with the IARM bus lock held may be waiting for dsLock (lock order inversion). */
+		/*!< Resolution Pre Change Event  - IARM_BUS_DSMGR_EVENT_RES_PRECHANGE */
+		IARM_BUS_Unlock(lock);
 		_dsVideoPortPreResolutionCall(&param->resolution);
+		IARM_BUS_Lock(lock);
 
 		/*!< Set Platform Resolution  */
 		ret = dsSetResolution(param->handle, &param->resolution);
 		
 		/*!< Resolution Post Change Event  - IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE */
+		IARM_BUS_Unlock(lock);
 		_dsSendVideoPortPostResolutionCall(&param->resolution);
+		IARM_BUS_Lock(lock);
 		
 		if (ret == dsERR_NONE)
 		{
@@ -1340,6 +1346,8 @@ static int  _dsSendVideoPortPostResolutionCall(dsVideoPortResolution_t *resoluti
 		ret = dsERR_INVALID_PARAM;
 	}
 
+	INT_INFO("Entering ...");
+
 	if (ret == dsERR_NONE){
           IARM_Bus_DSMgr_EventData_t eventData = {0};
 		  IARM_Bus_CommonAPI_ResChange_Param_t param;
@@ -1384,9 +1392,12 @@ static int  _dsSendVideoPortPostResolutionCall(dsVideoPortResolution_t *resoluti
 			}
 			eventData.data.resn.width = param.width;
 			eventData.data.resn.height = param.height;
+			INT_INFO("ResolutionPostChange: pixelRes[%u]", resolution->pixelResolution);
 			IARM_BusDaemon_ResolutionPostchange(param);
+			INT_INFO("IARM_BusDaemon_ResolutionPostchange completed");
 			IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_RES_POSTCHANGE,(void *)&eventData, sizeof(eventData));
 		}
+	INT_INFO("Exiting ret[%d]...",ret);
 	return ret;
 }
 static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
@@ -1397,8 +1408,10 @@ static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
 		ret = dsERR_INVALID_PARAM;
 	}
 
+	INT_INFO("Entering ...");
+
 	if (ret == dsERR_NONE){
-                IARM_Bus_DSMgr_EventData_t eventData = {0};
+			IARM_Bus_DSMgr_EventData_t eventData = {0};
 			IARM_Bus_CommonAPI_ResChange_Param_t param;
 
 			switch(resolution->pixelResolution) {
@@ -1441,9 +1454,12 @@ static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
 			}
 			eventData.data.resn.width = param.width;
 			eventData.data.resn.height = param.height;
+			INT_INFO("ResolutionPostChange: pixelRes[%u]", resolution->pixelResolution);
 			IARM_BusDaemon_ResolutionPrechange(param);
+			INT_INFO("IARM_BusDaemon_ResolutionPrechange completed");
 			IARM_Bus_BroadcastEvent(IARM_BUS_DSMGR_NAME,(IARM_EventId_t)IARM_BUS_DSMGR_EVENT_RES_PRECHANGE,(void *)&eventData, sizeof(eventData));
 		}
+	INT_INFO("Exiting ret[%d]...",ret);
 	return ret;
 }
 
