@@ -124,7 +124,7 @@ IARM_Result_t dsMgr_init()
 	dsServer_Rdklogger_Init();
 	dsHostInit();
 	dsDisplayMgr_init();
-	dsAudioMgr_init();
+	//dsAudioMgr_init();
 	dsVideoPortMgr_init();
 	dsVideoDeviceMgr_init();
 	dsFPDMgr_init();
