@@ -252,11 +252,17 @@ static dsError_t getHDMISPDInfo (dsHdmiInPort_t iHdmiPort, unsigned char *spd) {
 }
 
 static dsError_t setEdidVersion (dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_t iEdidVersion) {
+    // Validate iHdmiPort bounds before HAL call
+    if (iHdmiPort < 0 || iHdmiPort >= dsHDMI_IN_PORT_MAX) {
+        INT_ERROR("%s: Invalid HDMI port %d\n", __FUNCTION__, iHdmiPort);
+        return dsERR_INVALID_PARAM;
+    }
+    
     dsError_t eRet = dsERR_GENERAL;
     typedef dsError_t (*dsSetEdidVersion_t)(dsHdmiInPort_t iHdmiPort, tv_hdmi_edid_version_t iEdidVersion);
     static dsSetEdidVersion_t dsSetEdidVersionFunc = 0;
-    char edidVer[2];
-    sprintf(edidVer,"%d\0",iEdidVersion);
+    char edidVer[16]; // Increased buffer size to prevent overflow
+    snprintf(edidVer, sizeof(edidVer), "%d", iEdidVersion);
 
     if (dsSetEdidVersionFunc == 0) {
        void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
