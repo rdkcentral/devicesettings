@@ -1326,18 +1326,26 @@ IARM_Result_t _dsSetVRRSupport (void *arg)
 
     dsVRRSupportParam_t *param = (dsVRRSupportParam_t *) arg;
     IARM_BUS_Lock(lock);
-    param->result = dsERR_NONE;
-    INT_INFO("[srv] :  In _dsSetVRRSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
-    if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the VRR bit in edid
-    {
-        param->result = setVRRSupport (param->iHdmiPort, param->vrrSupport);
+    
+    // Validate iHdmiPort bounds before array access
+    if (param->iHdmiPort >= 0 && param->iHdmiPort < dsHDMI_IN_PORT_MAX) {
+        param->result = dsERR_NONE;
+        INT_INFO("[srv] :  In _dsSetVRRSupport, checking m_ediversion of port %d : %d\n",param->iHdmiPort,m_edidversion[param->iHdmiPort]);
+        if(m_edidversion[param->iHdmiPort] == HDMI_EDID_VER_20)//if the edidver is 2.0, then only set the VRR bit in edid
+        {
+            param->result = setVRRSupport (param->iHdmiPort, param->vrrSupport);
+        }
+        INT_INFO("[srv] %s: dsSetVRRSupport Port: %d vrrSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->vrrSupport, param->result);
+        if(param->result == dsERR_NONE && m_hdmiPortVrrCaps[param->iHdmiPort])// update the persistence only for VRR supported ports
+        {
+            updateVRRBitValuesInPersistence(param->iHdmiPort,param->vrrSupport);
+            m_vrrsupport[param->iHdmiPort] = param->vrrSupport;
+        }
+    } else {
+        param->result = dsERR_INVALID_PARAM;
+        INT_ERROR("[srv] %s: Invalid HDMI port %d\n", __FUNCTION__, param->iHdmiPort);
     }
-    INT_INFO("[srv] %s: dsSetVRRSupport Port: %d vrrSupport: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->vrrSupport, param->result);
-    if(param->result == dsERR_NONE && m_hdmiPortVrrCaps[param->iHdmiPort])// update the persistence only for VRR supported ports
-    {
-        updateVRRBitValuesInPersistence(param->iHdmiPort,param->vrrSupport);
-        m_vrrsupport[param->iHdmiPort] = param->vrrSupport;
-    }
+    
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
