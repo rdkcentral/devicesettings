@@ -248,10 +248,11 @@ bool HdmiInput::isPortConnected(int8_t Port) const
 void HdmiInput::selectPort (int8_t Port,bool requestAudioMix, int videoPlaneType,bool topMost) const
 {
 	dsError_t eError = dsHdmiInSelectPort ((dsHdmiInPort_t)Port, requestAudioMix ,(dsVideoPlaneType_t)videoPlaneType,topMost);
-
+        INT_ERROR("HdmiInput::selectPort : dsHdmiInSelectPort result eError = %d", eError);
 	// Throw an exception if there was an error
 	if (dsERR_NONE != eError) 
 	{
+		INT_ERROR("HdmiInput::selectPort : Exception occurred eError = %d", eError);
 		throw Exception(eError);
 	}
 	
