@@ -388,6 +388,14 @@ IARM_Result_t _dsIsVideoPortEnabled(void *arg)
     IARM_BUS_Lock(lock);
     
 	dsVideoPortIsEnabledParam_t *param = (dsVideoPortIsEnabledParam_t *)arg;
+    
+    // Validate handle before HAL call
+    if (_GetVideoPortType(param->handle) == dsVIDEOPORT_TYPE_MAX) {
+        INT_ERROR("%s: Invalid video port handle %ld\n", __FUNCTION__, (long)param->handle);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
     dsIsVideoPortEnabled(param->handle, &param->enabled);
    
     IARM_BUS_Unlock(lock);
@@ -810,6 +818,14 @@ IARM_Result_t _dsEnableVideoPort(void *arg)
     IARM_BUS_Lock(lock);
    
 	dsVideoPortSetEnabledParam_t *param = (dsVideoPortSetEnabledParam_t *)arg;
+    
+    // Validate handle before HAL call
+    if (_GetVideoPortType(param->handle) == dsVIDEOPORT_TYPE_MAX) {
+        INT_ERROR("%s: Invalid video port handle %ld\n", __FUNCTION__, (long)param->handle);
+        IARM_BUS_Unlock(lock);
+        return IARM_RESULT_INVALID_STATE;
+    }
+    
     dsEnableVideoPort(param->handle, param->enabled);
    
     IARM_BUS_Unlock(lock);
@@ -2069,6 +2085,13 @@ IARM_Result_t _dsSetForceHDRMode(void *arg)
     if (param != NULL) {
         param->result = dsERR_GENERAL;
 
+        // Validate handle before HAL call
+        if (_GetVideoPortType(param->handle) == dsVIDEOPORT_TYPE_MAX) {
+            INT_ERROR("%s: Invalid video port handle %ld\n", __FUNCTION__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+
         if (func != NULL) {
             param->result = func(param->handle, param->hdrMode);
         }
@@ -2281,7 +2304,13 @@ IARM_Result_t _dsSetBackgroundColor(void *arg)
     }
 
     if (param != NULL && func != NULL) {
-          func(param->handle, param->color);
+        // Validate handle before HAL call
+        if (_GetVideoPortType(param->handle) == dsVIDEOPORT_TYPE_MAX) {
+            INT_ERROR("%s: Invalid video port handle %ld\n", __FUNCTION__, (long)param->handle);
+            IARM_BUS_Unlock(lock);
+            return IARM_RESULT_INVALID_STATE;
+        }
+        func(param->handle, param->color);
     }
 
     IARM_BUS_Unlock(lock);
