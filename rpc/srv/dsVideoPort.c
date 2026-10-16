@@ -1349,7 +1349,7 @@ static int  _dsSendVideoPortPostResolutionCall(dsVideoPortResolution_t *resoluti
 	}
 
 	if (ret == dsERR_NONE){
-		  IARM_Bus_DSMgr_EventData_t eventData;
+          IARM_Bus_DSMgr_EventData_t eventData = {0};
 		  IARM_Bus_CommonAPI_ResChange_Param_t param;
 
 			switch(resolution->pixelResolution) {
@@ -1406,7 +1406,7 @@ static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
 	}
 
 	if (ret == dsERR_NONE){
-		        IARM_Bus_DSMgr_EventData_t eventData;
+                IARM_Bus_DSMgr_EventData_t eventData = {0};
 			IARM_Bus_CommonAPI_ResChange_Param_t param;
 
 			switch(resolution->pixelResolution) {
@@ -1458,7 +1458,7 @@ static int  _dsVideoPortPreResolutionCall(dsVideoPortResolution_t *resolution)
 /*HDCP Status  Call back */
 void _dsHdcpCallback (intptr_t handle, dsHdcpStatus_t status)
 {
-	IARM_Bus_DSMgr_EventData_t hdcp_eventData;
+    IARM_Bus_DSMgr_EventData_t hdcp_eventData = {0};
 
 	if (handle == NULL_HANDLE)
 	{
@@ -2291,7 +2291,7 @@ IARM_Result_t _dsSetBackgroundColor(void *arg)
 }
 void _dsVideoFormatUpdateCB(dsHDRStandard_t videoFormat)
 {
-    IARM_Bus_DSMgr_EventData_t video_format_event_data;
+    IARM_Bus_DSMgr_EventData_t video_format_event_data = {0};
     INT_INFO("%s: VideoOutPort format:%d \r\n", __FUNCTION__, videoFormat);
     video_format_event_data.data.VideoFormatInfo.videoFormat = videoFormat;
 

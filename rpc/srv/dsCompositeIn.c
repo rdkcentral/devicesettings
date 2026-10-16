@@ -478,7 +478,7 @@ IARM_Result_t _dsCompositeInScaleVideo(void *arg)
 
 void _dsCompositeInConnectCB(dsCompositeInPort_t port, bool isPortConnected)
 {
-    IARM_Bus_DSMgr_EventData_t composite_in_hpd_eventData;
+    IARM_Bus_DSMgr_EventData_t composite_in_hpd_eventData = {0};
 
     INT_INFO("%s:%d - COMPOSITE In hotplug update!!!!!!..%d, %d\r\n",__PRETTY_FUNCTION__,__LINE__, port, isPortConnected);
     composite_in_hpd_eventData.data.composite_in_connect.port = port;
@@ -494,7 +494,7 @@ void _dsCompositeInConnectCB(dsCompositeInPort_t port, bool isPortConnected)
 
 void _dsCompositeInSignalChangeCB(dsCompositeInPort_t port, dsCompInSignalStatus_t sigStatus)
 {
-    IARM_Bus_DSMgr_EventData_t composite_in_sigStatus_eventData;
+    IARM_Bus_DSMgr_EventData_t composite_in_sigStatus_eventData = {0};
     INT_INFO("%s:%d Composite In signal change update!!!!!! Port: %d, Signal Status: %d\r\n", __PRETTY_FUNCTION__, __LINE__, port, sigStatus);
     composite_in_sigStatus_eventData.data.composite_in_sig_status.port = port;
     composite_in_sigStatus_eventData.data.composite_in_sig_status.status = sigStatus;
@@ -509,7 +509,7 @@ void _dsCompositeInSignalChangeCB(dsCompositeInPort_t port, dsCompInSignalStatus
 
 void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus)
 {
-    IARM_Bus_DSMgr_EventData_t hdmi_in_status_eventData;
+    IARM_Bus_DSMgr_EventData_t hdmi_in_status_eventData = {0};
     INT_INFO("%s:%d Composite In status change update!!!!!! Port: %d, isPresented: %d\r\n", __PRETTY_FUNCTION__, __LINE__, inputStatus.activePort, inputStatus.isPresented);
     hdmi_in_status_eventData.data.composite_in_status.port = inputStatus.activePort;
     hdmi_in_status_eventData.data.composite_in_status.isPresented = inputStatus.isPresented;
@@ -524,7 +524,7 @@ void _dsCompositeInStatusChangeCB(dsCompositeInStatus_t inputStatus)
 
 void _dsCompositeInVideoModeUpdateCB(dsCompositeInPort_t port, dsVideoPortResolution_t videoResolution)
 {
-    IARM_Bus_DSMgr_EventData_t composite_in_videoMode_eventData;
+    IARM_Bus_DSMgr_EventData_t composite_in_videoMode_eventData = {0};
     INT_INFO("%s:%d - Composite In video mode info  update, Port: %d, Pixel Resolution: %d, Interlaced: %d, Frame Rate: %d \n", __PRETTY_FUNCTION__,__LINE__,port, videoResolution.pixelResolution, videoResolution.interlaced, videoResolution.frameRate);
     composite_in_videoMode_eventData.data.composite_in_video_mode.port = port;
     composite_in_videoMode_eventData.data.composite_in_video_mode.resolution.pixelResolution = videoResolution.pixelResolution;
