@@ -645,6 +645,8 @@ static int _dsSendDisplayFrameRateStatusChangeEventCallBack(dsFramerateParam_t *
         return ret;
     }
 
+    // Zero the event data structure to prevent broadcasting uninitialized stack data
+    memset(&_eventData, 0, sizeof(_eventData));
     memmove(_eventData.data.DisplayFrameRateChange.framerate, displayframerate->framerate, sizeof(_eventData.data.DisplayFrameRateChange));
     __TIMESTAMP();
     printf("%s:%d - Framerate status change update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
