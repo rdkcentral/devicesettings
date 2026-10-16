@@ -364,7 +364,7 @@ void AudioConfigInit()
                     }
                     catch(...) {
                             try {
-                                INT_DEBUG("SPEAKER0.audio.Level not found in persistence store. Try system default\n");
+                                INT_INFO("SPEAKER0.audio.Level not found in persistence store. Try system default\n");
                                 _AudioLevel = device::HostPersistence::getInstance().getDefaultProperty("SPEAKER0.audio.Level");
                             }
                             catch(...) {
@@ -3012,6 +3012,7 @@ IARM_Result_t _dsSetAudioDucking(void *arg)
     }
     if (dsSetAudioLevelFunc != 0 )
     {
+        INT_ERROR(" YESH: setAudioducking setaudiolevel volume %d \n", volume);
         dsSetAudioLevelFunc(param->handle, volume);
     }
 
@@ -3237,14 +3238,14 @@ IARM_Result_t _dsSetAudioLevel(void *arg)
         dsAudioPortType_t _APortType = _GetAudioPortType(param->handle);
         if(_APortType == dsAUDIOPORT_TYPE_SPEAKER)
         {
-            INT_DEBUG("_dsSetAudioLevel param->level :%f m_isDuckingInProgress :%d  \n",param->level,m_isDuckingInProgress);
+            INT_INFO("_dsSetAudioLevel param->level :%f m_isDuckingInProgress :%d  \n",param->level,m_isDuckingInProgress);
             float currlevel = 0;
             if (dsGetAudioLevelfunc == 0) {
                 void *dllib = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
                 if (dllib) {
                     dsGetAudioLevelfunc = (dsGetAudioLevel_t) dlsym(dllib, "dsGetAudioLevel");
                     if (dsGetAudioLevelfunc) {
-                        INT_DEBUG("dsGetAudioLevel_t(int, float *) is defined and loaded\r\n");
+                        INT_INFO("dsGetAudioLevel_t(int, float *) is defined and loaded\r\n");
                     }
                     else {
                         INT_INFO("dsGetAudioLevel_t(int, float *) is not defined\r\n");
