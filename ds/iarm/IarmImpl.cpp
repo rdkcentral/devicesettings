@@ -93,6 +93,8 @@ private:
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure framerate is NUL-terminated before constructing string
+            eventData->data.DisplayFrameRateChange.framerate[sizeof(eventData->data.DisplayFrameRateChange.framerate) - 1] = '\0';
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
@@ -114,6 +116,8 @@ private:
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure framerate is NUL-terminated before constructing string
+            eventData->data.DisplayFrameRateChange.framerate[sizeof(eventData->data.DisplayFrameRateChange.framerate) - 1] = '\0';
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
@@ -324,6 +328,8 @@ private:
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure audioLanguage is NUL-terminated before constructing string
+            eventData->data.AudioLanguageInfo.audioLanguage[sizeof(eventData->data.AudioLanguageInfo.audioLanguage) - 1] = '\0';
             std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
             IarmImpl::Dispatch([&primaryLanguage](IAudioOutputPortEvents* listener) {
@@ -345,6 +351,8 @@ private:
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure audioLanguage is NUL-terminated before constructing string
+            eventData->data.AudioLanguageInfo.audioLanguage[sizeof(eventData->data.AudioLanguageInfo.audioLanguage) - 1] = '\0';
             std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
             IarmImpl::Dispatch([&secondaryLanguage](IAudioOutputPortEvents* listener) {
