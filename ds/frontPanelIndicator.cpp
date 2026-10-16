@@ -476,10 +476,12 @@ uint32_t FrontPanelIndicator::getColor()
  */
 void FrontPanelIndicator::setColor(const FrontPanelIndicator::Color & color,bool toPersist)
 {
+    INT_INFO("[%s:%d] 17349:Color id = %d, color name = %s", __FUNCTION__, __LINE__, color.getId(), color.getName().c_str());
    
     bool IsPersist = toPersist;
     if(_colorMode == 0 || _colorMode == 1)
     {
+        INT_INFO("[%s:%d] 17349:Color mode is %d, API not supported", __FUNCTION__, __LINE__, _colorMode);
         throw UnsupportedOperationException("This API not supported for the color mode");
     }
     else if(_colorMode == 2)
@@ -488,6 +490,7 @@ void FrontPanelIndicator::setColor(const FrontPanelIndicator::Color & color,bool
         const List<FrontPanelIndicator::Color> supportedColors = FrontPanelConfig::getInstance().getColors();
         for (uint j = 0; j < supportedColors.size(); j++)
         {
+            INT_INFO("[%s:%d] 17349:Supported color id = %d, color id = %d", __FUNCTION__, __LINE__, supportedColors.at(j).getId(), color.getId());
             if( supportedColors.at(j).getId() == color.getId())
             {
                isValidColor = true;
@@ -496,6 +499,7 @@ void FrontPanelIndicator::setColor(const FrontPanelIndicator::Color & color,bool
         }
         if(!isValidColor)
         {
+            INT_INFO("[%s:%d] 17349:Invalid color id = %d", __FUNCTION__, __LINE__, color.getId());
            throw IllegalArgumentException("Invalid color object");
         }
     }
@@ -503,6 +507,7 @@ void FrontPanelIndicator::setColor(const FrontPanelIndicator::Color & color,bool
 
     if (dsERR_NONE != dsSetFPDColor((dsFPDIndicator_t)_id, (dsFPDColor_t)colorValue,IsPersist) )
     {
+		INT_INFO("[%s:%d] 17349: dsSetFPDColor failed--", __FUNCTION__, __LINE__);
         throw IllegalArgumentException("dsSetFPDColor failed");
     }
 	_color_rgb32 = colorValue;
@@ -525,10 +530,12 @@ void FrontPanelIndicator::setColor(uint32_t color,bool toPersist)
     bool isValidColor = false;
     if(_colorMode == 0 || _colorMode == 2)
     {
+		INT_INFO("[%s:%d] 17349: This API not supported for the color mode", __FUNCTION__, __LINE__);
         throw UnsupportedOperationException("This API not supported for the color mode");
     }
     if (dsERR_NONE != dsSetFPDColor((dsFPDIndicator_t)_id, (dsFPDColor_t) color,IsPersist) )
     {
+		INT_INFO("[%s:%d] 17349: dsSetFPDColor failed ", __FUNCTION__, __LINE__);
         throw IllegalArgumentException();
     }
 	_color_rgb32 = (dsFPDColor_t) color;
