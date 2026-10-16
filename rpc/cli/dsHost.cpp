@@ -180,7 +180,8 @@ dsError_t dsGetHostEDID( unsigned char *edid, int *length)
    {
         if (param.result == dsERR_NONE) {
             printf("dsCLI ::getHostEDID returns %d bytes\r\n", param.length);
-                rc = memcpy_s((void *)edid,param.length, param.bytes, param.length);
+            // Use actual buffer size (512) instead of param.length to prevent overflow
+            rc = memcpy_s((void *)edid, 512, param.bytes, param.length);
                 if(rc!=EOK)
                 {
                         ERR_CHK(rc);
