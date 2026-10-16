@@ -686,7 +686,7 @@ void VideoOutputPort::Display::getEDIDBytes(std::vector<uint8_t> &edid) const
     dsError_t ret = dsERR_NONE;
     int length = 0;
 
-    unsigned char edidBytes[512] = {0};
+    unsigned char edidBytes[1024] = {0};
 
     const auto reading_edid_start = system_clock::now();
     const char* exceptionstr = "";
