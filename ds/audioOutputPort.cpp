@@ -364,6 +364,7 @@ void AudioOutputPort::setEnablePersist (bool isEnabled)
     return;
 }
 
+
 /**
  * @fn const int AudioOutputPort::getStereoAuto()
  * @brief This API is used to get the current auto mode.
