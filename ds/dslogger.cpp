@@ -37,7 +37,7 @@
 #define MAX_LOG_BUFF 1024
 #define kFormatMessageSize (MAX_LOG_BUFF - 128)
 
-DS_LogCb logCb = NULL;
+static DS_LogCb logCb = NULL;
 
 void DS_RegisterForLog(DS_LogCb cb)
 {
