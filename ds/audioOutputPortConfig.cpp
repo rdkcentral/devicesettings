@@ -103,6 +103,7 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 {
 	List<AudioOutputPortType> supportedTypes;
 	for (std::vector<AudioOutputPortType>::const_iterator it = _aPortTypes.begin(); it != _aPortTypes.end(); it++) {
+                printf("\nYESH: supportedTypes _aPortTypes *it %s enabled %d", it->toString().c_str(), it->isEnabled());
 		if (it->isEnabled()) {
 			supportedTypes.push_back(*it);
 		}
@@ -114,32 +115,32 @@ List<AudioOutputPortType>  AudioOutputPortConfig::getSupportedTypes()
 void dumpconfig(audioConfigs_t *config)
 {
     if (nullptr == config) {
-        INT_ERROR("Audio config is NULL");
+        printf("\nAudio config is NULL");
         return;
     }
     if ( -1 == access("/opt/dsMgrDumpDeviceConfigs", F_OK) ) {
-        INT_INFO("Dumping of Device configs is disabled");
+        printf("\nDumping of Device configs is disabled");
         return;
     }
 
     int configSize = -1, portSize = -1;
-    INT_INFO("\n=============== Starting to Dump Audio Configs ===============\n");
+    printf("\n\n=============== Starting to Dump Audio Configs ===============\n");
     if( nullptr != config->pKConfigs )
     {
         configSize = (config->pKConfigSize) ? *(config->pKConfigSize) : -1;
 
         for (int i = 0; i < configSize; i++) {
             const dsAudioTypeConfig_t *typeCfg = &(config->pKConfigs[i]);
-            INT_INFO("typeCfg->typeId = %d", typeCfg->typeId);
-            INT_INFO("typeCfg->name = %s", typeCfg->name);
-            INT_INFO("typeCfg->numSupportedEncodings = %zu", typeCfg->numSupportedEncodings);
-            INT_INFO("typeCfg->numSupportedCompressions = %zu", typeCfg->numSupportedCompressions);
-            INT_INFO("typeCfg->numSupportedStereoModes = %zu", typeCfg->numSupportedStereoModes);
+            printf("\ntypeCfg->typeId = %d", typeCfg->typeId);
+            printf("\ntypeCfg->name = %s", typeCfg->name);
+            printf("\ntypeCfg->numSupportedEncodings = %zu", typeCfg->numSupportedEncodings);
+            printf("\ntypeCfg->numSupportedCompressions = %zu", typeCfg->numSupportedCompressions);
+            printf("\ntypeCfg->numSupportedStereoModes = %zu", typeCfg->numSupportedStereoModes);
         }
     }
     else
     {
-        INT_ERROR("kAudioConfigs is NULL");
+        printf("\nkAudioConfigs is NULL");
     }
 
     if( nullptr != config->pKPorts )
@@ -147,16 +148,16 @@ void dumpconfig(audioConfigs_t *config)
         portSize = (config->pKPortSize) ? *(config->pKPortSize) : -1;
         for (int i = 0; i < portSize; i++) {
             const dsAudioPortConfig_t *portCfg = &(config->pKPorts[i]);
-            INT_INFO("portCfg->id.type = %d", portCfg->id.type);
-            INT_INFO("portCfg->id.index = %d", portCfg->id.index);
+            printf("\nportCfg->id.type = %d", portCfg->id.type);
+            printf("\nportCfg->id.index = %d", portCfg->id.index);
         }
     }
     else
     {
-        INT_ERROR("kAudioPorts is NULL");
+        printf("\nkAudioPorts is NULL");
     }
 
-    INT_INFO("\n=============== Dump Audio Configs done ===============\n");
+    printf("\n\n=============== Dump Audio Configs done ===============\n");
 }
 
 void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
@@ -164,7 +165,7 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
     int configSize = -1, portSize = -1;
     audioConfigs_t configuration = {0};
 
-    INT_INFO("Enter function");
+    printf("\nEnter function");
     try {
         /*
         * Load Constants First.
@@ -188,7 +189,7 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
 
         }
 
-        INT_INFO("Using '%s' config", dynamicAudioConfigs ? "dynamic" : "static");
+        printf("\nUsing '%s' config", dynamicAudioConfigs ? "dynamic" : "static");
         if ( nullptr != dynamicAudioConfigs )
         {
             configuration = *dynamicAudioConfigs;
@@ -204,7 +205,7 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
             configuration.pKPortSize = &portSize;
         }
 
-        INT_INFO("Audio Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d]",
+        printf("\nAudio Config[%p] ConfigSize[%d] Ports[%p] PortSize[%d]",
                 configuration.pKConfigs,
                 configSize,
                 configuration.pKPorts,
@@ -250,16 +251,16 @@ void AudioOutputPortConfig::load(audioConfigs_t* dynamicAudioConfigs)
                 _aPorts.push_back(AudioOutputPort((portCfg->id.type), portCfg->id.index, i));
                 _aPortTypes.at(portCfg->id.type).addPort(_aPorts.at(i));
             }
-            INT_INFO("Audio Configs loaded successfully");
+            printf("\nAudio Configs loaded successfully");
         }
         else {
-            INT_ERROR("Audio Configs loading failed");
+            printf("\nAudio Configs loading failed");
         }
     }
     catch(const Exception &e) {
         throw e;
     }
-    INT_INFO("Exit function");
+    printf("\nExit function");
 }
 
 void AudioOutputPortConfig::release()
