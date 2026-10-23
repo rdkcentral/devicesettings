@@ -48,6 +48,7 @@
 #include "iarmUtil.h"
 #include "dsRpc.h"
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 #include "hostPersistence.hpp"
 #include "dsserverlogger.h"
 #include "dsAudioConfig.h"
@@ -2118,6 +2119,10 @@ void AudioConfigInit()
 
 IARM_Result_t dsAudioMgr_init()
 {
+   if (dsMgrPluginEnabled) {
+       INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping audio HAL init\r\n", __FUNCTION__);
+       return IARM_RESULT_SUCCESS;
+   }
    IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsAudioPortInit, _dsAudioPortInit);
    IARM_BUS_Lock(lock);
    try
@@ -2402,6 +2407,9 @@ IARM_Result_t dsAudioMgr_term()
 
 IARM_Result_t _dsAudioPortInit(void *arg)
 {
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
 
     if (!m_isInitialized) {
@@ -3735,6 +3743,10 @@ IARM_Result_t _dsSetEnablePersist(void *arg)
 IARM_Result_t _dsAudioPortTerm(void *arg)
 {
     _DEBUG_ENTER();
+
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
 
     IARM_BUS_Lock(lock);
 

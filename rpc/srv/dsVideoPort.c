@@ -47,6 +47,7 @@
 #include "libIBus.h"
 #include "dsRpc.h"
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 #include <iostream>
 #include <string.h>
 #include "hostPersistence.hpp"
@@ -160,6 +161,10 @@ void VideoConfigInit()
 
 IARM_Result_t dsVideoPortMgr_init()
 {
+   if (dsMgrPluginEnabled) {
+       INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping video port HAL init\r\n", __FUNCTION__);
+       return IARM_RESULT_SUCCESS;
+   }
    IARM_BUS_Lock(lock);
 
    std::string _Resolution(DEFAULT_RESOLUTION);
@@ -271,6 +276,9 @@ IARM_Result_t dsVideoPortMgr_term()
 
 IARM_Result_t _dsVideoPortInit(void *arg)
 {
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
     bool isConnected = false;
     if (!m_isInitialized) {
@@ -1306,6 +1314,9 @@ void resetColorDepthOnHdmiReset(intptr_t handle)
 IARM_Result_t _dsVideoPortTerm(void *arg)
 {
     _DEBUG_ENTER();
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
 
     m_isPlatInitialized--;

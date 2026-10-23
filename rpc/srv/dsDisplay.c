@@ -45,6 +45,7 @@
 #include "iarmUtil.h"
 #include "dsRpc.h"
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 #include "dsserverlogger.h"
 #include "dsVideoPort.h"
 #include "dsVideoPortConfig.h"
@@ -83,6 +84,10 @@ static intptr_t _hdmiVideoPortHandle = 0;
 
 IARM_Result_t dsDisplayMgr_init()
 {
+	if (dsMgrPluginEnabled) {
+		INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping display HAL init\r\n", __FUNCTION__);
+		return IARM_RESULT_SUCCESS;
+	}
 	IARM_BUS_Lock(lock);
 	if (!m_isPlatInitialized) {
     	/* Nexus init, if any here */
@@ -103,6 +108,9 @@ IARM_Result_t dsDisplayMgr_term()
 
 IARM_Result_t _dsDisplayInit(void *arg)
 {
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
 
     if (!m_isInitialized) {
@@ -493,6 +501,9 @@ IARM_Result_t _dsDisplayTerm(void *arg)
 {
     _DEBUG_ENTER();
     
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
 	IARM_BUS_Lock(lock);
 
     m_isPlatInitialized--;

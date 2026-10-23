@@ -28,6 +28,7 @@
 
 
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 #include "libIARM.h"
 #include "dsError.h"
 #include "libIARM.h"
@@ -122,15 +123,20 @@ IARM_Result_t dsMgr_init()
 	}
     device::HostPersistence::getInstance().load();
 	dsServer_Rdklogger_Init();
-	dsHostInit();
-	dsDisplayMgr_init();
-	dsAudioMgr_init();
-	dsVideoPortMgr_init();
-	dsVideoDeviceMgr_init();
-	dsFPDMgr_init();
-	dsHostMgr_init();
-	dsHdmiInMgr_init();
-	dsCompositeInMgr_init();
+	if (dsMgrPluginEnabled) {
+		INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping HAL init and manager init\r\n", __FUNCTION__);
+	}
+	else {
+		dsHostInit();
+		dsDisplayMgr_init();
+		dsAudioMgr_init();
+		dsVideoPortMgr_init();
+		dsVideoDeviceMgr_init();
+		dsFPDMgr_init();
+		dsHostMgr_init();
+		dsHdmiInMgr_init();
+		dsCompositeInMgr_init();
+	}
 
 	return ret;
 }
@@ -139,14 +145,16 @@ IARM_Result_t dsMgr_term()
 {
     IARM_Result_t ret = IARM_RESULT_SUCCESS;
    
-	dsAudioMgr_term();
-	dsVideoPortMgr_term();
-	dsVideoDeviceMgr_term();
-	dsFPDMgr_term();
-	dsDisplayMgr_term();
-	dsHostMgr_term();
-	dsHdmiInMgr_term();
-	dsCompositeInMgr_term();
+    if (!dsMgrPluginEnabled) {
+        dsAudioMgr_term();
+        dsVideoPortMgr_term();
+        dsVideoDeviceMgr_term();
+        dsFPDMgr_term();
+        dsDisplayMgr_term();
+        dsHostMgr_term();
+        dsHdmiInMgr_term();
+        dsCompositeInMgr_term();
+    }
 
     if (dsFreeConfig() != dsERR_NONE) {
 		INT_ERROR("Failed to free device configurations\r\n");
