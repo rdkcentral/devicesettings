@@ -67,6 +67,7 @@
 #include "dsTypes.h"
 #include "dsserverlogger.h"
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 
 #include "iarmUtil.h"
 #include "libIARM.h"
@@ -107,6 +108,10 @@ using namespace std;
 
 IARM_Result_t dsCompositeInMgr_init()
 {
+    if (dsMgrPluginEnabled) {
+        INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping CompositeIn HAL init\r\n", __FUNCTION__);
+        return IARM_RESULT_SUCCESS;
+    }
 
     _dsCompositeInInit(NULL);
     IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsCompositeInInit, _dsCompositeInInit);
@@ -123,6 +128,9 @@ IARM_Result_t dsCompositeInMgr_term()
 
 IARM_Result_t _dsCompositeInInit(void *arg)
 {
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
     INT_INFO("%s:%d ---> m_isInitialized=%d, m_isPlatInitialized=%d \n",
                    __PRETTY_FUNCTION__,__LINE__, m_isInitialized, m_isPlatInitialized);
@@ -264,6 +272,9 @@ IARM_Result_t _dsCompositeInInit(void *arg)
 IARM_Result_t _dsCompositeInTerm(void *arg)
 {
     _DEBUG_ENTER();
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
     INT_DEBUG("%s:%d ---> m_isPlatInitialized=%d\n", __PRETTY_FUNCTION__,__LINE__, m_isPlatInitialized);
 
