@@ -852,16 +852,18 @@ IARM_Result_t _dsHdmiInSelectPort(void *arg)
 
     if (PROFILE_TV == profileType)
     {
-        INT_INFO("[%d][%s]: its TV Profile\r\n", __LINE__, __FUNCTION__);
         param->result = dsHdmiInSelectPort(param->port,param->requestAudioMix, param->videoPlaneType,param->topMostPlane);
+	INT_ERROR("[%d][%s]: its TV Profile, dsHdmiInSelectPort param->result = %d \r\n", __LINE__, __FUNCTION__, param->result);
     }
     else
     {
-        INT_INFO("[%d][%s]: its Other Profile\r\n", __LINE__, __FUNCTION__);
+        INT_ERROR("[%d][%s]: its Other Profile, param result is ERR_General\r\n", __LINE__, __FUNCTION__);
         param->result = dsERR_GENERAL;
     }
 
     IARM_BUS_Unlock(lock);
+
+    INT_ERROR("returning IARM_RESULT_SUCCESS in _dsHdmiInSelectPort");
 
     return IARM_RESULT_SUCCESS;
 }
