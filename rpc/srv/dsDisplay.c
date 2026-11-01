@@ -149,6 +149,14 @@ IARM_Result_t _dsGetDisplay(void *arg)
     IARM_BUS_Lock(lock);
     
 	dsDisplayGetHandleParam_t *param = (dsDisplayGetHandleParam_t *)arg;
+    
+	// Validate type and index before HAL call (defense-in-depth)
+	if (param->type < 0 || param->index < 0) {
+		INT_ERROR("%s: Invalid type %d or index %d\n", __FUNCTION__, param->type, param->index);
+		IARM_BUS_Unlock(lock);
+		return IARM_RESULT_INVALID_STATE;
+	}
+	
     dsGetDisplay(param->type, param->index, &param->handle);
     
 	IARM_BUS_Unlock(lock);
