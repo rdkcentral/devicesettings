@@ -7379,6 +7379,8 @@ static dsError_t setAudioMixerLevels (intptr_t handle, dsAudioInput_t aInput, in
     }
     else {
         INT_INFO("%s:  dsSetAudioMixerLevelsFunc = %p\n", __FUNCTION__, dsSetAudioMixerLevelsFunc);
+		INT_INFO("%s: dsSetAudioMixerLevelsFunc = %p\n", __FUNCTION__, (void *)dsSetAudioMixerLevelsFunc);
+
     }
     return eRet;
 }
