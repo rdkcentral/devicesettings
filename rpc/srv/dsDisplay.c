@@ -193,16 +193,21 @@ IARM_Result_t _dsGetEDID(void *arg)
     IARM_BUS_Lock(lock);
     memset(edidInfo,0,sizeof(*edidInfo));
 
-    dsGetEDID(param->handle, &param->edid);
+    dsError_t ret = dsGetEDID(param->handle, &param->edid);
     
-    filterEDIDResolution(param->handle, &param->edid);
-    dumpEDIDInformation( &param->edid);
-    rc = memcpy_s(edidInfo,sizeof(dsDisplayEDID_t),&param->edid,sizeof(param->edid));
-     if(rc!=EOK)
-     {
-	     ERR_CHK(rc);
-     }
-     isEdidCached = true;
+    // Only proceed if HAL call succeeded
+    if (ret == dsERR_NONE) {
+        filterEDIDResolution(param->handle, &param->edid);
+        dumpEDIDInformation( &param->edid);
+        rc = memcpy_s(edidInfo,sizeof(dsDisplayEDID_t),&param->edid,sizeof(param->edid));
+         if(rc!=EOK)
+         {
+	         ERR_CHK(rc);
+         }
+         isEdidCached = true;
+    } else {
+        INT_ERROR("%s: dsGetEDID failed with error %d\n", __FUNCTION__, ret);
+    }
 	
 	IARM_BUS_Unlock(lock);
 	
