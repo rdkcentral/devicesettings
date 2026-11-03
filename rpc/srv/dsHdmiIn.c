@@ -1113,7 +1113,9 @@ IARM_Result_t _dsSetEdidVersion (void *arg)
     dsEdidVersionParam_t *param = (dsEdidVersionParam_t *) arg;
     IARM_BUS_Lock(lock);
     param->result = setEdidVersion (param->iHdmiPort, param->iEdidVersion);
-    m_edidversion[param->iHdmiPort]=param->iEdidVersion;
+    if (param->iHdmiPort >= 0 && param->iHdmiPort < dsHDMI_IN_PORT_MAX && param->result == dsERR_NONE) {
+        m_edidversion[param->iHdmiPort]=param->iEdidVersion;
+    }
     INT_INFO("[srv] %s: dsSetEdidVersion Port: %d EDID: %d eRet: %d\r\n", __FUNCTION__, param->iHdmiPort,  param->iEdidVersion, param->result);
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
