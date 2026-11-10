@@ -30,7 +30,7 @@
 #include "dsclientlogger.h"
 #define MAX_LOG_BUFF 500
 
-DSClient_LogCb logCb = NULL;
+static DSClient_LogCb logCb = NULL;
 
 void DSClient_RegisterForLog(DSClient_LogCb cb)
 {

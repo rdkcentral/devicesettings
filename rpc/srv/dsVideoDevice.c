@@ -43,6 +43,7 @@
 #include "libIBus.h"
 #include "dsRpc.h"
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 #include "dsserverlogger.h"
 #include "hostPersistence.hpp"
 #include <dlfcn.h>
@@ -82,6 +83,10 @@ void _dsFramerateStatusPreChangeCB(unsigned int inputStatus);
 
 IARM_Result_t dsVideoDeviceMgr_init()
 {
+   if (dsMgrPluginEnabled) {
+       INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping video device HAL init\r\n", __FUNCTION__);
+       return IARM_RESULT_SUCCESS;
+   }
    IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsVideoDeviceInit, _dsVideoDeviceInit);
    IARM_BUS_Lock(lock);
 
@@ -143,6 +148,9 @@ IARM_Result_t dsVideoDeviceMgr_term()
 
 IARM_Result_t _dsVideoDeviceInit(void *arg)
 {
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
    
 	if (!m_isInitialized) {
@@ -320,6 +328,9 @@ IARM_Result_t _dsVideoDeviceTerm(void *arg)
 {
     _DEBUG_ENTER();
     
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
 	IARM_BUS_Lock(lock);
     
 	m_isPlatInitialized --;

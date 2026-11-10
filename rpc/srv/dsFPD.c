@@ -39,6 +39,7 @@
 #include "dsTypes.h"
 #include "dsserverlogger.h"
 #include "dsMgr.h"
+#include "dsPluginOwnership.h"
 	
 #include "iarmUtil.h"
 #include "libIARM.h"
@@ -172,7 +173,10 @@ std::string enumToColor (dsFPDColor_t enumColor)
 
 IARM_Result_t dsFPDMgr_init()
 {
-
+	if (dsMgrPluginEnabled) {
+		INT_INFO("[%s]: DeviceSettings plugin owns the DS HAL, skipping FPD HAL init\r\n", __FUNCTION__);
+		return IARM_RESULT_SUCCESS;
+	}
 
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsFPInit,_dsFPInit);
 	
@@ -240,6 +244,9 @@ IARM_Result_t dsFPDMgr_term()
 
 IARM_Result_t _dsFPInit(void *arg)
 {
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
     IARM_BUS_Lock(lock);
 
 
@@ -292,6 +299,9 @@ IARM_Result_t _dsFPTerm(void *arg)
     /*@TODO: Deregister the calls, if necessary */
     _DEBUG_ENTER();
 
+    if (dsMgrPluginEnabled) {
+        return IARM_RESULT_SUCCESS;
+    }
 
 	IARM_BUS_Lock(lock);
 
