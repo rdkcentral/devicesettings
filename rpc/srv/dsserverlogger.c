@@ -38,7 +38,7 @@ int b_rdk_logger_enabled = 0;
 
 #endif
 
-DSServer_LogCb logCb = NULL;
+static DSServer_LogCb logCb = NULL;
 
 void DSServer_RegisterForLog(DSServer_LogCb cb)
 {
