@@ -53,6 +53,7 @@
 #include "dsserverlogger.h"
 #include "dsAudioConfig.h"
 
+#include <sys/prctl.h>
 #include "safec_lib.h"
 
 static int m_isInitialized = 0;
@@ -2414,6 +2415,10 @@ IARM_Result_t _dsAudioPortInit(void *arg)
 
     if (!m_isInitialized) {
 
+	char name[16];
+	snprintf(name, 16, "dsAVCTRL_Thread");
+	prctl(PR_SET_NAME, name, 0, 0, 0);
+	INT_INFO("%s Thread name set to %s, pthread id %lu\n", __func__, name, (unsigned long)pthread_self());
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetAudioPort,_dsGetAudioPort);
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetSupportedARCTypes,_dsGetSupportedARCTypes);
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsAudioSetSAD,_dsAudioSetSAD);
@@ -3102,6 +3107,7 @@ IARM_Result_t _dsGetAudioGain(void *arg)
 
 IARM_Result_t _dsGetAudioLevel(void *arg)
 {
+INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 #ifndef RDK_DSHAL_NAME
 #warning   "RDK_DSHAL_NAME is not defined"
 #define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
@@ -3211,6 +3217,7 @@ IARM_Result_t _dsSetAudioGain(void *arg)
 
 IARM_Result_t _dsSetAudioLevel(void *arg)
 {
+    INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 #ifndef RDK_DSHAL_NAME
 #warning   "RDK_DSHAL_NAME is not defined"
 #define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
@@ -3390,6 +3397,7 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
 IARM_Result_t _dsSetAudioMute(void *arg)
 {
     _DEBUG_ENTER();
+    INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 
     IARM_BUS_Lock(lock);
 
@@ -3448,6 +3456,7 @@ IARM_Result_t _dsSetAudioMute(void *arg)
 IARM_Result_t _dsIsAudioMute(void *arg)
 {
     _DEBUG_ENTER();
+    INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 
     IARM_BUS_Lock(lock);
 
@@ -7309,6 +7318,11 @@ IARM_Result_t _dsGetHDMIARCPortId(void *arg)
 
 static void* persist_audioLevel_timer_threadFunc(void* arg) {
 	float prev_audioLevel_spdif = audioLevel_cache_spdif, prev_audioLevel_speaker = audioLevel_cache_speaker, prev_audioLevel_hdmi = audioLevel_cache_hdmi, prev_audioLevel_headphone = audioLevel_cache_headphone;
+	char name[16];
+	snprintf(name, 16, "persistAudlvl_T");
+	prctl(PR_SET_NAME, name, 0, 0, 0);
+	INT_INFO("%s Thread name set to %s, pthread id %lu\n", __func__, name, (unsigned long)pthread_self());
+	
 	INT_DEBUG("%s Audio level persistence update timer thread running...\n",__func__);
 	struct timespec ts;
 	    while(1){
