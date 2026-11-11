@@ -167,7 +167,8 @@ dsError_t dsHdmiInSelectPort (dsHdmiInPort_t ePort, bool audioMix,dsVideoPlaneTy
                             (char *)IARM_BUS_DSMGR_API_dsHdmiInSelectPort,
                             (void *)&param,
                             sizeof(param));
-  
+ 
+    printf("%s:%d - rpcRet=%d\n", __FUNCTION__, __LINE__, rpcRet);	
     if (IARM_RESULT_SUCCESS == rpcRet)
     {
         printf("%s:%d - %d\n", __PRETTY_FUNCTION__,__LINE__, param.result);
