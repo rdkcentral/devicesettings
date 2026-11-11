@@ -180,7 +180,8 @@ dsError_t dsGetEDIDBytes(intptr_t handle, unsigned char *edid, int *length)
         if (param.result == dsERR_NONE) {
             printf("dsCLI ::getEDIDBytes returns %d bytes\r\n", param.length);
             if (edid) {
-                rc = memcpy_s(edid, *length, param.bytes, param.length);
+                // Use actual buffer size (1024) instead of *length to prevent overflow
+                rc = memcpy_s(edid, 1024, param.bytes, param.length);
                 if(rc!=EOK)
                 {
                         ERR_CHK(rc);
