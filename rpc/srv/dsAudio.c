@@ -2419,6 +2419,7 @@ IARM_Result_t _dsAudioPortInit(void *arg)
 	snprintf(name, 16, "dsAVCTRL_Thread");
 	prctl(PR_SET_NAME, name, 0, 0, 0);
 	INT_INFO("%s Thread name set to %s, pthread id %lu\n", __func__, name, (unsigned long)pthread_self());
+
         IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetAudioPort,_dsGetAudioPort);
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsGetSupportedARCTypes,_dsGetSupportedARCTypes);
 	IARM_Bus_RegisterCall(IARM_BUS_DSMGR_API_dsAudioSetSAD,_dsAudioSetSAD);
@@ -3107,7 +3108,6 @@ IARM_Result_t _dsGetAudioGain(void *arg)
 
 IARM_Result_t _dsGetAudioLevel(void *arg)
 {
-INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 #ifndef RDK_DSHAL_NAME
 #warning   "RDK_DSHAL_NAME is not defined"
 #define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
@@ -3217,7 +3217,6 @@ IARM_Result_t _dsSetAudioGain(void *arg)
 
 IARM_Result_t _dsSetAudioLevel(void *arg)
 {
-    INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 #ifndef RDK_DSHAL_NAME
 #warning   "RDK_DSHAL_NAME is not defined"
 #define RDK_DSHAL_NAME "RDK_DSHAL_NAME is not defined"
@@ -3397,7 +3396,6 @@ static IARM_Result_t setAudioDuckingAudioLevel(intptr_t handle)
 IARM_Result_t _dsSetAudioMute(void *arg)
 {
     _DEBUG_ENTER();
-    INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 
     IARM_BUS_Lock(lock);
 
@@ -3456,7 +3454,6 @@ IARM_Result_t _dsSetAudioMute(void *arg)
 IARM_Result_t _dsIsAudioMute(void *arg)
 {
     _DEBUG_ENTER();
-    INT_INFO("%s pthread id %lu\n", __func__, (unsigned long)pthread_self());
 
     IARM_BUS_Lock(lock);
 
