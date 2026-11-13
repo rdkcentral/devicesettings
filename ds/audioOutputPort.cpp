@@ -1567,6 +1567,7 @@ dsError_t AudioOutputPort::enableLEConfig(const bool enable)
 {
     dsError_t ret = dsERR_GENERAL;
 
+    printf("enableLEConfig requested: %d\n", enable);
     ret = dsEnableLEConfig(_handle, enable);
 
     if (ret != dsERR_NONE)
