@@ -1075,19 +1075,32 @@ IARM_Result_t _dsGetEDIDBytesInfo (void *arg)
     dsError_t eRet = dsERR_GENERAL;
 
     dsGetEDIDBytesInfoParam_t *param = (dsGetEDIDBytesInfoParam_t *) arg;
+    if (param == NULL) {
+        return IARM_RESULT_INVALID_PARAM;
+    }
     memset (param->edid, '\0', MAX_EDID_BYTES_LEN);
     unsigned char edidArg[MAX_EDID_BYTES_LEN] = {0};
+    int edidCapacity = sizeof(edidArg);
     IARM_BUS_Lock(lock);
-    eRet = getEDIDBytesInfo (param->iHdmiPort, edidArg, &(param->length));
-    param->result = eRet;
-    INT_INFO("[srv] %s: getEDIDBytesInfo eRet: %d\r\n", __FUNCTION__, param->result);
-    if (eRet == dsERR_NONE && param->length > 0 && param->length <= MAX_EDID_BYTES_LEN) {//Make sure the result was true, and there is a valid length.
-        rc = memcpy_s(param->edid,sizeof(param->edid), edidArg, param->length);
-        if(rc!=EOK)
-        {
-		ERR_CHK(rc);
+    
+    // Validate iHdmiPort bounds before HAL call
+    if (param->iHdmiPort >= 0 && param->iHdmiPort < dsHDMI_IN_PORT_MAX) {
+        param->length = edidCapacity;
+        eRet = getEDIDBytesInfo (param->iHdmiPort, edidArg, &(param->length));
+        param->result = eRet;
+        INT_INFO("[srv] %s: getEDIDBytesInfo eRet: %d\r\n", __FUNCTION__, param->result);
+        // Use buffer size as maximum to prevent overflow from HAL-reported length
+        if (eRet == dsERR_NONE && param->length > 0 && param->length <= MAX_EDID_BYTES_LEN) {
+            rc = memcpy_s(param->edid, sizeof(param->edid), edidArg, param->length);
+            if(rc!=EOK)
+            {
+                ERR_CHK(rc);
+            }
         }
+    } else {
+        param->result = dsERR_INVALID_PARAM;
     }
+    
     IARM_BUS_Unlock(lock);
     return IARM_RESULT_SUCCESS;
 }
