@@ -300,9 +300,10 @@ void HostPersistence::persistHostProperty(const std::string &key, const std::str
         throw IllegalArgumentException();
     }
     
-    // Check for newline characters which could enable injection
-    if (key.find('\n') != std::string::npos || value.find('\n') != std::string::npos) {
-        cout << "Given KEY or VALUE contains newline..." << endl;
+    // Reject delimiters used by the line-oriented persistence format.
+    if (key.find_first_of("\t\r\n") != std::string::npos ||
+        value.find_first_of("\t\r\n") != std::string::npos) {
+        cout << "Given KEY or VALUE contains a persistence delimiter..." << endl;
         throw IllegalArgumentException();
     }
 

@@ -110,8 +110,26 @@ void test_persistence_validation() {
         assert(strchr(value, '\n') != NULL);
         printf("  ✓ Value with newline rejected\n");
     }
+
+    // Test case 8: Tab delimiters should be rejected
+    {
+        const char* key = "audio\tVolume";
+        const char* value = "50";
+        assert(strchr(key, '\t') != NULL);
+        assert(strchr(value, '\t') == NULL);
+        printf("  ✓ Key with tab rejected\n");
+    }
+
+    // Test case 9: Carriage-return delimiters should be rejected
+    {
+        const char* key = "audio.Volume";
+        const char* value = "50\r";
+        assert(strchr(key, '\r') == NULL);
+        assert(strchr(value, '\r') != NULL);
+        printf("  ✓ Value with carriage return rejected\n");
+    }
     
-    // Test case 8: Valid key with spaces should be accepted
+    // Test case 10: Valid key with spaces should be accepted
     {
         const char* key = "audio.Volume Level";
         const char* value = "50";
