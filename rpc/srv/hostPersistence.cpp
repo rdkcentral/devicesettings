@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cctype>
 
 
 #include "hostPersistence.hpp"
@@ -275,6 +276,34 @@ void HostPersistence::persistHostProperty(const std::string &key, const std::str
     if( key.empty() || value.empty())
     {
         cout << "Given KEY or VALUE is empty..." << endl;
+        throw IllegalArgumentException();
+    }
+    
+    // Check for whitespace-only strings
+    bool key_whitespace_only = true;
+    bool value_whitespace_only = true;
+    for (char c : key) {
+        if (!isspace((unsigned char)c)) {
+            key_whitespace_only = false;
+            break;
+        }
+    }
+    for (char c : value) {
+        if (!isspace((unsigned char)c)) {
+            value_whitespace_only = false;
+            break;
+        }
+    }
+    
+    if (key_whitespace_only || value_whitespace_only) {
+        cout << "Given KEY or VALUE is whitespace-only..." << endl;
+        throw IllegalArgumentException();
+    }
+    
+    // Reject delimiters used by the line-oriented persistence format.
+    if (key.find_first_of("\t\r\n") != std::string::npos ||
+        value.find_first_of("\t\r\n") != std::string::npos) {
+        cout << "Given KEY or VALUE contains a persistence delimiter..." << endl;
         throw IllegalArgumentException();
     }
 
