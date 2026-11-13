@@ -82,11 +82,16 @@ public:
     }
 
 private:
-    static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received owner = %s, eventId = %d", owner, eventId);
 
         if (!isValidOwner(owner)) {
+            return;
+        }
+
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid display framerate pre-change event size");
             return;
         }
 
@@ -105,11 +110,16 @@ private:
         }
     }
 
-    static void iarmDisplayFrameratePostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmDisplayFrameratePostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE received owner = %s, eventId = %d", owner, eventId);
 
         if (!isValidOwner(owner)) {
+            return;
+        }
+
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid display framerate post-change event size");
             return;
         }
 
@@ -317,11 +327,16 @@ private:
         }
     };
 
-    static void iarmAudioPrimaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmAudioPrimaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
 
         if (!isValidOwner(owner)) {
+            return;
+        }
+
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid primary-language event size");
             return;
         }
 
@@ -340,11 +355,16 @@ private:
         }
     };
 
-    static void iarmAudioSecondaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmAudioSecondaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
 
         if (!isValidOwner(owner)) {
+            return;
+        }
+
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid secondary-language event size");
             return;
         }
 
