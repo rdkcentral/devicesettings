@@ -82,7 +82,7 @@ public:
     }
 
 private:
-    static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmDisplayFrameratePreChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_PRECHANGE received owner = %s, eventId = %d", owner, eventId);
 
@@ -90,9 +90,16 @@ private:
             return;
         }
 
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid display framerate pre-change event size");
+            return;
+        }
+
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure framerate is NUL-terminated before constructing string
+            eventData->data.DisplayFrameRateChange.framerate[sizeof(eventData->data.DisplayFrameRateChange.framerate) - 1] = '\0';
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
@@ -103,7 +110,7 @@ private:
         }
     }
 
-    static void iarmDisplayFrameratePostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmDisplayFrameratePostChangeHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_DISPLAY_FRAMRATE_POSTCHANGE received owner = %s, eventId = %d", owner, eventId);
 
@@ -111,9 +118,16 @@ private:
             return;
         }
 
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid display framerate post-change event size");
+            return;
+        }
+
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure framerate is NUL-terminated before constructing string
+            eventData->data.DisplayFrameRateChange.framerate[sizeof(eventData->data.DisplayFrameRateChange.framerate) - 1] = '\0';
             std::string framerate(eventData->data.DisplayFrameRateChange.framerate);
 
             IarmImpl::Dispatch([&framerate](IVideoDeviceEvents* listener) {
@@ -313,7 +327,7 @@ private:
         }
     };
 
-    static void iarmAudioPrimaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmAudioPrimaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_PRIMARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
 
@@ -321,9 +335,16 @@ private:
             return;
         }
 
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid primary-language event size");
+            return;
+        }
+
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure audioLanguage is NUL-terminated before constructing string
+            eventData->data.AudioLanguageInfo.audioLanguage[sizeof(eventData->data.AudioLanguageInfo.audioLanguage) - 1] = '\0';
             std::string primaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
             IarmImpl::Dispatch([&primaryLanguage](IAudioOutputPortEvents* listener) {
@@ -334,7 +355,7 @@ private:
         }
     };
 
-    static void iarmAudioSecondaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t)
+    static void iarmAudioSecondaryLanguageChangedHandler(const char* owner, IARM_EventId_t eventId, void* data, size_t size)
     {
         INT_INFO("IARM_BUS_DSMGR_EVENT_AUDIO_SECONDARY_LANGUAGE_CHANGED received owner = %s, eventId = %d", owner, eventId);
 
@@ -342,9 +363,16 @@ private:
             return;
         }
 
+        if (!data || size < sizeof(IARM_Bus_DSMgr_EventData_t)) {
+            INT_ERROR("Invalid secondary-language event size");
+            return;
+        }
+
         auto* eventData = static_cast<IARM_Bus_DSMgr_EventData_t*>(data);
 
         if (eventData) {
+            // Ensure audioLanguage is NUL-terminated before constructing string
+            eventData->data.AudioLanguageInfo.audioLanguage[sizeof(eventData->data.AudioLanguageInfo.audioLanguage) - 1] = '\0';
             std::string secondaryLanguage(eventData->data.AudioLanguageInfo.audioLanguage);
 
             IarmImpl::Dispatch([&secondaryLanguage](IAudioOutputPortEvents* listener) {
