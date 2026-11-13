@@ -6089,8 +6089,11 @@ IARM_Result_t _dsSetSecondaryLanguage(void *arg)
 
     if (func != 0 && param != NULL)
     {
-        // Validate secondaryLanguage is non-empty before persisting
-        if (strlen(param->secondaryLanguage) > 0) {
+        // Validate the fixed-size RPC string before using it.
+        size_t secondaryLanguageLength = strnlen(param->secondaryLanguage,
+                                                 sizeof(param->secondaryLanguage));
+        if (secondaryLanguageLength > 0 &&
+            secondaryLanguageLength < sizeof(param->secondaryLanguage)) {
             if (func(param->handle, param->secondaryLanguage) == dsERR_NONE)
             {
 #ifdef DS_AUDIO_SETTINGS_PERSISTENCE
