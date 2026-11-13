@@ -1062,12 +1062,17 @@ IARM_Result_t _dsGetEDIDBytesInfo (void *arg)
     dsError_t eRet = dsERR_GENERAL;
 
     dsGetEDIDBytesInfoParam_t *param = (dsGetEDIDBytesInfoParam_t *) arg;
+    if (param == NULL) {
+        return IARM_RESULT_INVALID_PARAM;
+    }
     memset (param->edid, '\0', MAX_EDID_BYTES_LEN);
     unsigned char edidArg[MAX_EDID_BYTES_LEN] = {0};
+    int edidCapacity = sizeof(edidArg);
     IARM_BUS_Lock(lock);
     
     // Validate iHdmiPort bounds before HAL call
     if (param->iHdmiPort >= 0 && param->iHdmiPort < dsHDMI_IN_PORT_MAX) {
+        param->length = edidCapacity;
         eRet = getEDIDBytesInfo (param->iHdmiPort, edidArg, &(param->length));
         param->result = eRet;
         INT_INFO("[srv] %s: getEDIDBytesInfo eRet: %d\r\n", __FUNCTION__, param->result);
