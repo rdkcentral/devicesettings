@@ -437,7 +437,9 @@ public:
     void getCurrentAudioFormat(dsAudioFormat_t& audioFormat);
     void getMS12ConfigDetails(std::string& configType);
     void setAudioMixerLevels(dsAudioInput_t aInput, int volume);
-
+    void setApplicationAudioConfig (const std::string &audioConfig, bool enable);
+    void getApplicationAudioConfig (const std::string &audioConfig, bool *enable);
+    void getApplicationAudioConfigList (std::vector<std::string>& configList);
 private:
     std::unique_ptr<DefaultImpl> m_impl;
 

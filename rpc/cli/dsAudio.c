@@ -396,6 +396,96 @@ dsError_t dsSetEnablePersist(intptr_t handle, const char* portName, bool enabled
 	return dsERR_GENERAL ;
 }
 
+dsError_t dsSetApplicationAudioConfig(intptr_t handle, const dsApplicationAudioConfig_t* audioConfig, bool enable)
+{
+    _DEBUG_ENTER();
+    if (audioConfig == NULL) {
+	INT_ERROR("%s:Invalid parameter", __func__);
+	return dsERR_INVALID_PARAM;
+    }
+    dsApplicationAudioConfigParam_t param;
+    memset(&param, 0, sizeof(param));
+    param.handle = handle;
+    param.enable = enable;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    memset(&param.audioConfig, '\0', sizeof(param.audioConfig));
+    strncpy(param.audioConfig.configName, audioConfig->configName, (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN  -1));
+    rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                              (char *)IARM_BUS_DSMGR_API_dsSetApplicationAudioConfig,
+                                              (void *)&param,
+                                             sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet && param.result == dsERR_NONE)
+    {
+        return dsERR_NONE;
+    }
+    INT_ERROR("%s: Failed to set application audio config\n", __func__);
+    return dsERR_GENERAL;
+}
+
+dsError_t dsGetApplicationAudioConfigList(intptr_t handle, dsApplicationAudioConfigList_t* appAudioConfigList)
+{
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    if (appAudioConfigList == NULL) {
+        INT_ERROR("%s:Invalid parameter", __func__);
+	return dsERR_INVALID_PARAM;
+    }
+    dsApplicationAudioConfigListParam_t param;
+    memset(&param, 0, sizeof(param));
+    param.handle = handle;
+    param.appAudioConfigList.size = sizeof(param.appAudioConfigList);
+
+    rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                            (char *)IARM_BUS_DSMGR_API_dsGetApplicationAudioConfigList,
+                                            (void *)&param,
+                                            sizeof(param));
+
+    if (IARM_RESULT_SUCCESS != rpcRet || param.result != dsERR_NONE)
+    {
+        INT_ERROR("%s: (GET) GENERAL ERROR\n", __func__);
+        return dsERR_GENERAL;
+    }
+
+    appAudioConfigList->size = param.appAudioConfigList.size;
+    appAudioConfigList->returnedCount = param.appAudioConfigList.returnedCount;
+    appAudioConfigList->totalCount = param.appAudioConfigList.totalCount;
+    for (int count=0; count <  param.appAudioConfigList.returnedCount; count++) {
+        strncpy(appAudioConfigList->config[count].configName, param.appAudioConfigList.config[count].configName, 
+			    (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN -1) );
+    }
+    return dsERR_NONE;
+}
+
+dsError_t dsGetApplicationAudioConfig(intptr_t handle, const dsApplicationAudioConfig_t* audioConfig, bool* enable)
+{
+    _DEBUG_ENTER();
+    if (audioConfig == NULL || enable == NULL) {
+        INT_ERROR("%s:Invalid parameter", __func__);
+        return dsERR_INVALID_PARAM;
+    }
+    dsApplicationAudioConfigParam_t param;
+    memset(&param, 0, sizeof(param));
+    param.handle = handle;
+    // By default enable will be false.
+    param.enable = false;
+    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
+    memset(&param.audioConfig, 0, sizeof(param.audioConfig));
+    strncpy(param.audioConfig.configName, audioConfig->configName, (DS_MAX_APPLICATION_AUDIO_CONFIG_NAME_LEN  -1));
+    rpcRet = IARM_Bus_Call(IARM_BUS_DSMGR_NAME,
+                                            (char *)IARM_BUS_DSMGR_API_dsGetApplicationAudioConfig,
+                                            (void *)&param,
+                                          sizeof(param));
+
+    if (IARM_RESULT_SUCCESS == rpcRet && param.result == dsERR_NONE)
+    {
+        *enable = param.enable;
+       return dsERR_NONE;
+    }
+    INT_ERROR("%s: Failed to get application audio config\n", __func__);
+    return dsERR_GENERAL ;
+}
+
+
 dsError_t dsSetAudioEncoding(intptr_t handle, dsAudioEncoding_t encoding)
 {
 	dsError_t ret = dsERR_NONE;
