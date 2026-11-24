@@ -282,7 +282,6 @@ void Manager::Initialize()
 	
     try {
         if (needInit) {
-            printf("Manager::Initialize starting initialization sequence\n");
             dsError_t err = dsERR_GENERAL;
 
             err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit);
