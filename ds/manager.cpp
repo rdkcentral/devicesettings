@@ -101,7 +101,7 @@ void loadDeviceCapabilities(unsigned int capabilityType)
     void* pDLHandle = nullptr;
     bool isSymbolsLoaded = false;
 
-    INT_INFO("Entering capabilityType = 0x%08X", capabilityType);
+    INT_INFO("loadDeviceCapabilities: entering with capabilityType = 0x%08X", capabilityType);
     dlerror(); // clear old error
     pDLHandle = dlopen(RDK_DSHAL_NAME, RTLD_LAZY);
     
