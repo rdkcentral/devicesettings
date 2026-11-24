@@ -1422,7 +1422,7 @@ void AudioOutputPort::setAudioDelay(const uint32_t audioDelayMs)
 	dsError_t ret = dsERR_NONE;
 	uint32_t ms = audioDelayMs;
 
-	INT_INFO("AudioOutputPort [%s], setting delay to [%u] ms\n", _name.c_str(), audioDelayMs);
+	INT_INFO("AudioOutputPort::setAudioDelay [%s], requested delay [%u] ms\n", _name.c_str(), audioDelayMs);
 
 	if (ms > audioDelayMsMax)
 	{
@@ -1568,6 +1568,7 @@ dsError_t AudioOutputPort::enableLEConfig(const bool enable)
 {
     dsError_t ret = dsERR_GENERAL;
 
+    printf("enableLEConfig requested: %d\n", enable);
     ret = dsEnableLEConfig(_handle, enable);
 
     if (ret != dsERR_NONE)
