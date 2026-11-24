@@ -236,7 +236,7 @@ IARM_Result_t _dsSetDFC(void *arg)
 
     IARM_BUS_Lock(lock);
     
-	IARM_Bus_DSMgr_EventData_t eventData;
+    IARM_Bus_DSMgr_EventData_t eventData = {0};
 	dsVideoDeviceSetDFCParam_t *param = (dsVideoDeviceSetDFCParam_t *)arg;
 
 	if (param != NULL)
@@ -636,7 +636,7 @@ IARM_Result_t _dsSetDisplayframerate(void *arg)
 
 static int _dsSendDisplayFrameRateStatusChangeEventCallBack(dsFramerateParam_t *displayframerate, IARM_Bus_DSMgr_EventId_t _eventId, dsError_t result)
 {
-    IARM_Bus_DSMgr_EventData_t _eventData;
+    IARM_Bus_DSMgr_EventData_t _eventData = {0};
     dsError_t ret = result;
 
     if ((strcmp(displayframerate->framerate,"") == 0) || ret == dsERR_INVALID_PARAM)
@@ -657,7 +657,7 @@ static int _dsSendDisplayFrameRateStatusChangeEventCallBack(dsFramerateParam_t *
 
 void _dsFramerateStatusPreChangeCB(unsigned int inputStatus)
 {
-    IARM_Bus_DSMgr_EventData_t _eventData;
+    IARM_Bus_DSMgr_EventData_t _eventData = {0};
 
     INT_INFO("%s:%d - Framerate status prechange update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
 
@@ -670,7 +670,7 @@ void _dsFramerateStatusPreChangeCB(unsigned int inputStatus)
 
 void _dsFramerateStatusPostChangeCB(unsigned int inputStatus)
 {
-    IARM_Bus_DSMgr_EventData_t _eventData;
+    IARM_Bus_DSMgr_EventData_t _eventData = {0};
 
     INT_INFO("%s:%d - Framerate status changed update!!!!!! \r\n", __PRETTY_FUNCTION__,__LINE__);
 

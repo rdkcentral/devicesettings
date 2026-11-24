@@ -748,7 +748,7 @@ IARM_Result_t _dsSetTimeFormat(void *arg)
 			}
 	    
 		   	/* Send Time Format Event */
-		   	IARM_Bus_DSMgr_EventData_t _eventData;
+			IARM_Bus_DSMgr_EventData_t _eventData = {0};
 	    	IARM_Bus_DSMgr_EventId_t _eventId;
 
 	    	_eventData.data.FPDTimeFormat.eTimeFormat =  _dsTextTimeFormat;
