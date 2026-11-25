@@ -519,6 +519,7 @@ void HdmiInput::getEDIDBytesInfo (int iHdmiPort, std::vector<uint8_t> &edidArg) 
 
 void HdmiInput::getHDMISPDInfo (int iHdmiPort, std::vector<uint8_t> &data) {
     INT_INFO("HdmiInput::getHDMISPDInfo");
+    INT_INFO("HdmiInput::getHDMISPDInfo port %d", iHdmiPort);
 
     unsigned char spdinfo[sizeof(struct dsSpd_infoframe_st)] = {0};
     const char* exceptionstr = "";

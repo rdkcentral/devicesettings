@@ -917,7 +917,7 @@ int VideoOutputPort::GetHdmiPreference()
  */
  void VideoOutputPort::Display::setAllmEnabled(bool enable) const
  {
-     printf("VideoOutputPort::Display::setAllmEnabled \r\n");
+    printf("VideoOutputPort::Display::setAllmEnabled enable=%d\r\n", enable);
      dsError_t ret = dsSetAllmEnabled(_handle,enable);
      if (ret != dsERR_NONE) {
          throw Exception(ret);
