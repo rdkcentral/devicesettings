@@ -37,7 +37,11 @@ CFLAGS      += $(INCLUDE)
 # make command line, and the flags it needs are passed through PLUGIN_FLAGS on every compile.
 ifneq (,$(or $(findstring -DDEVICESETTINGS_PLUGIN_ENABLED,$(CFLAGS)),$(filter y Y 1 ON on yes,$(DEVICESETTINGS_PLUGIN_ENABLED))))
 DS_PLUGIN_MODE := y
-PLUGIN_FLAGS   := -DDEVICESETTINGS_PLUGIN_ENABLED -std=c++11
+# Thunder (core/, com/, plugins/) and the entservices-apis interfaces/ headers are staged under
+# <sysroot>/usr/include/WPEFramework, like CMake's find_package(WPEFramework...) gives PowerController.
+# "-I=" is relative to the compiler sysroot, override WPEFRAMEWORK_INCLUDE for another layout.
+WPEFRAMEWORK_INCLUDE ?= -I=/usr/include/WPEFramework
+PLUGIN_FLAGS   := -DDEVICESETTINGS_PLUGIN_ENABLED -std=c++11 $(WPEFRAMEWORK_INCLUDE)
 $(info $(CURDIR): DeviceSettings plugin mode, COM-RPC to the DeviceSettings plugin is used)
 COMRPC_LIBS    := -lWPEFrameworkCore -lWPEFrameworkCOM -lWPEFrameworkPlugins -lWPEFrameworkDefinitions
 else
