@@ -189,7 +189,7 @@ List<VideoResolution>  VideoOutputPortConfig::getSupportedResolutions(bool isIgn
 				edid->numOfSupportedResolution = 0;
 			}
 	
-			INT_INFO("EDID reports %d supported resolutions", edid->numOfSupportedResolution);	
+			INT_INFO("VideoOutputPortConfig: EDID reports %d supported resolutions", edid->numOfSupportedResolution);
 			for (size_t i = 0; i < edid->numOfSupportedResolution; i++)
 			{
 				dsVideoPortResolution_t *resolution = &edid->suppResolutionList[i];
