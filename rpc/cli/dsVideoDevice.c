@@ -45,6 +45,11 @@
 
 dsError_t dsVideoDeviceInit()
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* DeviceSettings plugin owns the HAL, nothing to initialise through dsMgr */
+    return dsERR_NONE;
+#endif
+
     printf("<<<<< VID is initialized in Multi-App Mode >>>>>>>>\r\n");
 
    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
@@ -143,6 +148,11 @@ dsError_t  dsGetDFC(intptr_t handle, dsVideoZoom_t *dfc)
 
 dsError_t dsVideoDeviceTerm(void)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* DeviceSettings plugin owns the HAL, nothing to initialise through dsMgr */
+    return dsERR_NONE;
+#endif
+
     _DEBUG_ENTER();
   
    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;

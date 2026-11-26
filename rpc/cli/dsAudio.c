@@ -47,6 +47,11 @@
 
 dsError_t dsAudioPortInit()
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* DeviceSettings plugin owns the HAL, nothing to initialise through dsMgr */
+    return dsERR_NONE;
+#endif
+
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 	
 	printf("<<<<< AOP is initialized in Multi-App Mode >>>>>>>>\r\n");
@@ -577,6 +582,11 @@ dsError_t dsSetAudioMute(intptr_t handle, bool mute)
 
 dsError_t dsAudioPortTerm(void)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* DeviceSettings plugin owns the HAL, nothing to initialise through dsMgr */
+    return dsERR_NONE;
+#endif
+
     _DEBUG_ENTER();
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 

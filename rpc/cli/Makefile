@@ -31,21 +31,35 @@ INCLUDE      += $(HAL_INCLUDE)
 
 CFLAGS      += $(INCLUDE)
 
+# DeviceSettings plugin mode. The devicesettings recipe builds with "make -e", so Makefile
+# appends to CFLAGS are ignored there: plugin mode is therefore detected from the environment
+# CFLAGS (-DDEVICESETTINGS_PLUGIN_ENABLED) or from DEVICESETTINGS_PLUGIN_ENABLED=y|1|ON|yes on the
+# make command line, and the flags it needs are passed through PLUGIN_FLAGS on every compile.
+ifneq (,$(or $(findstring -DDEVICESETTINGS_PLUGIN_ENABLED,$(CFLAGS)),$(filter y Y 1 ON on yes,$(DEVICESETTINGS_PLUGIN_ENABLED))))
+DS_PLUGIN_MODE := y
+PLUGIN_FLAGS   := -DDEVICESETTINGS_PLUGIN_ENABLED -std=c++11
+$(info $(CURDIR): DeviceSettings plugin mode, COM-RPC to the DeviceSettings plugin is used)
+COMRPC_LIBS    := -lWPEFrameworkCore -lWPEFrameworkCOM -lWPEFrameworkPlugins -lWPEFrameworkDefinitions
+else
+# dsSmartInterfaceHandler.cpp (COM-RPC client) is built and linked only in plugin mode
+OBJS := $(filter-out dsSmartInterfaceHandler.o,$(OBJS))
+endif
 
 all: install
 	@echo "Build Finished...."
 
 library: $(OBJS)
 	@echo "Building $(LIBNAMEFULL) ...."
-	$(CXX) $(OBJS) $(CFLAGS) -lIARMBus -shared -o $(LIBNAMEFULL)
+	@echo "Objects: $(OBJS)"
+	$(CXX) $(OBJS) $(CFLAGS) -lIARMBus $(COMRPC_LIBS) -shared -o $(LIBNAMEFULL)
 
 %.o: %.cpp
 	@echo "Building $@ ...."
-	$(CXX) -c $<  $(CFLAGS) -o $@
+	$(CXX) -c $<  $(CFLAGS) $(PLUGIN_FLAGS) -o $@
 
 %.o: %.c
 	@echo "Building $@ ...."
-	$(CXX) -c $<  $(CFLAGS) -o $@
+	$(CXX) -c $<  $(CFLAGS) $(PLUGIN_FLAGS) -o $@
 
 install: library
 	@echo "installling...!"

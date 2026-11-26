@@ -40,11 +40,18 @@
 #include "dsTypes.h"
 #include "dsclientlogger.h"
 #include "dsInternal.h"
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+#include "dsSmartInterfaceHandler.h"
+#endif
 
 #include "safec_lib.h"
 
 dsError_t dsVideoPortInit()
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_Init();
+#endif
+
     printf("<<<<< VOP is initialized in Multi-App Mode >>>>>>>>\r\n");
 
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
@@ -67,6 +74,10 @@ dsError_t dsGetVideoPort(dsVideoPortType_t type, int index, intptr_t *handle)
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(dsVideoPortType_isValid(type), dsERR_INVALID_PARAM);
     _RETURN_IF_ERROR((handle) != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetVideoPort(type, index, handle);
+#endif
+
 
 	dsVideoPortGetHandleParam_t param;
     param.type = type;
@@ -99,6 +110,10 @@ dsError_t dsIsHDCPEnabled(intptr_t handle, bool *enabled)
     _DEBUG_ENTER();
     
     _RETURN_IF_ERROR(enabled != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_IsHDCPEnabled(handle, enabled);
+#endif
+
 
     dsVideoPortIsHDCPEnabledParam_t param;
    
@@ -128,6 +143,10 @@ dsError_t dsIsVideoPortEnabled(intptr_t handle, bool *enabled)
     _DEBUG_ENTER();
     
     _RETURN_IF_ERROR(enabled != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_IsVideoPortEnabled(handle, enabled);
+#endif
+
 
     dsVideoPortIsEnabledParam_t param;
    
@@ -156,6 +175,10 @@ dsError_t dsGetHDCPStatus (intptr_t handle, dsHdcpStatus_t *status)
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(status != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetHDCPStatus(handle, status);
+#endif
+
 
     dsVideoPortGetHDCPStatus_t param;
     param.handle = handle;
@@ -179,6 +202,10 @@ dsError_t dsGetHDCPProtocol (intptr_t handle, dsHdcpProtocolVersion_t *version)
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(version != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetHDCPProtocol(handle, version);
+#endif
+
 
     dsVideoPortGetHDCPProtocolVersion_t param;
     param.handle = handle;
@@ -202,6 +229,10 @@ dsError_t dsGetHDCPReceiverProtocol (intptr_t handle, dsHdcpProtocolVersion_t *v
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(version != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetHDCPReceiverProtocol(handle, version);
+#endif
+
 
     dsVideoPortGetHDCPProtocolVersion_t param;
     param.handle = handle;
@@ -225,6 +256,10 @@ dsError_t dsGetHDCPCurrentProtocol (intptr_t handle, dsHdcpProtocolVersion_t *ve
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(version != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetHDCPCurrentProtocol(handle, version);
+#endif
+
 
     dsVideoPortGetHDCPProtocolVersion_t param;
     param.handle = handle;
@@ -247,6 +282,10 @@ dsError_t  dsIsDisplayConnected(intptr_t handle, bool *connected)
 {
     _DEBUG_ENTER();
     _RETURN_IF_ERROR(connected != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_IsDisplayConnected(handle, connected);
+#endif
+
    
 	dsVideoPortIsDisplayConnectedParam_t param;
     
@@ -328,6 +367,10 @@ dsError_t  dsGetSurroundMode(intptr_t handle, int *surround)
 }
 dsError_t  dsEnableVideoPort(intptr_t handle, bool enabled)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_EnableVideoPort(handle, enabled);
+#endif
+
     _DEBUG_ENTER();
 
 	dsVideoPortSetEnabledParam_t param;
@@ -482,6 +525,10 @@ dsError_t dsColorDepthCapabilities(intptr_t handle, unsigned int *capabilities)
 
 dsError_t dsVideoPortTerm(void)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsERR_NONE;
+#endif
+
     _DEBUG_ENTER();
 
    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
@@ -551,6 +598,10 @@ dsError_t dsIsVideoPortActive(intptr_t handle, bool *active)
     _DEBUG_ENTER();
     
     _RETURN_IF_ERROR(active != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_IsVideoPortActive(handle, active);
+#endif
+
 
     dsVideoPortIsActiveParam_t param;
    
@@ -715,6 +766,10 @@ dsError_t dsSetHdmiPreference(intptr_t handle, dsHdcpProtocolVersion_t *hdcpProt
     _DEBUG_ENTER();
 
     _RETURN_IF_ERROR(hdcpProtocol != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_SetHdmiPreference(handle, *hdcpProtocol);
+#endif
+
 
     dsSetHdmiPreferenceParam_t param;
 
@@ -742,6 +797,10 @@ dsError_t dsGetHdmiPreference(intptr_t handle, dsHdcpProtocolVersion_t *hdcpProt
     _DEBUG_ENTER();
 
     _RETURN_IF_ERROR(hdcpProtocol != NULL, dsERR_INVALID_PARAM);
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetHdmiPreference(handle, hdcpProtocol);
+#endif
+
 
     dsGetHdmiPreferenceParam_t param;
 

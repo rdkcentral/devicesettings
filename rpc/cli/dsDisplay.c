@@ -29,6 +29,9 @@
 
 #include "dsDisplay.h"
 #include "dsclientlogger.h"
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+#include "dsSmartInterfaceHandler.h"
+#endif
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
@@ -46,6 +49,11 @@
 
 dsError_t dsDisplayInit()
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* DeviceSettings plugin owns the HAL, nothing to initialise through dsMgr */
+    return dsERR_NONE;
+#endif
+
    IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	printf("<<<<< VDISP is initialized in Multi-App Mode >>>>>>>>\r\n");
@@ -69,6 +77,10 @@ dsError_t dsDisplayInit()
 
 dsError_t dsGetDisplay(dsVideoPortType_t vType, int index, intptr_t *handle)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetDisplay(vType, index, handle);
+#endif
+
   
 	 IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 	_DEBUG_ENTER();
@@ -123,6 +135,10 @@ dsError_t dsGetDisplayAspectRatio(intptr_t handle, dsVideoAspectRatio_t *aspect)
 
 dsError_t dsGetEDID(intptr_t handle, dsDisplayEDID_t *edid)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    return dsSmartInterface_GetEDID(handle, edid);
+#endif
+
     IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;
 
 	_DEBUG_ENTER();
@@ -269,6 +285,11 @@ dsError_t dsSetAVIScanInformation (intptr_t  handle, dsAVIScanInformation_t scan
 
 dsError_t dsDisplayTerm(void)
 {
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* DeviceSettings plugin owns the HAL, nothing to initialise through dsMgr */
+    return dsERR_NONE;
+#endif
+
    _DEBUG_ENTER();
 
 	IARM_Result_t rpcRet = IARM_RESULT_SUCCESS;

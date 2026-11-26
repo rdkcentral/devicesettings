@@ -53,6 +53,16 @@ CFLAGS       +=$(HAL_BUILDFLAGS)
 
 CFLAGS      += $(INCLUDE)
 
+# DeviceSettings plugin mode. The devicesettings recipe builds with "make -e", so Makefile
+# appends to CFLAGS are ignored there: plugin mode is therefore detected from the environment
+# CFLAGS (-DDEVICESETTINGS_PLUGIN_ENABLED) or from DEVICESETTINGS_PLUGIN_ENABLED=y|1|ON|yes on the
+# make command line, and the flags it needs are passed through PLUGIN_FLAGS on every compile.
+ifneq (,$(or $(findstring -DDEVICESETTINGS_PLUGIN_ENABLED,$(CFLAGS)),$(filter y Y 1 ON on yes,$(DEVICESETTINGS_PLUGIN_ENABLED))))
+DS_PLUGIN_MODE := y
+PLUGIN_FLAGS   := -DDEVICESETTINGS_PLUGIN_ENABLED
+$(info $(CURDIR): DeviceSettings plugin mode, COM-RPC to the DeviceSettings plugin is used)
+endif
+
 
 all: install
 	@echo "Build Finished...."
@@ -64,7 +74,7 @@ library: $(OBJS)
 
 %.o: %.cpp
 	@echo "Building $@ ...."
-	$(CXX) -c $<  $(CFLAGS) -o $@
+	$(CXX) -c $<  $(CFLAGS) $(PLUGIN_FLAGS) -o $@
 
 install: library
 	@echo "installling...!"

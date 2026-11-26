@@ -47,6 +47,9 @@
 #include <dlfcn.h>
 #include "dsHALConfig.h"
 #include "frontPanelConfig.hpp"
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+#include "dsSmartInterfaceHandler.h"
+#endif
 
 /**
  * @file manager.cpp
@@ -284,6 +287,12 @@ void Manager::Initialize()
         if (needInit) {
             dsError_t err = dsERR_GENERAL;
 
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+            // The DeviceSettings plugin owns the HAL: open the COM-RPC channel to it (and start
+            // the Thunder PID monitor that keeps it alive across Thunder restarts) before any
+            // other libds call. Readiness of the plugin is awaited by dsVideoPortInit below.
+            dsSmartInterface_Start();
+#endif
             err = initializeFunctionWithRetry("dsDisplayInit", dsDisplayInit);
             CHECK_RET_VAL(err);
             
@@ -304,6 +313,11 @@ void Manager::Initialize()
     }
     catch(const Exception &e) {
         cout << "Caught exception during Initialization" << e.what() << endl;
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+        if (needInit) {
+            dsSmartInterface_Stop();
+        }
+#endif
 		std::lock_guard<std::mutex> lock(gManagerInitMutex);
         IsInitialized--;
         throw e;
@@ -357,6 +371,9 @@ void Manager::DeInitialize()
             dsVideoPortTerm();
             dsAudioPortTerm();
             dsDisplayTerm();
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+            dsSmartInterface_Stop();
+#endif
         }
 	}
 	INT_INFO("Exiting ... with thread %lu",pthread_self());
