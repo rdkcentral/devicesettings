@@ -31,6 +31,14 @@
 
 #ifdef DEVICESETTINGS_PLUGIN_ENABLED
 
+// System headers first: Thunder's core.h pulls <sys/inotify.h> in inside its own namespace, which would
+// hide the global inotify declarations used by the PID monitor (PowerController uses the same ordering).
+#include <poll.h>
+#include <sys/eventfd.h>
+#include <sys/inotify.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
 #include "dsSmartInterfaceHandler.h"
 #include "dsclientlogger.h"
 
@@ -45,12 +53,6 @@
 #include <interfaces/IDeviceSettings.h>
 #include <interfaces/IDeviceSettingsDisplay.h>
 #include <interfaces/IDeviceSettingsVideoPort.h>
-
-#include <poll.h>
-#include <sys/syscall.h>
-#include <sys/eventfd.h>
-#include <sys/inotify.h>
-#include <unistd.h>
 
 #include <atomic>
 #include <cctype>
@@ -98,6 +100,10 @@ using DisplayIf   = Exchange::IDeviceSettingsDisplay;
 const char kCallsign[]        = "org.rdk.DeviceSettings";
 const char kPidFile[]         = "/tmp/wpeframework.pid";
 const uint32_t kOpenTimeoutMs = 2000;
+
+#define INVALID_PID (-1)
+#define INVALID_FD (-1)
+#define POLL_TIMEOUT (2000)
 
 // ---- HAL (ds*_t) <-> entservices-apis enum mapping -------------------------------------------
 // The DeviceSettings plugin API declares its own enums. Where they are value-for-value identical a
