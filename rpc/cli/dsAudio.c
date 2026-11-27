@@ -44,6 +44,7 @@
 #include <string.h> 
 
 #include "safec_lib.h"
+#include "dsPluginModeNoOp.h"
 
 dsError_t dsAudioPortInit()
 {

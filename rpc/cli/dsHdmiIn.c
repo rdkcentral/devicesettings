@@ -55,6 +55,7 @@
 #include "libIBus.h"
 #include "safec_lib.h" 
 #include "dsInternal.h"
+#include "dsPluginModeNoOp.h"
 
 
 dsError_t dsHdmiInInit (void)
@@ -276,6 +277,11 @@ dsError_t dsGetEDIDBytesInfo (dsHdmiInPort_t iHdmiPort, unsigned char *edid, int
         printf("[cli] %s: dsGetEDIDBytesInfo eRet: %d data len: %d \r\n", __FUNCTION__, param.result, *length);
         return param.result;
     }
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+    /* not served in plugin mode: no-op, no EDID bytes (the zeroed no-op reply has length 0) */
+    *length = 0;
+    return dsERR_NONE;
+#endif
     printf("%s:%d - dsERR_GENERAL\n", __PRETTY_FUNCTION__,__LINE__);
     return dsERR_GENERAL;
 }

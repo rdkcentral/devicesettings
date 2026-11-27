@@ -53,6 +53,7 @@
 #include "iarmUtil.h"
 #include "libIARM.h"
 #include "libIBus.h"
+#include "dsPluginModeNoOp.h"
 
 
 dsError_t dsCompositeInInit (void)

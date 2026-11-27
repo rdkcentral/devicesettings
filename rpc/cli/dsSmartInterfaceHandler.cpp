@@ -40,6 +40,7 @@
 #include <unistd.h>
 
 #include "dsSmartInterfaceHandler.h"
+#include "dsPluginModeNoOp.h"
 #include "dsclientlogger.h"
 
 #ifndef MODULE_NAME
@@ -66,6 +67,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <string>
 #include <thread>
 #include <vector>
@@ -1268,6 +1270,37 @@ dsError_t dsSmartInterface_GetEDID(intptr_t handle, dsDisplayEDID_t* edid)
         return invalidParam(__func__);
     }
     return Guard("GetEDID", [&]() -> dsError_t { return DSSmartInterfaceHandler::Instance().GetEDID(handle, edid); });
+}
+
+// Every dsXxx client call that is not one of the functions above ends up here (see dsPluginModeNoOp.h): the
+// legacy dsMgr does not serve the HAL in plugin mode, so the call succeeds without doing anything.
+int dsSmartInterface_NoOpCall(const char* method, void* arg, size_t len)
+{
+    const char* name = (method != nullptr) ? method : "(null)";
+
+    try {
+        static std::mutex lock;
+        static std::set<std::string> seen;
+        bool first = false;
+        {
+            std::lock_guard<std::mutex> guard(lock);
+            first = seen.insert(name).second;
+        }
+        if (first) {
+            SI_INFO("DSMGR API '%s' is not served by the DeviceSettings plugin client, handled as no-op "
+                    "(returns success, outputs are zero); logged once per API",
+                    name);
+        } else {
+            SI_TRACE("no-op DSMGR API '%s'", name);
+        }
+    } catch (...) {
+        // logging must never turn a no-op into a failure
+    }
+
+    if (arg != nullptr && len != 0) {
+        memset(arg, 0, len);
+    }
+    return 0; // IARM_RESULT_SUCCESS
 }
 
 } // extern "C"

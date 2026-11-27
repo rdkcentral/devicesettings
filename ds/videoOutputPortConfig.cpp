@@ -437,7 +437,13 @@ void VideoOutputPortConfig::load(videoPortConfigs_t* dynamicVideoPortConfigs)
                 }
                 _vPorts.push_back(
                         VideoOutputPort((portCfg->id.type), portCfg->id.index, i,
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+                                // The audio config is not loaded in plugin mode; the id is only used by
+                                // VideoOutputPort::getAudioOutputPort(), which plugin-mode clients do not call.
+                                -1,
+#else
                                 AudioOutputPortType::getInstance(portCfg->connectedAOP.type).getPort(portCfg->connectedAOP.index).getId(),
+#endif
                                 (portCfg->defaultResolution) ? std::string(portCfg->defaultResolution) : std::string("")));
                 _vPortTypes.at(portCfg->id.type).addPort(_vPorts.at(i));
             }

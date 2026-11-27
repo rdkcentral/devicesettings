@@ -38,6 +38,7 @@
 #include "libIBus.h"
 #include "dsHost.h"
 #include "dsInternal.h"
+#include "dsPluginModeNoOp.h"
 
 #include "safec_lib.h"
 

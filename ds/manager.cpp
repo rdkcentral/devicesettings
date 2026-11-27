@@ -304,11 +304,17 @@ void Manager::Initialize()
             
             err = initializeFunctionWithRetry("dsVideoDeviceInit", dsVideoDeviceInit);
             CHECK_RET_VAL(err);
-            
+
+#ifdef DEVICESETTINGS_PLUGIN_ENABLED
+            // Plugin mode serves the video ports only (Widevine). The audio, video device and front panel
+            // configs build their ports through the legacy dsMgr, which is not available here.
+            loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT);
+#else
             loadDeviceCapabilities(device::DEVICE_CAPABILITY_VIDEO_PORT |
                                     device::DEVICE_CAPABILITY_AUDIO_PORT |
                                     device::DEVICE_CAPABILITY_VIDEO_DEVICE |
                                     device::DEVICE_CAPABILITY_FRONT_PANEL);
+#endif
         }
     }
     catch(const Exception &e) {

@@ -45,6 +45,7 @@
 #endif
 
 #include "safec_lib.h"
+#include "dsPluginModeNoOp.h"
 
 dsError_t dsVideoPortInit()
 {

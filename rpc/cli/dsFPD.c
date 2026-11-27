@@ -37,6 +37,7 @@
 #include "libIARM.h"
 #include "libIBus.h"
 #include "dsInternal.h"
+#include "dsPluginModeNoOp.h"
 
 
 

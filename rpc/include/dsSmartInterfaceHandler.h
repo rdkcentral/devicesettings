@@ -71,7 +71,12 @@ dsError_t dsSmartInterface_Init(void);
 /* ---- Implemented: everything the Widevine CDM needs from libds -------------------------------
  * VideoOutputPort construction / state (dsGetVideoPort, enabled, display connected, active), HDCP
  * status and protocol versions, HDMI preference, and the display EDID read that
- * device::Manager::Initialize() does while loading the video port configuration. */
+ * device::Manager::Initialize() does while loading the video port configuration.
+ *
+ * ---- Everything else: no-op ----------------------------------------------------------------------
+ * Any other dsXxx client call (audio, video device, front panel, HDMI / composite in, host, the remaining video
+ * port and display calls) is not served here. In plugin mode it is a successful no-op with zeroed outputs and
+ * never an exception (see dsPluginModeNoOp.h); each such API is logged once at INFO as "handled as no-op". */
 dsError_t dsSmartInterface_GetVideoPort(dsVideoPortType_t type, int index, intptr_t* handle);
 dsError_t dsSmartInterface_IsVideoPortEnabled(intptr_t handle, bool* enabled);
 dsError_t dsSmartInterface_EnableVideoPort(intptr_t handle, bool enabled);
